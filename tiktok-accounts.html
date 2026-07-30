@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tiktok账户 - 海外中台</title>
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body);
+      line-height: 22px;
+      color: #1D2129;
+      background: var(--color-bg-page);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    img { display: block; }
+    input, select { font-family: inherit; font-size: 14px; color: #1D2129; }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-width: 1100px;
+      overflow: hidden;
+    }
+
+    .header {
+      flex-shrink: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      background: #1B2B4C;
+      color: #fff;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 240px;
+      height: 100%;
+      padding-left: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
+    .brand-name { font-size: 18px; font-weight: 600; line-height: 26px; white-space: nowrap; }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 16px;
+      gap: 16px;
+    }
+
+    .header-nav__item {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 32px;
+      padding: 0 8px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.65);
+      white-space: nowrap;
+    }
+
+    .header-nav__item:hover { color: #fff; }
+    .header-nav__item.is-active { color: #fff; font-weight: 500; }
+    .header-nav__item.is-active::after {
+      content: '';
+      position: absolute;
+      left: 8px; right: 8px; bottom: 0;
+      height: 2px;
+      background: var(--color-primary);
+      border-radius: 1px 1px 0 0;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 16px;
+    }
+
+    .header-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      color: rgba(255, 255, 255, 0.75);
+      border-radius: 4px;
+    }
+
+    .header-icon:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+    .header-icon svg { width: 18px; height: 18px; }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      padding: 0 8px 0 4px;
+      color: #fff;
+      border-radius: 16px;
+    }
+
+    .user-chip:hover { background: rgba(255, 255, 255, 0.08); }
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .user-name { font-size: 14px; }
+    .user-chip .chevron { width: 12px; height: 12px; opacity: 0.75; }
+
+    .body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid #E5E6EB;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.is-collapsed { width: 64px; }
+    .sidebar.is-collapsed .menu-group__title-text,
+    .sidebar.is-collapsed .menu-item__text,
+    .sidebar.is-collapsed .menu-group__arrow { display: none; }
+    .sidebar.is-collapsed .menu-item,
+    .sidebar.is-collapsed .menu-group__title {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .sidebar.is-collapsed .menu-children { display: none !important; }
+
+    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 0; }
+
+    .menu-group__title {
+      width: 100%;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      color: #1D2129;
+      font-size: 14px;
+    }
+
+    .menu-group__title:hover { background: #F7F8FA; }
+    .menu-icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .menu-group__title-text { flex: 1; text-align: left; }
+    .menu-group__arrow {
+      width: 12px; height: 12px; color: #86909C;
+      transition: transform 0.15s;
+    }
+    .menu-group.is-open .menu-group__arrow { transform: rotate(180deg); }
+    .menu-children { display: none; }
+    .menu-group.is-open .menu-children { display: block; }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 16px 0 40px;
+      font-size: 14px;
+      color: #1D2129;
+    }
+
+    .menu-item:hover { background: #F7F8FA; }
+    .menu-item.is-active {
+      background: var(--color-primary-bg, #E8F3FF);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    .sidebar-footer {
+      flex-shrink: 0;
+      padding: 8px 16px 16px;
+      border-top: 1px solid #E5E6EB;
+    }
+
+    .sidebar-collapse-btn {
+      width: 32px; height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #4E5969;
+    }
+    .sidebar-collapse-btn:hover { background: #F2F3F5; }
+    .sidebar-collapse-btn svg { width: 18px; height: 18px; }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-card {
+      flex: 1;
+      min-height: 0;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: var(--shadow-1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .filter-bar {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      padding: 16px;
+      align-items: center;
+    }
+
+    .filter-item {
+      width: 200px;
+      position: relative;
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .input, .select-trigger {
+      width: 100%;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input::placeholder { color: #86909C; }
+    .input:hover, .select-trigger:hover { border-color: #94BFFF; }
+    .input:focus, .select-trigger:focus, .select-trigger.is-open { border-color: var(--color-primary); }
+
+    .select-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .select-trigger__text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #1D2129;
+    }
+
+    .select-trigger__text .muted { color: #86909C; }
+    .select-trigger__arrow {
+      width: 12px; height: 12px; color: #86909C; flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .select-trigger.is-open .select-trigger__arrow { transform: rotate(180deg); }
+
+    .single-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 30;
+      display: none;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .single-panel.is-open { display: block; }
+
+    .single-option {
+      display: flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #1D2129;
+      cursor: pointer;
+    }
+
+    .single-option:hover { background: #F5F7FA; }
+    .single-option.is-active { color: var(--color-primary); background: #E8F3FF; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      padding: 0 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn:active { opacity: 0.85; }
+    .btn--primary { background: var(--color-primary); color: #fff; }
+    .btn--primary:hover { background: var(--color-primary-hover); }
+    .btn--default {
+      background: #fff;
+      color: #1D2129;
+      border: 1px solid #E5E6EB;
+    }
+    .btn--default:hover { color: var(--color-primary); border-color: var(--color-primary); }
+    .btn:disabled {
+      color: #C9CDD4;
+      border-color: #E5E6EB;
+      background: #F7F8FA;
+      cursor: not-allowed;
+    }
+
+    .table-shell {
+      flex: 1;
+      min-height: 0;
+      margin: 0 16px;
+      border: 1px solid #E5E6EB;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .table-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      position: relative;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+
+    .data-table th,
+    .data-table td {
+      height: 48px;
+      padding: 0 12px;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: left;
+      border-bottom: 1px solid #E5E6EB;
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .data-table th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #F7F8FA;
+      font-weight: 600;
+      color: #1D2129;
+    }
+
+    .data-table tbody tr:hover td { background: #F5F7FA; }
+
+    .col-check { width: 48px; text-align: center; padding-left: 12px; padding-right: 12px; }
+    .col-name { width: 22%; }
+    .col-id { width: 18%; }
+    .col-product { width: 16%; }
+    .col-appid { width: 16%; }
+    .col-optimizer { width: 10%; }
+    .col-status { width: 8%; }
+    .col-action {
+      width: 100px;
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background: #fff;
+      padding-right: 24px;
+      box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
+    }
+    th.col-action { z-index: 3; background: #F7F8FA; }
+    .data-table tbody tr:hover td.col-action { background: #F5F7FA; }
+
+    .cell-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .cell-check input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 2px;
+      font-size: 12px;
+      line-height: 20px;
+      white-space: nowrap;
+    }
+
+    .tag--enabled { background: #E8FFEA; color: #00B42A; }
+    .tag--disabled { background: #FFECE8; color: #F53F3F; }
+
+    .link { color: var(--color-primary); font-size: 14px; }
+    .link:hover { opacity: 0.85; }
+
+    .empty-tip {
+      position: absolute;
+      inset: 48px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #86909C;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .empty-tip[hidden] { display: none; }
+
+    .pagination {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px 16px;
+      font-size: 14px;
+      color: #4E5969;
+    }
+
+    .pager { display: inline-flex; align-items: center; gap: 4px; }
+
+    .pager__btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      color: #1D2129;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pager__btn:hover:not(:disabled):not(.is-active) {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .pager__btn.is-active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    .pager__btn:disabled { color: #C9CDD4; cursor: not-allowed; }
+    .pager__btn svg { width: 12px; height: 12px; }
+
+    .page-size {
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      outline: none;
+    }
+
+    .page-jump {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-jump input {
+      width: 48px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      text-align: center;
+      outline: none;
+    }
+
+    .page-msg {
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      z-index: 1200;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      font-size: 14px;
+      color: #1D2129;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+      max-width: min(560px, calc(100vw - 32px));
+    }
+
+    .page-msg.is-show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .page-msg--success { border: 1px solid #AFF0B5; }
+    .page-msg--error { border: 1px solid #FDCDC5; }
+    .page-msg__icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .page-msg--success .page-msg__icon { color: #00B42A; }
+    .page-msg--error .page-msg__icon { color: #F53F3F; }
+
+    /* Modal · 导入 */
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(29, 33, 41, 0.6);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .modal-mask.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      width: 800px;
+      max-width: calc(100vw - 32px);
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(8px);
+      transition: transform 0.2s;
+      overflow: hidden;
+    }
+
+    .modal-mask.is-open .modal { transform: translateY(0); }
+
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 24px;
+      flex-shrink: 0;
+      border-bottom: 1px solid #E5E6EB;
+    }
+
+    .modal__title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      color: #1D2129;
+    }
+
+    .modal__close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      color: #86909C;
+    }
+
+    .modal__close:hover { background: #F2F3F5; color: #1D2129; }
+    .modal__close svg { width: 14px; height: 14px; }
+
+    .modal__body {
+      padding: 24px 24px 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .modal__footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px 20px;
+      flex-shrink: 0;
+    }
+
+    .import-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+
+    .import-actions .link {
+      font-size: 14px;
+      color: var(--color-primary);
+    }
+
+    .import-alert {
+      display: none;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      background: #FFECE8;
+      border: 1px solid #FDCDC5;
+      color: #F53F3F;
+      font-size: 13px;
+      line-height: 20px;
+      flex-shrink: 0;
+    }
+
+    .import-alert.is-show { display: flex; }
+    .import-alert__icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .import-table-shell {
+      flex: 1;
+      min-height: 280px;
+      max-height: 360px;
+      border: 1px solid #E5E6EB;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      background: #fff;
+    }
+
+    .import-table-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .import-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+
+    .import-table th,
+    .import-table td {
+      height: 44px;
+      padding: 0 12px;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: left;
+      border-bottom: 1px solid #E5E6EB;
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .import-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #F7F8FA;
+      font-weight: 600;
+    }
+
+    .import-table tbody tr:hover td { background: #F5F7FA; }
+
+    .import-table .col-error { width: 28%; white-space: normal; color: #1D2129; }
+
+    .import-empty {
+      position: absolute;
+      inset: 44px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #C9CDD4;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .import-empty[hidden] { display: none; }
+
+    body.modal-open { overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <img class="logo" src="assets/logo.png" width="32" height="32" alt="海外中台" />
+        <span class="brand-name">海外中台</span>
+      </div>
+      <nav class="header-nav" aria-label="顶部导航">
+        <a href="#" class="header-nav__item">首页</a>
+        <a href="#" class="header-nav__item">看板</a>
+        <a href="#" class="header-nav__item is-active">产品</a>
+        <a href="feedback-tickets.html" class="header-nav__item">工具</a>
+        <a href="wonder.html" class="header-nav__item">管理</a>
+      </nav>
+      <div class="header-right">
+        <button class="header-icon" type="button" title="下载" aria-label="下载">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="消息" aria-label="消息">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="主题" aria-label="主题">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
+        <button class="user-chip" type="button" aria-label="用户菜单">
+          <span class="user-avatar">风</span>
+          <span class="user-name">小风</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4.5L6 7.5L9 4.5"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="body">
+      <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+          <div class="menu-group is-open" data-group>
+            <button class="menu-group__title" type="button" data-group-toggle>
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="menu-group__title-text">资产管理</span>
+              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
+            </button>
+            <ul class="menu-children">
+              <li><a href="tiktok-accounts.html" class="menu-item is-active"><span class="menu-item__text">Tiktok账户</span></a></li>
+              <li><a href="tiktok-grant.html" class="menu-item"><span class="menu-item__text">TikTok赠款</span></a></li>
+            </ul>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="sidebar-collapse-btn" id="sidebarToggle" type="button" title="折叠菜单">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h16M4 12h10M4 18h16"/><path d="M15 9l-3 3 3 3"/>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="content-card">
+          <div class="filter-bar">
+            <div class="filter-item">
+              <input class="input" id="nameKeyword" type="text" placeholder="账户名称" autocomplete="off" />
+            </div>
+            <div class="filter-item">
+              <input class="input" id="idKeyword" type="text" placeholder="账户ID" autocomplete="off" />
+            </div>
+            <div class="filter-item" id="optimizerWrap">
+              <button class="select-trigger" type="button" id="optimizerTrigger">
+                <span class="select-trigger__text" id="optimizerLabel">优化师：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="single-panel" id="optimizerPanel"></div>
+            </div>
+            <div class="filter-item" id="statusWrap">
+              <button class="select-trigger" type="button" id="statusTrigger">
+                <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="single-panel" id="statusPanel">
+                <div class="single-option is-active" data-value="">全部</div>
+                <div class="single-option" data-value="启用">启用</div>
+                <div class="single-option" data-value="禁用">禁用</div>
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+              <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+              <button class="btn btn--default" type="button" id="batchBtn" disabled>批量操作</button>
+              <button class="btn btn--default" type="button" id="exportBtn">导出</button>
+              <button class="btn btn--default" type="button" id="importBtn">导入</button>
+            </div>
+          </div>
+
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="accountTable">
+                <thead>
+                  <tr>
+                    <th class="col-check"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
+                    <th class="col-name">账户名称</th>
+                    <th class="col-id">账户ID</th>
+                    <th class="col-product">产品名称</th>
+                    <th class="col-appid">APPID</th>
+                    <th class="col-optimizer">优化师</th>
+                    <th class="col-status">状态</th>
+                    <th class="col-action">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="accountBody"></tbody>
+              </table>
+              <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <!-- 导入弹窗 -->
+  <div class="modal-mask" id="importModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="importTitle">导入</h2>
+        <button class="modal__close" type="button" id="importClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="import-actions">
+          <button class="btn btn--primary" type="button" id="uploadBtn">上传文件</button>
+          <button class="link" type="button" id="downloadTemplateBtn">下载模板</button>
+          <input type="file" id="importFile" accept=".csv,.xls,text/csv,application/vnd.ms-excel" hidden />
+        </div>
+        <div class="import-alert" id="importAlert" role="alert">
+          <svg class="import-alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/>
+          </svg>
+          <span id="importAlertText"></span>
+        </div>
+        <div class="import-table-shell">
+          <div class="import-table-wrap">
+            <table class="import-table" id="importTable">
+              <thead>
+                <tr>
+                  <th style="width:28%">账户ID</th>
+                  <th style="width:28%">产品名称</th>
+                  <th style="width:16%">优化师</th>
+                  <th class="col-error">错误信息</th>
+                </tr>
+              </thead>
+              <tbody id="importBody"></tbody>
+            </table>
+          </div>
+          <div class="import-empty" id="importEmpty">暂无数据</div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="importCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="importConfirm">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const PRODUCTS = [
+        'Color Water Sort Master',
+        'Tile Match Journey',
+        'Wonder Puzzle',
+        'Star Merge',
+        'Ocean Match',
+        'Pixel Farm'
+      ];
+      const OPTIMIZERS = ['佩奇', '木子', '阿哲', '小风', '用户A', '用户B', '用户C'];
+      const ACCOUNT_PREFIXES = ['CWSM_TT_BV', 'TMJ_TT_US', 'WP_TT_EU', 'SM_TT_SEA', 'OM_TT_NA', 'PF_TT_JP'];
+
+      let allRows = [];
+      let filteredRows = [];
+      let page = 1;
+      let pageSize = 50;
+      let selectedIds = new Set();
+      let filterOptimizer = '';
+      let filterStatus = '';
+      let importRows = [];
+      let msgTimer = null;
+
+      function escapeHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function padId(n, len) {
+        const base = String(7000000000000000000n + BigInt(n));
+        return base.slice(0, len || 19);
+      }
+
+      function buildData() {
+        const rows = [];
+        for (let i = 0; i < 58; i++) {
+          const product = PRODUCTS[i % PRODUCTS.length];
+          const prefix = ACCOUNT_PREFIXES[i % ACCOUNT_PREFIXES.length];
+          rows.push({
+            id: 'acc_' + (i + 1),
+            accountName: prefix + '_minigame_' + String(i + 1).padStart(3, '0'),
+            accountId: padId(i * 137 + 8295792517141, 19),
+            productName: product,
+            appId: padId(i * 211 + 5955854953662482, 19),
+            optimizer: OPTIMIZERS[i % OPTIMIZERS.length],
+            status: i % 11 === 0 ? '禁用' : '启用'
+          });
+        }
+        return rows;
+      }
+
+      function showPageMsg(text, type) {
+        const el = document.getElementById('pageMsg');
+        const icon = type === 'error'
+          ? '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>'
+          : '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
+        el.className = 'page-msg page-msg--' + (type || 'success') + ' is-show';
+        el.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
+        clearTimeout(msgTimer);
+        msgTimer = setTimeout(function () {
+          el.classList.remove('is-show');
+        }, 2800);
+      }
+
+      function closePanels() {
+        document.querySelectorAll('.single-panel.is-open').forEach(function (p) {
+          p.classList.remove('is-open');
+        });
+        document.querySelectorAll('.select-trigger.is-open').forEach(function (t) {
+          t.classList.remove('is-open');
+        });
+      }
+
+      function renderOptimizerPanel() {
+        const panel = document.getElementById('optimizerPanel');
+        const opts = ['<div class="single-option' + (!filterOptimizer ? ' is-active' : '') + '" data-value="">全部</div>']
+          .concat(OPTIMIZERS.map(function (name) {
+            return '<div class="single-option' + (filterOptimizer === name ? ' is-active' : '') + '" data-value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</div>';
+          }));
+        panel.innerHTML = opts.join('');
+      }
+
+      function updateOptimizerLabel() {
+        const label = document.getElementById('optimizerLabel');
+        if (!filterOptimizer) {
+          label.innerHTML = '优化师：<span class="muted">请选择</span>';
+        } else {
+          label.innerHTML = '优化师：' + escapeHtml(filterOptimizer);
+        }
+      }
+
+      function updateStatusLabel() {
+        const label = document.getElementById('statusLabel');
+        if (!filterStatus) {
+          label.innerHTML = '状态：<span class="muted">请选择</span>';
+        } else {
+          label.innerHTML = '状态：' + escapeHtml(filterStatus);
+        }
+      }
+
+      function applyFilter() {
+        const nameKw = document.getElementById('nameKeyword').value.trim().toLowerCase();
+        const idKw = document.getElementById('idKeyword').value.trim();
+        filteredRows = allRows.filter(function (row) {
+          if (nameKw && row.accountName.toLowerCase().indexOf(nameKw) === -1) return false;
+          if (idKw && row.accountId.indexOf(idKw) === -1) return false;
+          if (filterOptimizer && row.optimizer !== filterOptimizer) return false;
+          if (filterStatus && row.status !== filterStatus) return false;
+          return true;
+        });
+        page = 1;
+        selectedIds.clear();
+        renderTable();
+        renderPagination();
+        syncBatchBtn();
+      }
+
+      function syncBatchBtn() {
+        const btn = document.getElementById('batchBtn');
+        const n = selectedIds.size;
+        btn.disabled = n === 0;
+        btn.textContent = n ? '批量操作（' + n + '）' : '批量操作';
+      }
+
+      function renderTable() {
+        const body = document.getElementById('accountBody');
+        const empty = document.getElementById('emptyTip');
+        const start = (page - 1) * pageSize;
+        const pageRows = filteredRows.slice(start, start + pageSize);
+
+        if (!filteredRows.length) {
+          body.innerHTML = '';
+          empty.hidden = false;
+          document.getElementById('checkAll').checked = false;
+          document.getElementById('checkAll').indeterminate = false;
+          return;
+        }
+
+        empty.hidden = true;
+        body.innerHTML = pageRows.map(function (row) {
+          const checked = selectedIds.has(row.id);
+          const tagClass = row.status === '启用' ? 'tag--enabled' : 'tag--disabled';
+          return '<tr>' +
+            '<td class="col-check"><span class="cell-check"><input type="checkbox" data-check="' + escapeHtml(row.id) + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
+            '<td class="col-name" title="' + escapeHtml(row.accountName) + '">' + escapeHtml(row.accountName) + '</td>' +
+            '<td class="col-id" title="' + escapeHtml(row.accountId) + '">' + escapeHtml(row.accountId) + '</td>' +
+            '<td class="col-product" title="' + escapeHtml(row.productName) + '">' + escapeHtml(row.productName) + '</td>' +
+            '<td class="col-appid" title="' + escapeHtml(row.appId) + '">' + escapeHtml(row.appId) + '</td>' +
+            '<td class="col-optimizer">' + escapeHtml(row.optimizer) + '</td>' +
+            '<td class="col-status"><span class="tag ' + tagClass + '">' + escapeHtml(row.status) + '</span></td>' +
+            '<td class="col-action"><button class="link" type="button" data-edit="' + escapeHtml(row.id) + '">编辑</button></td>' +
+            '</tr>';
+        }).join('');
+
+        const pageIds = pageRows.map(function (r) { return r.id; });
+        const checkedCount = pageIds.filter(function (id) { return selectedIds.has(id); }).length;
+        const checkAll = document.getElementById('checkAll');
+        checkAll.checked = pageIds.length > 0 && checkedCount === pageIds.length;
+        checkAll.indeterminate = checkedCount > 0 && checkedCount < pageIds.length;
+      }
+
+      function renderPagination() {
+        const total = filteredRows.length;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
+        if (page > totalPages) page = totalPages;
+        const el = document.getElementById('pagination');
+        const pages = [];
+        const maxShow = 5;
+        let start = Math.max(1, page - Math.floor(maxShow / 2));
+        let end = Math.min(totalPages, start + maxShow - 1);
+        start = Math.max(1, end - maxShow + 1);
+        for (let i = start; i <= end; i++) pages.push(i);
+
+        el.innerHTML =
+          '<span>共 ' + total + ' 条</span>' +
+          '<select class="page-size" id="pageSizeSelect">' +
+            [10, 20, 50, 100].map(function (n) {
+              return '<option value="' + n + '"' + (n === pageSize ? ' selected' : '') + '>' + n + ' 条/页</option>';
+            }).join('') +
+          '</select>' +
+          '<div class="pager">' +
+            '<button class="pager__btn" type="button" data-page="prev" ' + (page <= 1 ? 'disabled' : '') + '>' +
+              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg>' +
+            '</button>' +
+            pages.map(function (p) {
+              return '<button class="pager__btn' + (p === page ? ' is-active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
+            }).join('') +
+            '<button class="pager__btn" type="button" data-page="next" ' + (page >= totalPages ? 'disabled' : '') + '>' +
+              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg>' +
+            '</button>' +
+          '</div>' +
+          '<div class="page-jump">前往 <input type="text" id="pageJumpInput" value="' + page + '" /> 页</div>';
+      }
+
+      /* —— 导入 —— */
+      function openImportModal() {
+        importRows = [];
+        hideImportAlert();
+        renderImportTable();
+        document.getElementById('importFile').value = '';
+        document.getElementById('importModal').classList.add('is-open');
+        document.getElementById('importModal').setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+
+      function closeImportModal() {
+        document.getElementById('importModal').classList.remove('is-open');
+        document.getElementById('importModal').setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+      }
+
+      function showImportAlert(text) {
+        const alert = document.getElementById('importAlert');
+        document.getElementById('importAlertText').textContent = text;
+        alert.classList.add('is-show');
+      }
+
+      function hideImportAlert() {
+        document.getElementById('importAlert').classList.remove('is-show');
+        document.getElementById('importAlertText').textContent = '';
+      }
+
+      function renderImportTable() {
+        const body = document.getElementById('importBody');
+        const empty = document.getElementById('importEmpty');
+        if (!importRows.length) {
+          body.innerHTML = '';
+          empty.hidden = false;
+          return;
+        }
+        empty.hidden = true;
+        body.innerHTML = importRows.map(function (row) {
+          return '<tr>' +
+            '<td title="' + escapeHtml(row.accountId) + '">' + escapeHtml(row.accountId || '-') + '</td>' +
+            '<td title="' + escapeHtml(row.productName) + '">' + escapeHtml(row.productName || '-') + '</td>' +
+            '<td>' + escapeHtml(row.optimizer || '-') + '</td>' +
+            '<td class="col-error">' + escapeHtml(row.error || '') + '</td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      /** Excel 文本格式：mso-number-format:@，避免长数字被科学计数法改写 */
+      function downloadTemplate() {
+        const sampleId = '7658218295792517141';
+        const sampleProduct = 'Color Water Sort Master';
+        const sampleOptimizer = '佩奇';
+        let emptyRows = '';
+        for (let i = 0; i < 20; i++) {
+          emptyRows += '<tr><td class="text"></td><td></td><td></td></tr>';
+        }
+        const html =
+          '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+          'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
+          'xmlns="http://www.w3.org/TR/REC-html40">' +
+          '<head><meta charset="UTF-8">' +
+          '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>' +
+          '<x:ExcelWorksheet><x:Name>导入模板</x:Name>' +
+          '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+          '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' +
+          '<style>' +
+          'td { border: 0.5pt solid #E5E6EB; font-size: 12pt; }' +
+          'td.text, .col-account-id { mso-number-format:"\\@"; }' +
+          '</style></head><body><table>' +
+          '<col class="col-account-id" />' +
+          '<col /><col />' +
+          '<tr><td class="text">账户ID</td><td>产品名称</td><td>优化师</td></tr>' +
+          '<tr>' +
+          '<td class="text">' + sampleId + '</td>' +
+          '<td>' + sampleProduct + '</td>' +
+          '<td>' + sampleOptimizer + '</td>' +
+          '</tr>' +
+          emptyRows +
+          '</table></body></html>';
+        const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Tiktok账户导入模板.xls';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showPageMsg('模板已下载（账户ID列为文本格式）');
+      }
+
+      function normalizeAccountId(raw) {
+        let v = String(raw == null ? '' : raw).trim();
+        if (!v) return '';
+        // Excel 文本前缀 / 公式写法：'123 或 ="123" 或 =123
+        if (v.charAt(0) === "'") v = v.slice(1).trim();
+        const formulaMatch = v.match(/^=\s*"([^"]*)"\s*$/) || v.match(/^=\s*(.+)$/);
+        if (formulaMatch) v = String(formulaMatch[1]).trim();
+        v = v.replace(/^\t+/, '').replace(/\s+/g, '');
+        // 科学计数法：精度已丢失，无法可靠还原
+        if (/e\+/i.test(v) || /e-/i.test(v)) return v;
+        return v;
+      }
+
+      function parseCsvLine(line) {
+        const result = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (inQuotes) {
+            if (ch === '"') {
+              if (line[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else {
+                inQuotes = false;
+              }
+            } else {
+              cur += ch;
+            }
+          } else if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ',' || ch === '\t') {
+            result.push(cur.trim());
+            cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        result.push(cur.trim());
+        return result;
+      }
+
+      function normalizeHeader(h) {
+        return String(h || '')
+          .replace(/^\uFEFF/, '')
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, '');
+      }
+
+      function mapHeaderIndex(headers) {
+        const map = { accountId: -1, productName: -1, optimizer: -1 };
+        headers.forEach(function (h, i) {
+          const key = normalizeHeader(h);
+          if (key === '账户id' || key === 'accountid' || key === 'account_id') map.accountId = i;
+          else if (key === '产品名称' || key === 'productname' || key === 'product_name' || key === '产品名') map.productName = i;
+          else if (key === '优化师' || key === 'optimizer') map.optimizer = i;
+        });
+        return map;
+      }
+
+      function validateImportRow(row, index, idSet) {
+        const errors = [];
+        if (!row.accountId) {
+          errors.push('账户ID不能为空');
+        } else if (/e[+-]/i.test(row.accountId)) {
+          errors.push('账户ID疑似被 Excel 转为科学计数法，请将账户ID列设为文本后重填');
+        } else if (!/^\d{5,}$/.test(row.accountId)) {
+          errors.push('账户ID格式不正确');
+        } else if (idSet.has(row.accountId)) {
+          errors.push('账户ID在文件中重复');
+        } else if (!allRows.some(function (r) { return r.accountId === row.accountId; })) {
+          errors.push('不存在账户ID');
+        }
+        if (row.accountId) idSet.add(row.accountId);
+        void index;
+        return errors.join('；');
+      }
+
+      function buildImportRows(headers, dataLines, splitLine) {
+        const col = mapHeaderIndex(headers);
+        if (col.accountId < 0 || col.productName < 0 || col.optimizer < 0) {
+          return { error: '表头不正确，需包含：账户ID、产品名称、优化师' };
+        }
+        const idSet = new Set();
+        const rows = [];
+        for (let i = 0; i < dataLines.length; i++) {
+          const cols = splitLine(dataLines[i]);
+          const row = {
+            accountId: normalizeAccountId(cols[col.accountId]),
+            productName: String(cols[col.productName] == null ? '' : cols[col.productName]).trim(),
+            optimizer: String(cols[col.optimizer] == null ? '' : cols[col.optimizer]).trim(),
+            error: ''
+          };
+          row.error = validateImportRow(row, i + 2, idSet);
+          rows.push(row);
+        }
+        if (!rows.length) {
+          return { error: '未解析到有效数据行，请检查文件内容' };
+        }
+        return { rows: rows };
+      }
+
+      function parseImportHtml(html) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const table = doc.querySelector('table');
+        if (!table) {
+          return { error: '无法解析模板表格，请使用下载的导入模板' };
+        }
+        const trs = Array.prototype.slice.call(table.querySelectorAll('tr'));
+        if (!trs.length) {
+          return { error: '文件内容为空，请使用下载的模板填写后重新上传' };
+        }
+        const headers = Array.prototype.map.call(trs[0].querySelectorAll('td,th'), function (cell) {
+          return (cell.textContent || '').trim();
+        });
+        const dataLines = trs.slice(1).map(function (tr) {
+          return Array.prototype.map.call(tr.querySelectorAll('td,th'), function (cell) {
+            return (cell.textContent || '').trim();
+          });
+        }).filter(function (cols) {
+          return cols.some(function (c) { return String(c).trim() !== ''; });
+        });
+        return buildImportRows(headers, dataLines, function (cols) { return cols; });
+      }
+
+      function parseImportText(text) {
+        const raw = String(text || '');
+        if (/<html[\s>]/i.test(raw) || /<table[\s>]/i.test(raw)) {
+          return parseImportHtml(raw);
+        }
+
+        const lines = raw
+          .replace(/\r\n/g, '\n')
+          .replace(/\r/g, '\n')
+          .split('\n')
+          .filter(function (line) { return line.trim() !== ''; });
+
+        if (!lines.length) {
+          return { error: '文件内容为空，请使用下载的模板填写后重新上传' };
+        }
+
+        const headers = parseCsvLine(lines[0]);
+        return buildImportRows(headers, lines.slice(1), parseCsvLine);
+      }
+
+      function handleImportFile(file) {
+        hideImportAlert();
+        if (!file) return;
+
+        const name = (file.name || '').toLowerCase();
+        if (name.endsWith('.xlsx')) {
+          importRows = [];
+          renderImportTable();
+          showImportAlert('暂不支持 .xlsx，请下载模板（.xls）填写后上传，或另存为 CSV');
+          showPageMsg('导入失败：请上传 .xls 或 .csv 文件', 'error');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const result = parseImportText(e.target.result);
+          if (result.error) {
+            importRows = [];
+            renderImportTable();
+            showImportAlert(result.error);
+            showPageMsg('导入失败：' + result.error, 'error');
+            return;
+          }
+          importRows = result.rows;
+          renderImportTable();
+          const errCount = importRows.filter(function (r) { return r.error; }).length;
+          if (errCount) {
+            showImportAlert('共 ' + importRows.length + ' 行，其中 ' + errCount + ' 行校验失败，请修正后重新上传');
+            showPageMsg('数据校验失败，请查看错误信息', 'error');
+          } else {
+            hideImportAlert();
+            showPageMsg('文件解析成功，共 ' + importRows.length + ' 行');
+          }
+        };
+        reader.onerror = function () {
+          importRows = [];
+          renderImportTable();
+          showImportAlert('文件读取失败，请重试');
+          showPageMsg('导入失败：文件读取失败', 'error');
+        };
+        reader.readAsText(file, 'UTF-8');
+      }
+
+      function confirmImport() {
+        if (!importRows.length) {
+          showImportAlert('请先上传文件');
+          showPageMsg('请先上传导入文件', 'error');
+          return;
+        }
+
+        const errors = importRows.filter(function (r) { return r.error; });
+        if (errors.length) {
+          showImportAlert('存在 ' + errors.length + ' 行错误数据，无法导入。请修正后重新上传');
+          showPageMsg('导入失败：存在错误数据', 'error');
+          return;
+        }
+
+        let updated = 0;
+        importRows.forEach(function (row) {
+          const existing = allRows.find(function (r) { return r.accountId === row.accountId; });
+          if (!existing) return;
+          let changed = false;
+          if (row.productName) {
+            existing.productName = row.productName;
+            changed = true;
+          }
+          if (row.optimizer) {
+            existing.optimizer = row.optimizer;
+            changed = true;
+            if (OPTIMIZERS.indexOf(row.optimizer) === -1) {
+              OPTIMIZERS.push(row.optimizer);
+            }
+          }
+          if (changed) updated++;
+        });
+        renderOptimizerPanel();
+
+        closeImportModal();
+        applyFilter();
+        showPageMsg('导入成功：已更新 ' + updated + ' 条账户归属');
+      }
+
+      function exportCsv() {
+        const bom = '\uFEFF';
+        const header = '账户名称,账户ID,产品名称,APPID,优化师,状态\n';
+        const lines = filteredRows.map(function (r) {
+          return [r.accountName, r.accountId, r.productName, r.appId, r.optimizer, r.status]
+            .map(function (v) {
+              const s = String(v == null ? '' : v);
+              return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+            })
+            .join(',');
+        });
+        const blob = new Blob([bom + header + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Tiktok账户导出.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showPageMsg('导出成功');
+      }
+
+      function bindEvents() {
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+          document.getElementById('sidebar').classList.toggle('is-collapsed');
+        });
+
+        document.querySelectorAll('[data-group-toggle]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            btn.closest('[data-group]').classList.toggle('is-open');
+          });
+        });
+
+        document.getElementById('optimizerTrigger').addEventListener('click', function (e) {
+          e.stopPropagation();
+          const panel = document.getElementById('optimizerPanel');
+          const open = !panel.classList.contains('is-open');
+          closePanels();
+          if (open) {
+            panel.classList.add('is-open');
+            document.getElementById('optimizerTrigger').classList.add('is-open');
+          }
+        });
+
+        document.getElementById('statusTrigger').addEventListener('click', function (e) {
+          e.stopPropagation();
+          const panel = document.getElementById('statusPanel');
+          const open = !panel.classList.contains('is-open');
+          closePanels();
+          if (open) {
+            panel.classList.add('is-open');
+            document.getElementById('statusTrigger').classList.add('is-open');
+          }
+        });
+
+        document.getElementById('optimizerPanel').addEventListener('click', function (e) {
+          const opt = e.target.closest('.single-option');
+          if (!opt) return;
+          filterOptimizer = opt.getAttribute('data-value') || '';
+          renderOptimizerPanel();
+          updateOptimizerLabel();
+          closePanels();
+        });
+
+        document.getElementById('statusPanel').addEventListener('click', function (e) {
+          const opt = e.target.closest('.single-option');
+          if (!opt) return;
+          filterStatus = opt.getAttribute('data-value') || '';
+          document.querySelectorAll('#statusPanel .single-option').forEach(function (el) {
+            el.classList.toggle('is-active', el === opt);
+          });
+          updateStatusLabel();
+          closePanels();
+        });
+
+        document.addEventListener('click', closePanels);
+
+        document.getElementById('searchBtn').addEventListener('click', applyFilter);
+        document.getElementById('resetBtn').addEventListener('click', function () {
+          document.getElementById('nameKeyword').value = '';
+          document.getElementById('idKeyword').value = '';
+          filterOptimizer = '';
+          filterStatus = '';
+          renderOptimizerPanel();
+          updateOptimizerLabel();
+          updateStatusLabel();
+          document.querySelectorAll('#statusPanel .single-option').forEach(function (el) {
+            el.classList.toggle('is-active', el.getAttribute('data-value') === '');
+          });
+          applyFilter();
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', exportCsv);
+        document.getElementById('batchBtn').addEventListener('click', function () {
+          if (!selectedIds.size) return;
+          showPageMsg('已选 ' + selectedIds.size + ' 条，批量操作功能开发中');
+        });
+
+        document.getElementById('importBtn').addEventListener('click', openImportModal);
+        document.getElementById('importClose').addEventListener('click', closeImportModal);
+        document.getElementById('importCancel').addEventListener('click', closeImportModal);
+        document.getElementById('importConfirm').addEventListener('click', confirmImport);
+        document.getElementById('downloadTemplateBtn').addEventListener('click', downloadTemplate);
+        document.getElementById('uploadBtn').addEventListener('click', function () {
+          document.getElementById('importFile').click();
+        });
+        document.getElementById('importFile').addEventListener('change', function (e) {
+          const file = e.target.files && e.target.files[0];
+          handleImportFile(file);
+        });
+
+        document.getElementById('importModal').addEventListener('click', function (e) {
+          if (e.target === this) closeImportModal();
+        });
+
+        document.getElementById('checkAll').addEventListener('change', function () {
+          const checked = this.checked;
+          const start = (page - 1) * pageSize;
+          const pageRows = filteredRows.slice(start, start + pageSize);
+          pageRows.forEach(function (row) {
+            if (checked) selectedIds.add(row.id);
+            else selectedIds.delete(row.id);
+          });
+          renderTable();
+          syncBatchBtn();
+        });
+
+        document.getElementById('accountBody').addEventListener('change', function (e) {
+          const input = e.target.closest('[data-check]');
+          if (!input) return;
+          const id = input.getAttribute('data-check');
+          if (input.checked) selectedIds.add(id);
+          else selectedIds.delete(id);
+          renderTable();
+          syncBatchBtn();
+        });
+
+        document.getElementById('accountBody').addEventListener('click', function (e) {
+          const edit = e.target.closest('[data-edit]');
+          if (edit) showPageMsg('编辑功能开发中');
+        });
+
+        document.getElementById('pagination').addEventListener('click', function (e) {
+          const btn = e.target.closest('[data-page]');
+          if (!btn || btn.disabled) return;
+          const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize) || 1);
+          const val = btn.getAttribute('data-page');
+          if (val === 'prev') page = Math.max(1, page - 1);
+          else if (val === 'next') page = Math.min(totalPages, page + 1);
+          else page = Number(val) || 1;
+          renderTable();
+          renderPagination();
+        });
+
+        document.getElementById('pagination').addEventListener('change', function (e) {
+          if (e.target.id === 'pageSizeSelect') {
+            pageSize = Number(e.target.value) || 50;
+            page = 1;
+            renderTable();
+            renderPagination();
+          }
+        });
+
+        document.getElementById('pagination').addEventListener('keydown', function (e) {
+          if (e.target.id !== 'pageJumpInput' || e.key !== 'Enter') return;
+          const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize) || 1);
+          let n = parseInt(e.target.value, 10);
+          if (!Number.isFinite(n)) n = 1;
+          page = Math.min(totalPages, Math.max(1, n));
+          renderTable();
+          renderPagination();
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && document.getElementById('importModal').classList.contains('is-open')) {
+            closeImportModal();
+          }
+        });
+      }
+
+      allRows = buildData();
+      filteredRows = allRows.slice();
+      renderOptimizerPanel();
+      updateOptimizerLabel();
+      updateStatusLabel();
+      renderTable();
+      renderPagination();
+      bindEvents();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海外中台 · 原型预览</title>
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: var(--font-family-base);
+      color: #1D2129;
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #E8F3FF 0%, transparent 55%),
+        radial-gradient(900px 420px at 100% 0%, #F2F3F5 0%, transparent 50%),
+        #F7F8FA;
+      padding: 48px 24px 64px;
+    }
+    .wrap { max-width: 880px; margin: 0 auto; }
+    .brand {
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 36px;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+    .desc {
+      font-size: 14px;
+      line-height: 22px;
+      color: #4E5969;
+      margin-bottom: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    a.card {
+      display: block;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 8px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    a.card:hover {
+      border-color: #165DFF;
+      box-shadow: 0 6px 16px rgba(22, 93, 255, 0.1);
+    }
+    .card h2 {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      margin-bottom: 6px;
+      color: #165DFF;
+    }
+    .card p {
+      font-size: 13px;
+      line-height: 20px;
+      color: #86909C;
+    }
+    .tip {
+      margin-top: 24px;
+      padding: 12px 16px;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 20px;
+      color: #4E5969;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 class="brand">海外中台 · 原型预览</h1>
+    <p class="desc">可对外分享的交互原型入口。后续需求会持续更新到本地址，供开发对照实现。</p>
+    <div class="grid">
+      <a class="card" href="./wonder.html">
+        <h2>菜单管理</h2>
+        <p>系统管理 · 菜单树表、添加/编辑、排序拖拽、导航联动</p>
+      </a>
+      <a class="card" href="./tiktok-accounts.html">
+        <h2>Tiktok账户</h2>
+        <p>产品 · 资产管理 · 筛选查询、批量操作、CSV 导入（账户ID / 产品名称 / 优化师）</p>
+      </a>
+      <a class="card" href="./tiktok-grant.html">
+        <h2>TikTok赠款</h2>
+        <p>产品 · 资产管理 · 筛选查询、复制账户ID、详情抽屉</p>
+      </a>
+      <a class="card" href="./feedback-tickets.html">
+        <h2>用户反馈</h2>
+        <p>工具 · 运营工具 · 工单筛选、批量改状态、详情抽屉</p>
+      </a>
+    </div>
+    <div class="tip">建议收藏本页地址。更新后刷新浏览器即可看到最新原型（如有缓存可强制刷新 Ctrl+F5）。</div>
+  </div>
+</body>
+</html>

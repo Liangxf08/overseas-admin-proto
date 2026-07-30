@@ -1,0 +1,3614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>菜单管理 - 海外中台</title>
+  <link rel="stylesheet" href="design-tokens.css" />
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body);
+      line-height: 22px;
+      color: #1D2129;
+      background: var(--color-bg-page);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    img { display: block; }
+
+    /* ========== Layout Shell ========== */
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-width: 1100px;
+      overflow: hidden;
+    }
+
+    /* ========== Header ========== */
+    .header {
+      flex-shrink: 0;
+      height: var(--header-height, 56px);
+      display: flex;
+      align-items: center;
+      padding: 0;
+      background: var(--color-bg-header, #1B2B4C);
+      color: #fff;
+      z-index: 100;
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      width: var(--sidebar-width, 240px);
+      height: 100%;
+      padding-left: var(--header-padding-x, 16px);
+      box-sizing: border-box;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      display: block;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .brand-name {
+      font-size: var(--brand-font-size, 18px);
+      font-weight: 600;
+      line-height: 26px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      color: #fff;
+    }
+
+    /* 设计稿：header-nav padding 0 16px；tabs 高 32 / 左右 pad 8；tabs 间距 16 */
+    .header-nav {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      margin-left: 0;
+      padding: 0 var(--header-padding-x, 16px);
+      gap: 16px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .header-nav__item {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: auto;
+      height: var(--nav-tab-height, 32px);
+      padding: 0 var(--nav-tab-padding-x, 8px);
+      font-size: 14px;
+      line-height: 22px;
+      color: rgba(255, 255, 255, 0.65);
+      transition: color 0.15s;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .header-nav__item-icon {
+      display: inline-flex;
+      align-items: center;
+      color: inherit;
+    }
+
+    .header-nav__item-icon svg,
+    .header-nav__item-icon iconify-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+
+    .header-nav__item:hover { color: #fff; }
+
+    .header-nav__item.is-active {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* 选中横线贴齐 tab 底部 */
+    .header-nav__item.is-active::after {
+      content: '';
+      position: absolute;
+      left: var(--nav-tab-padding-x, 8px);
+      right: var(--nav-tab-padding-x, 8px);
+      bottom: 0;
+      height: 2px;
+      background: var(--color-primary);
+      border-radius: 1px 1px 0 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+      flex-shrink: 0;
+      height: 100%;
+      padding-right: var(--header-padding-x, 16px);
+    }
+
+    .header-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      color: rgba(255, 255, 255, 0.75);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .header-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .header-icon svg { width: 16px; height: 16px; }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 8px;
+      padding: 4px 8px 4px 4px;
+      border-radius: 4px;
+      color: rgba(255, 255, 255, 0.9);
+      transition: background 0.15s;
+    }
+
+    .user-chip:hover { background: rgba(255, 255, 255, 0.08); }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary-hover), var(--color-primary-active));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-name { font-size: 14px; white-space: nowrap; }
+
+    .user-chip .chevron {
+      width: 12px;
+      height: 12px;
+      opacity: 0.7;
+    }
+
+    /* ========== Body: Sidebar + Main ========== */
+    .body {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ========== Sidebar ========== */
+    .sidebar {
+      flex-shrink: 0;
+      width: var(--sidebar-width, 240px);
+      background: var(--color-bg-container);
+      border-right: 1px solid var(--color-border-base);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.2s ease;
+    }
+
+    .sidebar.is-collapsed { width: 64px; }
+
+    .sidebar.is-collapsed .menu-group__title-text,
+    .sidebar.is-collapsed .menu-item__text,
+    .sidebar.is-collapsed .menu-group__arrow { display: none; }
+
+    .sidebar.is-collapsed .menu-item,
+    .sidebar.is-collapsed .menu-group__title {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .sidebar.is-collapsed .menu-children { display: none !important; }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .menu-group { margin: 0; }
+
+    /* 设计稿：宽 240 · 项高 44 · padding 0 16px */
+    .menu-group__title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 44px;
+      margin: 0;
+      padding: 0 16px;
+      border-radius: 0;
+      color: #1D2129;
+      font-size: 14px;
+      line-height: 22px;
+      transition: background 0.15s, color 0.15s;
+      box-sizing: border-box;
+    }
+
+    .menu-group__title:hover {
+      background: var(--color-bg-hover);
+      color: #1D2129;
+    }
+
+    .menu-group__title .menu-icon,
+    .menu-group__title svg.menu-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: #1D2129;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-group__title .menu-icon svg,
+    .menu-group__title .menu-icon iconify-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+
+    .menu-group__title-text {
+      flex: 1;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      color: #1D2129;
+    }
+
+    .menu-group__arrow {
+      width: 12px;
+      height: 12px;
+      color: #1D2129;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .menu-group.is-collapsed .menu-group__arrow { transform: rotate(-90deg); }
+    .menu-group.is-collapsed .menu-children { display: none; }
+
+    .menu-children { padding: 0; }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 44px;
+      margin: 0;
+      padding: 0 16px; /* 与一级同为 0 16px；缩进用左侧占位 */
+      border-radius: 0;
+      color: #1D2129;
+      font-size: 14px;
+      line-height: 22px;
+      transition: background 0.15s, color 0.15s;
+      box-sizing: border-box;
+    }
+
+    /* 二级：左侧留出与一级图标对齐的缩进 */
+    .menu-children .menu-item {
+      padding-left: 40px;
+    }
+
+    .menu-item:hover {
+      background: var(--color-bg-hover);
+      color: #1D2129;
+    }
+
+    .menu-item.is-active {
+      background: var(--color-primary-bg);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    .menu-item.is-active .menu-icon { color: var(--color-primary); }
+
+    .menu-item .menu-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: #1D2129;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-item .menu-icon svg,
+    .menu-item .menu-icon iconify-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+
+    .menu-item__text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-footer {
+      flex-shrink: 0;
+      height: 48px;
+      border-top: 1px solid var(--color-border-light);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      margin: 0;
+    }
+
+    .sidebar-collapse-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      color: #1D2129;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar-collapse-btn:hover {
+      background: var(--color-bg-hover);
+      color: #1D2129;
+    }
+
+    .sidebar-collapse-btn svg { width: 18px; height: 18px; }
+
+    /* ========== Main Content ========== */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 16px; /* 与 .header --main-padding 保持一致 */
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content-card {
+      flex: 1;
+      min-height: 0;
+      background: var(--color-bg-container);
+      border-radius: 4px;
+      box-shadow: var(--shadow-1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--toolbar-padding, 16px) var(--table-padding-x, 16px);
+      border-bottom: none;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--btn-height, 32px);
+      padding: 0 var(--btn-padding-x, 16px);
+      font-size: 14px;
+      line-height: 22px;
+      border-radius: 4px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn:active { opacity: 0.85; }
+
+    .btn--success {
+      background: var(--color-success);
+      color: #fff;
+    }
+
+    .btn--success:hover { background: var(--color-success-hover); }
+
+    .btn--primary {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .btn--primary:hover { background: var(--color-primary-hover); }
+
+    .btn--default {
+      background: var(--color-bg-container);
+      color: #1D2129;
+      border: 1px solid var(--color-border-base);
+    }
+
+    .btn--default:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--icon-btn-size, 32px);
+      height: var(--icon-btn-size, 32px);
+      padding: 0;
+      border-radius: 4px;
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border-base);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .icon-btn:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .icon-btn svg { width: 14px; height: 14px; }
+
+    /* Page message（排序提示 / 保存成功） */
+    .page-msg {
+      position: fixed;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      width: max-content;
+      max-width: min(480px, calc(100vw - 48px));
+      padding: 10px 16px;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      pointer-events: none;
+      box-sizing: border-box;
+    }
+
+    .page-msg.is-show { display: inline-flex; }
+
+    .page-msg__icon {
+      display: inline-flex;
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+    }
+
+    .page-msg--warning .page-msg__icon { color: var(--color-warning, #FF7D00); }
+    .page-msg--success .page-msg__icon { color: var(--color-success, #00B42A); }
+
+    /* Sort mode */
+    .drag-handle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 28px;
+      margin-left: -4px;
+      flex-shrink: 0;
+      color: var(--color-text-3, #86909C);
+      cursor: grab;
+      border-radius: 2px;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .drag-handle:hover { color: var(--color-primary); }
+
+    .drag-handle:active,
+    .content-card.is-sorting.is-drag-active .drag-handle { cursor: grabbing; }
+
+    .drag-handle svg {
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
+
+    .content-card.is-sorting .drag-handle { display: inline-flex; }
+
+    .content-card.is-sorting .tree-table tbody tr.is-sortable {
+      user-select: none;
+    }
+
+    .content-card.is-sorting .tree-table tbody tr.is-dragging {
+      opacity: 0.35;
+      background: var(--color-primary-bg, #E8F3FF);
+    }
+
+    .content-card.is-sorting .tree-table tbody tr.is-drag-hidden {
+      display: none !important;
+    }
+
+    .content-card.is-sorting .tree-table tbody tr.drop-before > td {
+      box-shadow: inset 0 2px 0 0 var(--color-primary);
+    }
+
+    .content-card.is-sorting .tree-table tbody tr.drop-after > td {
+      box-shadow: inset 0 -2px 0 0 var(--color-primary);
+    }
+
+    .content-card.is-sorting .tree-table tbody tr.drop-inside > td {
+      background: var(--color-primary-bg, #E8F3FF) !important;
+    }
+
+    .sort-ghost {
+      position: fixed;
+      z-index: 1200;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 12px;
+      background: #fff;
+      border: 1px solid var(--color-primary);
+      border-radius: 4px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      pointer-events: none;
+      white-space: nowrap;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sort-ghost.is-show { display: inline-flex; }
+
+    .sort-ghost__icon {
+      color: var(--color-text-3, #86909C);
+      display: inline-flex;
+    }
+
+    .sort-ghost__icon svg { width: 14px; height: 14px; }
+
+    /* Tree Table
+       table-shell 外边距 16px，右边框与全屏按钮右边缘对齐；
+       滚动条在 shell 内侧，不挤占外边框位置 */
+    .table-shell {
+      flex: 1;
+      min-height: 0;
+      margin: 0 var(--table-padding-x, 16px) var(--table-padding-x, 16px);
+      border: 1px solid var(--color-table-border, #E5E6EB);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--color-bg-container);
+    }
+
+    .table-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.45) transparent;
+    }
+
+    .table-wrap::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .table-wrap::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.45);
+      border-radius: 6px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: rgba(201, 205, 212, 0.7);
+    }
+
+    .table-wrap::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    .tree-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+
+    .tree-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .tree-table th {
+      height: 40px;
+      padding: 0 var(--table-cell-padding-x, 12px);
+      font-size: 14px;
+      font-weight: 600;
+      color: #1D2129;
+      background: var(--color-table-header-bg, #F7F8FA);
+      /* 上边框由 .table-shell 承担 */
+      border-top: none;
+      border-bottom: 1px solid var(--color-table-border, #E5E6EB);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .tree-table td {
+      height: 44px;
+      padding: 0 var(--table-cell-padding-x, 12px);
+      font-size: 14px;
+      color: #1D2129;
+      border-bottom: 1px solid var(--color-table-border, #E5E6EB);
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tree-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .tree-table tbody tr:hover td {
+      background: var(--color-table-row-hover, #F5F7FA);
+    }
+
+    /* 列宽比例（基准合计 1360px → 100%）：
+       路由名称 240 · 类型/图标/状态 120 · 关联父级 160 · 地址/权限/操作 200 */
+    .col-name { width: 17.647%; }   /* 240 */
+    .col-type { width: 8.824%; }    /* 120 */
+    .col-parent { width: 11.765%; } /* 160 */
+    .col-path { width: 14.706%; }   /* 200 */
+    .col-perm { width: 14.706%; }   /* 200 */
+    .col-icon { width: 8.824%; }    /* 120 */
+    .col-status { width: 8.824%; }  /* 120 */
+    .col-action {
+      width: 14.706%;               /* 200 */
+      padding-left: 12px;
+      padding-right: 24px;
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background: var(--color-bg-container);
+      border-left: 1px solid var(--color-table-border, #E5E6EB);
+      box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
+
+    th.col-action {
+      z-index: 3;
+      background: var(--color-table-header-bg, #F7F8FA);
+      padding-left: 12px;
+      padding-right: 24px;
+    }
+
+    .tree-table td.col-action {
+      overflow: hidden;
+      padding-left: 12px;
+      padding-right: 24px;
+    }
+
+    .tree-table tbody tr:hover td.col-action {
+      background: var(--color-table-row-hover, #F5F7FA);
+    }
+
+    /* Tree cell */
+    .tree-cell {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .tree-indent { flex-shrink: 0; display: inline-block; }
+
+    .tree-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--color-text-tertiary);
+      border-radius: 2px;
+      transition: transform 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .tree-toggle:hover {
+      color: var(--color-primary);
+      background: var(--color-primary-bg);
+    }
+
+    .tree-toggle svg {
+      width: 12px;
+      height: 12px;
+      transition: transform 0.15s;
+    }
+
+    .tree-toggle.is-collapsed svg { transform: rotate(-90deg); }
+
+    .tree-toggle.is-leaf {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .tree-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Tags · 路由类型 40×28 带边框；状态 40×28 无边框 */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 40px;
+      height: 28px;
+      padding: 0;
+      font-size: 12px;
+      line-height: 20px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    .tag--type {
+      border: 1px solid;
+    }
+
+    .tag--nav {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+      border-color: var(--color-warning-border);
+    }
+
+    .tag--dir {
+      background: var(--color-primary-bg);
+      color: var(--color-primary);
+      border-color: var(--color-primary-border);
+    }
+
+    .tag--page {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border-color: var(--color-success-border);
+    }
+
+    .tag--btn {
+      background: var(--color-fill-2);
+      color: var(--color-text-2);
+      border-color: var(--color-border-2);
+    }
+
+    .tag--link {
+      background: #FFECE8;
+      color: #F53F3F;
+      border-color: #F53F3F;
+    }
+
+    .tag--success {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: none;
+    }
+
+    .tag--disabled {
+      background: #FFECE8;
+      color: #F53F3F;
+      border: none;
+    }
+
+    /* Menu icon in table */
+    .cell-icon {
+      display: inline-flex;
+      align-items: center;
+      color: #1D2129;
+    }
+
+    .cell-icon svg { width: 16px; height: 16px; }
+
+    /* Action links */
+    .actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      white-space: nowrap;
+    }
+
+    .link {
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-primary);
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+
+    .link:hover { color: var(--color-primary-hover); }
+
+    .link--danger { color: var(--color-danger); }
+    .link--danger:hover { color: var(--color-danger-active); }
+
+    .link.is-disabled,
+    .link:disabled {
+      color: #BEDAFF;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .link--danger.is-disabled,
+    .link--danger:disabled {
+      color: #BEDAFF;
+    }
+
+    /* Hidden rows */
+    tr.is-hidden { display: none; }
+
+    /* Confirm modal · 删除确认 */
+    .confirm-modal {
+      position: relative;
+      width: 400px;
+      max-width: calc(100vw - 32px);
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      padding: 32px 32px 24px;
+      box-sizing: border-box;
+    }
+
+    .confirm-modal__close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      color: #86909C;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .confirm-modal__close:hover {
+      background: #F2F3F5;
+      color: #1D2129;
+    }
+
+    .confirm-modal__close svg { width: 12px; height: 12px; }
+
+    .confirm-modal__main {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding-right: 16px;
+      margin-bottom: 24px;
+    }
+
+    .confirm-modal__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      border-radius: 50%;
+      background: #F53F3F;
+      color: #fff;
+    }
+
+    .confirm-modal__icon svg { width: 12px; height: 12px; }
+
+    .confirm-modal__content { min-width: 0; flex: 1; }
+
+    .confirm-modal__title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      color: #1D2129;
+      margin: 0 0 8px;
+    }
+
+    .confirm-modal__body {
+      font-size: 14px;
+      line-height: 22px;
+      color: #4E5969;
+      margin: 0;
+    }
+
+    .confirm-modal__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .modal-mask--confirm {
+      z-index: 1100;
+    }
+
+    /* Modal · 添加菜单 */
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(29, 33, 41, 0.6);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .modal-mask.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      width: 800px;
+      max-width: calc(100vw - 32px);
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg-container);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(8px);
+      transition: transform 0.2s;
+      overflow: visible;
+    }
+
+    .modal-mask.is-open .modal { transform: translateY(0); }
+
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 24px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+    }
+
+    .modal__title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      color: #1D2129;
+    }
+
+    .modal__close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      color: var(--color-text-3, #86909C);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .modal__close:hover {
+      background: var(--color-fill-2, #F2F3F5);
+      color: #1D2129;
+    }
+
+    .modal__close svg { width: 14px; height: 14px; }
+
+    .modal__body {
+      padding: 24px 24px 8px;
+      overflow: visible;
+    }
+
+    .modal__footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px 20px;
+      flex-shrink: 0;
+    }
+
+    .form-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .form-item__label {
+      width: 120px;
+      flex-shrink: 0;
+      padding: 8px;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .form-item__label .req {
+      color: var(--color-danger, #F53F3F);
+      margin-right: 2px;
+    }
+
+    .form-item__control {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .form-item__error {
+      position: absolute;
+      left: 0;
+      top: calc(100% + 2px);
+      z-index: 1;
+      display: none;
+      margin: 0;
+      font-size: 12px;
+      line-height: 20px;
+      color: #F53F3F;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .form-item.is-error .form-item__error {
+      display: block;
+    }
+
+    .form-item.is-error .input,
+    .form-item.is-error .combo__trigger {
+      border-color: #F53F3F;
+    }
+
+    .form-item.is-error .input:hover,
+    .form-item.is-error .input:focus,
+    .form-item.is-error .combo__trigger:hover {
+      border-color: #F53F3F;
+      box-shadow: 0 0 0 2px rgba(245, 63, 63, 0.15);
+    }
+
+    .seg {
+      display: inline-flex;
+      flex-wrap: wrap;
+      background: transparent;
+    }
+
+    .seg__item {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 32px;
+      padding: 0;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      margin-left: -1px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, z-index 0s;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .seg__item:first-child {
+      margin-left: 0;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .seg__item:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+
+    .seg__item:hover:not(.is-active) {
+      color: #165DFF;
+      z-index: 1;
+    }
+
+    .seg__item.is-active {
+      z-index: 2;
+      background: #E8F3FF;
+      border-color: #165DFF;
+      color: #165DFF;
+    }
+
+    .seg.is-readonly {
+      pointer-events: none;
+    }
+
+    .seg.is-readonly .seg__item:not(.is-active) {
+      background: #fff;
+      color: #C9CDD4;
+      border-color: #E5E6EB;
+    }
+
+    .seg.is-readonly .seg__item.is-active {
+      z-index: 2;
+      background: #E8F3FF;
+      border-color: #165DFF;
+      color: #165DFF;
+    }
+
+    .input:disabled {
+      background: #F7F8FA;
+      color: #86909C;
+      cursor: not-allowed;
+    }
+
+    .input-wrap.is-readonly:hover .input-clear,
+    .input-wrap.is-readonly:focus-within .input-clear {
+      display: none !important;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap .input {
+      width: 100%;
+      padding-right: 32px;
+    }
+
+    .input-wrap.has-count .input {
+      padding-right: 72px;
+    }
+
+    .input-clear {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      color: #fff;
+      background: #C9CDD4;
+      transition: background 0.15s, opacity 0.15s;
+      z-index: 1;
+    }
+
+    .input-wrap.has-count .input-clear {
+      right: 44px;
+    }
+
+    .input-clear:hover { background: #86909C; }
+
+    .input-clear svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .input-wrap.has-value:hover .input-clear,
+    .input-wrap.has-value:focus-within .input-clear {
+      display: inline-flex;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      height: 32px;
+      padding: 0 12px;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      background: var(--color-bg-container);
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      box-sizing: border-box;
+    }
+
+    .input::placeholder,
+    .select:invalid {
+      color: var(--color-text-3, #86909C);
+    }
+
+    .input:hover,
+    .select:hover {
+      border-color: var(--color-primary-border-hover, #94BFFF);
+    }
+
+    .input:focus,
+    .select:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px var(--color-primary-light, rgba(22, 93, 255, 0.15));
+    }
+
+    .input--count { padding-right: 72px; }
+
+    .input-count {
+      position: absolute;
+      right: 12px;
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--color-text-3, #86909C);
+      pointer-events: none;
+    }
+
+    .select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2386909C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+
+    /* Searchable combo · 上级菜单 / 图标 */
+    .combo {
+      position: relative;
+      width: 100%;
+    }
+
+    .combo__trigger {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 32px;
+      padding: 0 32px 0 12px;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      text-align: left;
+      background: var(--color-bg-container);
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+
+    .combo.has-value .combo__trigger {
+      padding-right: 56px;
+    }
+
+    .combo__trigger:hover { border-color: var(--color-primary-border-hover, #94BFFF); }
+
+    .combo.is-open .combo__trigger {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.15);
+    }
+
+    .combo.is-disabled .combo__trigger {
+      background: #F7F8FA;
+      color: #86909C;
+      cursor: not-allowed;
+    }
+
+    .combo__trigger-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .combo__trigger-text.is-placeholder { color: var(--color-text-3, #86909C); }
+
+    .combo__trigger-icon {
+      display: none;
+      align-items: center;
+      margin-right: 8px;
+      color: #1D2129;
+      flex-shrink: 0;
+    }
+
+    .combo__trigger-icon.is-show { display: inline-flex; }
+
+    .combo__trigger-icon iconify-icon { font-size: 16px; }
+
+    .combo__clear {
+      position: absolute;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      color: #fff;
+      background: #C9CDD4;
+      z-index: 1;
+    }
+
+    .combo__clear:hover { background: #86909C; }
+
+    .combo__clear svg { width: 10px; height: 10px; }
+
+    .combo.has-value:hover .combo__clear,
+    .combo.has-value:focus-within .combo__clear {
+      display: inline-flex;
+    }
+
+    .combo.is-disabled .combo__clear { display: none !important; }
+
+    .combo__caret {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      margin-top: -6px;
+      color: var(--color-text-3, #86909C);
+      pointer-events: none;
+      transition: transform 0.15s;
+    }
+
+    .combo.is-open .combo__caret { transform: rotate(180deg); }
+
+    .combo__panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 4px);
+      z-index: 20;
+      display: none;
+      flex-direction: column;
+      max-height: 280px;
+      background: #fff;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .combo.is-open .combo__panel { display: flex; }
+
+    .combo__search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+      flex-shrink: 0;
+    }
+
+    .combo__search-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--color-text-3, #86909C);
+      flex-shrink: 0;
+    }
+
+    .combo__search-input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      color: #1D2129;
+      background: transparent;
+    }
+
+    .combo__search-input::placeholder { color: var(--color-text-3, #86909C); }
+
+    .combo__list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .combo__option {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 36px;
+      padding: 6px 12px;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      text-align: left;
+      transition: background 0.12s;
+    }
+
+    .combo__option:hover {
+      background: #F5F7FA;
+      color: #1D2129;
+    }
+
+    .combo__option.is-active {
+      background: var(--color-primary-bg, #E8F3FF);
+      color: var(--color-primary);
+    }
+
+    .combo__empty {
+      padding: 16px 12px;
+      font-size: 13px;
+      color: var(--color-text-3, #86909C);
+      text-align: center;
+    }
+
+    .combo__panel--icons { max-height: 320px; }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      padding: 8px;
+      overflow-y: auto;
+      max-height: 240px;
+    }
+
+    .icon-grid__item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 64px;
+      padding: 6px 4px;
+      border-radius: 4px;
+      color: #1D2129;
+      transition: background 0.12s, color 0.12s;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .icon-grid__item:hover {
+      background: #F5F7FA;
+    }
+
+    .icon-grid__item.is-active {
+      background: var(--color-primary-bg, #E8F3FF);
+      color: var(--color-primary);
+      border-color: var(--color-primary-border, #94BFFF);
+    }
+
+    .icon-grid__item iconify-icon { font-size: 20px; }
+
+    .icon-grid__name {
+      max-width: 100%;
+      font-size: 10px;
+      line-height: 14px;
+      color: var(--color-text-3, #86909C);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .icon-grid__item.is-active .icon-grid__name { color: var(--color-primary); }
+
+    .cell-icon iconify-icon {
+      font-size: 16px;
+      color: #1D2129;
+      vertical-align: middle;
+    }
+
+    body.modal-open { overflow: hidden; }
+
+    /* Fullscreen mode */
+    .content-card.is-fullscreen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      border-radius: 0;
+    }
+
+    /* Mono for paths / permission keys */
+    .mono {
+      font-family: var(--font-family-base);
+      font-size: 14px;
+      color: #1D2129;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <img class="logo" src="assets/logo.png" width="32" height="32" alt="海外中台" />
+        <span class="brand-name">海外中台</span>
+      </div>
+
+      <nav class="header-nav" aria-label="顶部导航">
+        <a href="#" class="header-nav__item">首页</a>
+        <a href="#" class="header-nav__item">看板</a>
+        <a href="#" class="header-nav__item">产品</a>
+        <a href="#" class="header-nav__item">工具</a>
+        <a href="#" class="header-nav__item is-active">管理</a>
+      </nav>
+
+      <div class="header-right">
+        <button class="header-icon" type="button" title="下载" aria-label="下载">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="消息" aria-label="消息">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="主题" aria-label="主题">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
+        <button class="user-chip" type="button" aria-label="用户菜单">
+          <span class="user-avatar">风</span>
+          <span class="user-name">小风</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4.5L6 7.5L9 4.5"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="body">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav" aria-label="侧边栏导航">
+          <div class="menu-group" data-group>
+            <button class="menu-group__title" type="button" data-group-toggle>
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+              <span class="menu-group__title-text">系统管理</span>
+              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
+            </button>
+            <ul class="menu-children">
+              <li>
+                <a href="#" class="menu-item is-active">
+                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+                  </svg>
+                  <span class="menu-item__text">菜单管理</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="menu-group" data-group>
+            <button class="menu-group__title" type="button" data-group-toggle>
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span class="menu-group__title-text">权限管理</span>
+              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
+            </button>
+            <ul class="menu-children">
+              <li>
+                <a href="#" class="menu-item">
+                  <span class="menu-item__text">用户管理</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="menu-item">
+                  <span class="menu-item__text">角色管理</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="menu-item">
+                  <span class="menu-item__text">数据组管理</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button class="sidebar-collapse-btn" id="sidebarToggle" type="button" title="折叠菜单" aria-label="折叠侧边栏">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h16M4 12h10M4 18h16"/><path d="M15 9l-3 3 3 3"/>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <div class="content-card" id="contentCard">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn btn--success" type="button" id="addMenuBtn">添加</button>
+              <button class="btn btn--primary" type="button" id="sortMenuBtn">排序</button>
+              <button class="btn btn--default" type="button" id="collapseAllBtn">收起</button>
+            </div>
+            <div class="toolbar-right">
+              <button class="icon-btn" type="button" id="refreshBtn" title="刷新" aria-label="刷新">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+              </button>
+              <button class="icon-btn" type="button" id="fullscreenBtn" title="全屏" aria-label="全屏">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-shell">
+          <div class="table-wrap">
+            <table class="tree-table" id="treeTable">
+              <thead>
+                <tr>
+                  <th class="col-name">路由名称</th>
+                  <th class="col-type">路由类型</th>
+                  <th class="col-parent">关联父级</th>
+                  <th class="col-path">路由地址</th>
+                  <th class="col-perm">权限标识</th>
+                  <th class="col-icon">图标</th>
+                  <th class="col-status">状态</th>
+                  <th class="col-action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="treeBody">
+                <!-- rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- 顶部提示：排序中 / 保存成功 -->
+  <div class="page-msg" id="pageMsg" role="status" aria-live="polite" aria-hidden="true"></div>
+  <div class="sort-ghost" id="sortGhost" aria-hidden="true"></div>
+
+  <!-- 添加菜单弹窗 -->
+  <div class="modal-mask" id="menuModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="menuModalTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="menuModalTitle">添加菜单</h2>
+        <button class="modal__close" type="button" id="menuModalClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <path d="M2 2l8 8M10 2L2 10"/>
+          </svg>
+        </button>
+      </div>
+      <form class="modal__body" id="menuForm" autocomplete="off">
+        <div class="form-item">
+          <div class="form-item__label">路由类型</div>
+          <div class="form-item__control">
+            <div class="seg" id="menuTypeSeg" role="radiogroup" aria-label="路由类型">
+              <button type="button" class="seg__item is-active" data-value="nav">导航</button>
+              <button type="button" class="seg__item" data-value="dir">目录</button>
+              <button type="button" class="seg__item" data-value="page">页面</button>
+              <button type="button" class="seg__item" data-value="btn">按钮</button>
+              <button type="button" class="seg__item" data-value="link">外链</button>
+            </div>
+            <input type="hidden" name="type" id="menuTypeInput" value="nav">
+          </div>
+        </div>
+        <div class="form-item" data-field="name">
+          <div class="form-item__label"><span class="req">*</span>路由名称</div>
+          <div class="form-item__control">
+            <div class="input-wrap has-count" data-clearable>
+              <input class="input input--count" type="text" name="name" id="menuNameInput" placeholder="请输入" maxlength="12">
+              <button type="button" class="input-clear" aria-label="清空" tabindex="-1">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <span class="input-count" id="menuNameCount">0/12</span>
+            </div>
+            <div class="form-item__error" id="menuNameError">请输入路由名称</div>
+          </div>
+        </div>
+        <div class="form-item" data-field="path">
+          <div class="form-item__label"><span class="req">*</span>路由地址</div>
+          <div class="form-item__control">
+            <div class="input-wrap" data-clearable>
+              <input class="input" type="text" name="path" id="menuPathInput" placeholder="请输入">
+              <button type="button" class="input-clear" aria-label="清空" tabindex="-1">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="form-item__error" id="menuPathError">请输入路由地址</div>
+          </div>
+        </div>
+        <div class="form-item" data-field="perm">
+          <div class="form-item__label">权限标识</div>
+          <div class="form-item__control">
+            <div class="input-wrap" data-clearable>
+              <input class="input" type="text" name="perm" id="menuPermInput" placeholder="请输入">
+              <button type="button" class="input-clear" aria-label="清空" tabindex="-1">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="form-item__error" id="menuPermError">权限标识已存在</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">上级菜单</div>
+          <div class="form-item__control">
+            <div class="combo" id="parentCombo">
+              <button type="button" class="combo__trigger" id="parentComboTrigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="combo__trigger-text is-placeholder" id="parentComboLabel">请选择</span>
+                <svg class="combo__caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <input type="hidden" name="parent" id="menuParentSelect" value="">
+              <div class="combo__panel" id="parentComboPanel">
+                <div class="combo__search">
+                  <svg class="combo__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input class="combo__search-input" type="text" id="parentComboSearch" placeholder="搜索" autocomplete="off">
+                </div>
+                <div class="combo__list" id="parentComboList" role="listbox"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item" id="iconFormItem">
+          <div class="form-item__label">图标</div>
+          <div class="form-item__control">
+            <div class="combo" id="iconCombo">
+              <button type="button" class="combo__trigger" id="iconComboTrigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="combo__trigger-icon" id="iconComboPreview"></span>
+                <span class="combo__trigger-text is-placeholder" id="iconComboLabel">请选择</span>
+                <svg class="combo__caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button type="button" class="combo__clear" id="iconComboClear" aria-label="清空图标" tabindex="-1">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <input type="hidden" name="icon" id="menuIconSelect" value="">
+              <div class="combo__panel combo__panel--icons" id="iconComboPanel">
+                <div class="combo__search">
+                  <svg class="combo__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input class="combo__search-input" type="text" id="iconComboSearch" placeholder="搜索" autocomplete="off">
+                </div>
+                <div class="icon-grid" id="iconComboGrid" role="listbox"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="menuStatusSeg" role="radiogroup" aria-label="状态">
+              <button type="button" class="seg__item is-active" data-value="启用">启用</button>
+              <button type="button" class="seg__item" data-value="禁用">禁用</button>
+            </div>
+            <input type="hidden" name="status" id="menuStatusInput" value="启用">
+          </div>
+        </div>
+      </form>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="menuModalCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="menuModalSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除确认弹窗 -->
+  <div class="modal-mask modal-mask--confirm" id="confirmModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+      <button class="confirm-modal__close" type="button" id="confirmModalClose" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M2 2l8 8M10 2L2 10"/>
+        </svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon" aria-hidden="true">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M3 3l6 6M9 3L3 9"/>
+          </svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="confirmModalTitle">删除确认</h2>
+          <p class="confirm-modal__body" id="confirmModalBody">此操作不可撤销，确定删除吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" id="confirmModalCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="confirmModalOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const ICONS = {
+        app: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+        folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+        file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+        grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
+        game: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"/></svg>',
+        chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
+        tool: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+        setting: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+        user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+        list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+        link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+      };
+
+      const TYPE_MAP = {
+        nav: { label: '导航', className: 'tag tag--type tag--nav' },
+        dir: { label: '目录', className: 'tag tag--type tag--dir' },
+        page: { label: '页面', className: 'tag tag--type tag--page' },
+        btn: { label: '按钮', className: 'tag tag--type tag--btn' },
+        link: { label: '外链', className: 'tag tag--type tag--link' },
+      };
+
+      /* 数据来源：《系统框架.xlsx》·菜单管理（UTF-8 导出） */
+            const menuFlat = [
+        {
+          "id": "1",
+          "name": "首页",
+          "type": "nav",
+          "parent": "-",
+          "path": "home",
+          "perm": "Home",
+          "icon": "grid",
+          "status": "启用"
+        },
+        {
+          "id": "2",
+          "name": "看板",
+          "type": "nav",
+          "parent": "-",
+          "path": "dashboard",
+          "perm": "Dashboard",
+          "icon": "chart",
+          "status": "启用"
+        },
+        {
+          "id": "3",
+          "name": "产品",
+          "type": "nav",
+          "parent": "-",
+          "path": "product",
+          "perm": "Product",
+          "icon": "app",
+          "status": "启用"
+        },
+        {
+          "id": "4",
+          "name": "APP管理",
+          "type": "dir",
+          "parent": "产品",
+          "path": "app",
+          "perm": "AppManager",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "5",
+          "name": "APP应用",
+          "type": "page",
+          "parent": "APP管理",
+          "path": "config",
+          "perm": "ProductConfig",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "6",
+          "name": "JSON文件",
+          "type": "page",
+          "parent": "APP管理",
+          "path": "json",
+          "perm": "ProductJsonFile",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "7",
+          "name": "产品类型",
+          "type": "page",
+          "parent": "APP管理",
+          "path": "category",
+          "perm": "ProductCategory",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "8",
+          "name": "小游戏管理",
+          "type": "dir",
+          "parent": "产品",
+          "path": "minis",
+          "perm": "MinisManager",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "9",
+          "name": "小游戏",
+          "type": "page",
+          "parent": "小游戏管理",
+          "path": "minis",
+          "perm": "ProductMinis",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "10",
+          "name": "产品类型",
+          "type": "page",
+          "parent": "小游戏管理",
+          "path": "minis/category",
+          "perm": "MinisCategory",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "11",
+          "name": "产品系列",
+          "type": "page",
+          "parent": "小游戏管理",
+          "path": "series",
+          "perm": "ProductSeries",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "12",
+          "name": "产品组管理",
+          "type": "dir",
+          "parent": "产品",
+          "path": "group",
+          "perm": "ProductGroup",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "13",
+          "name": "平台管理",
+          "type": "dir",
+          "parent": "产品",
+          "path": "platform",
+          "perm": "PlatformManager",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "14",
+          "name": "平台配置",
+          "type": "page",
+          "parent": "平台管理",
+          "path": "config",
+          "perm": "PlatformConfig",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "15",
+          "name": "插件配置",
+          "type": "page",
+          "parent": "平台管理",
+          "path": "plugin/config",
+          "perm": "PluginConfig",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "16",
+          "name": "开发者账号",
+          "type": "page",
+          "parent": "平台管理",
+          "path": "developer",
+          "perm": "PlatformDeveloper",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "17",
+          "name": "SDK启动配置",
+          "type": "page",
+          "parent": "平台管理",
+          "path": "startup/field/config",
+          "perm": "StartupFieldConfig",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "18",
+          "name": "广告策略",
+          "type": "dir",
+          "parent": "产品",
+          "path": "adStrategy",
+          "perm": "AdStrategy",
+          "icon": "chart",
+          "status": "启用"
+        },
+        {
+          "id": "19",
+          "name": "字段配置",
+          "type": "page",
+          "parent": "广告策略",
+          "path": "fieldConfig",
+          "perm": "AdStrategyFieldConfig",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "20",
+          "name": "场景管理",
+          "type": "page",
+          "parent": "广告策略",
+          "path": "scene",
+          "perm": "AdStrategyScene",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "21",
+          "name": "聚合应用",
+          "type": "page",
+          "parent": "广告策略",
+          "path": "app",
+          "perm": "AdStrategyApp",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "22",
+          "name": "广告策略",
+          "type": "page",
+          "parent": "广告策略",
+          "path": "adStrategyList",
+          "perm": "AdStrategyList",
+          "icon": "chart",
+          "status": "启用"
+        },
+        {
+          "id": "23",
+          "name": "资产管理",
+          "type": "dir",
+          "parent": "产品",
+          "path": "asset",
+          "perm": "Asset",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "24",
+          "name": "Tiktok账户",
+          "type": "page",
+          "parent": "资产管理",
+          "path": "tiktok/advertiser",
+          "perm": "TiktokAccount",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "45",
+          "name": "TikTok赠款",
+          "type": "page",
+          "parent": "资产管理",
+          "path": "tiktok/grant",
+          "perm": "TiktokGrant",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "25",
+          "name": "工具",
+          "type": "nav",
+          "parent": "-",
+          "path": "tool",
+          "perm": "Tool",
+          "icon": "tool",
+          "status": "启用"
+        },
+        {
+          "id": "26",
+          "name": "任务中心",
+          "type": "dir",
+          "parent": "工具",
+          "path": "Task",
+          "perm": "Task",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "27",
+          "name": "下载任务",
+          "type": "page",
+          "parent": "任务中心",
+          "path": "TaskExport",
+          "perm": "TaskExport",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "28",
+          "name": "素材采集",
+          "type": "dir",
+          "parent": "工具",
+          "path": "material/collection",
+          "perm": "MaterialCollection",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "29",
+          "name": "采集任务",
+          "type": "page",
+          "parent": "素材采集",
+          "path": "task",
+          "perm": "CollectionTask",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "30",
+          "name": "素材列表",
+          "type": "page",
+          "parent": "素材采集",
+          "path": "library",
+          "perm": "MaterialLibrary",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "46",
+          "name": "运营工具",
+          "type": "dir",
+          "parent": "工具",
+          "path": "ops",
+          "perm": "OpsTools",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "47",
+          "name": "用户反馈",
+          "type": "page",
+          "parent": "运营工具",
+          "path": "feedback/tickets",
+          "perm": "UserFeedback",
+          "icon": "list",
+          "status": "启用"
+        },
+        {
+          "id": "31",
+          "name": "管理",
+          "type": "nav",
+          "parent": "-",
+          "path": "manager",
+          "perm": "Manager",
+          "icon": "setting",
+          "status": "启用"
+        },
+        {
+          "id": "32",
+          "name": "系统管理",
+          "type": "dir",
+          "parent": "管理",
+          "path": "system",
+          "perm": "SystemManager",
+          "icon": "setting",
+          "status": "启用"
+        },
+        {
+          "id": "33",
+          "name": "菜单管理",
+          "type": "page",
+          "parent": "系统管理",
+          "path": "menu",
+          "perm": "MenuManager",
+          "icon": "list",
+          "status": "启用"
+        },
+        {
+          "id": "34",
+          "name": "添加",
+          "type": "btn",
+          "parent": "菜单管理",
+          "path": "add",
+          "perm": "MenuManagerAdd",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "35",
+          "name": "编辑",
+          "type": "btn",
+          "parent": "菜单管理",
+          "path": "edit",
+          "perm": "MenuManagerEdit",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "36",
+          "name": "删除",
+          "type": "btn",
+          "parent": "菜单管理",
+          "path": "del",
+          "perm": "MenuManagerDel",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "37",
+          "name": "权限管理",
+          "type": "dir",
+          "parent": "管理",
+          "path": "permission",
+          "perm": "",
+          "icon": "shield",
+          "status": "启用"
+        },
+        {
+          "id": "38",
+          "name": "用户管理",
+          "type": "page",
+          "parent": "权限管理",
+          "path": "user",
+          "perm": "UserManager",
+          "icon": "user",
+          "status": "启用"
+        },
+        {
+          "id": "39",
+          "name": "编辑",
+          "type": "btn",
+          "parent": "用户管理",
+          "path": "edit",
+          "perm": "UserManagerEdit",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "40",
+          "name": "日志",
+          "type": "btn",
+          "parent": "用户管理",
+          "path": "log",
+          "perm": "UserManagerLog",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "41",
+          "name": "扮演",
+          "type": "btn",
+          "parent": "用户管理",
+          "path": "play",
+          "perm": "UserManagerPlay",
+          "icon": "",
+          "status": "启用"
+        },
+        {
+          "id": "42",
+          "name": "角色管理",
+          "type": "page",
+          "parent": "权限管理",
+          "path": "role",
+          "perm": "RoleManager",
+          "icon": "shield",
+          "status": "启用"
+        },
+        {
+          "id": "43",
+          "name": "数据组管理",
+          "type": "page",
+          "parent": "权限管理",
+          "path": "department",
+          "perm": "DepartmentManager",
+          "icon": "folder",
+          "status": "启用"
+        },
+        {
+          "id": "44",
+          "name": "Github（我是外链）",
+          "type": "link",
+          "parent": "管理",
+          "path": "github",
+          "perm": "Github",
+          "icon": "link",
+          "status": "禁用"
+        }
+      ];
+
+      function buildTree(flat) {
+        const rank = { nav: 0, dir: 1, page: 2, link: 3, btn: 4 };
+        const nodes = flat.map((row) => ({ ...row, children: [] }));
+        const byName = new Map();
+        nodes.forEach((n) => {
+          const prev = byName.get(n.name);
+          if (!prev || (rank[n.type] ?? 9) < (rank[prev.type] ?? 9)) byName.set(n.name, n);
+        });
+        const roots = [];
+        nodes.forEach((n) => {
+          if (!n.parent || n.parent === '-') {
+            roots.push(n);
+            return;
+          }
+          const parent = byName.get(n.parent);
+          if (parent && parent.id !== n.id) parent.children.push(n);
+          else roots.push(n);
+        });
+        return roots;
+      }
+
+      let menuTree = buildTree(menuFlat);
+
+      /** Flatten tree → rows with depth / parentId / hasChildren */
+      function flatten(nodes, depth = 0, parentId = null, acc = []) {
+        nodes.forEach((node) => {
+          const hasChildren = !!(node.children && node.children.length);
+          acc.push({
+            ...node,
+            depth,
+            parentId,
+            hasChildren,
+            expanded: true,
+          });
+          if (hasChildren) flatten(node.children, depth + 1, node.id, acc);
+        });
+        return acc;
+      }
+
+      let flatRows = flatten(menuTree);
+      const expandedMap = {};
+      flatRows.forEach((r) => { if (r.hasChildren) expandedMap[r.id] = true; });
+
+      const treeBody = document.getElementById('treeBody');
+      let sortMode = false;
+      let sortDragId = null;
+      let sortDrop = { id: null, position: null };
+      let pageMsgTimer = null;
+
+      function isVisible(row) {
+        if (!row.parentId) return true;
+        let pid = row.parentId;
+        while (pid) {
+          if (!expandedMap[pid]) return false;
+          const parent = flatRows.find((r) => r.id === pid);
+          pid = parent ? parent.parentId : null;
+        }
+        return true;
+      }
+
+      function renderTable() {
+        const html = flatRows.map((row) => {
+          const typeInfo = TYPE_MAP[row.type] || TYPE_MAP.page;
+          const indent = row.depth * 20;
+          const toggleClass = row.hasChildren
+            ? (expandedMap[row.id] ? 'tree-toggle' : 'tree-toggle is-collapsed')
+            : 'tree-toggle is-leaf';
+          const hidden = isVisible(row) ? '' : ' is-hidden';
+          const canShowIcon = row.type !== 'nav' && row.type !== 'btn';
+          const iconSvg = canShowIcon && row.icon && ICONS[row.icon]
+            ? ICONS[row.icon]
+            : (canShowIcon && row.icon && String(row.icon).indexOf('Icon') === 0
+              ? `<iconify-icon icon="${arcoToIconify(row.icon)}"></iconify-icon>`
+              : '');
+          const statusClass = row.status === '禁用' ? 'tag tag--disabled' : 'tag tag--success';
+          const canAddChild = row.type === 'nav' || row.type === 'dir' || row.type === 'page';
+          const addChildBtn = canAddChild
+            ? `<button class="link" type="button" data-action="add-child" data-id="${row.id}">添加下级</button>`
+            : `<button class="link is-disabled" type="button" disabled title="按钮/外链不支持添加下级">添加下级</button>`;
+          const dragHandle = `<span class="drag-handle" title="拖拽排序" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+              <circle cx="5" cy="4" r="1.2"/><circle cx="11" cy="4" r="1.2"/>
+              <circle cx="5" cy="8" r="1.2"/><circle cx="11" cy="8" r="1.2"/>
+              <circle cx="5" cy="12" r="1.2"/><circle cx="11" cy="12" r="1.2"/>
+            </svg>
+          </span>`;
+
+          return `
+            <tr data-id="${row.id}" data-parent="${row.parentId || ''}" data-type="${row.type}"
+              class="${hidden}${sortMode ? ' is-sortable' : ''}">
+              <td>
+                <div class="tree-cell">
+                  ${dragHandle}
+                  <span class="tree-indent" style="width:${indent}px"></span>
+                  <button class="${toggleClass}" type="button" data-toggle="${row.id}" aria-label="展开/折叠">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <span class="tree-name" title="${row.name}">${row.name}</span>
+                </div>
+              </td>
+              <td><span class="${typeInfo.className}">${typeInfo.label}</span></td>
+              <td>${row.parent === '-' ? '' : row.parent}</td>
+              <td><span class="mono" title="${row.path}">${row.path}</span></td>
+              <td><span class="mono" title="${row.perm}">${row.perm || ''}</span></td>
+              <td><span class="cell-icon">${iconSvg}</span></td>
+              <td><span class="${statusClass}">${row.status}</span></td>
+              <td class="col-action">
+                <div class="actions">
+                  ${addChildBtn}
+                  <button class="link" type="button" data-action="edit" data-id="${row.id}">编辑</button>
+                  <button class="link link--danger" type="button" data-action="delete" data-id="${row.id}">删除</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        treeBody.innerHTML = html;
+      }
+
+      treeBody.addEventListener('click', (e) => {
+        if (sortMode && e.target.closest('[data-action]')) return;
+        const actionBtn = e.target.closest('[data-action]');
+        if (actionBtn) {
+          if (actionBtn.disabled || actionBtn.classList.contains('is-disabled')) return;
+          const action = actionBtn.getAttribute('data-action');
+          const id = actionBtn.getAttribute('data-id') || '';
+          if (action === 'add-child') {
+            const parentRow = menuFlat.find((r) => r.id === String(id));
+            openMenuModal({
+              parentId: id,
+              parentType: parentRow ? parentRow.type : '',
+            });
+          } else if (action === 'edit') {
+            openEditMenuModal(id);
+          } else if (action === 'delete') {
+            openDeleteConfirm(id);
+          }
+          return;
+        }
+        const btn = e.target.closest('[data-toggle]');
+        if (!btn || btn.classList.contains('is-leaf')) return;
+        const id = btn.getAttribute('data-toggle');
+        expandedMap[id] = !expandedMap[id];
+        renderTable();
+      });
+
+      function showPageMsg(type, text, persistent) {
+        const el = document.getElementById('pageMsg');
+        if (!el) return;
+        if (pageMsgTimer) {
+          clearTimeout(pageMsgTimer);
+          pageMsgTimer = null;
+        }
+        const icon = type === 'success'
+          ? '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>'
+          : '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>';
+        el.className = `page-msg page-msg--${type} is-show`;
+        el.innerHTML = `${icon}<span>${text}</span>`;
+        el.setAttribute('aria-hidden', 'false');
+        if (!persistent) {
+          pageMsgTimer = setTimeout(() => hidePageMsg(), 2500);
+        }
+      }
+
+      function hidePageMsg() {
+        const el = document.getElementById('pageMsg');
+        if (!el) return;
+        if (pageMsgTimer) {
+          clearTimeout(pageMsgTimer);
+          pageMsgTimer = null;
+        }
+        el.classList.remove('is-show');
+        el.setAttribute('aria-hidden', 'true');
+      }
+
+      function canBeParentOf(parentType, childType) {
+        if (!parentType || parentType === '-') return childType === 'nav';
+        const map = {
+          nav: ['dir', 'page', 'link'],
+          dir: ['dir', 'page', 'link'],
+          page: ['btn'],
+          btn: [],
+          link: [],
+        };
+        return (map[parentType] || []).indexOf(childType) !== -1;
+      }
+
+      function serializeTreeToFlat(nodes, parentName, acc) {
+        nodes.forEach((n) => {
+          acc.push({
+            id: n.id,
+            name: n.name,
+            type: n.type,
+            parent: parentName,
+            path: n.path,
+            perm: n.perm || '',
+            icon: n.icon || '',
+            status: n.status || '启用',
+          });
+          if (n.children && n.children.length) {
+            serializeTreeToFlat(n.children, n.name, acc);
+          }
+        });
+        return acc;
+      }
+
+      function findInTree(nodes, id, parent = null) {
+        for (let i = 0; i < nodes.length; i += 1) {
+          if (String(nodes[i].id) === String(id)) {
+            return { node: nodes[i], siblings: nodes, index: i, parent };
+          }
+          const kids = nodes[i].children;
+          if (kids && kids.length) {
+            const found = findInTree(kids, id, nodes[i]);
+            if (found) return found;
+          }
+        }
+        return null;
+      }
+
+      function removeFromTree(nodes, id) {
+        for (let i = 0; i < nodes.length; i += 1) {
+          if (String(nodes[i].id) === String(id)) return nodes.splice(i, 1)[0];
+          const kids = nodes[i].children;
+          if (kids && kids.length) {
+            const got = removeFromTree(kids, id);
+            if (got) return got;
+          }
+        }
+        return null;
+      }
+
+      function moveMenuNode(dragId, targetId, position) {
+        dragId = String(dragId);
+        targetId = String(targetId);
+        if (!dragId || !targetId || dragId === targetId) return false;
+        if (getDescendantIds(dragId).has(targetId)) return false;
+
+        const drag = menuFlat.find((r) => r.id === dragId);
+        const target = menuFlat.find((r) => r.id === targetId);
+        if (!drag || !target) return false;
+
+        const targetFlat = flatRows.find((r) => r.id === targetId);
+        if (position === 'inside') {
+          if (!canBeParentOf(target.type, drag.type)) return false;
+        } else {
+          const parentId = targetFlat ? targetFlat.parentId : null;
+          if (!parentId) {
+            if (!canBeParentOf(null, drag.type)) return false;
+          } else {
+            const parent = menuFlat.find((r) => r.id === parentId);
+            if (!parent || !canBeParentOf(parent.type, drag.type)) return false;
+          }
+        }
+
+        const tree = buildTree(menuFlat);
+        const moved = removeFromTree(tree, dragId);
+        if (!moved) return false;
+
+        if (position === 'inside') {
+          const t = findInTree(tree, targetId);
+          if (!t) return false;
+          if (!t.node.children) t.node.children = [];
+          t.node.children.push(moved);
+          expandedMap[targetId] = true;
+        } else {
+          const t = findInTree(tree, targetId);
+          if (!t) return false;
+          const idx = position === 'before' ? t.index : t.index + 1;
+          t.siblings.splice(idx, 0, moved);
+        }
+
+        const next = serializeTreeToFlat(tree, '-', []);
+        menuFlat.length = 0;
+        next.forEach((row) => menuFlat.push(row));
+        return true;
+      }
+
+      function clearDropMarkers() {
+        treeBody.querySelectorAll('tr.drop-before, tr.drop-after, tr.drop-inside').forEach((tr) => {
+          tr.classList.remove('drop-before', 'drop-after', 'drop-inside');
+        });
+        sortDrop = { id: null, position: null };
+      }
+
+      function resolveDropPosition(tr, clientY) {
+        const rect = tr.getBoundingClientRect();
+        const y = clientY - rect.top;
+        const ratio = rect.height ? y / rect.height : 0.5;
+        const targetType = tr.getAttribute('data-type');
+        const drag = menuFlat.find((r) => r.id === sortDragId);
+        if (drag && canBeParentOf(targetType, drag.type)) {
+          if (ratio > 0.3 && ratio < 0.7) return 'inside';
+        }
+        return ratio < 0.5 ? 'before' : 'after';
+      }
+
+      function isValidDrop(dragId, targetId, position) {
+        const drag = menuFlat.find((r) => r.id === String(dragId));
+        const target = menuFlat.find((r) => r.id === String(targetId));
+        if (!drag || !target || String(dragId) === String(targetId)) return false;
+        if (getDescendantIds(dragId).has(String(targetId))) return false;
+        if (position === 'inside') return canBeParentOf(target.type, drag.type);
+        const targetFlat = flatRows.find((r) => r.id === String(targetId));
+        const parentId = targetFlat ? targetFlat.parentId : null;
+        if (!parentId) return canBeParentOf(null, drag.type);
+        const parent = menuFlat.find((r) => r.id === parentId);
+        return !!(parent && canBeParentOf(parent.type, drag.type));
+      }
+
+      function hideDragSubtree(dragId) {
+        const ids = getDescendantIds(dragId);
+        treeBody.querySelectorAll('tr[data-id]').forEach((tr) => {
+          const id = tr.getAttribute('data-id');
+          if (id === String(dragId)) tr.classList.add('is-dragging');
+          else if (ids.has(id)) tr.classList.add('is-drag-hidden');
+        });
+      }
+
+      function showSortGhost(name, clientX, clientY) {
+        const ghost = document.getElementById('sortGhost');
+        if (!ghost) return;
+        ghost.innerHTML = `<span class="sort-ghost__icon"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.2"/><circle cx="11" cy="4" r="1.2"/><circle cx="5" cy="8" r="1.2"/><circle cx="11" cy="8" r="1.2"/><circle cx="5" cy="12" r="1.2"/><circle cx="11" cy="12" r="1.2"/></svg></span><span>${name}</span>`;
+        ghost.classList.add('is-show');
+        ghost.style.left = `${clientX + 12}px`;
+        ghost.style.top = `${clientY - 18}px`;
+      }
+
+      function moveSortGhost(clientX, clientY) {
+        const ghost = document.getElementById('sortGhost');
+        if (!ghost) return;
+        ghost.style.left = `${clientX + 12}px`;
+        ghost.style.top = `${clientY - 18}px`;
+      }
+
+      function hideSortGhost() {
+        const ghost = document.getElementById('sortGhost');
+        if (!ghost) return;
+        ghost.classList.remove('is-show');
+        ghost.innerHTML = '';
+      }
+
+      function updateDropTarget(clientX, clientY) {
+        const el = document.elementFromPoint(clientX, clientY);
+        const tr = el && el.closest ? el.closest('#treeBody tr.is-sortable') : null;
+        if (!tr || tr.classList.contains('is-dragging') || tr.classList.contains('is-drag-hidden') || tr.classList.contains('is-hidden')) {
+          clearDropMarkers();
+          return;
+        }
+        const targetId = tr.getAttribute('data-id');
+        const position = resolveDropPosition(tr, clientY);
+        if (!isValidDrop(sortDragId, targetId, position)) {
+          clearDropMarkers();
+          return;
+        }
+        if (sortDrop.id === targetId && sortDrop.position === position) return;
+        clearDropMarkers();
+        tr.classList.add(`drop-${position}`);
+        sortDrop = { id: targetId, position };
+      }
+
+      function endSortDrag(commit) {
+        const card = document.getElementById('contentCard');
+        const dragId = sortDragId;
+        const targetId = sortDrop.id;
+        const position = sortDrop.position;
+        document.removeEventListener('pointermove', onSortPointerMove);
+        document.removeEventListener('pointerup', onSortPointerUp);
+        document.removeEventListener('pointercancel', onSortPointerUp);
+        if (card) card.classList.remove('is-drag-active');
+        hideSortGhost();
+        clearDropMarkers();
+        treeBody.querySelectorAll('tr.is-dragging, tr.is-drag-hidden').forEach((tr) => {
+          tr.classList.remove('is-dragging', 'is-drag-hidden');
+        });
+        sortDragId = null;
+        sortPointer = null;
+        if (commit && dragId && targetId && position && moveMenuNode(dragId, targetId, position)) {
+          menuTree = buildTree(menuFlat);
+          flatRows = flatten(menuTree);
+          flatRows.forEach((r) => {
+            if (r.hasChildren && expandedMap[r.id] === undefined) expandedMap[r.id] = true;
+          });
+          renderTable();
+        }
+      }
+
+      let sortPointer = null;
+
+      function onSortPointerMove(e) {
+        if (!sortPointer || !sortDragId) return;
+        const dx = e.clientX - sortPointer.x;
+        const dy = e.clientY - sortPointer.y;
+        if (!sortPointer.started) {
+          if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+          sortPointer.started = true;
+          document.getElementById('contentCard').classList.add('is-drag-active');
+          hideDragSubtree(sortDragId);
+          const row = menuFlat.find((r) => r.id === String(sortDragId));
+          showSortGhost(row ? row.name : '', e.clientX, e.clientY);
+        }
+        e.preventDefault();
+        moveSortGhost(e.clientX, e.clientY);
+        updateDropTarget(e.clientX, e.clientY);
+      }
+
+      function onSortPointerUp() {
+        const started = sortPointer && sortPointer.started;
+        endSortDrag(!!started);
+      }
+
+      treeBody.addEventListener('pointerdown', (e) => {
+        if (!sortMode || e.button !== 0) return;
+        const handle = e.target.closest('.drag-handle');
+        if (!handle) return;
+        const tr = handle.closest('tr.is-sortable');
+        if (!tr || tr.classList.contains('is-hidden')) return;
+        e.preventDefault();
+        sortDragId = tr.getAttribute('data-id');
+        sortPointer = { x: e.clientX, y: e.clientY, started: false };
+        clearDropMarkers();
+        document.addEventListener('pointermove', onSortPointerMove, { passive: false });
+        document.addEventListener('pointerup', onSortPointerUp);
+        document.addEventListener('pointercancel', onSortPointerUp);
+      });
+
+      function enterSortMode() {
+        sortMode = true;
+        document.getElementById('contentCard').classList.add('is-sorting');
+        document.getElementById('sortMenuBtn').textContent = '保存';
+        showPageMsg('warning', '拖拽排序后，请注意保存！', true);
+        renderTable();
+      }
+
+      function exitSortMode() {
+        if (sortPointer || sortDragId) endSortDrag(false);
+        sortMode = false;
+        sortDragId = null;
+        sortPointer = null;
+        document.getElementById('contentCard').classList.remove('is-sorting', 'is-drag-active');
+        document.getElementById('sortMenuBtn').textContent = '排序';
+        hidePageMsg();
+        hideSortGhost();
+        clearDropMarkers();
+        renderTable();
+        syncNavigationUI();
+      }
+
+      function saveSortOrder() {
+        exitSortMode();
+        showPageMsg('success', '保存成功', false);
+      }
+
+      document.getElementById('sortMenuBtn').addEventListener('click', () => {
+        if (sortMode) saveSortOrder();
+        else enterSortMode();
+      });
+
+      /* —— 添加菜单弹窗 —— */
+      const menuModal = document.getElementById('menuModal');
+      const menuForm = document.getElementById('menuForm');
+      const menuNameInput = document.getElementById('menuNameInput');
+      const menuNameCount = document.getElementById('menuNameCount');
+      const menuParentSelect = document.getElementById('menuParentSelect');
+      const menuIconSelect = document.getElementById('menuIconSelect');
+      const menuPermInput = document.getElementById('menuPermInput');
+      const menuPathInput = document.getElementById('menuPathInput');
+      const menuTypeSeg = document.getElementById('menuTypeSeg');
+      let editingId = null;
+      let editingSnapshot = null;
+
+      /** Arco IconXxx → IconPark（Arco 图标库同源） */
+      function arcoToIconify(componentName) {
+        const name = String(componentName || '');
+        const isFill = /Fill$/.test(name);
+        const isColor = /Color$/.test(name);
+        const bare = name.replace(/^Icon/, '').replace(/Fill$/, '').replace(/Color$/, '');
+        const kebab = bare
+          .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+          .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+          .toLowerCase();
+        if (isFill) return 'icon-park-solid:' + kebab;
+        if (isColor) return 'icon-park:' + kebab;
+        return 'icon-park-outline:' + kebab;
+      }
+
+      function shortIconLabel(componentName) {
+        return String(componentName || '').replace(/^Icon/, '');
+      }
+
+      function bindSeg(segEl, hiddenInput, onChange) {
+        segEl.addEventListener('click', (e) => {
+          if (segEl.classList.contains('is-readonly')) return;
+          const item = e.target.closest('.seg__item');
+          if (!item || item.style.display === 'none') return;
+          segEl.querySelectorAll('.seg__item').forEach((el) => el.classList.remove('is-active'));
+          item.classList.add('is-active');
+          hiddenInput.value = item.getAttribute('data-value');
+          if (typeof onChange === 'function') onChange(hiddenInput.value);
+        });
+      }
+
+      bindSeg(document.getElementById('menuTypeSeg'), document.getElementById('menuTypeInput'), (type) => {
+        syncIconFieldByType(type);
+      });
+      bindSeg(document.getElementById('menuStatusSeg'), document.getElementById('menuStatusInput'));
+
+      menuNameInput.addEventListener('input', () => {
+        menuNameCount.textContent = `${menuNameInput.value.length}/12`;
+      });
+
+      /* 输入框非空时 hover / focus 显示清空 */
+      function syncClearable(wrap) {
+        const input = wrap.querySelector('.input');
+        if (!input) return;
+        wrap.classList.toggle('has-value', input.value.length > 0);
+      }
+
+      document.querySelectorAll('[data-clearable]').forEach((wrap) => {
+        const input = wrap.querySelector('.input');
+        const clearBtn = wrap.querySelector('.input-clear');
+        if (!input || !clearBtn) return;
+        const update = () => syncClearable(wrap);
+        input.addEventListener('input', update);
+        input.addEventListener('change', update);
+        clearBtn.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          input.value = '';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          syncClearable(wrap);
+          input.focus();
+        });
+        syncClearable(wrap);
+      });
+
+      /* 上级菜单：层级路径 + 搜索 */
+      let parentOptions = [];
+
+      function buildParentOptions() {
+        const options = [];
+        function walk(nodes, trail) {
+          (nodes || []).forEach((node) => {
+            if (node.type === 'btn') return;
+            const next = trail.concat(node.name);
+            options.push({
+              id: node.id,
+              name: node.name,
+              label: next.join('/'),
+            });
+            if (node.children && node.children.length) walk(node.children, next);
+          });
+        }
+        walk(menuTree, []);
+        return options;
+      }
+
+      function renderParentList(keyword) {
+        const list = document.getElementById('parentComboList');
+        const kw = (keyword || '').trim().toLowerCase();
+        const filtered = parentOptions.filter((opt) => {
+          if (!kw) return true;
+          return opt.label.toLowerCase().indexOf(kw) !== -1
+            || opt.name.toLowerCase().indexOf(kw) !== -1;
+        });
+        if (!filtered.length) {
+          list.innerHTML = '<div class="combo__empty">无匹配菜单</div>';
+          return;
+        }
+        const selected = menuParentSelect.value;
+        list.innerHTML = filtered.map((opt) => `
+          <button type="button" class="combo__option${opt.id === selected ? ' is-active' : ''}"
+            data-id="${opt.id}" data-label="${opt.label.replace(/"/g, '&quot;')}" role="option">
+            ${opt.label}
+          </button>
+        `).join('');
+      }
+
+      function setParentValue(id, label) {
+        menuParentSelect.value = id || '';
+        const labelEl = document.getElementById('parentComboLabel');
+        if (id && label) {
+          labelEl.textContent = label;
+          labelEl.classList.remove('is-placeholder');
+        } else {
+          labelEl.textContent = '请选择';
+          labelEl.classList.add('is-placeholder');
+        }
+      }
+
+      function closeCombo(comboEl) {
+        if (!comboEl) return;
+        comboEl.classList.remove('is-open');
+        const trigger = comboEl.querySelector('.combo__trigger');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      }
+
+      function openCombo(comboEl) {
+        document.querySelectorAll('.combo.is-open').forEach((el) => {
+          if (el !== comboEl) closeCombo(el);
+        });
+        comboEl.classList.add('is-open');
+        comboEl.querySelector('.combo__trigger').setAttribute('aria-expanded', 'true');
+      }
+
+      function fillParentOptions(selectedId, excludeIds) {
+        const blocked = excludeIds instanceof Set ? excludeIds : new Set(excludeIds || []);
+        parentOptions = buildParentOptions().filter((opt) => !blocked.has(opt.id));
+        let label = '';
+        if (selectedId) {
+          const hit = parentOptions.find((o) => o.id === selectedId)
+            || buildParentOptions().find((o) => o.id === selectedId);
+          if (hit) label = hit.label;
+        }
+        setParentValue(selectedId || '', label);
+        document.getElementById('parentComboSearch').value = '';
+        renderParentList('');
+      }
+
+      function getDescendantIds(rootId) {
+        const ids = new Set([String(rootId)]);
+        let growing = true;
+        while (growing) {
+          growing = false;
+          flatRows.forEach((r) => {
+            if (r.parentId && ids.has(String(r.parentId)) && !ids.has(String(r.id))) {
+              ids.add(String(r.id));
+              growing = true;
+            }
+          });
+        }
+        return ids;
+      }
+
+      /* —— 删除确认 —— */
+      const confirmModal = document.getElementById('confirmModal');
+      let pendingDeleteId = null;
+
+      function openDeleteConfirm(id) {
+        const row = flatRows.find((r) => r.id === String(id));
+        if (!row) return;
+        pendingDeleteId = String(id);
+        const hasKids = !!row.hasChildren;
+        document.getElementById('confirmModalBody').textContent = hasKids
+          ? '此操作将删除菜单及其子菜单，确定删除吗？'
+          : '此操作不可撤销，确定删除吗？';
+        confirmModal.classList.add('is-open');
+        confirmModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+
+      function closeDeleteConfirm() {
+        confirmModal.classList.remove('is-open');
+        confirmModal.setAttribute('aria-hidden', 'true');
+        pendingDeleteId = null;
+        if (!menuModal.classList.contains('is-open')) {
+          document.body.classList.remove('modal-open');
+        }
+      }
+
+      function confirmDeleteMenu() {
+        if (!pendingDeleteId) return;
+        const removeIds = getDescendantIds(pendingDeleteId);
+        for (let i = menuFlat.length - 1; i >= 0; i -= 1) {
+          if (removeIds.has(String(menuFlat[i].id))) menuFlat.splice(i, 1);
+        }
+        Object.keys(expandedMap).forEach((key) => {
+          if (removeIds.has(String(key))) delete expandedMap[key];
+        });
+        closeDeleteConfirm();
+        rebuildTable();
+      }
+
+      document.getElementById('confirmModalCancel').addEventListener('click', closeDeleteConfirm);
+      document.getElementById('confirmModalClose').addEventListener('click', closeDeleteConfirm);
+      document.getElementById('confirmModalOk').addEventListener('click', confirmDeleteMenu);
+      confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) closeDeleteConfirm();
+      });
+
+      function setFormLockedFields(locked) {
+        menuTypeSeg.classList.toggle('is-readonly', !!locked);
+        menuPermInput.disabled = !!locked;
+        const permWrap = menuPermInput.closest('[data-clearable]');
+        if (permWrap) permWrap.classList.toggle('is-readonly', !!locked);
+      }
+
+      document.getElementById('parentComboTrigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const combo = document.getElementById('parentCombo');
+        if (combo.classList.contains('is-open')) closeCombo(combo);
+        else {
+          openCombo(combo);
+          setTimeout(() => document.getElementById('parentComboSearch').focus(), 0);
+        }
+      });
+
+      document.getElementById('parentComboSearch').addEventListener('input', (e) => {
+        renderParentList(e.target.value);
+      });
+
+      document.getElementById('parentComboSearch').addEventListener('click', (e) => e.stopPropagation());
+
+      document.getElementById('parentComboList').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const opt = e.target.closest('.combo__option');
+        if (!opt) return;
+        setParentValue(opt.getAttribute('data-id'), opt.getAttribute('data-label'));
+        closeCombo(document.getElementById('parentCombo'));
+      });
+
+      /* 图标：Arco Design 图标库（icons.json + IconPark 渲染） */
+      let arcoIconList = [];
+
+      function flattenArcoIcons(data) {
+        const list = [];
+        const icons = (data && data.icons) || {};
+        Object.keys(icons).forEach((cat) => {
+          const group = icons[cat] || {};
+          Object.keys(group).forEach((style) => {
+            (group[style] || []).forEach((item) => {
+              if (item && item.componentName) {
+                list.push({
+                  name: item.componentName,
+                  category: cat,
+                  style,
+                  iconify: arcoToIconify(item.componentName),
+                  label: shortIconLabel(item.componentName),
+                });
+              }
+            });
+          });
+        });
+        return list;
+      }
+
+      function renderIconGrid(keyword) {
+        const grid = document.getElementById('iconComboGrid');
+        const kw = (keyword || '').trim().toLowerCase().replace(/^icon/, '');
+        const filtered = arcoIconList.filter((item) => {
+          if (!kw) return true;
+          return item.name.toLowerCase().indexOf(kw) !== -1
+            || item.label.toLowerCase().indexOf(kw) !== -1;
+        });
+        if (!filtered.length) {
+          grid.innerHTML = '<div class="combo__empty" style="grid-column:1/-1">无匹配图标</div>';
+          return;
+        }
+        const selected = menuIconSelect.value;
+        /* 默认展示前 120 个，搜索时展示全部匹配 */
+        const shown = kw ? filtered : filtered.slice(0, 120);
+        grid.innerHTML = shown.map((item) => `
+          <button type="button" class="icon-grid__item${item.name === selected ? ' is-active' : ''}"
+            data-name="${item.name}" title="${item.name}" role="option">
+            <iconify-icon icon="${item.iconify}"></iconify-icon>
+            <span class="icon-grid__name">${item.label}</span>
+          </button>
+        `).join('');
+      }
+
+      function setIconValue(name) {
+        menuIconSelect.value = name || '';
+        const combo = document.getElementById('iconCombo');
+        const labelEl = document.getElementById('iconComboLabel');
+        const preview = document.getElementById('iconComboPreview');
+        if (name) {
+          labelEl.textContent = shortIconLabel(name);
+          labelEl.classList.remove('is-placeholder');
+          preview.classList.add('is-show');
+          preview.innerHTML = ICONS[name]
+            ? ICONS[name]
+            : `<iconify-icon icon="${arcoToIconify(name)}"></iconify-icon>`;
+          combo.classList.add('has-value');
+        } else {
+          labelEl.textContent = '请选择';
+          labelEl.classList.add('is-placeholder');
+          preview.classList.remove('is-show');
+          preview.innerHTML = '';
+          combo.classList.remove('has-value');
+        }
+      }
+
+      function iconAllowedForType(type) {
+        return type !== 'nav' && type !== 'btn';
+      }
+
+      function syncIconFieldByType(type) {
+        const allowed = iconAllowedForType(type);
+        const formItem = document.getElementById('iconFormItem');
+        const combo = document.getElementById('iconCombo');
+        if (formItem) formItem.style.display = allowed ? '' : 'none';
+        if (combo) combo.classList.toggle('is-disabled', !allowed);
+        if (!allowed) {
+          setIconValue('');
+          closeCombo(combo);
+        }
+      }
+
+      function renderMenuIconHtml(icon) {
+        if (!icon) return '';
+        let html = '';
+        if (ICONS[icon]) html = ICONS[icon];
+        else if (String(icon).indexOf('Icon') === 0) {
+          html = `<iconify-icon icon="${arcoToIconify(icon)}"></iconify-icon>`;
+        }
+        if (!html) return '';
+        return html
+          .replace('<svg ', '<svg class="menu-icon" ')
+          .replace('<iconify-icon ', '<iconify-icon class="menu-icon" ');
+      }
+
+      function syncNavigationUI() {
+        const headerNav = document.querySelector('.header-nav');
+        if (headerNav) {
+          const activeEl = headerNav.querySelector('.header-nav__item.is-active');
+          const activeName = (activeEl && (activeEl.getAttribute('data-menu-name') || activeEl.textContent.trim())) || '管理';
+          const navItems = menuFlat.filter((r) => r.type === 'nav' && r.status !== '禁用');
+          headerNav.innerHTML = navItems.map((r) => {
+            const isActive = r.name === activeName;
+            return `<a href="#" class="header-nav__item${isActive ? ' is-active' : ''}" data-menu-name="${r.name}">${r.name}</a>`;
+          }).join('');
+        }
+
+        const sidebarNav = document.querySelector('.sidebar-nav');
+        if (!sidebarNav) return;
+        const manager = menuFlat.find((r) => r.name === '管理' && r.type === 'nav' && r.status !== '禁用');
+        if (!manager) {
+          sidebarNav.innerHTML = '';
+          return;
+        }
+        const groups = menuFlat.filter((r) => r.parent === manager.name && r.type === 'dir' && r.status !== '禁用');
+        const activeTextEl = sidebarNav.querySelector('.menu-item.is-active .menu-item__text');
+        const activeItem = (activeTextEl && activeTextEl.textContent) || '菜单管理';
+        const collapsed = {};
+        sidebarNav.querySelectorAll('[data-group]').forEach((g) => {
+          const title = g.querySelector('.menu-group__title-text');
+          if (title) collapsed[title.textContent] = g.classList.contains('is-collapsed');
+        });
+
+        sidebarNav.innerHTML = groups.map((group) => {
+          const children = menuFlat.filter((r) => r.parent === group.name && r.type === 'page' && r.status !== '禁用');
+          const groupIcon = renderMenuIconHtml(group.icon);
+          const isCollapsed = collapsed[group.name] ? ' is-collapsed' : '';
+          const kids = children.map((page) => {
+            const pageIcon = renderMenuIconHtml(page.icon);
+            const active = page.name === activeItem ? ' is-active' : '';
+            return `<li>
+              <a href="#" class="menu-item${active}" data-menu-name="${page.name}">
+                ${pageIcon || ''}
+                <span class="menu-item__text">${page.name}</span>
+              </a>
+            </li>`;
+          }).join('');
+          return `<div class="menu-group${isCollapsed}" data-group>
+            <button class="menu-group__title" type="button" data-group-toggle>
+              ${groupIcon || '<span class="menu-icon" aria-hidden="true"></span>'}
+              <span class="menu-group__title-text">${group.name}</span>
+              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
+            </button>
+            <ul class="menu-children">${kids}</ul>
+          </div>`;
+        }).join('');
+
+        sidebarNav.querySelectorAll('[data-group-toggle]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            btn.closest('[data-group]').classList.toggle('is-collapsed');
+          });
+        });
+      }
+
+      document.getElementById('iconComboTrigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const combo = document.getElementById('iconCombo');
+        if (combo.classList.contains('is-disabled')) return;
+        if (combo.classList.contains('is-open')) closeCombo(combo);
+        else {
+          openCombo(combo);
+          setTimeout(() => document.getElementById('iconComboSearch').focus(), 0);
+        }
+      });
+
+      document.getElementById('iconComboClear').addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIconValue('');
+      });
+
+      document.getElementById('iconComboSearch').addEventListener('input', (e) => {
+        renderIconGrid(e.target.value);
+      });
+
+      document.getElementById('iconComboSearch').addEventListener('click', (e) => e.stopPropagation());
+
+      document.getElementById('iconComboGrid').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = e.target.closest('.icon-grid__item');
+        if (!item) return;
+        setIconValue(item.getAttribute('data-name'));
+        closeCombo(document.getElementById('iconCombo'));
+      });
+
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.combo.is-open').forEach((combo) => closeCombo(combo));
+      });
+
+      fetch('arco-icons.json')
+        .then((r) => r.json())
+        .then((data) => {
+          arcoIconList = flattenArcoIcons(data);
+          renderIconGrid('');
+        })
+        .catch(() => {
+          arcoIconList = [
+            'IconHome', 'IconApps', 'IconDashboard', 'IconSettings', 'IconUser', 'IconUserGroup',
+            'IconFolder', 'IconFile', 'IconMenu', 'IconList', 'IconTool', 'IconSafe', 'IconLink',
+            'IconNotification', 'IconCalendar', 'IconStorage', 'IconCommon', 'IconNav',
+          ].map((name) => ({
+            name,
+            label: shortIconLabel(name),
+            iconify: arcoToIconify(name),
+          }));
+          renderIconGrid('');
+        });
+
+      const ADD_CHILD_TYPE_RULES = {
+        nav: { allowed: ['dir', 'page', 'link'], defaultType: 'dir' },
+        dir: { allowed: ['dir', 'page', 'link'], defaultType: 'page' },
+        page: { allowed: ['btn'], defaultType: 'btn' },
+      };
+
+      function refreshSegCorners(segEl) {
+        const items = Array.from(segEl.querySelectorAll('.seg__item')).filter((el) => el.style.display !== 'none');
+        segEl.querySelectorAll('.seg__item').forEach((el) => {
+          el.style.borderRadius = '0';
+          el.style.marginLeft = '-1px';
+        });
+        items.forEach((el, i) => {
+          if (i === 0) {
+            el.style.marginLeft = '0';
+            el.style.borderRadius = items.length === 1 ? '4px' : '4px 0 0 4px';
+          } else if (i === items.length - 1) {
+            el.style.borderRadius = '0 4px 4px 0';
+          }
+        });
+      }
+
+      function applyTypeOptions(allowed, defaultType) {
+        const allow = allowed && allowed.length
+          ? allowed
+          : ['nav', 'dir', 'page', 'btn', 'link'];
+        const def = defaultType && allow.indexOf(defaultType) !== -1 ? defaultType : allow[0];
+        menuTypeSeg.querySelectorAll('.seg__item').forEach((el) => {
+          const v = el.getAttribute('data-value');
+          const on = allow.indexOf(v) !== -1;
+          el.style.display = on ? '' : 'none';
+          el.classList.toggle('is-active', v === def);
+        });
+        document.getElementById('menuTypeInput').value = def;
+        refreshSegCorners(menuTypeSeg);
+      }
+
+      function resetMenuForm(defaults) {
+        const d = defaults || {};
+        menuForm.reset();
+        clearFieldErrors();
+
+        let type = d.type || 'nav';
+        if (d.editId) {
+          /* 编辑不可改类型：只展示当前类型，与添加下级一致 */
+          applyTypeOptions([type], type);
+        } else if (d.parentType && ADD_CHILD_TYPE_RULES[d.parentType]) {
+          const rule = ADD_CHILD_TYPE_RULES[d.parentType];
+          applyTypeOptions(rule.allowed, rule.defaultType);
+          type = rule.defaultType;
+        } else {
+          applyTypeOptions(['nav', 'dir', 'page', 'btn', 'link'], type);
+        }
+
+        const status = d.status || '启用';
+        document.getElementById('menuTypeInput').value = type;
+        document.getElementById('menuStatusInput').value = status;
+        document.querySelectorAll('#menuTypeSeg .seg__item').forEach((el) => {
+          if (el.style.display === 'none') return;
+          el.classList.toggle('is-active', el.getAttribute('data-value') === type);
+        });
+        document.querySelectorAll('#menuStatusSeg .seg__item').forEach((el) => {
+          el.classList.toggle('is-active', el.getAttribute('data-value') === status);
+        });
+        refreshSegCorners(document.getElementById('menuStatusSeg'));
+
+        menuNameInput.value = d.name || '';
+        menuNameCount.textContent = `${menuNameInput.value.length}/12`;
+        menuPathInput.value = d.path || '';
+        menuPermInput.value = d.perm || '';
+
+        const excludeIds = d.editId ? getDescendantIds(d.editId) : null;
+        fillParentOptions(d.parentId || '', excludeIds);
+        setIconValue(d.icon || '');
+        document.getElementById('iconComboSearch').value = '';
+        renderIconGrid('');
+        closeCombo(document.getElementById('parentCombo'));
+        closeCombo(document.getElementById('iconCombo'));
+        document.querySelectorAll('[data-clearable]').forEach(syncClearable);
+        setFormLockedFields(!!d.editId);
+        syncIconFieldByType(type);
+      }
+
+      function openMenuModal(defaults) {
+        editingId = (defaults && defaults.editId) || null;
+        editingSnapshot = editingId
+          ? { path: (defaults && defaults.path) || '', perm: (defaults && defaults.perm) || '' }
+          : null;
+        document.getElementById('menuModalTitle').textContent = editingId ? '编辑菜单' : '添加菜单';
+        resetMenuForm(defaults || {});
+        menuModal.classList.add('is-open');
+        menuModal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        setTimeout(() => menuNameInput.focus(), 50);
+      }
+
+      function openEditMenuModal(id) {
+        const row = menuFlat.find((r) => r.id === String(id));
+        if (!row) return;
+        const flat = flatRows.find((r) => r.id === String(id));
+        openMenuModal({
+          editId: row.id,
+          type: row.type,
+          status: row.status || '启用',
+          name: row.name,
+          path: row.path,
+          perm: row.perm || '',
+          icon: row.icon || '',
+          parentId: (flat && flat.parentId) || '',
+        });
+      }
+
+      function closeMenuModal() {
+        closeCombo(document.getElementById('parentCombo'));
+        closeCombo(document.getElementById('iconCombo'));
+        menuModal.classList.remove('is-open');
+        menuModal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        editingId = null;
+        editingSnapshot = null;
+        setFormLockedFields(false);
+      }
+
+      function rebuildTable() {
+        menuTree = buildTree(menuFlat);
+        flatRows = flatten(menuTree);
+        flatRows.forEach((r) => { if (r.hasChildren && expandedMap[r.id] === undefined) expandedMap[r.id] = true; });
+        document.getElementById('collapseAllBtn').textContent = '收起';
+        renderTable();
+        syncNavigationUI();
+      }
+
+      document.getElementById('addMenuBtn').addEventListener('click', () => {
+        if (sortMode) return;
+        openMenuModal();
+      });
+      document.getElementById('menuModalClose').addEventListener('click', closeMenuModal);
+      document.getElementById('menuModalCancel').addEventListener('click', closeMenuModal);
+      menuModal.addEventListener('click', (e) => {
+        if (e.target === menuModal) closeMenuModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (confirmModal.classList.contains('is-open')) closeDeleteConfirm();
+          else if (menuModal.classList.contains('is-open')) closeMenuModal();
+        }
+      });
+
+      function clearFieldErrors() {
+        menuForm.querySelectorAll('.form-item.is-error').forEach((el) => el.classList.remove('is-error'));
+      }
+
+      function setFieldError(field, hasError, message) {
+        const item = menuForm.querySelector(`.form-item[data-field="${field}"]`);
+        if (!item) return;
+        item.classList.toggle('is-error', !!hasError);
+        if (hasError && message) {
+          const err = item.querySelector('.form-item__error');
+          if (err) err.textContent = message;
+        }
+      }
+
+      function isPathDuplicate(path) {
+        if (!path) return false;
+        /* 编辑时未改动的原值，不视为与自身重复 */
+        if (editingId && editingSnapshot && path === editingSnapshot.path) return false;
+        return menuFlat.some((r) => String(r.path) === path && String(r.id) !== String(editingId));
+      }
+
+      function isPermDuplicate(perm) {
+        if (!perm) return false;
+        if (editingId && editingSnapshot && perm === editingSnapshot.perm) return false;
+        return menuFlat.some((r) => r.perm && String(r.perm) === perm && String(r.id) !== String(editingId));
+      }
+
+      function validateMenuForm() {
+        const name = menuNameInput.value.trim();
+        const path = menuPathInput.value.trim();
+        const perm = menuPermInput.value.trim();
+        let firstInvalid = null;
+
+        if (!name) {
+          setFieldError('name', true, '请输入路由名称');
+          firstInvalid = firstInvalid || menuNameInput;
+        } else {
+          setFieldError('name', false);
+        }
+
+        if (!path) {
+          setFieldError('path', true, '请输入路由地址');
+          firstInvalid = firstInvalid || menuPathInput;
+        } else if (isPathDuplicate(path)) {
+          setFieldError('path', true, '路由地址已存在');
+          firstInvalid = firstInvalid || menuPathInput;
+        } else {
+          setFieldError('path', false);
+        }
+
+        if (!editingId && perm && isPermDuplicate(perm)) {
+          setFieldError('perm', true, '权限标识已存在');
+          firstInvalid = firstInvalid || menuPermInput;
+        } else {
+          setFieldError('perm', false);
+        }
+
+        if (firstInvalid) {
+          firstInvalid.focus();
+          return false;
+        }
+        return true;
+      }
+
+      menuNameInput.addEventListener('input', () => {
+        if (menuNameInput.value.trim()) setFieldError('name', false);
+      });
+      menuPathInput.addEventListener('input', () => {
+        const path = menuPathInput.value.trim();
+        if (!path) {
+          setFieldError('path', false);
+          return;
+        }
+        if (isPathDuplicate(path)) setFieldError('path', true, '路由地址已存在');
+        else setFieldError('path', false);
+      });
+      menuPermInput.addEventListener('input', () => {
+        if (editingId) return;
+        const perm = menuPermInput.value.trim();
+        if (!perm) {
+          setFieldError('perm', false);
+          return;
+        }
+        if (isPermDuplicate(perm)) setFieldError('perm', true, '权限标识已存在');
+        else setFieldError('perm', false);
+      });
+
+      document.getElementById('menuModalSave').addEventListener('click', () => {
+        if (!validateMenuForm()) return;
+        const name = menuNameInput.value.trim();
+        const path = menuPathInput.value.trim();
+        const parentId = menuParentSelect.value;
+        const parentRow = menuFlat.find((r) => r.id === parentId);
+        const parentName = parentRow ? parentRow.name : '-';
+        const status = document.getElementById('menuStatusInput').value;
+        const type = document.getElementById('menuTypeInput').value;
+        const icon = iconAllowedForType(type) ? menuIconSelect.value : '';
+
+        if (editingId) {
+          const row = menuFlat.find((r) => r.id === editingId);
+          if (!row) return;
+          const oldName = row.name;
+          if (oldName !== name) {
+            menuFlat.forEach((r) => {
+              if (r.parent === oldName) r.parent = name;
+            });
+          }
+          row.name = name;
+          row.parent = parentName;
+          row.path = path;
+          row.icon = icon;
+          row.status = status;
+          /* 类型、权限标识编辑时不可改，保持原值 */
+        } else {
+          const nextId = String(menuFlat.reduce((max, r) => Math.max(max, Number(r.id) || 0), 0) + 1);
+          menuFlat.push({
+            id: nextId,
+            name,
+            type,
+            parent: parentName,
+            path,
+            perm: menuPermInput.value.trim(),
+            icon,
+            status,
+          });
+        }
+        closeMenuModal();
+        rebuildTable();
+      });
+
+      menuForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        document.getElementById('menuModalSave').click();
+      });
+
+      /* Sidebar collapse */
+      const sidebar = document.getElementById('sidebar');
+      document.getElementById('sidebarToggle').addEventListener('click', () => {
+        sidebar.classList.toggle('is-collapsed');
+      });
+
+      /* Collapse all tree rows */
+      document.getElementById('collapseAllBtn').addEventListener('click', () => {
+        const anyExpanded = Object.values(expandedMap).some(Boolean);
+        flatRows.forEach((r) => {
+          if (r.hasChildren) expandedMap[r.id] = !anyExpanded;
+        });
+        const btn = document.getElementById('collapseAllBtn');
+        btn.textContent = anyExpanded ? '展开' : '收起';
+        renderTable();
+      });
+
+      /* Refresh */
+      document.getElementById('refreshBtn').addEventListener('click', () => {
+        rebuildTable();
+      });
+
+      /* Fullscreen */
+      document.getElementById('fullscreenBtn').addEventListener('click', () => {
+        document.getElementById('contentCard').classList.toggle('is-fullscreen');
+      });
+
+      renderTable();
+      syncNavigationUI();
+    })();
+  </script>
+</body>
+</html>

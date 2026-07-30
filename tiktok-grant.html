@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TikTok赠款 - 海外中台</title>
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body);
+      line-height: 22px;
+      color: #1D2129;
+      background: var(--color-bg-page);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    img { display: block; }
+    input, select { font-family: inherit; font-size: 14px; color: #1D2129; }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-width: 1100px;
+      overflow: hidden;
+    }
+
+    .header {
+      flex-shrink: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      background: #1B2B4C;
+      color: #fff;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 240px;
+      height: 100%;
+      padding-left: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
+    .brand-name { font-size: 18px; font-weight: 600; line-height: 26px; white-space: nowrap; }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 16px;
+      gap: 16px;
+    }
+
+    .header-nav__item {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 32px;
+      padding: 0 8px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.65);
+      white-space: nowrap;
+    }
+
+    .header-nav__item:hover { color: #fff; }
+    .header-nav__item.is-active { color: #fff; font-weight: 500; }
+    .header-nav__item.is-active::after {
+      content: '';
+      position: absolute;
+      left: 8px; right: 8px; bottom: 0;
+      height: 2px;
+      background: var(--color-primary);
+      border-radius: 1px 1px 0 0;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 16px;
+    }
+
+    .header-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .header-icon:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+    .header-icon svg { width: 18px; height: 18px; }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      color: #fff;
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .user-chip .chevron { width: 12px; height: 12px; opacity: 0.75; }
+
+    .body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid var(--color-border-light);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.is-collapsed { width: 64px; }
+    .sidebar.is-collapsed .menu-group__title-text,
+    .sidebar.is-collapsed .menu-item__text,
+    .sidebar.is-collapsed .menu-group__arrow { display: none; }
+    .sidebar.is-collapsed .menu-children { display: none !important; }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 4px 0; }
+
+    .menu-group__title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 44px;
+      padding: 0 16px;
+      color: #1D2129;
+      font-size: 14px;
+    }
+
+    .menu-group__title:hover { background: var(--color-bg-hover); }
+    .menu-group__title .menu-icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .menu-group__title-text { flex: 1; text-align: left; }
+    .menu-group__arrow { width: 12px; height: 12px; transition: transform 0.2s; }
+    .menu-group.is-collapsed .menu-group__arrow { transform: rotate(-90deg); }
+    .menu-group.is-collapsed .menu-children { display: none; }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 16px 0 40px;
+      color: #1D2129;
+      font-size: 14px;
+    }
+
+    .menu-item:hover { background: var(--color-bg-hover); }
+    .menu-item.is-active {
+      background: var(--color-primary-bg);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    .sidebar-footer {
+      height: 48px;
+      border-top: 1px solid var(--color-border-light);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    .sidebar-collapse-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #1D2129;
+    }
+
+    .sidebar-collapse-btn:hover { background: var(--color-bg-hover); }
+    .sidebar-collapse-btn svg { width: 18px; height: 18px; }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-card {
+      flex: 1;
+      min-height: 0;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: var(--shadow-1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .filter-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .filter-item__control { width: 200px; position: relative; margin-top: 4px; }
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .input, .select-trigger {
+      width: 100%;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input::placeholder { color: #86909C; }
+    .input:hover, .select-trigger:hover { border-color: #94BFFF; }
+    .input:focus, .select-trigger:focus, .select-trigger.is-open { border-color: var(--color-primary); }
+
+    .select-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .select-trigger__text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #1D2129;
+    }
+
+    .select-trigger__text .muted { color: #86909C; }
+    .select-trigger__arrow {
+      width: 12px;
+      height: 12px;
+      color: #86909C;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .select-trigger.is-open .select-trigger__arrow { transform: rotate(180deg); }
+
+    .multi-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 480px;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 20;
+      display: none;
+      overflow: hidden;
+    }
+
+    .multi-panel.is-open {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .multi-panel__left,
+    .multi-panel__right {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .multi-panel__left { border-right: 1px solid #E5E6EB; }
+
+    .multi-panel__search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 12px 8px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .multi-panel__search svg { width: 14px; height: 14px; color: #86909C; flex-shrink: 0; }
+    .multi-panel__search input {
+      flex: 1;
+      border: none;
+      outline: none;
+      height: 100%;
+      background: transparent;
+    }
+
+    .multi-panel__toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 12px 8px;
+      font-size: 13px;
+      color: #4E5969;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--color-border-base, #E5E6EB);
+    }
+
+    .multi-panel__toolbar--right {
+      justify-content: space-between;
+      padding: 12px;
+      background: #F7F8FA;
+      border-bottom: 1px solid var(--color-border-base, #E5E6EB);
+    }
+
+    .multi-panel__link {
+      color: var(--color-primary);
+      font-size: 13px;
+    }
+
+    .multi-panel__list {
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    /* 左侧列表固定展示 6 个选项高度，双栏整体随左侧适配 */
+    .multi-panel__left .multi-panel__list {
+      height: calc(36px * 6);
+      flex-shrink: 0;
+    }
+
+    .multi-panel__right .multi-panel__list {
+      flex: 1;
+    }
+
+    .multi-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      text-align: left;
+      font-size: 14px;
+      color: #1D2129;
+    }
+
+    .multi-option:hover { background: #F5F7FA; }
+    .multi-option.is-active { color: var(--color-primary); }
+    .multi-option.is-active:hover { background: #F5F7FA; }
+
+    .multi-option input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      border: 1px solid var(--color-border-base, #E5E6EB);
+      border-radius: 2px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .multi-option:hover input[type="checkbox"],
+    .multi-option input[type="checkbox"]:hover {
+      border-color: var(--color-primary, #165DFF);
+    }
+
+    .multi-option input[type="checkbox"]:checked {
+      background: var(--color-primary, #165DFF) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+      border-color: var(--color-primary, #165DFF);
+    }
+
+    .multi-selected {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #1D2129;
+    }
+
+    .multi-selected:hover { background: #F5F7FA; }
+    .multi-selected__name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .multi-selected__remove {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #C9CDD4;
+      flex-shrink: 0;
+      border-radius: 2px;
+    }
+
+    .multi-selected__remove:hover { color: #86909C; background: #F2F3F5; }
+    .multi-selected__remove svg { width: 10px; height: 10px; }
+
+    .multi-panel__empty {
+      padding: 24px 12px;
+      text-align: center;
+      color: #86909C;
+      font-size: 13px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      padding: 0 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn:active { opacity: 0.85; }
+    .btn--primary { background: var(--color-primary); color: #fff; }
+    .btn--primary:hover { background: var(--color-primary-hover); }
+    .btn--default {
+      background: #fff;
+      color: #1D2129;
+      border: 1px solid #E5E6EB;
+    }
+    .btn--default:hover { color: var(--color-primary); border-color: var(--color-primary); }
+
+    .table-shell {
+      flex: 1;
+      min-height: 0;
+      margin: 0 16px;
+      border: 1px solid #E5E6EB;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .table-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 1200px;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+
+    .data-table th,
+    .data-table td {
+      height: 48px;
+      padding: 0 12px;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: left;
+      border-right: 1px solid #E5E6EB;
+      border-bottom: 1px solid #E5E6EB;
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .data-table th:first-child,
+    .data-table td:first-child { border-left: 1px solid #E5E6EB; }
+
+    .data-table thead th { border-top: 1px solid #E5E6EB; }
+
+    .data-table th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #F7F8FA;
+      font-weight: 600;
+      color: #1D2129;
+    }
+
+    .data-table tbody tr:hover td { background: #F5F7FA; }
+
+    .th-sort {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+      color: inherit;
+      font: inherit;
+      font-weight: 600;
+    }
+
+    .th-sort__icons {
+      display: inline-flex;
+      flex-direction: column;
+      width: 10px;
+      color: #C9CDD4;
+      line-height: 0;
+    }
+
+    .th-sort__icons svg { width: 10px; height: 8px; }
+    .th-sort.is-asc .th-sort__icons .asc,
+    .th-sort.is-desc .th-sort__icons .desc { color: var(--color-primary); }
+
+    .col-optimizer { width: 7%; }
+    .col-metric { width: 10%; }
+    #detailTable .col-datetime {
+      width: 15%;
+      text-align: left;
+      padding-left: 12px;
+      padding-right: 12px;
+      box-sizing: border-box;
+    }
+    #detailTable th.col-datetime .th-sort {
+      justify-content: flex-start;
+      width: auto;
+    }
+    #detailTable td.col-datetime {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    td.col-num,
+    td.col-align-right {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    th.col-num,
+    th.col-align-right {
+      text-align: right;
+    }
+    th.col-num .th-sort,
+    th.col-align-right .th-sort {
+      justify-content: flex-end;
+      width: 100%;
+    }
+
+    .summary-row td {
+      background: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .data-table tfoot td {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      background: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .data-table tfoot td.col-action {
+      z-index: 3;
+      background: #FFFFFF;
+    }
+
+    .col-action {
+      width: 110px;
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background: #fff;
+      padding-right: 24px;
+      box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
+    }
+
+    th.col-action {
+      z-index: 3;
+      background: #F7F8FA;
+    }
+
+    .data-table tbody tr:hover td.col-action { background: #F5F7FA; }
+
+    .cell-id {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+    }
+
+    .cell-id__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      border-radius: 2px;
+      color: #86909C;
+    }
+
+    .copy-btn:hover { color: var(--color-primary); background: var(--color-primary-bg); }
+    .copy-btn svg { width: 14px; height: 14px; }
+
+    .link { color: var(--color-primary); font-size: 14px; }
+    .link:hover { opacity: 0.85; }
+
+    .empty-tip {
+      padding: 48px 16px;
+      text-align: center;
+      color: #86909C;
+      font-size: 14px;
+    }
+
+    .pagination {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px 16px;
+      font-size: 14px;
+      color: #4E5969;
+    }
+
+    .pager {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pager__btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      color: #1D2129;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pager__btn:hover:not(:disabled):not(.is-active) {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .pager__btn.is-active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    .pager__btn:disabled { color: #C9CDD4; cursor: not-allowed; }
+    .pager__btn svg { width: 12px; height: 12px; }
+
+    .page-size {
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      outline: none;
+    }
+
+    .page-jump {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-jump input {
+      width: 48px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      text-align: center;
+      outline: none;
+    }
+
+    .page-msg {
+      position: fixed;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1200;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      width: max-content;
+      padding: 10px 16px;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .page-msg.is-show { display: inline-flex; }
+    .page-msg__icon { width: 18px; height: 18px; color: var(--color-success); }
+
+    .drawer-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(29, 33, 41, 0.6);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .drawer-mask.is-open { opacity: 1; visibility: visible; }
+
+    .drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 80%;
+      height: 100%;
+      background: #fff;
+      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+
+    .drawer-mask.is-open .drawer { transform: translateX(0); }
+
+    .drawer__header {
+      height: 48px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #E5E6EB;
+      flex-shrink: 0;
+    }
+
+    .drawer__title { font-size: 16px; font-weight: 500; }
+
+    .drawer__close {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #86909C;
+    }
+
+    .drawer__close:hover { background: #F2F3F5; color: #1D2129; }
+    .drawer__close svg { width: 12px; height: 12px; }
+
+    .drawer__body {
+      flex: 1;
+      min-height: 0;
+      padding: 16px 24px 24px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .drawer__meta { font-size: 14px; color: #4E5969; }
+    .drawer__meta strong { color: #1D2129; font-weight: 500; }
+
+    .drawer-filter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .drawer-filter .filter-item__control {
+      width: 200px;
+      margin-top: 4px;
+    }
+
+    .single-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 30;
+      display: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 4px 0;
+      max-height: 256px;
+    }
+
+    .single-panel.is-open { display: block; }
+
+    .single-option {
+      display: block;
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 36px;
+      color: #1D2129;
+      background: transparent;
+    }
+
+    .single-option:hover { background: #F5F7FA; }
+    .single-option.is-active { color: var(--color-primary); }
+
+    .drawer .table-shell {
+      margin: 0;
+      flex: 1;
+      min-height: 240px;
+    }
+
+    .drawer .pagination {
+      padding: 12px 0 0;
+    }
+
+    body.drawer-open { overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <img class="logo" src="assets/logo.png" width="32" height="32" alt="海外中台" />
+        <span class="brand-name">海外中台</span>
+      </div>
+      <nav class="header-nav" aria-label="顶部导航">
+        <a href="#" class="header-nav__item">首页</a>
+        <a href="#" class="header-nav__item">看板</a>
+        <a href="#" class="header-nav__item is-active">产品</a>
+        <a href="#" class="header-nav__item">工具</a>
+        <a href="wonder.html" class="header-nav__item">管理</a>
+      </nav>
+      <div class="header-right">
+        <button class="header-icon" type="button" title="下载" aria-label="下载">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="消息" aria-label="消息">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="主题" aria-label="主题">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
+        <button class="user-chip" type="button" aria-label="用户菜单">
+          <span class="user-avatar">风</span>
+          <span class="user-name">小风</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4.5L6 7.5L9 4.5"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="body">
+      <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+          <div class="menu-group" data-group>
+            <button class="menu-group__title" type="button" data-group-toggle>
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="menu-group__title-text">资产管理</span>
+              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
+            </button>
+            <ul class="menu-children">
+              <li><a href="tiktok-accounts.html" class="menu-item"><span class="menu-item__text">Tiktok账户</span></a></li>
+              <li><a href="tiktok-grant.html" class="menu-item is-active"><span class="menu-item__text">TikTok赠款</span></a></li>
+            </ul>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="sidebar-collapse-btn" id="sidebarToggle" type="button" title="折叠菜单">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h16M4 12h10M4 18h16"/><path d="M15 9l-3 3 3 3"/>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="content-card">
+          <div class="filter-bar">
+            <div class="filter-item__control">
+              <input class="input" id="accountKeyword" type="text" placeholder="账户名称/ID" autocomplete="off" />
+            </div>
+            <div class="filter-item__control" id="optimizerWrap">
+              <button class="select-trigger" type="button" id="optimizerTrigger">
+                <span class="select-trigger__text" id="optimizerLabel">优化师：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="multi-panel" id="optimizerPanel">
+                <div class="multi-panel__left">
+                  <div class="multi-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="optimizerSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="multi-panel__toolbar">
+                    <button class="multi-panel__link" type="button" id="optimizerSelectAll">全选</button>
+                  </div>
+                  <div class="multi-panel__list" id="optimizerList"></div>
+                </div>
+                <div class="multi-panel__right">
+                  <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                    <span id="optimizerCount">已选择 0 项</span>
+                    <button class="multi-panel__link" type="button" id="optimizerClear">清空</button>
+                  </div>
+                  <div class="multi-panel__list" id="optimizerSelected"></div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+              <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+              <button class="btn btn--default" type="button" id="exportBtn">导出</button>
+            </div>
+          </div>
+
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="grantTable">
+                <thead>
+                  <tr>
+                    <th style="width:16%">账户名称</th>
+                    <th style="width:16%">账户ID</th>
+                    <th class="col-optimizer">优化师</th>
+                    <th class="col-metric col-num" data-sort="total_amount"><button class="th-sort" type="button" data-key="total_amount">累计赠款<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                    <th class="col-metric col-num" data-sort="total_valid_amount"><button class="th-sort" type="button" data-key="total_valid_amount">可用赠款<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                    <th class="col-metric col-num" data-sort="grant_valid_amount"><button class="th-sort" type="button" data-key="grant_valid_amount">免费赠款<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                    <th class="col-metric col-num" data-sort="recharge_coupon_valid_amount"><button class="th-sort" type="button" data-key="recharge_coupon_valid_amount">附条件赠款<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                    <th class="col-metric col-num" data-sort="frozen_amount"><button class="th-sort" type="button" data-key="frozen_amount">待分配赠款<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                    <th class="col-metric">更新日期</th>
+                    <th class="col-action">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="grantBody"></tbody>
+                <tfoot id="grantFoot"></tfoot>
+              </table>
+              <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="drawerTitle">赠款详情</h2>
+        <button class="drawer__close" type="button" id="drawerClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="drawer__body">
+        <div class="drawer__meta" id="drawerMeta"></div>
+        <div class="drawer-filter">
+          <div class="filter-item__control" id="detailTypeWrap">
+            <button class="select-trigger" type="button" id="detailTypeTrigger">
+              <span class="select-trigger__text" id="detailTypeLabel">All</span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <input type="hidden" id="detailTypeFilter" value="All" />
+            <div class="single-panel" id="detailTypePanel">
+              <button class="single-option is-active" type="button" data-value="All">All</button>
+              <button class="single-option" type="button" data-value="免费">免费</button>
+              <button class="single-option" type="button" data-value="可分配">可分配</button>
+              <button class="single-option" type="button" data-value="附条件">附条件</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="detailTable">
+              <thead>
+                <tr>
+                  <th style="width:15%">优惠券名</th>
+                  <th style="width:15%">优惠券码</th>
+                  <th style="width:10%">类型</th>
+                  <th class="col-metric col-num"><button class="th-sort" type="button" data-key="total_balance">总金额<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                  <th class="col-metric col-num"><button class="th-sort" type="button" data-key="used_balance">已使用<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                  <th class="col-metric col-num"><button class="th-sort" type="button" data-key="valid_balance">未使用<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                  <th class="col-datetime"><button class="th-sort" type="button" data-key="issue_time">兑换日期<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                  <th class="col-datetime"><button class="th-sort" type="button" data-key="valid_end_time">失效日期<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button></th>
+                </tr>
+              </thead>
+              <tbody id="detailBody"></tbody>
+              <tfoot id="detailFoot"></tfoot>
+            </table>
+          </div>
+        </div>
+        <div class="pagination" id="detailPagination"></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    (function () {
+      const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+      const OPTIMIZERS = Array.from({ length: 12 }, (_, i) => `用户${String.fromCharCode(65 + i)}`);
+
+      function num(v) {
+        const n = Number(String(v).replace(/,/g, ''));
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function formatNum(v) {
+        return num(v).toFixed(2);
+      }
+
+      const typeNames = ['免费', '附条件', '可分配'];
+      const baseCoupons = Array.from({ length: 28 }, (_, i) => {
+        const total = 1000 + i * 450.25;
+        const used = total * ((i % 7) + 1) / 10;
+        return {
+          coupon_activity_name: i === 0 ? '勇往Q5' : `赠款活动_${String(i + 1).padStart(2, '0')}`,
+          coupon_code: i === 0 ? 'GKCGPMPGFFAGKPDJ' : `TTGRANT${String(1000 + i)}`,
+          ad_credit_type_name: typeNames[i % typeNames.length],
+          total_balance: Number(total.toFixed(2)),
+          used_balance: Number(used.toFixed(2)),
+          valid_balance: Number((total - used).toFixed(2)),
+          issue_time: `2026-0${(i % 6) + 1}-${String((i % 27) + 1).padStart(2, '0')} 10:00:00`,
+          valid_end_time: `2026-1${(i % 2)}-${String((i % 27) + 1).padStart(2, '0')} 23:59:59`,
+        };
+      });
+      baseCoupons[0].total_balance = 50000;
+      baseCoupons[0].used_balance = 21617.25;
+      baseCoupons[0].valid_balance = 28382.75;
+      baseCoupons[0].issue_time = '2026-06-08 17:42:55';
+      baseCoupons[0].valid_end_time = '2026-09-06 23:59:59';
+      baseCoupons[1].coupon_activity_name = '暑期激励';
+      baseCoupons[1].coupon_code = 'TTGRANT2026SUMMER';
+      baseCoupons[1].ad_credit_type_name = '免费';
+      baseCoupons[1].total_balance = 10000;
+      baseCoupons[1].used_balance = 4799.5;
+      baseCoupons[1].valid_balance = 5200.5;
+      baseCoupons[2].coupon_activity_name = '充值返赠';
+      baseCoupons[2].coupon_code = 'TTRECHARGECOND01';
+      baseCoupons[2].ad_credit_type_name = '附条件';
+      baseCoupons[2].total_balance = 3000;
+      baseCoupons[2].used_balance = 0;
+      baseCoupons[2].valid_balance = 3000;
+      baseCoupons[3].coupon_activity_name = '可分配额度包';
+      baseCoupons[3].coupon_code = 'TTALLOCATABLE01';
+      baseCoupons[3].ad_credit_type_name = '可分配';
+      baseCoupons[3].total_balance = 8000;
+      baseCoupons[3].used_balance = 1200;
+      baseCoupons[3].valid_balance = 6800;
+
+      const today = (() => {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      })();
+
+      const grantList = Array.from({ length: 48 }, (_, i) => {
+        const opt = OPTIMIZERS[i % OPTIMIZERS.length];
+        const total = 1000 + i * 137.35;
+        const valid = total * 0.65;
+        const free = valid * 0.7;
+        const cond = valid * 0.2;
+        const frozen = valid * 0.1;
+        return {
+          id: String(i + 1),
+          account_name: i === 0 ? 'CPT_TT_TD_minigame_01' : `CPT_TT_TD_account_${String(i + 1).padStart(2, '0')}`,
+          account_id: i === 0 ? '7595920415051202561' : String(7595920415051202561 + i),
+          optimizer: opt,
+          total_amount: i === 0 ? 30305.98 : Number(total.toFixed(2)),
+          total_valid_amount: i === 0 ? 30305.98 : Number(valid.toFixed(2)),
+          grant_valid_amount: i === 0 ? 30305.98 : Number(free.toFixed(2)),
+          recharge_coupon_valid_amount: i === 0 ? 0 : Number(cond.toFixed(2)),
+          frozen_amount: i === 0 ? 0 : Number(frozen.toFixed(2)),
+          update_date: today,
+          coupons: i === 0 ? baseCoupons.slice() : baseCoupons.slice(i % 8, (i % 8) + 12),
+        };
+      });
+
+      let filtered = grantList.slice();
+      let selectedOptimizers = [];
+      let sortState = { key: '', dir: '' };
+      let page = 1;
+      let pageSize = 20;
+      let pageMsgTimer = null;
+
+      let currentDetailRow = null;
+      let detailRows = [];
+      let detailSort = { key: '', dir: '' };
+      let detailPage = 1;
+      let detailPageSize = 20;
+
+      function escapeHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function showPageMsg(text) {
+        const el = document.getElementById('pageMsg');
+        if (!el) return;
+        if (pageMsgTimer) clearTimeout(pageMsgTimer);
+        el.innerHTML = `<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg><span>${text}</span>`;
+        el.classList.add('is-show');
+        pageMsgTimer = setTimeout(() => el.classList.remove('is-show'), 2000);
+      }
+
+      function syncOptimizerLabel() {
+        const label = document.getElementById('optimizerLabel');
+        const count = document.getElementById('optimizerCount');
+        count.textContent = `已选择 ${selectedOptimizers.length} 项`;
+        if (!selectedOptimizers.length) {
+          label.innerHTML = '优化师：<span class="muted">请选择</span>';
+        } else {
+          label.innerHTML = `优化师：已选 ${selectedOptimizers.length} 项`;
+        }
+        renderOptimizerSelected();
+      }
+
+      function renderOptimizerSelected() {
+        const box = document.getElementById('optimizerSelected');
+        if (!selectedOptimizers.length) {
+          box.innerHTML = '<div class="multi-panel__empty">暂无选择</div>';
+          return;
+        }
+        box.innerHTML = selectedOptimizers.map((name) => `
+          <div class="multi-selected">
+            <span class="multi-selected__name">${escapeHtml(name)}</span>
+            <button class="multi-selected__remove" type="button" data-remove="${escapeHtml(name)}" aria-label="移除">
+              <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l6 6M8 2L2 8"/></svg>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      function renderOptimizerList(keyword) {
+        const list = document.getElementById('optimizerList');
+        const kw = (keyword || '').trim().toLowerCase();
+        const items = OPTIMIZERS.filter((name) => !kw || name.toLowerCase().indexOf(kw) !== -1);
+        list.innerHTML = items.map((name) => {
+          const checked = selectedOptimizers.indexOf(name) !== -1;
+          return `
+          <label class="multi-option${checked ? ' is-active' : ''}">
+            <input type="checkbox" value="${escapeHtml(name)}" ${checked ? 'checked' : ''} />
+            <span>${escapeHtml(name)}</span>
+          </label>`;
+        }).join('') || '<div class="multi-panel__empty">无匹配项</div>';
+      }
+
+      function applySort(rows) {
+        if (!sortState.key || !sortState.dir) return rows.slice();
+        const key = sortState.key;
+        const dir = sortState.dir === 'asc' ? 1 : -1;
+        return rows.slice().sort((a, b) => {
+          const av = a[key];
+          const bv = b[key];
+          if (typeof av === 'number' || typeof bv === 'number') return (num(av) - num(bv)) * dir;
+          return String(av).localeCompare(String(bv), 'zh') * dir;
+        });
+      }
+
+      function updateSortHeaders() {
+        document.querySelectorAll('#grantTable .th-sort').forEach((btn) => {
+          const key = btn.getAttribute('data-key');
+          btn.classList.toggle('is-asc', sortState.key === key && sortState.dir === 'asc');
+          btn.classList.toggle('is-desc', sortState.key === key && sortState.dir === 'desc');
+        });
+      }
+
+      function renderPaginationBar(el, total, currentPage, currentSize, onPageChange, onSizeChange) {
+        const totalPages = Math.max(1, Math.ceil(total / currentSize) || 1);
+        let pageNo = currentPage;
+        if (pageNo > totalPages) pageNo = totalPages;
+        const pages = [];
+        const start = Math.max(1, pageNo - 2);
+        const end = Math.min(totalPages, start + 4);
+        for (let i = start; i <= end; i += 1) pages.push(i);
+
+        el.innerHTML = `
+          <div class="pager">
+            <button class="pager__btn" type="button" data-page="1" ${pageNo <= 1 ? 'disabled' : ''} aria-label="首页">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg>
+            </button>
+            <button class="pager__btn" type="button" data-page="${pageNo - 1}" ${pageNo <= 1 ? 'disabled' : ''} aria-label="上一页">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7.5 2L3.5 6l4 4"/></svg>
+            </button>
+            ${pages.map((p) => `<button class="pager__btn${p === pageNo ? ' is-active' : ''}" type="button" data-page="${p}">${p}</button>`).join('')}
+            <button class="pager__btn" type="button" data-page="${pageNo + 1}" ${pageNo >= totalPages ? 'disabled' : ''} aria-label="下一页">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4.5 2L8.5 6l-4 4"/></svg>
+            </button>
+            <button class="pager__btn" type="button" data-page="${totalPages}" ${pageNo >= totalPages ? 'disabled' : ''} aria-label="末页">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg>
+            </button>
+          </div>
+          <select class="page-size" data-role="page-size">
+            <option value="10" ${currentSize === 10 ? 'selected' : ''}>10条/页</option>
+            <option value="20" ${currentSize === 20 ? 'selected' : ''}>20条/页</option>
+            <option value="50" ${currentSize === 50 ? 'selected' : ''}>50条/页</option>
+          </select>
+          <div class="page-jump">
+            前往 <input data-role="page-jump" type="text" value="${pageNo}" /> 页
+          </div>
+          <span>共 ${total} 条记录</span>
+        `;
+
+        el.querySelectorAll('[data-page]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const next = Number(btn.getAttribute('data-page'));
+            if (!Number.isFinite(next) || next < 1 || next > totalPages || next === pageNo) return;
+            onPageChange(next);
+          });
+        });
+
+        el.querySelector('[data-role="page-size"]').addEventListener('change', (e) => {
+          onSizeChange(Number(e.target.value) || 20);
+        });
+
+        el.querySelector('[data-role="page-jump"]').addEventListener('keydown', (e) => {
+          if (e.key !== 'Enter') return;
+          const next = Number(e.target.value);
+          if (!Number.isFinite(next)) return;
+          onPageChange(Math.min(totalPages, Math.max(1, Math.floor(next))));
+        });
+
+        return pageNo;
+      }
+
+      function renderPagination(total) {
+        const el = document.getElementById('pagination');
+        page = renderPaginationBar(
+          el,
+          total,
+          page,
+          pageSize,
+          (next) => { page = next; renderTable(); },
+          (size) => { pageSize = size; page = 1; renderTable(); }
+        );
+      }
+
+      function sumField(rows, key) {
+        return rows.reduce((acc, row) => acc + num(row[key]), 0);
+      }
+
+      function renderTable() {
+        const body = document.getElementById('grantBody');
+        const foot = document.getElementById('grantFoot');
+        const empty = document.getElementById('emptyTip');
+        const sorted = applySort(filtered);
+        const total = sorted.length;
+        const start = (page - 1) * pageSize;
+        const rows = sorted.slice(start, start + pageSize);
+
+        if (!total) {
+          body.innerHTML = '';
+          foot.innerHTML = '';
+          empty.hidden = false;
+        } else {
+          empty.hidden = true;
+          body.innerHTML = rows.map((row) => `
+            <tr data-id="${escapeHtml(row.id)}">
+              <td title="${escapeHtml(row.account_name)}">${escapeHtml(row.account_name)}</td>
+              <td>
+                <span class="cell-id">
+                  <button class="copy-btn" type="button" data-copy="${escapeHtml(row.account_id)}" title="复制账户ID">${COPY_ICON}</button>
+                  <span class="cell-id__text" title="${escapeHtml(row.account_id)}">${escapeHtml(row.account_id)}</span>
+                </span>
+              </td>
+              <td>${escapeHtml(row.optimizer)}</td>
+              <td class="col-num">${formatNum(row.total_amount)}</td>
+              <td class="col-num">${formatNum(row.total_valid_amount)}</td>
+              <td class="col-num">${formatNum(row.grant_valid_amount)}</td>
+              <td class="col-num">${formatNum(row.recharge_coupon_valid_amount)}</td>
+              <td class="col-num">${formatNum(row.frozen_amount)}</td>
+              <td>${escapeHtml(row.update_date)}</td>
+              <td class="col-action">
+                <button class="link" type="button" data-detail="${escapeHtml(row.id)}">查看详情</button>
+              </td>
+            </tr>
+          `).join('');
+          foot.innerHTML = `
+            <tr class="summary-row">
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="col-num">${formatNum(sumField(sorted, 'total_amount'))}</td>
+              <td class="col-num">${formatNum(sumField(sorted, 'total_valid_amount'))}</td>
+              <td class="col-num">${formatNum(sumField(sorted, 'grant_valid_amount'))}</td>
+              <td class="col-num">${formatNum(sumField(sorted, 'recharge_coupon_valid_amount'))}</td>
+              <td class="col-num">${formatNum(sumField(sorted, 'frozen_amount'))}</td>
+              <td>-</td>
+              <td class="col-action">-</td>
+            </tr>
+          `;
+        }
+
+        updateSortHeaders();
+        renderPagination(total);
+      }
+
+      function doSearch() {
+        const kw = (document.getElementById('accountKeyword').value || '').trim().toLowerCase();
+        filtered = grantList.filter((row) => {
+          if (kw) {
+            const hitName = String(row.account_name).toLowerCase().indexOf(kw) !== -1;
+            const hitId = String(row.account_id).toLowerCase().indexOf(kw) !== -1;
+            if (!hitName && !hitId) return false;
+          }
+          if (selectedOptimizers.length && selectedOptimizers.indexOf(row.optimizer) === -1) return false;
+          return true;
+        });
+        page = 1;
+        renderTable();
+      }
+
+      function resetFilters() {
+        document.getElementById('accountKeyword').value = '';
+        selectedOptimizers = [];
+        document.getElementById('optimizerSearch').value = '';
+        syncOptimizerLabel();
+        renderOptimizerList('');
+        sortState = { key: '', dir: '' };
+        page = 1;
+        pageSize = 20;
+        filtered = grantList.slice();
+        renderTable();
+      }
+
+      function copyText(text) {
+        const done = () => showPageMsg('复制成功');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            done();
+          });
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          done();
+        }
+      }
+
+      function applyDetailSort(rows) {
+        if (!detailSort.key || !detailSort.dir) return rows.slice();
+        const key = detailSort.key;
+        const dir = detailSort.dir === 'asc' ? 1 : -1;
+        return rows.slice().sort((a, b) => {
+          const av = a[key];
+          const bv = b[key];
+          if (typeof av === 'number' || typeof bv === 'number' || key.indexOf('balance') !== -1) {
+            return (num(av) - num(bv)) * dir;
+          }
+          return String(av).localeCompare(String(bv), 'zh') * dir;
+        });
+      }
+
+      function updateDetailSortHeaders() {
+        document.querySelectorAll('#detailTable .th-sort').forEach((btn) => {
+          const key = btn.getAttribute('data-key');
+          btn.classList.toggle('is-asc', detailSort.key === key && detailSort.dir === 'asc');
+          btn.classList.toggle('is-desc', detailSort.key === key && detailSort.dir === 'desc');
+        });
+      }
+
+      function renderDetailTable() {
+        const type = document.getElementById('detailTypeFilter').value;
+        let rows = (currentDetailRow && currentDetailRow.coupons) ? currentDetailRow.coupons.slice() : [];
+        if (type && type !== 'All') rows = rows.filter((c) => c.ad_credit_type_name === type);
+        detailRows = applyDetailSort(rows);
+        const total = detailRows.length;
+        const start = (detailPage - 1) * detailPageSize;
+        const pageRows = detailRows.slice(start, start + detailPageSize);
+        const body = document.getElementById('detailBody');
+        const foot = document.getElementById('detailFoot');
+        if (!total) {
+          body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#86909C">暂无优惠券明细</td></tr>';
+          foot.innerHTML = '';
+        } else {
+          body.innerHTML = pageRows.map((c) => `
+            <tr>
+              <td title="${escapeHtml(c.coupon_activity_name)}">${escapeHtml(c.coupon_activity_name)}</td>
+              <td title="${escapeHtml(c.coupon_code)}">${escapeHtml(c.coupon_code)}</td>
+              <td>${escapeHtml(c.ad_credit_type_name)}</td>
+              <td class="col-num">${formatNum(c.total_balance)}</td>
+              <td class="col-num">${formatNum(c.used_balance)}</td>
+              <td class="col-num">${formatNum(c.valid_balance)}</td>
+              <td class="col-datetime" title="${escapeHtml(c.issue_time)}">${escapeHtml(c.issue_time)}</td>
+              <td class="col-datetime" title="${escapeHtml(c.valid_end_time)}">${escapeHtml(c.valid_end_time)}</td>
+            </tr>
+          `).join('');
+          foot.innerHTML = `
+            <tr class="summary-row">
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="col-num">${formatNum(sumField(detailRows, 'total_balance'))}</td>
+              <td class="col-num">${formatNum(sumField(detailRows, 'used_balance'))}</td>
+              <td class="col-num">${formatNum(sumField(detailRows, 'valid_balance'))}</td>
+              <td class="col-datetime">-</td>
+              <td class="col-datetime">-</td>
+            </tr>
+          `;
+        }
+        updateDetailSortHeaders();
+        detailPage = renderPaginationBar(
+          document.getElementById('detailPagination'),
+          total,
+          detailPage,
+          detailPageSize,
+          (next) => { detailPage = next; renderDetailTable(); },
+          (size) => { detailPageSize = size; detailPage = 1; renderDetailTable(); }
+        );
+      }
+
+      function setDetailType(value) {
+        const next = value || 'All';
+        document.getElementById('detailTypeFilter').value = next;
+        document.getElementById('detailTypeLabel').textContent = next;
+        document.querySelectorAll('#detailTypePanel .single-option').forEach((el) => {
+          el.classList.toggle('is-active', el.getAttribute('data-value') === next);
+        });
+      }
+
+      function openDrawer(row) {
+        currentDetailRow = row;
+        detailSort = { key: '', dir: '' };
+        detailPage = 1;
+        detailPageSize = 20;
+        setDetailType('All');
+        document.getElementById('drawerMeta').innerHTML =
+          `账户名称：<strong>${escapeHtml(row.account_name)}</strong>　账户ID：<strong>${escapeHtml(row.account_id)}</strong>　优化师：<strong>${escapeHtml(row.optimizer)}</strong>`;
+        renderDetailTable();
+        const mask = document.getElementById('detailDrawer');
+        mask.classList.add('is-open');
+        mask.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('drawer-open');
+      }
+
+      function closeDrawer() {
+        document.getElementById('detailDrawer').classList.remove('is-open');
+        document.getElementById('detailDrawer').setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('drawer-open');
+        currentDetailRow = null;
+      }
+
+      /* events */
+      const optimizerTrigger = document.getElementById('optimizerTrigger');
+      const optimizerPanel = document.getElementById('optimizerPanel');
+
+      optimizerTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = !optimizerPanel.classList.contains('is-open');
+        optimizerPanel.classList.toggle('is-open', open);
+        optimizerTrigger.classList.toggle('is-open', open);
+      });
+
+      document.getElementById('optimizerSearch').addEventListener('input', (e) => {
+        renderOptimizerList(e.target.value);
+      });
+
+      document.getElementById('optimizerList').addEventListener('change', (e) => {
+        const input = e.target.closest('input[type="checkbox"]');
+        if (!input) return;
+        const val = input.value;
+        if (input.checked) {
+          if (selectedOptimizers.indexOf(val) === -1) selectedOptimizers.push(val);
+        } else {
+          selectedOptimizers = selectedOptimizers.filter((n) => n !== val);
+        }
+        syncOptimizerLabel();
+        renderOptimizerList(document.getElementById('optimizerSearch').value);
+      });
+
+      document.getElementById('optimizerSelected').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-remove]');
+        if (!btn) return;
+        const name = btn.getAttribute('data-remove');
+        selectedOptimizers = selectedOptimizers.filter((n) => n !== name);
+        syncOptimizerLabel();
+        renderOptimizerList(document.getElementById('optimizerSearch').value);
+      });
+
+      document.getElementById('optimizerSelectAll').addEventListener('click', () => {
+        const kw = (document.getElementById('optimizerSearch').value || '').trim().toLowerCase();
+        const visible = OPTIMIZERS.filter((name) => !kw || name.toLowerCase().indexOf(kw) !== -1);
+        visible.forEach((name) => {
+          if (selectedOptimizers.indexOf(name) === -1) selectedOptimizers.push(name);
+        });
+        syncOptimizerLabel();
+        renderOptimizerList(document.getElementById('optimizerSearch').value);
+      });
+
+      document.getElementById('optimizerClear').addEventListener('click', () => {
+        selectedOptimizers = [];
+        syncOptimizerLabel();
+        renderOptimizerList(document.getElementById('optimizerSearch').value);
+      });
+
+      document.getElementById('searchBtn').addEventListener('click', doSearch);
+      document.getElementById('resetBtn').addEventListener('click', resetFilters);
+      document.getElementById('exportBtn').addEventListener('click', () => showPageMsg('导出成功'));
+      document.getElementById('accountKeyword').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doSearch();
+      });
+
+      document.getElementById('grantTable').addEventListener('click', (e) => {
+        const sortBtn = e.target.closest('.th-sort');
+        if (sortBtn) {
+          const key = sortBtn.getAttribute('data-key');
+          if (sortState.key === key) {
+            sortState.dir = sortState.dir === 'asc' ? 'desc' : sortState.dir === 'desc' ? '' : 'asc';
+            if (!sortState.dir) sortState.key = '';
+          } else {
+            sortState = { key, dir: 'asc' };
+          }
+          renderTable();
+          return;
+        }
+      });
+
+      document.getElementById('grantBody').addEventListener('click', (e) => {
+        const copyBtn = e.target.closest('[data-copy]');
+        if (copyBtn) {
+          copyText(copyBtn.getAttribute('data-copy') || '');
+          return;
+        }
+        const detailBtn = e.target.closest('[data-detail]');
+        if (detailBtn) {
+          const row = grantList.find((r) => r.id === detailBtn.getAttribute('data-detail'));
+          if (row) openDrawer(row);
+        }
+      });
+
+      document.getElementById('detailTypeFilter').addEventListener('change', () => {
+        detailPage = 1;
+        renderDetailTable();
+      });
+
+      const detailTypeTrigger = document.getElementById('detailTypeTrigger');
+      const detailTypePanel = document.getElementById('detailTypePanel');
+
+      detailTypeTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = !detailTypePanel.classList.contains('is-open');
+        detailTypePanel.classList.toggle('is-open', open);
+        detailTypeTrigger.classList.toggle('is-open', open);
+      });
+
+      detailTypePanel.addEventListener('click', (e) => {
+        const opt = e.target.closest('.single-option');
+        if (!opt) return;
+        setDetailType(opt.getAttribute('data-value'));
+        detailTypePanel.classList.remove('is-open');
+        detailTypeTrigger.classList.remove('is-open');
+        detailPage = 1;
+        renderDetailTable();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#optimizerWrap')) {
+          optimizerPanel.classList.remove('is-open');
+          optimizerTrigger.classList.remove('is-open');
+        }
+        if (!e.target.closest('#detailTypeWrap')) {
+          detailTypePanel.classList.remove('is-open');
+          detailTypeTrigger.classList.remove('is-open');
+        }
+      });
+      document.getElementById('detailTable').addEventListener('click', (e) => {
+        const sortBtn = e.target.closest('.th-sort');
+        if (!sortBtn) return;
+        const key = sortBtn.getAttribute('data-key');
+        if (detailSort.key === key) {
+          detailSort.dir = detailSort.dir === 'asc' ? 'desc' : detailSort.dir === 'desc' ? '' : 'asc';
+          if (!detailSort.dir) detailSort.key = '';
+        } else {
+          detailSort = { key, dir: 'asc' };
+        }
+        renderDetailTable();
+      });
+
+      document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+      document.getElementById('detailDrawer').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeDrawer();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDrawer();
+      });
+
+      document.querySelectorAll('[data-group-toggle]').forEach((btn) => {
+        btn.addEventListener('click', () => btn.closest('[data-group]').classList.toggle('is-collapsed'));
+      });
+      document.getElementById('sidebarToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('is-collapsed');
+      });
+
+      syncOptimizerLabel();
+      renderOptimizerList('');
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用户反馈 - 海外中台</title>
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-body);
+      line-height: 22px;
+      color: #1D2129;
+      background: var(--color-bg-page);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    img { display: block; }
+    input, select { font-family: inherit; font-size: 14px; color: #1D2129; }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      min-width: 1100px;
+      overflow: hidden;
+    }
+
+    .header {
+      flex-shrink: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      background: #1B2B4C;
+      color: #fff;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 240px;
+      height: 100%;
+      padding-left: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
+    .brand-name { font-size: 18px; font-weight: 600; line-height: 26px; white-space: nowrap; }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 16px;
+      gap: 16px;
+    }
+
+    .header-nav__item {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: 32px;
+      padding: 0 8px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.65);
+      white-space: nowrap;
+    }
+
+    .header-nav__item:hover { color: #fff; }
+    .header-nav__item.is-active { color: #fff; font-weight: 500; }
+    .header-nav__item.is-active::after {
+      content: '';
+      position: absolute;
+      left: 8px; right: 8px; bottom: 0;
+      height: 2px;
+      background: var(--color-primary);
+      border-radius: 1px 1px 0 0;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 16px;
+    }
+
+    .header-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      color: rgba(255, 255, 255, 0.75);
+      border-radius: 4px;
+    }
+
+    .header-icon:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+    .header-icon svg { width: 18px; height: 18px; }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      padding: 0 8px 0 4px;
+      color: #fff;
+      border-radius: 16px;
+    }
+
+    .user-chip:hover { background: rgba(255, 255, 255, 0.08); }
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .user-name { font-size: 14px; }
+    .user-chip .chevron { width: 12px; height: 12px; opacity: 0.75; }
+
+    .body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid #E5E6EB;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.is-collapsed { width: 64px; }
+    .sidebar.is-collapsed .menu-group__title-text,
+    .sidebar.is-collapsed .menu-item__text,
+    .sidebar.is-collapsed .menu-group__arrow { display: none; }
+    .sidebar.is-collapsed .menu-item,
+    .sidebar.is-collapsed .menu-group__title {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .sidebar.is-collapsed .menu-children { display: none !important; }
+
+    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 0; }
+
+    .menu-group__title {
+      width: 100%;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      color: #1D2129;
+      font-size: 14px;
+    }
+
+    .menu-group__title:hover { background: #F7F8FA; }
+    .menu-icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .menu-group__title-text { flex: 1; text-align: left; }
+    .menu-group__arrow {
+      width: 12px; height: 12px; color: #86909C;
+      transition: transform 0.15s;
+    }
+    .menu-group.is-open .menu-group__arrow { transform: rotate(180deg); }
+    .menu-children { display: none; }
+    .menu-group.is-open .menu-children { display: block; }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 16px 0 40px;
+      font-size: 14px;
+      color: #1D2129;
+    }
+
+    .menu-item:hover { background: #F7F8FA; }
+    .menu-item.is-active {
+      background: var(--color-primary-bg, #E8F3FF);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    .sidebar-footer {
+      flex-shrink: 0;
+      padding: 8px 16px 16px;
+      border-top: 1px solid #E5E6EB;
+    }
+
+    .sidebar-collapse-btn {
+      width: 32px; height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #4E5969;
+    }
+    .sidebar-collapse-btn:hover { background: #F2F3F5; }
+    .sidebar-collapse-btn svg { width: 18px; height: 18px; }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-card {
+      flex: 1;
+      min-height: 0;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: var(--shadow-1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .filter-bar {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      padding: 16px;
+      align-items: flex-end;
+    }
+
+    .filter-item {
+      width: 220px;
+      position: relative;
+    }
+
+    .filter-item--date { width: 280px; }
+    .filter-item--wide { width: 240px; }
+
+    .filter-item__label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #1D2129;
+      line-height: 22px;
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 0;
+    }
+
+    .input, .select-trigger {
+      width: 100%;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input::placeholder { color: #86909C; }
+    .input:hover, .select-trigger:hover { border-color: #94BFFF; }
+    .input:focus, .select-trigger:focus, .select-trigger.is-open { border-color: var(--color-primary); }
+
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      padding: 0 8px 0 12px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+
+    .date-range:hover { border-color: #94BFFF; }
+    .date-range:focus-within { border-color: var(--color-primary); }
+
+    .date-range input[type="date"] {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #1D2129;
+      font-size: 13px;
+    }
+
+    .date-range__sep { color: #C9CDD4; flex-shrink: 0; }
+
+    .select-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .select-trigger__text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #1D2129;
+    }
+
+    .select-trigger__text .muted { color: #86909C; }
+    .select-trigger__arrow {
+      width: 12px; height: 12px; color: #86909C; flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .select-trigger.is-open .select-trigger__arrow { transform: rotate(180deg); }
+
+    .single-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 30;
+      display: none;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .single-panel.is-open { display: block; }
+
+    .single-option {
+      display: flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #1D2129;
+      cursor: pointer;
+    }
+
+    .single-option:hover { background: #F5F7FA; }
+    .single-option.is-active { color: var(--color-primary); background: #E8F3FF; }
+
+    .multi-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 480px;
+      background: #fff;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 30;
+      display: none;
+      overflow: hidden;
+    }
+
+    .multi-panel.is-open { display: flex; align-items: stretch; }
+
+    .multi-panel__left,
+    .multi-panel__right {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .multi-panel__left { border-right: 1px solid #E5E6EB; }
+
+    .multi-panel__search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 12px 8px;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+    }
+
+    .multi-panel__search svg { width: 14px; height: 14px; color: #86909C; flex-shrink: 0; }
+    .multi-panel__search input {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+    }
+
+    .multi-panel__toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 8px;
+      font-size: 12px;
+      color: #86909C;
+    }
+
+    .multi-panel__link {
+      color: var(--color-primary);
+      font-size: 12px;
+    }
+
+    .multi-panel__list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-bottom: 8px;
+    }
+
+    .multi-panel__left .multi-panel__list { max-height: 216px; }
+    .multi-panel__right .multi-panel__list { max-height: 256px; }
+
+    .multi-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #1D2129;
+      cursor: pointer;
+    }
+
+    .multi-option:hover { background: #F5F7FA; }
+
+    .multi-option input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1px solid #C9CDD4;
+      border-radius: 2px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .multi-option input[type="checkbox"]:checked {
+      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+      border-color: var(--color-primary);
+    }
+
+    .multi-selected {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 14px;
+    }
+
+    .multi-selected:hover { background: #F5F7FA; }
+    .multi-selected__name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .multi-selected__remove {
+      width: 16px; height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #C9CDD4;
+      border-radius: 2px;
+    }
+
+    .multi-selected__remove:hover { color: #86909C; background: #F2F3F5; }
+    .multi-selected__remove svg { width: 10px; height: 10px; }
+
+    .multi-panel__empty {
+      padding: 24px 12px;
+      text-align: center;
+      color: #86909C;
+      font-size: 13px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      padding: 0 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn:active { opacity: 0.85; }
+    .btn--primary { background: var(--color-primary); color: #fff; }
+    .btn--primary:hover { background: var(--color-primary-hover, #4080FF); }
+    .btn--default {
+      background: #fff;
+      color: #1D2129;
+      border: 1px solid #E5E6EB;
+    }
+    .btn--default:hover { color: var(--color-primary); border-color: var(--color-primary); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .table-shell {
+      flex: 1;
+      min-height: 0;
+      margin: 0 16px;
+      border: 1px solid #E5E6EB;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .table-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 1480px;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+
+    .data-table th,
+    .data-table td {
+      height: 48px;
+      padding: 0 12px;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: left;
+      border-bottom: 1px solid #E5E6EB;
+      vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .data-table th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #F7F8FA;
+      font-weight: 600;
+      color: #1D2129;
+    }
+
+    .data-table tbody tr:hover td { background: #F5F7FA; }
+
+    .col-check { width: 48px; text-align: center; }
+    .col-product { width: 10%; }
+    .col-platform { width: 7%; }
+    .col-version { width: 8%; }
+    .col-summary { width: 16%; }
+    .col-status { width: 8%; }
+    .col-uuid { width: 12%; }
+    .col-device { width: 12%; }
+    .col-time { width: 11%; }
+
+    .col-action {
+      width: 100px;
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background: #fff;
+      padding-left: 12px;
+      padding-right: 24px;
+      box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
+    }
+
+    th.col-action { z-index: 3; background: #F7F8FA; }
+    .data-table tbody tr:hover td.col-action { background: #F5F7FA; }
+
+    .cell-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .cell-check input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1px solid #C9CDD4;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .cell-check input[type="checkbox"]:checked {
+      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+      border-color: var(--color-primary);
+    }
+
+    .cell-id {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 100%;
+    }
+
+    .cell-id__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      border-radius: 2px;
+      color: #86909C;
+    }
+
+    .copy-btn:hover { color: var(--color-primary); background: #E8F3FF; }
+    .copy-btn svg { width: 14px; height: 14px; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 2px;
+      font-size: 12px;
+      line-height: 20px;
+      white-space: nowrap;
+    }
+
+    .tag--pending { background: #FFF7E8; color: #FF7D00; }
+    .tag--processing { background: #E8F3FF; color: #165DFF; }
+    .tag--done { background: #E8FFEA; color: #00B42A; }
+    .tag--ignored { background: #F2F3F5; color: #86909C; }
+
+    .link { color: var(--color-primary); font-size: 14px; }
+    .link:hover { opacity: 0.85; }
+
+    .empty-tip {
+      padding: 48px 16px;
+      text-align: center;
+      color: #86909C;
+      font-size: 14px;
+    }
+
+    .pagination {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px 16px;
+      font-size: 14px;
+      color: #4E5969;
+    }
+
+    .pager { display: inline-flex; align-items: center; gap: 4px; }
+
+    .pager__btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      color: #1D2129;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pager__btn:hover:not(:disabled):not(.is-active) {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .pager__btn.is-active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    .pager__btn:disabled { color: #C9CDD4; cursor: not-allowed; }
+    .pager__btn svg { width: 12px; height: 12px; }
+
+    .page-size {
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      outline: none;
+    }
+
+    .page-jump {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-jump input {
+      width: 48px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      text-align: center;
+      outline: none;
+    }
+
+    .page-msg {
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      z-index: 1000;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      font-size: 14px;
+      color: #1D2129;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+    }
+
+    .page-msg.is-show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .page-msg--success { border: 1px solid #AFF0B5; }
+    .page-msg--error { border: 1px solid #FDCDC5; }
+    .page-msg__icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .page-msg--success .page-msg__icon { color: #00B42A; }
+    .page-msg--error .page-msg__icon { color: #F53F3F; }
+
+    /* Drawer */
+    .drawer-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(29, 33, 41, 0.6);
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .drawer-mask.is-open { opacity: 1; visibility: visible; }
+
+    .drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 520px;
+      max-width: calc(100vw - 32px);
+      height: 100%;
+      background: #fff;
+      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+    }
+
+    .drawer-mask.is-open .drawer { transform: translateX(0); }
+
+    .drawer__header {
+      flex-shrink: 0;
+      height: 48px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #E5E6EB;
+    }
+
+    .drawer__title { font-size: 16px; font-weight: 500; }
+
+    .drawer__close {
+      width: 28px; height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: #86909C;
+    }
+
+    .drawer__close:hover { background: #F2F3F5; color: #1D2129; }
+    .drawer__close svg { width: 12px; height: 12px; }
+
+    .drawer__body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .drawer__footer {
+      flex-shrink: 0;
+      padding: 16px 24px 20px;
+      border-top: 1px solid #E5E6EB;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .detail-block { margin-bottom: 24px; }
+    .detail-block__title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1D2129;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 12px 16px;
+      font-size: 14px;
+    }
+
+    .detail-grid__label { color: #86909C; line-height: 22px; }
+    .detail-grid__value {
+      color: #1D2129;
+      line-height: 22px;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    .detail-desc {
+      padding: 12px;
+      background: #F7F8FA;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 80px;
+    }
+
+    .status-quick {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .status-quick__btn {
+      height: 32px;
+      padding: 0 14px;
+      border: 1px solid #E5E6EB;
+      border-radius: 4px;
+      background: #fff;
+      font-size: 14px;
+      color: #1D2129;
+    }
+
+    .status-quick__btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .status-quick__btn.is-active {
+      border-color: var(--color-primary);
+      background: #E8F3FF;
+      color: var(--color-primary);
+    }
+
+    /* Modal */
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(29, 33, 41, 0.6);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .modal-mask.is-open { opacity: 1; visibility: visible; }
+
+    .modal {
+      width: 480px;
+      max-width: 100%;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+    }
+
+    .modal__header {
+      height: 48px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #E5E6EB;
+    }
+
+    .modal__title { font-size: 16px; font-weight: 500; }
+
+    .modal__body { padding: 24px; }
+
+    .modal__hint {
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #4E5969;
+    }
+
+    .modal__footer {
+      padding: 16px 24px 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .form-row { margin-bottom: 0; }
+    .form-row__label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #1D2129;
+    }
+
+    .form-row__label .req { color: #F53F3F; margin-left: 2px; }
+
+    body.drawer-open { overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <img class="logo" src="assets/logo.png" width="32" height="32" alt="海外中台" />
+        <span class="brand-name">海外中台</span>
+      </div>
+      <nav class="header-nav" aria-label="顶部导航">
+        <a href="#" class="header-nav__item">首页</a>
+        <a href="#" class="header-nav__item">看板</a>
+        <a href="#" class="header-nav__item">产品</a>
+        <a href="#" class="header-nav__item is-active">工具</a>
+        <a href="wonder.html" class="header-nav__item">管理</a>
+      </nav>
+      <div class="header-right">
+        <button class="header-icon" type="button" title="下载" aria-label="下载">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="消息" aria-label="消息">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+        <button class="header-icon" type="button" title="主题" aria-label="主题">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
+        <button class="user-chip" type="button" aria-label="用户菜单">
+          <span class="user-avatar">风</span>
+          <span class="user-name">小风</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 4.5L6 7.5L9 4.5"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="body">
+      <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+          <div class="menu-group is-open" data-group>
+            <button class="menu-group__title" type="button" data-group-toggle>
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+              <span class="menu-group__title-text">运营工具</span>
+              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
+            </button>
+            <ul class="menu-children">
+              <li><a href="feedback-tickets.html" class="menu-item is-active"><span class="menu-item__text">用户反馈</span></a></li>
+            </ul>
+          </div>
+          <div class="menu-group" data-group>
+            <button class="menu-group__title" type="button" data-group-toggle>
+              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="menu-group__title-text">任务中心</span>
+              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5L6 7.5L9 4.5"/>
+              </svg>
+            </button>
+            <ul class="menu-children">
+              <li><a href="#" class="menu-item"><span class="menu-item__text">下载任务</span></a></li>
+            </ul>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="sidebar-collapse-btn" id="sidebarToggle" type="button" title="折叠菜单">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6h16M4 12h10M4 18h16"/><path d="M15 9l-3 3 3 3"/>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="content-card">
+          <div class="filter-bar">
+            <div class="filter-item filter-item--date">
+              <label class="filter-item__label">日期</label>
+              <div class="date-range">
+                <input type="date" id="dateStart" />
+                <span class="date-range__sep">至</span>
+                <input type="date" id="dateEnd" />
+              </div>
+            </div>
+
+            <div class="filter-item" id="platformWrap">
+              <label class="filter-item__label">平台</label>
+              <button class="select-trigger" type="button" id="platformTrigger">
+                <span class="select-trigger__text" id="platformLabel">全部</span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="single-panel" id="platformPanel">
+                <div class="single-option is-active" data-value="全部">全部</div>
+                <div class="single-option" data-value="Android">Android</div>
+                <div class="single-option" data-value="iOS">iOS</div>
+              </div>
+            </div>
+
+            <div class="filter-item filter-item--wide" id="productWrap">
+              <label class="filter-item__label">产品</label>
+              <button class="select-trigger" type="button" id="productTrigger">
+                <span class="select-trigger__text" id="productLabel"><span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="multi-panel" id="productPanel">
+                <div class="multi-panel__left">
+                  <div class="multi-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="productSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="multi-panel__toolbar">
+                    <button class="multi-panel__link" type="button" id="productSelectAll">全选</button>
+                  </div>
+                  <div class="multi-panel__list" id="productList"></div>
+                </div>
+                <div class="multi-panel__right">
+                  <div class="multi-panel__toolbar">
+                    <span id="productCount">已选择 0 项</span>
+                    <button class="multi-panel__link" type="button" id="productClear">清空</button>
+                  </div>
+                  <div class="multi-panel__list" id="productSelected"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-item filter-item--wide" id="versionWrap">
+              <label class="filter-item__label">APP版本</label>
+              <button class="select-trigger" type="button" id="versionTrigger">
+                <span class="select-trigger__text" id="versionLabel"><span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="multi-panel" id="versionPanel">
+                <div class="multi-panel__left">
+                  <div class="multi-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="versionSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="multi-panel__toolbar">
+                    <button class="multi-panel__link" type="button" id="versionSelectAll">全选</button>
+                  </div>
+                  <div class="multi-panel__list" id="versionList"></div>
+                </div>
+                <div class="multi-panel__right">
+                  <div class="multi-panel__toolbar">
+                    <span id="versionCount">已选择 0 项</span>
+                    <button class="multi-panel__link" type="button" id="versionClear">清空</button>
+                  </div>
+                  <div class="multi-panel__list" id="versionSelected"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-item">
+              <label class="filter-item__label">内容查找</label>
+              <input class="input" id="contentKeyword" type="text" placeholder="问题摘要关键词" autocomplete="off" />
+            </div>
+
+            <div class="filter-item">
+              <label class="filter-item__label">UUID</label>
+              <input class="input" id="uuidKeyword" type="text" placeholder="请输入 UUID" autocomplete="off" />
+            </div>
+
+            <div class="filter-item">
+              <label class="filter-item__label">设备ID</label>
+              <input class="input" id="deviceKeyword" type="text" placeholder="请输入设备ID" autocomplete="off" />
+            </div>
+
+            <div class="filter-actions">
+              <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+              <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+              <button class="btn btn--default" type="button" id="exportBtn">导出</button>
+              <button class="btn btn--default" type="button" id="batchBtn" disabled>批量操作</button>
+            </div>
+          </div>
+
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="ticketTable">
+                <thead>
+                  <tr>
+                    <th class="col-check"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
+                    <th class="col-product">产品</th>
+                    <th class="col-platform">平台</th>
+                    <th class="col-version">APP版本</th>
+                    <th class="col-summary">问题摘要</th>
+                    <th class="col-status">状态</th>
+                    <th class="col-uuid">UUID</th>
+                    <th class="col-device">设备ID</th>
+                    <th class="col-time">创建时间</th>
+                    <th class="col-time">更新时间</th>
+                    <th class="col-action">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="ticketBody"></tbody>
+              </table>
+              <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <!-- Detail Drawer -->
+  <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="drawerTitle">反馈详情</h2>
+        <button class="drawer__close" type="button" id="drawerClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="drawer__body" id="drawerBody"></div>
+      <div class="drawer__footer">
+        <button class="btn btn--default" type="button" id="drawerCancel">关闭</button>
+        <button class="btn btn--primary" type="button" id="drawerSave">更新状态</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Batch Modal -->
+  <div class="modal-mask" id="batchModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="batchTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="batchTitle">批量修改状态</h2>
+        <button class="drawer__close" type="button" id="batchClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p class="modal__hint" id="batchHint">已选 0 条工单，请选择目标状态</p>
+        <div class="form-row">
+          <label class="form-row__label">状态<span class="req">*</span></label>
+          <div class="status-quick" id="batchStatusQuick">
+            <button class="status-quick__btn" type="button" data-status="待处理">待处理</button>
+            <button class="status-quick__btn" type="button" data-status="处理中">处理中</button>
+            <button class="status-quick__btn" type="button" data-status="已处理">已处理</button>
+            <button class="status-quick__btn" type="button" data-status="不处理">不处理</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchConfirm">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+
+      const PRODUCTS = ['Wonder Puzzle', 'Star Merge', 'Ocean Match', 'Pixel Farm', 'Galaxy Rush', 'Candy Dash'];
+      const VERSIONS = ['1.0.0', '1.1.2', '1.2.0', '1.3.5', '2.0.0', '2.1.1', '2.2.0'];
+      const PLATFORMS = ['Android', 'iOS'];
+      const STATUSES = ['待处理', '处理中', '已处理', '不处理'];
+      const STATUS_CLASS = {
+        '待处理': 'tag--pending',
+        '处理中': 'tag--processing',
+        '已处理': 'tag--done',
+        '不处理': 'tag--ignored'
+      };
+
+      const SUMMARIES = [
+        '登录后闪退，无法进入主页',
+        '支付成功但未到账',
+        '广告加载失败，黑屏卡住',
+        '活动奖励未发放',
+        '账号绑定邮箱失败',
+        '音效异常，无法关闭',
+        '关卡进度丢失',
+        '网络超时频繁提示',
+        '推送通知重复收到',
+        '内购页面空白'
+      ];
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function formatDate(d) {
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      }
+
+      function formatDateTime(d) {
+        return formatDate(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+      }
+
+      function daysAgo(n) {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - n);
+        return d;
+      }
+
+      function parseDate(str) {
+        if (!str) return null;
+        const d = new Date(str.replace(/-/g, '/'));
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function uid(prefix, i) {
+        const hex = (Math.abs((i * 2654435761) >>> 0)).toString(16).padStart(8, '0');
+        return prefix + '-' + hex + '-' + (1000 + (i % 9000));
+      }
+
+      function buildMockData() {
+        const list = [];
+        const now = Date.now();
+        for (let i = 0; i < 48; i++) {
+          const created = new Date(now - i * 5.5 * 3600 * 1000 - (i % 7) * 86400000);
+          const updated = new Date(created.getTime() + (i % 5) * 3600 * 1000);
+          const platform = PLATFORMS[i % 2];
+          const summary = SUMMARIES[i % SUMMARIES.length];
+          list.push({
+            id: 'FB' + String(10001 + i),
+            product: PRODUCTS[i % PRODUCTS.length],
+            platform: platform,
+            version: VERSIONS[i % VERSIONS.length],
+            summary: summary,
+            content: summary + '。补充信息：用户反馈发生在' + (platform === 'iOS' ? 'iPhone' : '安卓机型') + '，已复现两次。联系邮箱：user' + (i + 1) + '@mail.com',
+            email: 'user' + (i + 1) + '@mail.com',
+            status: STATUSES[i % STATUSES.length],
+            uuid: uid('uuid', i + 17),
+            deviceId: uid(platform === 'iOS' ? 'idfv' : 'gaid', i + 91),
+            createdAt: formatDateTime(created),
+            updatedAt: formatDateTime(updated),
+            createdTs: created.getTime(),
+            updatedTs: updated.getTime()
+          });
+        }
+        return list;
+      }
+
+      const allTickets = buildMockData();
+      let filtered = allTickets.slice();
+      let selectedIds = new Set();
+      let selectedProducts = [];
+      let selectedVersions = [];
+      let platformValue = '全部';
+      let currentPage = 1;
+      let pageSize = 10;
+      let drawerTicketId = null;
+      let drawerStatus = null;
+      let batchStatus = null;
+
+      const dateStartEl = document.getElementById('dateStart');
+      const dateEndEl = document.getElementById('dateEnd');
+      const ticketBody = document.getElementById('ticketBody');
+      const emptyTip = document.getElementById('emptyTip');
+      const checkAll = document.getElementById('checkAll');
+      const batchBtn = document.getElementById('batchBtn');
+
+      function setDefaultDates() {
+        dateStartEl.value = formatDate(daysAgo(6));
+        dateEndEl.value = formatDate(new Date());
+      }
+
+      function showMsg(text, type) {
+        const el = document.getElementById('pageMsg');
+        const icon = type === 'error'
+          ? '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>'
+          : '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
+        el.className = 'page-msg page-msg--' + (type || 'success') + ' is-show';
+        el.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
+        clearTimeout(showMsg._t);
+        showMsg._t = setTimeout(function () { el.classList.remove('is-show'); }, 2000);
+      }
+
+      async function copyText(text) {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+          showMsg('已复制');
+        } catch (e) {
+          showMsg('复制失败', 'error');
+        }
+      }
+
+      function closeAllPanels(except) {
+        document.querySelectorAll('.select-trigger.is-open').forEach(function (el) {
+          if (except && (el === except || except.contains(el))) return;
+          el.classList.remove('is-open');
+        });
+        document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open').forEach(function (el) {
+          if (except && except.contains(el)) return;
+          el.classList.remove('is-open');
+        });
+      }
+
+      function createMultiSelect(cfg) {
+        const trigger = document.getElementById(cfg.triggerId);
+        const panel = document.getElementById(cfg.panelId);
+        const listEl = document.getElementById(cfg.listId);
+        const selectedEl = document.getElementById(cfg.selectedId);
+        const countEl = document.getElementById(cfg.countId);
+        const labelEl = document.getElementById(cfg.labelId);
+        const searchEl = document.getElementById(cfg.searchId);
+        let selected = cfg.getSelected();
+
+        function syncSelectedRef() {
+          selected = cfg.getSelected();
+        }
+
+        function updateLabel() {
+          syncSelectedRef();
+          countEl.textContent = '已选择 ' + selected.length + ' 项';
+          if (!selected.length) {
+            labelEl.innerHTML = '<span class="muted">请选择</span>';
+          } else {
+            labelEl.textContent = '已选 ' + selected.length + ' 项';
+          }
+        }
+
+        function renderSelected() {
+          syncSelectedRef();
+          if (!selected.length) {
+            selectedEl.innerHTML = '<div class="multi-panel__empty">暂无选择</div>';
+            return;
+          }
+          selectedEl.innerHTML = selected.map(function (name) {
+            return '<div class="multi-selected"><span class="multi-selected__name">' + escapeHtml(name) + '</span>' +
+              '<button class="multi-selected__remove" type="button" data-remove="' + escapeHtml(name) + '" aria-label="移除">' +
+              '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l6 6M8 2L2 8"/></svg></button></div>';
+          }).join('');
+        }
+
+        function renderList() {
+          syncSelectedRef();
+          const kw = (searchEl.value || '').trim().toLowerCase();
+          const items = cfg.options.filter(function (name) {
+            return !kw || name.toLowerCase().indexOf(kw) !== -1;
+          });
+          listEl.innerHTML = items.map(function (name) {
+            const checked = selected.indexOf(name) !== -1;
+            return '<label class="multi-option"><input type="checkbox" value="' + escapeHtml(name) + '"' + (checked ? ' checked' : '') + ' /><span>' + escapeHtml(name) + '</span></label>';
+          }).join('') || '<div class="multi-panel__empty">无匹配项</div>';
+        }
+
+        function refresh() {
+          updateLabel();
+          renderSelected();
+          renderList();
+        }
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const willOpen = !panel.classList.contains('is-open');
+          closeAllPanels(document.getElementById(cfg.wrapId));
+          if (willOpen) {
+            trigger.classList.add('is-open');
+            panel.classList.add('is-open');
+            refresh();
+          }
+        });
+
+        listEl.addEventListener('change', function (e) {
+          const input = e.target;
+          if (input.tagName !== 'INPUT') return;
+          const val = input.value;
+          const next = cfg.getSelected().slice();
+          if (input.checked) {
+            if (next.indexOf(val) === -1) next.push(val);
+          } else {
+            const idx = next.indexOf(val);
+            if (idx !== -1) next.splice(idx, 1);
+          }
+          cfg.setSelected(next);
+          refresh();
+        });
+
+        selectedEl.addEventListener('click', function (e) {
+          const btn = e.target.closest('[data-remove]');
+          if (!btn) return;
+          const name = btn.getAttribute('data-remove');
+          cfg.setSelected(cfg.getSelected().filter(function (n) { return n !== name; }));
+          refresh();
+        });
+
+        document.getElementById(cfg.selectAllId).addEventListener('click', function () {
+          const kw = (searchEl.value || '').trim().toLowerCase();
+          const visible = cfg.options.filter(function (name) {
+            return !kw || name.toLowerCase().indexOf(kw) !== -1;
+          });
+          const next = cfg.getSelected().slice();
+          visible.forEach(function (name) {
+            if (next.indexOf(name) === -1) next.push(name);
+          });
+          cfg.setSelected(next);
+          refresh();
+        });
+
+        document.getElementById(cfg.clearId).addEventListener('click', function () {
+          cfg.setSelected([]);
+          refresh();
+        });
+
+        searchEl.addEventListener('input', renderList);
+
+        return { refresh: refresh, updateLabel: updateLabel };
+      }
+
+      const productSelect = createMultiSelect({
+        wrapId: 'productWrap',
+        triggerId: 'productTrigger',
+        panelId: 'productPanel',
+        listId: 'productList',
+        selectedId: 'productSelected',
+        countId: 'productCount',
+        labelId: 'productLabel',
+        searchId: 'productSearch',
+        selectAllId: 'productSelectAll',
+        clearId: 'productClear',
+        options: PRODUCTS,
+        getSelected: function () { return selectedProducts; },
+        setSelected: function (v) { selectedProducts = v; }
+      });
+
+      const versionSelect = createMultiSelect({
+        wrapId: 'versionWrap',
+        triggerId: 'versionTrigger',
+        panelId: 'versionPanel',
+        listId: 'versionList',
+        selectedId: 'versionSelected',
+        countId: 'versionCount',
+        labelId: 'versionLabel',
+        searchId: 'versionSearch',
+        selectAllId: 'versionSelectAll',
+        clearId: 'versionClear',
+        options: VERSIONS,
+        getSelected: function () { return selectedVersions; },
+        setSelected: function (v) { selectedVersions = v; }
+      });
+
+      /* Platform single select */
+      (function () {
+        const trigger = document.getElementById('platformTrigger');
+        const panel = document.getElementById('platformPanel');
+        const label = document.getElementById('platformLabel');
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const willOpen = !panel.classList.contains('is-open');
+          closeAllPanels(document.getElementById('platformWrap'));
+          if (willOpen) {
+            trigger.classList.add('is-open');
+            panel.classList.add('is-open');
+          }
+        });
+        panel.addEventListener('click', function (e) {
+          const opt = e.target.closest('.single-option');
+          if (!opt) return;
+          platformValue = opt.getAttribute('data-value');
+          label.textContent = platformValue;
+          panel.querySelectorAll('.single-option').forEach(function (el) {
+            el.classList.toggle('is-active', el === opt);
+          });
+          closeAllPanels();
+        });
+      })();
+
+      document.addEventListener('click', function () { closeAllPanels(); });
+      document.querySelectorAll('.multi-panel, .single-panel, .filter-item').forEach(function (el) {
+        el.addEventListener('click', function (e) { e.stopPropagation(); });
+      });
+
+      function applyFilter() {
+        const start = parseDate(dateStartEl.value);
+        const end = parseDate(dateEndEl.value);
+        let endTs = end ? end.getTime() + 86400000 - 1 : null;
+        const contentKw = (document.getElementById('contentKeyword').value || '').trim().toLowerCase();
+        const uuidKw = (document.getElementById('uuidKeyword').value || '').trim().toLowerCase();
+        const deviceKw = (document.getElementById('deviceKeyword').value || '').trim().toLowerCase();
+
+        filtered = allTickets.filter(function (row) {
+          if (start && row.createdTs < start.getTime()) return false;
+          if (endTs && row.createdTs > endTs) return false;
+          if (platformValue !== '全部' && row.platform !== platformValue) return false;
+          if (selectedProducts.length && selectedProducts.indexOf(row.product) === -1) return false;
+          if (selectedVersions.length && selectedVersions.indexOf(row.version) === -1) return false;
+          if (contentKw && row.summary.toLowerCase().indexOf(contentKw) === -1 && row.content.toLowerCase().indexOf(contentKw) === -1) return false;
+          if (uuidKw && row.uuid.toLowerCase().indexOf(uuidKw) === -1) return false;
+          if (deviceKw && row.deviceId.toLowerCase().indexOf(deviceKw) === -1) return false;
+          return true;
+        });
+
+        currentPage = 1;
+        selectedIds.clear();
+        renderTable();
+      }
+
+      function updateBatchBtn() {
+        batchBtn.disabled = selectedIds.size === 0;
+        batchBtn.textContent = selectedIds.size ? '批量操作（' + selectedIds.size + '）' : '批量操作';
+      }
+
+      function renderTable() {
+        const total = filtered.length;
+        const pages = Math.max(1, Math.ceil(total / pageSize));
+        if (currentPage > pages) currentPage = pages;
+        const start = (currentPage - 1) * pageSize;
+        const pageRows = filtered.slice(start, start + pageSize);
+
+        emptyTip.hidden = pageRows.length > 0;
+        ticketBody.innerHTML = pageRows.map(function (row) {
+          const checked = selectedIds.has(row.id);
+          return '<tr data-id="' + escapeHtml(row.id) + '">' +
+            '<td class="col-check"><span class="cell-check"><input type="checkbox" data-check="' + escapeHtml(row.id) + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
+            '<td title="' + escapeHtml(row.product) + '">' + escapeHtml(row.product) + '</td>' +
+            '<td>' + escapeHtml(row.platform) + '</td>' +
+            '<td>' + escapeHtml(row.version) + '</td>' +
+            '<td title="' + escapeHtml(row.summary) + '">' + escapeHtml(row.summary) + '</td>' +
+            '<td><span class="tag ' + STATUS_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span></td>' +
+            '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(row.uuid) + '">' + escapeHtml(row.uuid) + '</span>' +
+            '<button class="copy-btn" type="button" data-copy="' + escapeHtml(row.uuid) + '" aria-label="复制UUID">' + COPY_ICON + '</button></span></td>' +
+            '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(row.deviceId) + '">' + escapeHtml(row.deviceId) + '</span>' +
+            '<button class="copy-btn" type="button" data-copy="' + escapeHtml(row.deviceId) + '" aria-label="复制设备ID">' + COPY_ICON + '</button></span></td>' +
+            '<td title="' + escapeHtml(row.createdAt) + '">' + escapeHtml(row.createdAt) + '</td>' +
+            '<td title="' + escapeHtml(row.updatedAt) + '">' + escapeHtml(row.updatedAt) + '</td>' +
+            '<td class="col-action"><button class="link" type="button" data-detail="' + escapeHtml(row.id) + '">查看详情</button></td>' +
+            '</tr>';
+        }).join('');
+
+        const pageChecked = pageRows.length && pageRows.every(function (r) { return selectedIds.has(r.id); });
+        checkAll.checked = pageChecked;
+        checkAll.indeterminate = !pageChecked && pageRows.some(function (r) { return selectedIds.has(r.id); });
+
+        renderPagination(total, pages);
+        updateBatchBtn();
+      }
+
+      function renderPagination(total, pages) {
+        const el = document.getElementById('pagination');
+        let btns = '';
+        const maxShow = 5;
+        let from = Math.max(1, currentPage - 2);
+        let to = Math.min(pages, from + maxShow - 1);
+        from = Math.max(1, to - maxShow + 1);
+
+        btns += '<button class="pager__btn" type="button" data-page="prev" ' + (currentPage <= 1 ? 'disabled' : '') + '>' +
+          '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7.5 2L3.5 6l4 4"/></svg></button>';
+        for (let p = from; p <= to; p++) {
+          btns += '<button class="pager__btn' + (p === currentPage ? ' is-active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
+        }
+        btns += '<button class="pager__btn" type="button" data-page="next" ' + (currentPage >= pages ? 'disabled' : '') + '>' +
+          '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4.5 2L8.5 6l-4 4"/></svg></button>';
+
+        el.innerHTML =
+          '<span>共 ' + total + ' 条</span>' +
+          '<div class="pager">' + btns + '</div>' +
+          '<select class="page-size" id="pageSize">' +
+          [10, 20, 50].map(function (n) {
+            return '<option value="' + n + '"' + (pageSize === n ? ' selected' : '') + '>' + n + '条/页</option>';
+          }).join('') +
+          '</select>' +
+          '<span class="page-jump">前往 <input type="number" id="pageJump" min="1" max="' + pages + '" value="' + currentPage + '" /> 页</span>';
+      }
+
+      function findTicket(id) {
+        return allTickets.find(function (r) { return r.id === id; });
+      }
+
+      function openDrawer(id) {
+        const row = findTicket(id);
+        if (!row) return;
+        drawerTicketId = id;
+        drawerStatus = row.status;
+        const body = document.getElementById('drawerBody');
+        body.innerHTML =
+          '<div class="detail-block">' +
+            '<div class="detail-block__title">基本信息</div>' +
+            '<div class="detail-grid">' +
+              '<div class="detail-grid__label">工单ID</div><div class="detail-grid__value">' + escapeHtml(row.id) + '</div>' +
+              '<div class="detail-grid__label">产品</div><div class="detail-grid__value">' + escapeHtml(row.product) + '</div>' +
+              '<div class="detail-grid__label">平台</div><div class="detail-grid__value">' + escapeHtml(row.platform) + '</div>' +
+              '<div class="detail-grid__label">APP版本</div><div class="detail-grid__value">' + escapeHtml(row.version) + '</div>' +
+              '<div class="detail-grid__label">联系邮箱</div><div class="detail-grid__value">' + escapeHtml(row.email || '-') + '</div>' +
+              '<div class="detail-grid__label">UUID</div><div class="detail-grid__value"><span class="cell-id"><span class="cell-id__text">' + escapeHtml(row.uuid) + '</span><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.uuid) + '">' + COPY_ICON + '</button></span></div>' +
+              '<div class="detail-grid__label">设备ID</div><div class="detail-grid__value"><span class="cell-id"><span class="cell-id__text">' + escapeHtml(row.deviceId) + '</span><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.deviceId) + '">' + COPY_ICON + '</button></span></div>' +
+              '<div class="detail-grid__label">创建时间</div><div class="detail-grid__value">' + escapeHtml(row.createdAt) + '</div>' +
+              '<div class="detail-grid__label">更新时间</div><div class="detail-grid__value">' + escapeHtml(row.updatedAt) + '</div>' +
+              '<div class="detail-grid__label">当前状态</div><div class="detail-grid__value"><span class="tag ' + STATUS_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="detail-block">' +
+            '<div class="detail-block__title">问题描述</div>' +
+            '<div class="detail-desc">' + escapeHtml(row.content) + '</div>' +
+          '</div>' +
+          '<div class="detail-block">' +
+            '<div class="detail-block__title">状态更新</div>' +
+            '<div class="status-quick" id="drawerStatusQuick">' +
+              STATUSES.map(function (s) {
+                return '<button class="status-quick__btn' + (s === drawerStatus ? ' is-active' : '') + '" type="button" data-status="' + escapeHtml(s) + '">' + escapeHtml(s) + '</button>';
+              }).join('') +
+            '</div>' +
+          '</div>';
+
+        document.getElementById('detailDrawer').classList.add('is-open');
+        document.getElementById('detailDrawer').setAttribute('aria-hidden', 'false');
+        document.body.classList.add('drawer-open');
+      }
+
+      function closeDrawer() {
+        document.getElementById('detailDrawer').classList.remove('is-open');
+        document.getElementById('detailDrawer').setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('drawer-open');
+        drawerTicketId = null;
+        drawerStatus = null;
+      }
+
+      function saveDrawerStatus() {
+        if (!drawerTicketId || !drawerStatus) return;
+        const row = findTicket(drawerTicketId);
+        if (!row) return;
+        if (row.status === drawerStatus) {
+          showMsg('状态未变更');
+          return;
+        }
+        row.status = drawerStatus;
+        row.updatedAt = formatDateTime(new Date());
+        row.updatedTs = Date.now();
+        showMsg('状态已更新为「' + drawerStatus + '」');
+        closeDrawer();
+        applyFilterKeepPage();
+      }
+
+      function applyFilterKeepPage() {
+        const page = currentPage;
+        applyFilter();
+        currentPage = page;
+        renderTable();
+      }
+
+      function openBatchModal() {
+        if (!selectedIds.size) {
+          showMsg('请先勾选工单', 'error');
+          return;
+        }
+        batchStatus = null;
+        document.getElementById('batchHint').textContent = '已选 ' + selectedIds.size + ' 条工单，请选择目标状态';
+        document.querySelectorAll('#batchStatusQuick .status-quick__btn').forEach(function (btn) {
+          btn.classList.remove('is-active');
+        });
+        document.getElementById('batchModal').classList.add('is-open');
+        document.getElementById('batchModal').setAttribute('aria-hidden', 'false');
+      }
+
+      function closeBatchModal() {
+        document.getElementById('batchModal').classList.remove('is-open');
+        document.getElementById('batchModal').setAttribute('aria-hidden', 'true');
+        batchStatus = null;
+      }
+
+      function confirmBatch() {
+        if (!batchStatus) {
+          showMsg('请选择目标状态', 'error');
+          return;
+        }
+        let count = 0;
+        selectedIds.forEach(function (id) {
+          const row = findTicket(id);
+          if (row) {
+            row.status = batchStatus;
+            row.updatedAt = formatDateTime(new Date());
+            row.updatedTs = Date.now();
+            count += 1;
+          }
+        });
+        closeBatchModal();
+        selectedIds.clear();
+        showMsg('已批量更新 ' + count + ' 条为「' + batchStatus + '」');
+        applyFilterKeepPage();
+      }
+
+      function exportCsv() {
+        if (!filtered.length) {
+          showMsg('暂无数据可导出', 'error');
+          return;
+        }
+        const header = ['工单ID', '产品', '平台', 'APP版本', '问题摘要', '状态', 'UUID', '设备ID', '创建时间', '更新时间'];
+        const lines = [header.join(',')].concat(filtered.map(function (r) {
+          return [r.id, r.product, r.platform, r.version, r.summary, r.status, r.uuid, r.deviceId, r.createdAt, r.updatedAt]
+            .map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; })
+            .join(',');
+        }));
+        const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '用户反馈_' + formatDate(new Date()) + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        showMsg('导出成功');
+      }
+
+      /* Events */
+      document.getElementById('searchBtn').addEventListener('click', applyFilter);
+      document.getElementById('resetBtn').addEventListener('click', function () {
+        setDefaultDates();
+        platformValue = '全部';
+        document.getElementById('platformLabel').textContent = '全部';
+        document.querySelectorAll('#platformPanel .single-option').forEach(function (el) {
+          el.classList.toggle('is-active', el.getAttribute('data-value') === '全部');
+        });
+        selectedProducts = [];
+        selectedVersions = [];
+        productSelect.refresh();
+        versionSelect.refresh();
+        document.getElementById('contentKeyword').value = '';
+        document.getElementById('uuidKeyword').value = '';
+        document.getElementById('deviceKeyword').value = '';
+        applyFilter();
+        showMsg('已重置筛选条件');
+      });
+      document.getElementById('exportBtn').addEventListener('click', exportCsv);
+      document.getElementById('batchBtn').addEventListener('click', openBatchModal);
+
+      ticketBody.addEventListener('click', function (e) {
+        const copyBtn = e.target.closest('[data-copy]');
+        if (copyBtn) {
+          copyText(copyBtn.getAttribute('data-copy'));
+          return;
+        }
+        const detailBtn = e.target.closest('[data-detail]');
+        if (detailBtn) {
+          openDrawer(detailBtn.getAttribute('data-detail'));
+          return;
+        }
+      });
+
+      ticketBody.addEventListener('change', function (e) {
+        const input = e.target.closest('[data-check]');
+        if (!input) return;
+        const id = input.getAttribute('data-check');
+        if (input.checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+        renderTable();
+      });
+
+      checkAll.addEventListener('change', function () {
+        const start = (currentPage - 1) * pageSize;
+        const pageRows = filtered.slice(start, start + pageSize);
+        pageRows.forEach(function (row) {
+          if (checkAll.checked) selectedIds.add(row.id);
+          else selectedIds.delete(row.id);
+        });
+        renderTable();
+      });
+
+      document.getElementById('pagination').addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-page]');
+        if (!btn || btn.disabled) return;
+        const val = btn.getAttribute('data-page');
+        const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+        if (val === 'prev') currentPage = Math.max(1, currentPage - 1);
+        else if (val === 'next') currentPage = Math.min(pages, currentPage + 1);
+        else currentPage = Number(val);
+        renderTable();
+      });
+
+      document.getElementById('pagination').addEventListener('change', function (e) {
+        if (e.target.id === 'pageSize') {
+          pageSize = Number(e.target.value) || 10;
+          currentPage = 1;
+          renderTable();
+        }
+      });
+
+      document.getElementById('pagination').addEventListener('keydown', function (e) {
+        if (e.target.id === 'pageJump' && e.key === 'Enter') {
+          const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+          let p = Number(e.target.value) || 1;
+          currentPage = Math.min(pages, Math.max(1, p));
+          renderTable();
+        }
+      });
+
+      document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+      document.getElementById('drawerCancel').addEventListener('click', closeDrawer);
+      document.getElementById('drawerSave').addEventListener('click', saveDrawerStatus);
+      document.getElementById('detailDrawer').addEventListener('click', function (e) {
+        if (e.target === this) closeDrawer();
+        const copyBtn = e.target.closest('[data-copy]');
+        if (copyBtn) copyText(copyBtn.getAttribute('data-copy'));
+        const statusBtn = e.target.closest('#drawerStatusQuick [data-status]');
+        if (statusBtn) {
+          drawerStatus = statusBtn.getAttribute('data-status');
+          document.querySelectorAll('#drawerStatusQuick .status-quick__btn').forEach(function (btn) {
+            btn.classList.toggle('is-active', btn === statusBtn);
+          });
+        }
+      });
+
+      document.getElementById('batchClose').addEventListener('click', closeBatchModal);
+      document.getElementById('batchCancel').addEventListener('click', closeBatchModal);
+      document.getElementById('batchConfirm').addEventListener('click', confirmBatch);
+      document.getElementById('batchModal').addEventListener('click', function (e) {
+        if (e.target === this) closeBatchModal();
+      });
+      document.getElementById('batchStatusQuick').addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-status]');
+        if (!btn) return;
+        batchStatus = btn.getAttribute('data-status');
+        document.querySelectorAll('#batchStatusQuick .status-quick__btn').forEach(function (el) {
+          el.classList.toggle('is-active', el === btn);
+        });
+      });
+
+      document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('is-collapsed');
+      });
+
+      document.querySelectorAll('[data-group-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          btn.closest('[data-group]').classList.toggle('is-open');
+        });
+      });
+
+      setDefaultDates();
+      productSelect.refresh();
+      versionSelect.refresh();
+      applyFilter();
+    })();
+  </script>
+</body>
+</html>
