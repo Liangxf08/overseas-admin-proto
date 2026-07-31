@@ -881,7 +881,8 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 80%;
+      width: var(--drawer-width, 960px);
+      max-width: calc(100vw - 32px);
       height: 100%;
       background: #fff;
       box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);

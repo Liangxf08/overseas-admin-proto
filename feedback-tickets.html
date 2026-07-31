@@ -28,25 +28,25 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      min-width: 1100px;
+      min-width: 1280px;
       overflow: hidden;
     }
 
     .header {
       flex-shrink: 0;
-      height: 56px;
+      height: var(--header-height, 56px);
       display: flex;
       align-items: center;
-      background: #1B2B4C;
+      background: var(--color-bg-header, #1B2B4C);
       color: #fff;
-      z-index: 100;
+      z-index: 1000;
     }
 
     .header-left {
       display: flex;
       align-items: center;
       gap: 8px;
-      width: 240px;
+      width: var(--sidebar-width, 224px);
       height: 100%;
       padding-left: 16px;
       flex-shrink: 0;
@@ -70,7 +70,7 @@
       height: 32px;
       padding: 0 8px;
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.65);
+      color: var(--color-text-header, rgba(255, 255, 255, 0.7));
       white-space: nowrap;
     }
 
@@ -89,7 +89,7 @@
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 16px;
       padding-right: 16px;
     }
 
@@ -133,15 +133,17 @@
     .body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
 
     .sidebar {
-      width: 240px;
       flex-shrink: 0;
-      background: #fff;
-      border-right: 1px solid #E5E6EB;
+      width: var(--sidebar-width, 224px);
+      background: var(--color-bg-container, #fff);
+      border-right: 1px solid var(--color-border-2, #E5E6EB);
       display: flex;
       flex-direction: column;
+      transition: width 0.2s ease;
+      z-index: 900;
     }
 
-    .sidebar.is-collapsed { width: 64px; }
+    .sidebar.is-collapsed { width: var(--sidebar-width-collapsed, 64px); }
     .sidebar.is-collapsed .menu-group__title-text,
     .sidebar.is-collapsed .menu-item__text,
     .sidebar.is-collapsed .menu-group__arrow { display: none; }
@@ -153,40 +155,82 @@
     }
     .sidebar.is-collapsed .menu-children { display: none !important; }
 
-    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 0; }
+    .sidebar-nav {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .menu-group { margin: 0; }
 
     .menu-group__title {
-      width: 100%;
-      height: 44px;
       display: flex;
       align-items: center;
       gap: 8px;
+      width: 100%;
+      height: 44px;
+      margin: 0;
       padding: 0 16px;
-      color: #1D2129;
-      font-size: 14px;
+      color: var(--color-text-1, #1D2129);
+      font-size: var(--font-size-body-2, 14px);
+      line-height: 22px;
+      box-sizing: border-box;
+      transition: background 0.15s, color 0.15s;
     }
 
-    .menu-group__title:hover { background: #F7F8FA; }
-    .menu-icon { width: 18px; height: 18px; flex-shrink: 0; }
-    .menu-group__title-text { flex: 1; text-align: left; }
-    .menu-group__arrow {
-      width: 12px; height: 12px; color: #86909C;
-      transition: transform 0.15s;
+    .menu-group__title:hover { background: var(--color-bg-table-hover, #F5F7FA); }
+
+    .menu-group__title .menu-icon,
+    .menu-group__title svg.menu-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--color-text-1, #1D2129);
     }
-    .menu-group.is-open .menu-group__arrow { transform: rotate(180deg); }
-    .menu-children { display: none; }
-    .menu-group.is-open .menu-children { display: block; }
+
+    .menu-group__title-text {
+      flex: 1;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .menu-group__arrow {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      color: var(--color-text-1, #1D2129);
+      transition: transform 0.2s;
+    }
+
+    .menu-group.is-collapsed .menu-group__arrow { transform: rotate(-90deg); }
+    .menu-group.is-collapsed .menu-children { display: none; }
+    .menu-children { padding: 0; }
 
     .menu-item {
       display: flex;
       align-items: center;
+      gap: 8px;
+      width: 100%;
       height: 44px;
+      margin: 0;
       padding: 0 16px 0 40px;
-      font-size: 14px;
-      color: #1D2129;
+      color: var(--color-text-1, #1D2129);
+      font-size: var(--font-size-body-2, 14px);
+      line-height: 22px;
+      box-sizing: border-box;
+      transition: background 0.15s, color 0.15s;
     }
 
-    .menu-item:hover { background: #F7F8FA; }
+    .menu-item .menu-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: currentColor;
+    }
+
+    .menu-item:hover { background: var(--color-bg-table-hover, #F5F7FA); }
     .menu-item.is-active {
       background: var(--color-primary-bg, #E8F3FF);
       color: var(--color-primary);
@@ -195,19 +239,23 @@
 
     .sidebar-footer {
       flex-shrink: 0;
-      padding: 8px 16px 16px;
-      border-top: 1px solid #E5E6EB;
+      height: 48px;
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
     }
 
     .sidebar-collapse-btn {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 4px;
-      color: #4E5969;
+      border-radius: var(--border-radius-medium, 4px);
+      color: var(--color-text-1, #1D2129);
     }
-    .sidebar-collapse-btn:hover { background: #F2F3F5; }
+    .sidebar-collapse-btn:hover { background: var(--color-bg-table-hover, #F5F7FA); }
     .sidebar-collapse-btn svg { width: 18px; height: 18px; }
 
     .main {
@@ -234,32 +282,22 @@
       flex-shrink: 0;
       display: flex;
       flex-wrap: wrap;
-      gap: 12px 16px;
+      gap: 8px;
       padding: 16px;
-      align-items: flex-end;
+      align-items: center;
     }
 
     .filter-item {
-      width: 220px;
+      width: 200px;
       position: relative;
     }
 
     .filter-item--date { width: 280px; }
-    .filter-item--wide { width: 240px; }
-
-    .filter-item__label {
-      display: block;
-      margin-bottom: 4px;
-      font-size: 14px;
-      color: #1D2129;
-      line-height: 22px;
-    }
 
     .filter-actions {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding-bottom: 0;
     }
 
     .input, .select-trigger {
@@ -270,40 +308,220 @@
       border-radius: 4px;
       background: #fff;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .input::placeholder { color: #86909C; }
-    .input:hover, .select-trigger:hover { border-color: #94BFFF; }
-    .input:focus, .select-trigger:focus, .select-trigger.is-open { border-color: var(--color-primary); }
+    .input::placeholder { color: var(--color-text-4, #C9CDD4); }
+    .input:hover, .select-trigger:hover { border-color: var(--color-primary); }
+    .input:focus, .select-trigger:focus, .select-trigger.is-open {
+      border-color: var(--color-primary);
+      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
+    }
 
-    .date-range {
+    .date-range-trigger {
+      width: 100%;
+      height: 32px;
+      padding: 0 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      height: 32px;
-      padding: 0 8px 0 12px;
-      border: 1px solid #E5E6EB;
+      border: 1px solid var(--color-border-2, #E5E6EB);
       border-radius: 4px;
       background: #fff;
-      transition: border-color 0.15s;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .date-range:hover { border-color: #94BFFF; }
-    .date-range:focus-within { border-color: var(--color-primary); }
+    .date-range-trigger:hover { border-color: var(--color-primary); }
+    .date-range-trigger.is-open {
+      border-color: var(--color-primary);
+      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
+    }
 
-    .date-range input[type="date"] {
+    .date-range-trigger__text {
       flex: 1;
       min-width: 0;
-      height: 28px;
-      border: none;
-      outline: none;
-      background: transparent;
-      color: #1D2129;
-      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      color: var(--color-text-1, #1D2129);
     }
 
-    .date-range__sep { color: #C9CDD4; flex-shrink: 0; }
+    .date-range-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
+
+    .date-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      z-index: 40;
+      display: none;
+      background: #fff;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .date-panel.is-open {
+      display: flex;
+      align-items: stretch;
+    }
+
+    .date-panel__shortcuts {
+      width: 112px;
+      flex-shrink: 0;
+      padding: 12px 0;
+      border-right: 1px solid var(--color-border-2, #E5E6EB);
+    }
+
+    .date-shortcut {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 36px;
+      padding: 0 16px;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1, #1D2129);
+      text-align: left;
+      background: transparent;
+    }
+
+    .date-shortcut:hover { background: var(--color-bg-table-hover, #F5F7FA); }
+    .date-shortcut.is-active {
+      background: var(--color-bg-table-hover, #F5F7FA);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    .date-panel__calendars {
+      display: flex;
+      align-items: stretch;
+      padding: 16px 8px 20px;
+    }
+
+    .date-cal {
+      width: 308px;
+      padding: 0 20px;
+    }
+
+    .date-cal + .date-cal {
+      border-left: 1px solid var(--color-border-2, #E5E6EB);
+    }
+
+    .date-cal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 36px;
+      margin-bottom: 12px;
+    }
+
+    .date-cal__title {
+      flex: 1;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-1, #1D2129);
+    }
+
+    .date-cal__nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .date-cal__btn {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      color: var(--color-text-3, #86909C);
+    }
+
+    .date-cal__btn:hover {
+      background: var(--color-bg-table-hover, #F5F7FA);
+      color: var(--color-primary);
+    }
+
+    .date-cal__btn svg { width: 12px; height: 12px; }
+
+    .date-cal__week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      margin-bottom: 8px;
+    }
+
+    .date-cal__week span {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--color-text-3, #86909C);
+    }
+
+    .date-cal__grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .date-cal__day {
+      position: relative;
+      height: 40px;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--color-text-1, #1D2129);
+      background: transparent;
+      z-index: 1;
+    }
+
+    .date-cal__day.is-out { color: var(--color-text-4, #C9CDD4); }
+
+    .date-cal__day.is-in-range::before {
+      content: '';
+      position: absolute;
+      inset: 4px 0;
+      background: var(--color-primary-1, #E8F3FF);
+      z-index: -1;
+    }
+
+    .date-cal__day.is-range-start.is-in-range::before { left: 50%; right: 0; }
+    .date-cal__day.is-range-end.is-in-range::before { left: 0; right: 50%; }
+    .date-cal__day.is-range-start.is-range-end.is-in-range::before { display: none; }
+
+    .date-cal__day-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .date-cal__day:hover:not(.is-range-start):not(.is-range-end) .date-cal__day-num {
+      background: var(--color-bg-table-hover, #F5F7FA);
+    }
+
+    .date-cal__day.is-range-start .date-cal__day-num,
+    .date-cal__day.is-range-end .date-cal__day-num {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .date-cal__day.is-today:not(.is-range-start):not(.is-range-end) .date-cal__day-num {
+      box-shadow: inset 0 0 0 1px var(--color-primary);
+      color: var(--color-primary);
+    }
 
     .select-trigger {
       display: flex;
@@ -323,7 +541,7 @@
       color: #1D2129;
     }
 
-    .select-trigger__text .muted { color: #86909C; }
+    .select-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
     .select-trigger__arrow {
       width: 12px; height: 12px; color: #86909C; flex-shrink: 0;
       transition: transform 0.15s;
@@ -332,9 +550,10 @@
 
     .single-panel {
       position: absolute;
-      top: calc(100% + 4px);
+      top: 100%;
       left: 0;
       right: 0;
+      margin-top: 4px;
       background: #fff;
       border: 1px solid #E5E6EB;
       border-radius: 4px;
@@ -344,28 +563,51 @@
       max-height: 240px;
       overflow-y: auto;
       padding: 4px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
     }
 
     .single-panel.is-open { display: block; }
+    .single-panel.is-dropup {
+      top: auto;
+      bottom: 100%;
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+
+    .single-panel::-webkit-scrollbar { width: 6px; height: 6px; }
+    .single-panel::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+    .single-panel::-webkit-scrollbar-track { background: transparent; }
+    .single-panel::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+    .single-panel::-webkit-scrollbar-thumb:hover { background: rgba(201, 205, 212, 0.85); }
+    .single-panel::-webkit-scrollbar-corner { background: transparent; }
 
     .single-option {
       display: flex;
       align-items: center;
+      width: 100%;
       height: 36px;
       padding: 0 12px;
       font-size: 14px;
       color: #1D2129;
       cursor: pointer;
+      background: transparent;
+      text-align: left;
     }
 
     .single-option:hover { background: #F5F7FA; }
-    .single-option.is-active { color: var(--color-primary); background: #E8F3FF; }
+    .single-option.is-active { color: var(--color-primary); background: transparent; }
 
     .multi-panel {
       position: absolute;
-      top: calc(100% + 4px);
+      top: 100%;
       left: 0;
       width: 480px;
+      margin: 4px 0 0;
+      height: calc(12px + 32px + 8px + 8px + 22px + 1px + 36px * 6);
       background: #fff;
       border: 1px solid #E5E6EB;
       border-radius: 4px;
@@ -373,6 +615,7 @@
       z-index: 30;
       display: none;
       overflow: hidden;
+      box-sizing: border-box;
     }
 
     .multi-panel.is-open { display: flex; align-items: stretch; }
@@ -380,6 +623,7 @@
     .multi-panel__left,
     .multi-panel__right {
       width: 50%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -396,6 +640,8 @@
       padding: 0 10px;
       border: 1px solid #E5E6EB;
       border-radius: 4px;
+      flex-shrink: 0;
+      box-sizing: border-box;
     }
 
     .multi-panel__search svg { width: 14px; height: 14px; color: #86909C; flex-shrink: 0; }
@@ -407,30 +653,51 @@
       outline: none;
       background: transparent;
     }
+    .multi-panel__search input::placeholder { color: var(--color-text-4, #C9CDD4); }
 
     .multi-panel__toolbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       padding: 0 12px 8px;
-      font-size: 12px;
-      color: #86909C;
+      font-size: 13px;
+      line-height: 22px;
+      color: #4E5969;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+    }
+
+    .multi-panel__toolbar--right {
+      justify-content: space-between;
+      height: 40px;
+      padding: 0 12px;
+      box-sizing: border-box;
+      background: #F7F8FA;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
     }
 
     .multi-panel__link {
       color: var(--color-primary);
-      font-size: 12px;
+      font-size: 13px;
     }
 
     .multi-panel__list {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding-bottom: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
     }
 
-    .multi-panel__left .multi-panel__list { max-height: 216px; }
-    .multi-panel__right .multi-panel__list { max-height: 256px; }
+    .multi-panel__list::-webkit-scrollbar { width: 6px; height: 6px; }
+    .multi-panel__list::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+    .multi-panel__list::-webkit-scrollbar-track { background: transparent; }
+    .multi-panel__list::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+    .multi-panel__list::-webkit-scrollbar-thumb:hover { background: rgba(201, 205, 212, 0.85); }
+    .multi-panel__list::-webkit-scrollbar-corner { background: transparent; }
 
     .multi-option {
       display: flex;
@@ -446,15 +713,58 @@
 
     .multi-option:hover { background: #F5F7FA; }
 
-    .multi-option input[type="checkbox"] {
-      appearance: none;
+    .multi-option__label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .multi-option__label > span:not(.select-option-icon) {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .select-option-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 16px;
       height: 16px;
-      border: 1px solid #C9CDD4;
+      flex-shrink: 0;
+    }
+
+    .select-option-icon img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .multi-option input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      border: 1px solid var(--color-border-2, #E5E6EB);
       border-radius: 2px;
       flex-shrink: 0;
       cursor: pointer;
+      background: #fff;
+      box-sizing: border-box;
       transition: border-color 0.15s, background 0.15s;
+    }
+
+    .multi-option:hover input[type="checkbox"],
+    .multi-option input[type="checkbox"]:hover {
+      border-color: var(--color-primary);
     }
 
     .multi-option input[type="checkbox"]:checked {
@@ -474,6 +784,16 @@
 
     .multi-selected:hover { background: #F5F7FA; }
     .multi-selected__name {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .multi-selected__name > span:not(.select-option-icon) {
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -520,13 +840,17 @@
       border: 1px solid #E5E6EB;
     }
     .btn--default:hover { color: var(--color-primary); border-color: var(--color-primary); }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn:disabled {
+      color: #C9CDD4;
+      border-color: #E5E6EB;
+      background: #F7F8FA;
+      cursor: not-allowed;
+    }
 
     .table-shell {
       flex: 1;
       min-height: 0;
       margin: 0 16px;
-      border: 1px solid #E5E6EB;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -537,6 +861,8 @@
       flex: 1;
       min-height: 0;
       overflow: auto;
+      position: relative;
+      scrollbar-gutter: stable;
     }
 
     .data-table {
@@ -554,6 +880,7 @@
       font-size: 14px;
       line-height: 22px;
       text-align: left;
+      border-right: 1px solid #E5E6EB;
       border-bottom: 1px solid #E5E6EB;
       vertical-align: middle;
       overflow: hidden;
@@ -562,25 +889,53 @@
       box-sizing: border-box;
     }
 
+    .data-table th:first-child,
+    .data-table td:first-child { border-left: 1px solid #E5E6EB; }
+
+    .data-table thead th { border-top: 1px solid #E5E6EB; }
+
     .data-table th {
       position: sticky;
       top: 0;
       z-index: 2;
-      background: #F7F8FA;
+      background: var(--color-bg-table-header, #F7F8FA);
       font-weight: 600;
-      color: #1D2129;
+      color: var(--color-text-2, #4E5969);
     }
 
-    .data-table tbody tr:hover td { background: #F5F7FA; }
+    .data-table tbody tr:hover td { background: var(--color-bg-table-hover, #F5F7FA); }
+
+    .th-sort {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+      color: inherit;
+      font: inherit;
+      font-weight: 600;
+    }
+
+    .th-sort__icons {
+      display: inline-flex;
+      flex-direction: column;
+      width: 10px;
+      color: var(--color-text-4, #C9CDD4);
+      line-height: 0;
+    }
+
+    .th-sort__icons svg { width: 10px; height: 8px; }
+    .th-sort.is-asc .th-sort__icons .asc,
+    .th-sort.is-desc .th-sort__icons .desc { color: var(--color-primary); }
 
     .col-check { width: 48px; text-align: center; }
-    .col-product { width: 10%; }
+    .col-product { width: 14%; }
     .col-platform { width: 7%; }
     .col-version { width: 8%; }
     .col-summary { width: 16%; }
     .col-status { width: 8%; }
-    .col-uuid { width: 12%; }
-    .col-device { width: 12%; }
+    .col-uuid { width: 10%; }
+    .col-device { width: 10%; }
     .col-time { width: 11%; }
 
     .col-action {
@@ -594,8 +949,8 @@
       box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
     }
 
-    th.col-action { z-index: 3; background: #F7F8FA; }
-    .data-table tbody tr:hover td.col-action { background: #F5F7FA; }
+    th.col-action { z-index: 3; background: var(--color-bg-table-header, #F7F8FA); }
+    .data-table tbody tr:hover td.col-action { background: var(--color-bg-table-hover, #F5F7FA); }
 
     .cell-check {
       display: inline-flex;
@@ -606,15 +961,30 @@
 
     .cell-check input[type="checkbox"] {
       appearance: none;
+      -webkit-appearance: none;
       width: 16px;
       height: 16px;
-      border: 1px solid #C9CDD4;
+      margin: 0;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      border: 1px solid var(--color-border-3, #C9CDD4);
       border-radius: 2px;
+      background: #fff;
       cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .cell-check input[type="checkbox"]:hover {
+      border-color: var(--color-primary);
     }
 
     .cell-check input[type="checkbox"]:checked {
       background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+      border-color: var(--color-primary);
+    }
+
+    .cell-check input[type="checkbox"]:indeterminate {
+      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
       border-color: var(--color-primary);
     }
 
@@ -638,7 +1008,7 @@
       color: #86909C;
     }
 
-    .copy-btn:hover { color: var(--color-primary); background: #E8F3FF; }
+    .copy-btn:hover { color: var(--color-primary); background: var(--color-primary-bg, #E8F3FF); }
     .copy-btn svg { width: 14px; height: 14px; }
 
     .tag {
@@ -646,7 +1016,7 @@
       align-items: center;
       justify-content: center;
       min-width: 52px;
-      height: 24px;
+      height: 28px;
       padding: 0 8px;
       border-radius: 2px;
       font-size: 12px;
@@ -654,20 +1024,49 @@
       white-space: nowrap;
     }
 
-    .tag--pending { background: #FFF7E8; color: #FF7D00; }
-    .tag--processing { background: #E8F3FF; color: #165DFF; }
-    .tag--done { background: #E8FFEA; color: #00B42A; }
-    .tag--ignored { background: #F2F3F5; color: #86909C; }
+    .tag--pending { background: var(--color-warning-1, #FFF7E8); color: var(--color-warning-6, #FF7D00); }
+    .tag--processing { background: var(--color-primary-1, #E8F3FF); color: var(--color-primary-6, #165DFF); }
+    .tag--done { background: var(--color-success-1, #E8FFEA); color: var(--color-success-6, #00B42A); }
+    .tag--ignored { background: var(--color-fill-2, #F2F3F5); color: var(--color-text-3, #86909C); }
+
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1, #1D2129);
+      white-space: nowrap;
+    }
+
+    .status-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot--pending::before { background: var(--color-warning-6, #FF7D00); }
+    .status-dot--processing::before { background: var(--color-primary-6, #165DFF); }
+    .status-dot--done::before { background: var(--color-success-6, #00B42A); }
+    .status-dot--ignored::before { background: var(--color-text-3, #86909C); }
 
     .link { color: var(--color-primary); font-size: 14px; }
     .link:hover { opacity: 0.85; }
 
     .empty-tip {
-      padding: 48px 16px;
-      text-align: center;
+      position: absolute;
+      inset: 48px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #86909C;
       font-size: 14px;
+      pointer-events: none;
     }
+
+    .empty-tip[hidden] { display: none; }
 
     .pagination {
       flex-shrink: 0;
@@ -677,8 +1076,12 @@
       flex-wrap: wrap;
       gap: 8px;
       padding: 12px 16px 16px;
-      font-size: 14px;
-      color: #4E5969;
+      font-size: var(--font-size-body-2, 14px);
+      color: var(--color-text-2, #4E5969);
+    }
+
+    .pagination__total {
+      color: var(--color-text-1, #1D2129);
     }
 
     .pager { display: inline-flex; align-items: center; gap: 4px; }
@@ -687,10 +1090,10 @@
       min-width: 32px;
       height: 32px;
       padding: 0 8px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      background: #fff;
-      color: #1D2129;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: var(--border-radius-medium, 4px);
+      background: var(--color-bg-container, #fff);
+      color: var(--color-text-1, #1D2129);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -704,19 +1107,24 @@
     .pager__btn.is-active {
       background: var(--color-primary);
       border-color: var(--color-primary);
-      color: #fff;
+      color: var(--color-text-inverse, #fff);
     }
 
-    .pager__btn:disabled { color: #C9CDD4; cursor: not-allowed; }
+    .pager__btn:disabled { color: var(--color-text-4, #C9CDD4); cursor: not-allowed; }
     .pager__btn svg { width: 12px; height: 12px; }
 
-    .page-size {
-      height: 32px;
-      padding: 0 8px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      background: #fff;
-      outline: none;
+    .page-size-wrap {
+      position: relative;
+      width: 112px;
+      flex-shrink: 0;
+    }
+
+    .page-size-wrap .select-trigger { width: 100%; }
+
+    .page-size-wrap .single-panel {
+      min-width: 100%;
+      right: 0;
+      left: auto;
     }
 
     .page-jump {
@@ -729,10 +1137,16 @@
       width: 48px;
       height: 32px;
       padding: 0 8px;
-      border: 1px solid #E5E6EB;
+      border: 1px solid var(--color-border-2, #E5E6EB);
       border-radius: 4px;
       text-align: center;
       outline: none;
+    }
+
+    .page-jump input:hover { border-color: var(--color-primary); }
+    .page-jump input:focus {
+      border-color: var(--color-primary);
+      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
     }
 
     .page-msg {
@@ -767,12 +1181,11 @@
     .page-msg--success .page-msg__icon { color: #00B42A; }
     .page-msg--error .page-msg__icon { color: #F53F3F; }
 
-    /* Drawer */
     .drawer-mask {
       position: fixed;
       inset: 0;
-      background: rgba(29, 33, 41, 0.6);
-      z-index: 200;
+      background: var(--color-bg-mask, rgba(29, 33, 41, 0.6));
+      z-index: 1050;
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.2s, visibility 0.2s;
@@ -784,7 +1197,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 520px;
+      width: var(--drawer-width, 960px);
       max-width: calc(100vw - 32px);
       height: 100%;
       background: #fff;
@@ -804,78 +1217,115 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #E5E6EB;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
     }
 
     .drawer__title { font-size: 16px; font-weight: 500; }
 
-    .drawer__close {
+    .drawer__close,
+    .modal__close {
       width: 28px; height: 28px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       border-radius: 4px;
-      color: #86909C;
+      color: var(--color-text-3, #86909C);
     }
 
-    .drawer__close:hover { background: #F2F3F5; color: #1D2129; }
-    .drawer__close svg { width: 12px; height: 12px; }
+    .drawer__close:hover,
+    .modal__close:hover { background: var(--color-fill-2, #F2F3F5); color: #1D2129; }
+    .drawer__close svg,
+    .modal__close svg { width: 12px; height: 12px; }
 
     .drawer__body {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding: 24px;
+      padding: 24px var(--size-10, 40px) 8px;
     }
 
     .drawer__footer {
       flex-shrink: 0;
-      padding: 16px 24px 20px;
-      border-top: 1px solid #E5E6EB;
+      padding: 16px 24px;
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
       display: flex;
       justify-content: flex-end;
       gap: 12px;
     }
 
-    .detail-block { margin-bottom: 24px; }
+    .detail-block { margin: 0; }
+    .detail-block + .detail-block { margin-top: 24px; }
+
+    .detail-block--info {
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+    }
+
     .detail-block__title {
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 12px;
-      color: #1D2129;
+      line-height: 22px;
+      margin: 0 0 16px;
+      color: var(--color-text-1, #1D2129);
     }
 
     .detail-grid {
       display: grid;
-      grid-template-columns: 96px 1fr;
-      gap: 12px 16px;
-      font-size: 14px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px 40px;
+      align-items: center;
     }
 
-    .detail-grid__label { color: #86909C; line-height: 22px; }
-    .detail-grid__value {
-      color: #1D2129;
+    .detail-field {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      min-height: 28px;
+      gap: var(--spacing-sm, 8px);
+    }
+
+    .detail-field__label {
+      flex-shrink: 0;
+      width: 72px;
+      font-size: 14px;
       line-height: 22px;
+      color: var(--color-text-3, #86909C);
+      box-sizing: border-box;
+    }
+
+    .detail-field__value {
+      flex: 1;
+      min-width: 0;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1, #1D2129);
       word-break: break-all;
-      white-space: pre-wrap;
     }
 
     .detail-desc {
+      height: 120px;
+      overflow-y: auto;
       padding: 12px;
-      background: #F7F8FA;
+      border: 1px solid var(--color-border-2, #E5E6EB);
       border-radius: 4px;
+      background: var(--color-fill-1, #F7F8FA);
       font-size: 14px;
       line-height: 22px;
-      color: #1D2129;
+      color: var(--color-text-1, #1D2129);
       white-space: pre-wrap;
       word-break: break-word;
-      min-height: 80px;
+      box-sizing: border-box;
     }
 
     .status-quick {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      padding-top: 0;
     }
 
     .status-quick__btn {
@@ -891,20 +1341,19 @@
     .status-quick__btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .status-quick__btn.is-active {
       border-color: var(--color-primary);
-      background: #E8F3FF;
       color: var(--color-primary);
+      background: transparent;
     }
 
     /* Modal */
     .modal-mask {
       position: fixed;
       inset: 0;
-      background: rgba(29, 33, 41, 0.6);
-      z-index: 300;
+      z-index: 1050;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      background: var(--color-bg-mask, rgba(29, 33, 41, 0.6));
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.2s, visibility 0.2s;
@@ -913,13 +1362,18 @@
     .modal-mask.is-open { opacity: 1; visibility: visible; }
 
     .modal {
-      width: 480px;
-      max-width: 100%;
-      background: #fff;
+      width: 800px;
+      max-width: calc(100vw - 32px);
+      max-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg-container, #fff);
       border-radius: 8px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       overflow: hidden;
     }
+
+    .modal--form { overflow: visible; }
 
     .modal__header {
       height: 48px;
@@ -927,37 +1381,72 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #E5E6EB;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
     }
 
-    .modal__title { font-size: 16px; font-weight: 500; }
+    .modal__title { font-size: 16px; font-weight: 500; line-height: 24px; color: #1D2129; }
 
-    .modal__body { padding: 24px; }
+    .modal__body {
+      padding: 24px 24px 8px;
+      overflow: visible;
+    }
 
     .modal__hint {
-      margin-bottom: 16px;
+      margin: 0 0 20px;
       font-size: 14px;
-      color: #4E5969;
+      line-height: 22px;
+      color: var(--color-text-2, #4E5969);
     }
 
     .modal__footer {
-      padding: 16px 24px 20px;
       display: flex;
+      align-items: center;
       justify-content: flex-end;
       gap: 12px;
+      padding: 16px 24px;
+      flex-shrink: 0;
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
     }
 
-    .form-row { margin-bottom: 0; }
-    .form-row__label {
-      display: block;
-      margin-bottom: 8px;
+    .form-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .form-item__label {
+      width: 120px;
+      flex-shrink: 0;
+      padding: 5px 8px;
       font-size: 14px;
+      line-height: 22px;
       color: #1D2129;
+      text-align: left;
+      box-sizing: border-box;
     }
 
-    .form-row__label .req { color: #F53F3F; margin-left: 2px; }
+    .form-item__label .req { color: var(--color-danger-6, #F53F3F); margin-left: 2px; }
 
-    body.drawer-open { overflow: hidden; }
+    .form-item__control {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .drawer .form-item__control {
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1, #1D2129);
+      word-break: break-all;
+    }
+
+    body.drawer-open,
+    body.modal-open { overflow: hidden; }
   </style>
 </head>
 <body>
@@ -1003,7 +1492,7 @@
     <div class="body">
       <aside class="sidebar" id="sidebar">
         <nav class="sidebar-nav">
-          <div class="menu-group is-open" data-group>
+          <div class="menu-group" data-group>
             <button class="menu-group__title" type="button" data-group-toggle>
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
@@ -1014,10 +1503,17 @@
               </svg>
             </button>
             <ul class="menu-children">
-              <li><a href="feedback-tickets.html" class="menu-item is-active"><span class="menu-item__text">用户反馈</span></a></li>
+              <li>
+                <a href="feedback-tickets.html" class="menu-item is-active">
+                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <span class="menu-item__text">用户反馈</span>
+                </a>
+              </li>
             </ul>
           </div>
-          <div class="menu-group" data-group>
+          <div class="menu-group is-collapsed" data-group>
             <button class="menu-group__title" type="button" data-group-toggle>
               <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
@@ -1028,7 +1524,14 @@
               </svg>
             </button>
             <ul class="menu-children">
-              <li><a href="#" class="menu-item"><span class="menu-item__text">下载任务</span></a></li>
+              <li>
+                <a href="#" class="menu-item">
+                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>
+                  </svg>
+                  <span class="menu-item__text">下载任务</span>
+                </a>
+              </li>
             </ul>
           </div>
         </nav>
@@ -1044,32 +1547,43 @@
       <main class="main">
         <div class="content-card">
           <div class="filter-bar">
-            <div class="filter-item filter-item--date">
-              <label class="filter-item__label">日期</label>
-              <div class="date-range">
-                <input type="date" id="dateStart" />
-                <span class="date-range__sep">至</span>
-                <input type="date" id="dateEnd" />
+            <div class="filter-item filter-item--date" id="dateRangeWrap">
+              <button class="date-range-trigger" type="button" id="dateRangeTrigger">
+                <span class="date-range-trigger__text" id="dateRangeLabel">日期：-</span>
+              </button>
+              <div class="date-panel" id="datePanel">
+                <div class="date-panel__shortcuts" id="dateShortcuts">
+                  <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
+                  <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
+                  <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
+                  <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
+                  <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
+                </div>
+                <div class="date-panel__calendars">
+                  <div class="date-cal" id="dateCalLeft"></div>
+                  <div class="date-cal" id="dateCalRight"></div>
+                </div>
               </div>
             </div>
 
             <div class="filter-item" id="platformWrap">
-              <label class="filter-item__label">平台</label>
               <button class="select-trigger" type="button" id="platformTrigger">
-                <span class="select-trigger__text" id="platformLabel">全部</span>
+                <span class="select-trigger__text" id="platformLabel">平台：全部</span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
               </button>
               <div class="single-panel" id="platformPanel">
-                <div class="single-option is-active" data-value="全部">全部</div>
-                <div class="single-option" data-value="Android">Android</div>
-                <div class="single-option" data-value="iOS">iOS</div>
+                <button class="single-option is-active" type="button" data-value="全部">全部</button>
+                <button class="single-option" type="button" data-value="Android">Android</button>
+                <button class="single-option" type="button" data-value="iOS">iOS</button>
               </div>
             </div>
 
-            <div class="filter-item filter-item--wide" id="productWrap">
-              <label class="filter-item__label">产品</label>
+            <div class="filter-item" id="productWrap">
               <button class="select-trigger" type="button" id="productTrigger">
-                <span class="select-trigger__text" id="productLabel"><span class="muted">请选择</span></span>
+                <span class="select-trigger__text" id="productLabel">产品：<span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
               </button>
               <div class="multi-panel" id="productPanel">
@@ -1084,7 +1598,7 @@
                   <div class="multi-panel__list" id="productList"></div>
                 </div>
                 <div class="multi-panel__right">
-                  <div class="multi-panel__toolbar">
+                  <div class="multi-panel__toolbar multi-panel__toolbar--right">
                     <span id="productCount">已选择 0 项</span>
                     <button class="multi-panel__link" type="button" id="productClear">清空</button>
                   </div>
@@ -1093,10 +1607,9 @@
               </div>
             </div>
 
-            <div class="filter-item filter-item--wide" id="versionWrap">
-              <label class="filter-item__label">APP版本</label>
+            <div class="filter-item" id="versionWrap">
               <button class="select-trigger" type="button" id="versionTrigger">
-                <span class="select-trigger__text" id="versionLabel"><span class="muted">请选择</span></span>
+                <span class="select-trigger__text" id="versionLabel">APP版本：<span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
               </button>
               <div class="multi-panel" id="versionPanel">
@@ -1111,7 +1624,7 @@
                   <div class="multi-panel__list" id="versionList"></div>
                 </div>
                 <div class="multi-panel__right">
-                  <div class="multi-panel__toolbar">
+                  <div class="multi-panel__toolbar multi-panel__toolbar--right">
                     <span id="versionCount">已选择 0 项</span>
                     <button class="multi-panel__link" type="button" id="versionClear">清空</button>
                   </div>
@@ -1120,26 +1633,36 @@
               </div>
             </div>
 
+            <div class="filter-item" id="statusWrap">
+              <button class="select-trigger" type="button" id="statusTrigger">
+                <span class="select-trigger__text" id="statusLabel">状态：全部</span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="single-panel" id="statusPanel">
+                <button class="single-option is-active" type="button" data-value="全部">全部</button>
+                <button class="single-option" type="button" data-value="待处理">待处理</button>
+                <button class="single-option" type="button" data-value="处理中">处理中</button>
+                <button class="single-option" type="button" data-value="已处理">已处理</button>
+                <button class="single-option" type="button" data-value="不处理">不处理</button>
+              </div>
+            </div>
+
             <div class="filter-item">
-              <label class="filter-item__label">内容查找</label>
               <input class="input" id="contentKeyword" type="text" placeholder="问题摘要关键词" autocomplete="off" />
             </div>
 
             <div class="filter-item">
-              <label class="filter-item__label">UUID</label>
-              <input class="input" id="uuidKeyword" type="text" placeholder="请输入 UUID" autocomplete="off" />
+              <input class="input" id="uuidKeyword" type="text" placeholder="UUID" autocomplete="off" />
             </div>
 
             <div class="filter-item">
-              <label class="filter-item__label">设备ID</label>
-              <input class="input" id="deviceKeyword" type="text" placeholder="请输入设备ID" autocomplete="off" />
+              <input class="input" id="deviceKeyword" type="text" placeholder="设备ID" autocomplete="off" />
             </div>
 
             <div class="filter-actions">
-              <button class="btn btn--default" type="button" id="resetBtn">重置</button>
               <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
-              <button class="btn btn--default" type="button" id="exportBtn">导出</button>
               <button class="btn btn--default" type="button" id="batchBtn" disabled>批量操作</button>
+              <button class="btn btn--default" type="button" id="exportBtn">导出</button>
             </div>
           </div>
 
@@ -1156,8 +1679,12 @@
                     <th class="col-status">状态</th>
                     <th class="col-uuid">UUID</th>
                     <th class="col-device">设备ID</th>
-                    <th class="col-time">创建时间</th>
-                    <th class="col-time">更新时间</th>
+                    <th class="col-time">
+                      <button class="th-sort" type="button" data-key="createdTs">创建时间<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button>
+                    </th>
+                    <th class="col-time">
+                      <button class="th-sort" type="button" data-key="updatedTs">更新时间<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button>
+                    </th>
                     <th class="col-action">操作</th>
                   </tr>
                 </thead>
@@ -1186,36 +1713,38 @@
       </div>
       <div class="drawer__body" id="drawerBody"></div>
       <div class="drawer__footer">
-        <button class="btn btn--default" type="button" id="drawerCancel">关闭</button>
-        <button class="btn btn--primary" type="button" id="drawerSave">更新状态</button>
+        <button class="btn btn--default" type="button" id="drawerCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="drawerSave">提交</button>
       </div>
     </aside>
   </div>
 
   <!-- Batch Modal -->
   <div class="modal-mask" id="batchModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="batchTitle">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchTitle">
       <div class="modal__header">
         <h2 class="modal__title" id="batchTitle">批量修改状态</h2>
-        <button class="drawer__close" type="button" id="batchClose" aria-label="关闭">
+        <button class="modal__close" type="button" id="batchClose" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
       <div class="modal__body">
         <p class="modal__hint" id="batchHint">已选 0 条工单，请选择目标状态</p>
-        <div class="form-row">
-          <label class="form-row__label">状态<span class="req">*</span></label>
-          <div class="status-quick" id="batchStatusQuick">
-            <button class="status-quick__btn" type="button" data-status="待处理">待处理</button>
-            <button class="status-quick__btn" type="button" data-status="处理中">处理中</button>
-            <button class="status-quick__btn" type="button" data-status="已处理">已处理</button>
-            <button class="status-quick__btn" type="button" data-status="不处理">不处理</button>
+        <div class="form-item">
+          <div class="form-item__label">状态<span class="req">*</span></div>
+          <div class="form-item__control">
+            <div class="status-quick" id="batchStatusQuick">
+              <button class="status-quick__btn" type="button" data-status="待处理">待处理</button>
+              <button class="status-quick__btn" type="button" data-status="处理中">处理中</button>
+              <button class="status-quick__btn" type="button" data-status="已处理">已处理</button>
+              <button class="status-quick__btn" type="button" data-status="不处理">不处理</button>
+            </div>
           </div>
         </div>
       </div>
       <div class="modal__footer">
         <button class="btn btn--default" type="button" id="batchCancel">取消</button>
-        <button class="btn btn--primary" type="button" id="batchConfirm">确定</button>
+        <button class="btn btn--primary" type="button" id="batchConfirm">提交</button>
       </div>
     </div>
   </div>
@@ -1224,9 +1753,46 @@
     (function () {
       const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 
-      const PRODUCTS = ['Wonder Puzzle', 'Star Merge', 'Ocean Match', 'Pixel Farm', 'Galaxy Rush', 'Candy Dash'];
+      const PRODUCT_CATALOG = [
+        { product: 'Tile Sort 3D (王牌分揀師)', platform: 'iOS' },
+        { product: 'Tile Sort 3D (王牌分揀師)', platform: 'Android' },
+        { product: 'Haggle Sleuth (砍價大偵探)', platform: 'Android' },
+        { product: 'Pixel Bounce Jam (解壓彈球館)', platform: 'Android' },
+        { product: 'Story Match: Associate Puzzle (腦洞故事會)', platform: 'Android' },
+        { product: 'Hotpot Match 3D (做道拿手菜)', platform: 'Android' },
+        { product: '文字の中に文字!', platform: 'iOS' },
+        { product: '文字の中に文字!', platform: 'Android' },
+        { product: 'Perfect Care: Cleaning ASMR (完美護理師)', platform: 'Android' },
+        { product: 'Jigword:Word Search Games', platform: 'Android' },
+        { product: '我要當學霸', platform: 'Android' }
+      ];
       const VERSIONS = ['1.0.0', '1.1.2', '1.2.0', '1.3.5', '2.0.0', '2.1.1', '2.2.0'];
       const PLATFORMS = ['Android', 'iOS'];
+      const PLATFORM_ICONS = {
+        Android: 'assets/Android.png',
+        iOS: 'assets/iOS.png'
+      };
+      const PRODUCT_OPTIONS = PRODUCT_CATALOG.map(function (item) {
+        return item.product + '@@' + item.platform;
+      });
+
+      function parseProductOption(key) {
+        const idx = String(key).lastIndexOf('@@');
+        if (idx === -1) return { product: key, platform: '' };
+        return { product: key.slice(0, idx), platform: key.slice(idx + 2) };
+      }
+
+      function productOptionIconHtml(key) {
+        const platform = parseProductOption(key).platform;
+        const src = PLATFORM_ICONS[platform];
+        if (!src) return '';
+        return '<span class="select-option-icon"><img src="' + src + '" alt="" /></span>';
+      }
+
+      function productOptionLabel(key) {
+        return parseProductOption(key).product;
+      }
+
       const STATUSES = ['待处理', '处理中', '已处理', '不处理'];
       const STATUS_CLASS = {
         '待处理': 'tag--pending',
@@ -1234,19 +1800,36 @@
         '已处理': 'tag--done',
         '不处理': 'tag--ignored'
       };
+      const STATUS_DOT_CLASS = {
+        '待处理': 'status-dot--pending',
+        '处理中': 'status-dot--processing',
+        '已处理': 'status-dot--done',
+        '不处理': 'status-dot--ignored'
+      };
 
-      const SUMMARIES = [
-        '登录后闪退，无法进入主页',
-        '支付成功但未到账',
-        '广告加载失败，黑屏卡住',
-        '活动奖励未发放',
-        '账号绑定邮箱失败',
-        '音效异常，无法关闭',
-        '关卡进度丢失',
-        '网络超时频繁提示',
-        '推送通知重复收到',
-        '内购页面空白'
+      const FEEDBACK_CONTENTS = [
+        '一打开游戏就闪退，进不去主页，重装了还是一样。',
+        '刚才充值成功了钱扣了但是钻石没到账，麻烦看一下。',
+        '看广告的时候黑屏卡住，等了很久都没反应，只能强退。',
+        '活动任务都做完了提示领取成功，但奖励根本没发到背包。',
+        '想绑定邮箱一直失败，验证码怎么输都说不对。',
+        '游戏里的音效关不掉，设置里关了还是一直响，好吵。',
+        '玩到一半进度没了，重新登录关卡全回去了，气死。',
+        '一直提示网络超时，WiFi和流量都试过了还是进不去。',
+        '同样一条推送连续弹了好多遍，能不能修一下。',
+        '点商店进去是白屏，什么都加载不出来，没法买东西。',
+        '过关动画卡住不动，点屏幕也没用，只能退出重进。',
+        '签到按钮点了没反应，今天的奖励领不了。'
       ];
+      const SUMMARY_MAX_LEN = 40;
+
+      function truncateSummary(text, maxLen) {
+        const raw = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+        const limit = maxLen == null ? SUMMARY_MAX_LEN : maxLen;
+        if (!raw) return '-';
+        if (raw.length <= limit) return raw;
+        return raw.slice(0, limit) + '...';
+      }
 
       function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -1284,25 +1867,47 @@
         return prefix + '-' + hex + '-' + (1000 + (i % 9000));
       }
 
+      const IOS_MODELS = ['iPhone 8', 'iPhone 11', 'iPhone 12', 'iPhone 13', 'iPhone 14', 'iPhone SE'];
+      const ANDROID_MODELS = ['Pixel 6', 'Samsung Galaxy S21', 'Xiaomi 12', 'OPPO Reno8', 'Huawei P40', 'OnePlus 9'];
+      const IOS_OS_VERSIONS = ['iOS 11.2.2', 'iOS 14.8.1', 'iOS 15.7.0', 'iOS 16.4.1', 'iOS 17.0.3', 'iOS 17.2.1'];
+      const ANDROID_OS_VERSIONS = ['Android 8.0.0', 'Android 10', 'Android 11', 'Android 12', 'Android 13', 'Android 14'];
+      const TIMEZONES = ['UTC+0', 'UTC+8', 'UTC-5', 'UTC-8', 'UTC+1', 'UTC+9'];
+      const REGIONS = [
+        '美国 (US)',
+        '中国 (CN)',
+        '日本 (JP)',
+        '英国 (GB)',
+        '德国 (DE)',
+        '巴西 (BR)',
+        '印度 (IN)',
+        '韩国 (KR)'
+      ];
+
       function buildMockData() {
         const list = [];
         const now = Date.now();
         for (let i = 0; i < 48; i++) {
           const created = new Date(now - i * 5.5 * 3600 * 1000 - (i % 7) * 86400000);
           const updated = new Date(created.getTime() + (i % 5) * 3600 * 1000);
-          const platform = PLATFORMS[i % 2];
-          const summary = SUMMARIES[i % SUMMARIES.length];
+          const catalogItem = PRODUCT_CATALOG[i % PRODUCT_CATALOG.length];
+          const platform = catalogItem.platform;
+          const content = FEEDBACK_CONTENTS[i % FEEDBACK_CONTENTS.length];
+          const isIos = platform === 'iOS';
           list.push({
             id: 'FB' + String(10001 + i),
-            product: PRODUCTS[i % PRODUCTS.length],
+            product: catalogItem.product,
             platform: platform,
             version: VERSIONS[i % VERSIONS.length],
-            summary: summary,
-            content: summary + '。补充信息：用户反馈发生在' + (platform === 'iOS' ? 'iPhone' : '安卓机型') + '，已复现两次。联系邮箱：user' + (i + 1) + '@mail.com',
+            content: content,
             email: 'user' + (i + 1) + '@mail.com',
             status: STATUSES[i % STATUSES.length],
             uuid: uid('uuid', i + 17),
-            deviceId: uid(platform === 'iOS' ? 'idfv' : 'gaid', i + 91),
+            deviceId: uid(isIos ? 'idfv' : 'gaid', i + 91),
+            os: platform,
+            deviceModel: (isIos ? IOS_MODELS : ANDROID_MODELS)[i % 6],
+            osVersion: (isIos ? IOS_OS_VERSIONS : ANDROID_OS_VERSIONS)[i % 6],
+            timezone: TIMEZONES[i % TIMEZONES.length],
+            region: REGIONS[i % REGIONS.length],
             createdAt: formatDateTime(created),
             updatedAt: formatDateTime(updated),
             createdTs: created.getTime(),
@@ -1318,22 +1923,199 @@
       let selectedProducts = [];
       let selectedVersions = [];
       let platformValue = '全部';
+      let statusValue = '全部';
+      let sortState = { key: '', dir: '' };
       let currentPage = 1;
       let pageSize = 10;
       let drawerTicketId = null;
       let drawerStatus = null;
       let batchStatus = null;
+      let rangeStart = null;
+      let rangeEnd = null;
+      let pickingStart = null;
+      let activeShortcut = 'last7';
+      let viewMonth = null;
 
-      const dateStartEl = document.getElementById('dateStart');
-      const dateEndEl = document.getElementById('dateEnd');
       const ticketBody = document.getElementById('ticketBody');
       const emptyTip = document.getElementById('emptyTip');
       const checkAll = document.getElementById('checkAll');
       const batchBtn = document.getElementById('batchBtn');
+      const dateRangeTrigger = document.getElementById('dateRangeTrigger');
+      const dateRangeLabel = document.getElementById('dateRangeLabel');
+      const datePanel = document.getElementById('datePanel');
+
+      function startOfDay(d) {
+        const x = new Date(d);
+        x.setHours(0, 0, 0, 0);
+        return x;
+      }
+
+      function addDays(d, n) {
+        const x = startOfDay(d);
+        x.setDate(x.getDate() + n);
+        return x;
+      }
+
+      function sameDay(a, b) {
+        return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+      }
+
+      function dayKey(d) {
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      }
+
+      function mondayOf(d) {
+        const x = startOfDay(d);
+        const day = x.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        return addDays(x, diff);
+      }
+
+      function getShortcutRange(key) {
+        const today = startOfDay(new Date());
+        if (key === 'today') return [today, today];
+        if (key === 'yesterday') {
+          const y = addDays(today, -1);
+          return [y, y];
+        }
+        if (key === 'last7') return [addDays(today, -6), today];
+        if (key === 'last30') return [addDays(today, -29), today];
+        if (key === 'thisWeek') return [mondayOf(today), today];
+        if (key === 'lastWeek') {
+          const thisMon = mondayOf(today);
+          const lastMon = addDays(thisMon, -7);
+          return [lastMon, addDays(lastMon, 6)];
+        }
+        if (key === 'thisMonth') {
+          return [new Date(today.getFullYear(), today.getMonth(), 1), today];
+        }
+        if (key === 'lastMonth') {
+          const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          const last = new Date(today.getFullYear(), today.getMonth(), 0);
+          return [first, last];
+        }
+        return [addDays(today, -6), today];
+      }
+
+      function matchShortcut(start, end) {
+        const keys = ['today', 'yesterday', 'last7', 'last30', 'thisWeek', 'lastWeek', 'thisMonth', 'lastMonth'];
+        for (let i = 0; i < keys.length; i++) {
+          const r = getShortcutRange(keys[i]);
+          if (sameDay(start, r[0]) && sameDay(end, r[1])) return keys[i];
+        }
+        return '';
+      }
+
+      function syncDateLabel() {
+        if (!rangeStart) {
+          dateRangeLabel.innerHTML = '日期：<span class="muted">请选择</span>';
+          return;
+        }
+        if (!rangeEnd) {
+          dateRangeLabel.textContent = '日期：' + formatDate(rangeStart) + ' - ...';
+          return;
+        }
+        dateRangeLabel.textContent = '日期：' + formatDate(rangeStart) + ' - ' + formatDate(rangeEnd);
+      }
+
+      function syncShortcutActive() {
+        document.querySelectorAll('#dateShortcuts .date-shortcut').forEach(function (btn) {
+          btn.classList.toggle('is-active', btn.getAttribute('data-shortcut') === activeShortcut);
+        });
+      }
+
+      function setRange(start, end, shortcut) {
+        rangeStart = startOfDay(start);
+        rangeEnd = startOfDay(end);
+        if (rangeStart > rangeEnd) {
+          const t = rangeStart;
+          rangeStart = rangeEnd;
+          rangeEnd = t;
+        }
+        pickingStart = null;
+        activeShortcut = shortcut == null ? matchShortcut(rangeStart, rangeEnd) : shortcut;
+        viewMonth = new Date(rangeEnd.getFullYear(), rangeEnd.getMonth() - 1, 1);
+        syncDateLabel();
+        syncShortcutActive();
+        renderCalendars();
+      }
+
+      function renderOneCalendar(el, year, month, navLeft, navRight) {
+        const weekLabels = ['一', '二', '三', '四', '五', '六', '日'];
+        const first = new Date(year, month, 1);
+        const startOffset = (first.getDay() + 6) % 7;
+        const gridStart = addDays(first, -startOffset);
+        const today = startOfDay(new Date());
+        let selStart = rangeStart;
+        let selEnd = rangeEnd;
+        if (pickingStart && !rangeEnd) {
+          selStart = pickingStart;
+          selEnd = pickingStart;
+        }
+
+        let daysHtml = '';
+        for (let i = 0; i < 42; i++) {
+          const d = addDays(gridStart, i);
+          const out = d.getMonth() !== month;
+          const key = dayKey(d);
+          const isStart = selStart && sameDay(d, selStart);
+          const isEnd = selEnd && sameDay(d, selEnd);
+          const inRange = selStart && selEnd && d >= selStart && d <= selEnd && !sameDay(selStart, selEnd);
+          const cls = [
+            'date-cal__day',
+            out ? 'is-out' : '',
+            sameDay(d, today) ? 'is-today' : '',
+            isStart ? 'is-range-start' : '',
+            isEnd ? 'is-range-end' : '',
+            inRange || isStart || isEnd ? 'is-in-range' : ''
+          ].filter(Boolean).join(' ');
+          daysHtml += '<button class="' + cls + '" type="button" data-day="' + key + '"><span class="date-cal__day-num">' + d.getDate() + '</span></button>';
+        }
+
+        const leftNav = navLeft
+          ? '<div class="date-cal__nav">' +
+              '<button class="date-cal__btn" type="button" data-nav="prev-year" aria-label="上一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg></button>' +
+              '<button class="date-cal__btn" type="button" data-nav="prev-month" aria-label="上一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg></button>' +
+            '</div>'
+          : '<div class="date-cal__nav" style="width:52px"></div>';
+        const rightNav = navRight
+          ? '<div class="date-cal__nav">' +
+              '<button class="date-cal__btn" type="button" data-nav="next-month" aria-label="下一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></button>' +
+              '<button class="date-cal__btn" type="button" data-nav="next-year" aria-label="下一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg></button>' +
+            '</div>'
+          : '<div class="date-cal__nav" style="width:52px"></div>';
+
+        el.innerHTML =
+          '<div class="date-cal__header">' + leftNav +
+            '<div class="date-cal__title">' + year + ' 年 ' + (month + 1) + ' 月</div>' + rightNav +
+          '</div>' +
+          '<div class="date-cal__week">' + weekLabels.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
+          '<div class="date-cal__grid">' + daysHtml + '</div>';
+      }
+
+      function renderCalendars() {
+        if (!viewMonth) viewMonth = new Date();
+        const left = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
+        const right = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1);
+        renderOneCalendar(document.getElementById('dateCalLeft'), left.getFullYear(), left.getMonth(), true, false);
+        renderOneCalendar(document.getElementById('dateCalRight'), right.getFullYear(), right.getMonth(), false, true);
+      }
+
+      function closeDatePanel() {
+        datePanel.classList.remove('is-open');
+        dateRangeTrigger.classList.remove('is-open');
+      }
+
+      function openDatePanel() {
+        closeAllPanels(document.getElementById('dateRangeWrap'));
+        datePanel.classList.add('is-open');
+        dateRangeTrigger.classList.add('is-open');
+        renderCalendars();
+      }
 
       function setDefaultDates() {
-        dateStartEl.value = formatDate(daysAgo(6));
-        dateEndEl.value = formatDate(new Date());
+        const r = getShortcutRange('last7');
+        setRange(r[0], r[1], 'last7');
       }
 
       function showMsg(text, type) {
@@ -1369,13 +2151,14 @@
       }
 
       function closeAllPanels(except) {
-        document.querySelectorAll('.select-trigger.is-open').forEach(function (el) {
+        document.querySelectorAll('.select-trigger.is-open, .date-range-trigger.is-open').forEach(function (el) {
           if (except && (el === except || except.contains(el))) return;
           el.classList.remove('is-open');
         });
-        document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open').forEach(function (el) {
+        document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open, .date-panel.is-open').forEach(function (el) {
           if (except && except.contains(el)) return;
           el.classList.remove('is-open');
+          el.classList.remove('is-dropup');
         });
       }
 
@@ -1393,13 +2176,36 @@
           selected = cfg.getSelected();
         }
 
+        function optionLabel(value) {
+          return cfg.getLabel ? cfg.getLabel(value) : value;
+        }
+
+        function optionIcon(value) {
+          return cfg.getIconHtml ? cfg.getIconHtml(value) : '';
+        }
+
+        function optionContentHtml(value) {
+          const icon = optionIcon(value);
+          const label = optionLabel(value);
+          const text = escapeHtml(label);
+          const title = ' title="' + escapeHtml(label) + '"';
+          if (!icon) return '<span' + title + '>' + text + '</span>';
+          return icon + '<span' + title + '>' + text + '</span>';
+        }
+
+        function matchesKeyword(value, kw) {
+          if (!kw) return true;
+          return optionLabel(value).toLowerCase().indexOf(kw) !== -1;
+        }
+
         function updateLabel() {
           syncSelectedRef();
           countEl.textContent = '已选择 ' + selected.length + ' 项';
+          const prefix = cfg.prefix || '';
           if (!selected.length) {
-            labelEl.innerHTML = '<span class="muted">请选择</span>';
+            labelEl.innerHTML = prefix + '<span class="muted">请选择</span>';
           } else {
-            labelEl.textContent = '已选 ' + selected.length + ' 项';
+            labelEl.textContent = prefix + '已选 ' + selected.length + ' 项';
           }
         }
 
@@ -1410,7 +2216,7 @@
             return;
           }
           selectedEl.innerHTML = selected.map(function (name) {
-            return '<div class="multi-selected"><span class="multi-selected__name">' + escapeHtml(name) + '</span>' +
+            return '<div class="multi-selected"><span class="multi-selected__name">' + optionContentHtml(name) + '</span>' +
               '<button class="multi-selected__remove" type="button" data-remove="' + escapeHtml(name) + '" aria-label="移除">' +
               '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l6 6M8 2L2 8"/></svg></button></div>';
           }).join('');
@@ -1420,11 +2226,11 @@
           syncSelectedRef();
           const kw = (searchEl.value || '').trim().toLowerCase();
           const items = cfg.options.filter(function (name) {
-            return !kw || name.toLowerCase().indexOf(kw) !== -1;
+            return matchesKeyword(name, kw);
           });
           listEl.innerHTML = items.map(function (name) {
             const checked = selected.indexOf(name) !== -1;
-            return '<label class="multi-option"><input type="checkbox" value="' + escapeHtml(name) + '"' + (checked ? ' checked' : '') + ' /><span>' + escapeHtml(name) + '</span></label>';
+            return '<label class="multi-option"><input type="checkbox" value="' + escapeHtml(name) + '"' + (checked ? ' checked' : '') + ' /><span class="multi-option__label">' + optionContentHtml(name) + '</span></label>';
           }).join('') || '<div class="multi-panel__empty">无匹配项</div>';
         }
 
@@ -1471,7 +2277,7 @@
         document.getElementById(cfg.selectAllId).addEventListener('click', function () {
           const kw = (searchEl.value || '').trim().toLowerCase();
           const visible = cfg.options.filter(function (name) {
-            return !kw || name.toLowerCase().indexOf(kw) !== -1;
+            return matchesKeyword(name, kw);
           });
           const next = cfg.getSelected().slice();
           visible.forEach(function (name) {
@@ -1502,7 +2308,10 @@
         searchId: 'productSearch',
         selectAllId: 'productSelectAll',
         clearId: 'productClear',
-        options: PRODUCTS,
+        prefix: '产品：',
+        options: PRODUCT_OPTIONS,
+        getLabel: productOptionLabel,
+        getIconHtml: productOptionIconHtml,
         getSelected: function () { return selectedProducts; },
         setSelected: function (v) { selectedProducts = v; }
       });
@@ -1518,6 +2327,7 @@
         searchId: 'versionSearch',
         selectAllId: 'versionSelectAll',
         clearId: 'versionClear',
+        prefix: 'APP版本：',
         options: VERSIONS,
         getSelected: function () { return selectedVersions; },
         setSelected: function (v) { selectedVersions = v; }
@@ -1541,7 +2351,33 @@
           const opt = e.target.closest('.single-option');
           if (!opt) return;
           platformValue = opt.getAttribute('data-value');
-          label.textContent = platformValue;
+          label.textContent = '平台：' + platformValue;
+          panel.querySelectorAll('.single-option').forEach(function (el) {
+            el.classList.toggle('is-active', el === opt);
+          });
+          closeAllPanels();
+        });
+      })();
+
+      /* Status single select */
+      (function () {
+        const trigger = document.getElementById('statusTrigger');
+        const panel = document.getElementById('statusPanel');
+        const label = document.getElementById('statusLabel');
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const willOpen = !panel.classList.contains('is-open');
+          closeAllPanels(document.getElementById('statusWrap'));
+          if (willOpen) {
+            trigger.classList.add('is-open');
+            panel.classList.add('is-open');
+          }
+        });
+        panel.addEventListener('click', function (e) {
+          const opt = e.target.closest('.single-option');
+          if (!opt) return;
+          statusValue = opt.getAttribute('data-value');
+          label.textContent = '状态：' + statusValue;
           panel.querySelectorAll('.single-option').forEach(function (el) {
             el.classList.toggle('is-active', el === opt);
           });
@@ -1550,13 +2386,57 @@
       })();
 
       document.addEventListener('click', function () { closeAllPanels(); });
-      document.querySelectorAll('.multi-panel, .single-panel, .filter-item').forEach(function (el) {
+      document.querySelectorAll('.multi-panel, .single-panel, .filter-item, .date-panel').forEach(function (el) {
         el.addEventListener('click', function (e) { e.stopPropagation(); });
       });
 
+      dateRangeTrigger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (datePanel.classList.contains('is-open')) closeDatePanel();
+        else openDatePanel();
+      });
+
+      document.getElementById('dateShortcuts').addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-shortcut]');
+        if (!btn) return;
+        const key = btn.getAttribute('data-shortcut');
+        const r = getShortcutRange(key);
+        setRange(r[0], r[1], key);
+        closeDatePanel();
+      });
+
+      datePanel.addEventListener('click', function (e) {
+        const nav = e.target.closest('[data-nav]');
+        if (nav) {
+          const type = nav.getAttribute('data-nav');
+          if (type === 'prev-month') viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1);
+          if (type === 'next-month') viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1);
+          if (type === 'prev-year') viewMonth = new Date(viewMonth.getFullYear() - 1, viewMonth.getMonth(), 1);
+          if (type === 'next-year') viewMonth = new Date(viewMonth.getFullYear() + 1, viewMonth.getMonth(), 1);
+          renderCalendars();
+          return;
+        }
+        const dayBtn = e.target.closest('[data-day]');
+        if (!dayBtn) return;
+        const d = parseDate(dayBtn.getAttribute('data-day'));
+        if (!d) return;
+        if (!pickingStart) {
+          pickingStart = startOfDay(d);
+          rangeStart = pickingStart;
+          rangeEnd = null;
+          activeShortcut = '';
+          syncShortcutActive();
+          syncDateLabel();
+          renderCalendars();
+          return;
+        }
+        setRange(pickingStart, d, null);
+        closeDatePanel();
+      });
+
       function applyFilter() {
-        const start = parseDate(dateStartEl.value);
-        const end = parseDate(dateEndEl.value);
+        const start = rangeStart;
+        const end = rangeEnd;
         let endTs = end ? end.getTime() + 86400000 - 1 : null;
         const contentKw = (document.getElementById('contentKeyword').value || '').trim().toLowerCase();
         const uuidKw = (document.getElementById('uuidKeyword').value || '').trim().toLowerCase();
@@ -1566,22 +2446,49 @@
           if (start && row.createdTs < start.getTime()) return false;
           if (endTs && row.createdTs > endTs) return false;
           if (platformValue !== '全部' && row.platform !== platformValue) return false;
-          if (selectedProducts.length && selectedProducts.indexOf(row.product) === -1) return false;
+          if (selectedProducts.length) {
+            const matched = selectedProducts.some(function (key) {
+              const opt = parseProductOption(key);
+              return row.product === opt.product && row.platform === opt.platform;
+            });
+            if (!matched) return false;
+          }
           if (selectedVersions.length && selectedVersions.indexOf(row.version) === -1) return false;
-          if (contentKw && row.summary.toLowerCase().indexOf(contentKw) === -1 && row.content.toLowerCase().indexOf(contentKw) === -1) return false;
+          if (statusValue !== '全部' && row.status !== statusValue) return false;
+          if (contentKw && row.content.toLowerCase().indexOf(contentKw) === -1) return false;
           if (uuidKw && row.uuid.toLowerCase().indexOf(uuidKw) === -1) return false;
           if (deviceKw && row.deviceId.toLowerCase().indexOf(deviceKw) === -1) return false;
           return true;
         });
 
+        filtered = applySort(filtered);
         currentPage = 1;
         selectedIds.clear();
         renderTable();
       }
 
+      function applySort(rows) {
+        const key = sortState.key || 'createdTs';
+        const dir = sortState.dir === 'asc' ? 1 : -1;
+        return rows.slice().sort(function (a, b) {
+          const av = a[key] || 0;
+          const bv = b[key] || 0;
+          if (av === bv) return (a.createdTs || 0) > (b.createdTs || 0) ? -1 : 1;
+          return av > bv ? dir : -dir;
+        });
+      }
+
+      function syncSortHeaders() {
+        document.querySelectorAll('#ticketTable .th-sort').forEach(function (btn) {
+          const key = btn.getAttribute('data-key');
+          const active = !!sortState.key && sortState.key === key;
+          btn.classList.toggle('is-asc', active && sortState.dir === 'asc');
+          btn.classList.toggle('is-desc', active && sortState.dir === 'desc');
+        });
+      }
+
       function updateBatchBtn() {
         batchBtn.disabled = selectedIds.size === 0;
-        batchBtn.textContent = selectedIds.size ? '批量操作（' + selectedIds.size + '）' : '批量操作';
       }
 
       function renderTable() {
@@ -1599,12 +2506,10 @@
             '<td title="' + escapeHtml(row.product) + '">' + escapeHtml(row.product) + '</td>' +
             '<td>' + escapeHtml(row.platform) + '</td>' +
             '<td>' + escapeHtml(row.version) + '</td>' +
-            '<td title="' + escapeHtml(row.summary) + '">' + escapeHtml(row.summary) + '</td>' +
-            '<td><span class="tag ' + STATUS_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span></td>' +
-            '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(row.uuid) + '">' + escapeHtml(row.uuid) + '</span>' +
-            '<button class="copy-btn" type="button" data-copy="' + escapeHtml(row.uuid) + '" aria-label="复制UUID">' + COPY_ICON + '</button></span></td>' +
-            '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(row.deviceId) + '">' + escapeHtml(row.deviceId) + '</span>' +
-            '<button class="copy-btn" type="button" data-copy="' + escapeHtml(row.deviceId) + '" aria-label="复制设备ID">' + COPY_ICON + '</button></span></td>' +
+            '<td title="' + escapeHtml(row.content) + '">' + escapeHtml(truncateSummary(row.content)) + '</td>' +
+            '<td><span class="status-dot ' + STATUS_DOT_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span></td>' +
+            '<td><span class="cell-id"><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.uuid) + '" aria-label="复制UUID">' + COPY_ICON + '</button><span class="cell-id__text" title="' + escapeHtml(row.uuid) + '">' + escapeHtml(row.uuid) + '</span></span></td>' +
+            '<td><span class="cell-id"><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.deviceId) + '" aria-label="复制设备ID">' + COPY_ICON + '</button><span class="cell-id__text" title="' + escapeHtml(row.deviceId) + '">' + escapeHtml(row.deviceId) + '</span></span></td>' +
             '<td title="' + escapeHtml(row.createdAt) + '">' + escapeHtml(row.createdAt) + '</td>' +
             '<td title="' + escapeHtml(row.updatedAt) + '">' + escapeHtml(row.updatedAt) + '</td>' +
             '<td class="col-action"><button class="link" type="button" data-detail="' + escapeHtml(row.id) + '">查看详情</button></td>' +
@@ -1617,33 +2522,90 @@
 
         renderPagination(total, pages);
         updateBatchBtn();
+        syncSortHeaders();
       }
 
       function renderPagination(total, pages) {
         const el = document.getElementById('pagination');
-        let btns = '';
         const maxShow = 5;
         let from = Math.max(1, currentPage - 2);
         let to = Math.min(pages, from + maxShow - 1);
         from = Math.max(1, to - maxShow + 1);
 
-        btns += '<button class="pager__btn" type="button" data-page="prev" ' + (currentPage <= 1 ? 'disabled' : '') + '>' +
-          '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7.5 2L3.5 6l4 4"/></svg></button>';
+        let pageBtns = '';
         for (let p = from; p <= to; p++) {
-          btns += '<button class="pager__btn' + (p === currentPage ? ' is-active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
+          pageBtns += '<button class="pager__btn' + (p === currentPage ? ' is-active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
         }
-        btns += '<button class="pager__btn" type="button" data-page="next" ' + (currentPage >= pages ? 'disabled' : '') + '>' +
-          '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4.5 2L8.5 6l-4 4"/></svg></button>';
 
         el.innerHTML =
-          '<span>共 ' + total + ' 条</span>' +
-          '<div class="pager">' + btns + '</div>' +
-          '<select class="page-size" id="pageSize">' +
-          [10, 20, 50].map(function (n) {
-            return '<option value="' + n + '"' + (pageSize === n ? ' selected' : '') + '>' + n + '条/页</option>';
-          }).join('') +
-          '</select>' +
-          '<span class="page-jump">前往 <input type="number" id="pageJump" min="1" max="' + pages + '" value="' + currentPage + '" /> 页</span>';
+          '<span class="pagination__total">共 ' + total + ' 条</span>' +
+          '<div class="page-size-wrap" data-role="page-size-wrap">' +
+            '<button class="select-trigger" type="button" data-role="page-size-trigger">' +
+              '<span class="select-trigger__text">' + pageSize + ' 条/页</span>' +
+              '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
+            '</button>' +
+            '<div class="single-panel" data-role="page-size-panel">' +
+              [10, 20, 50, 100].map(function (n) {
+                return '<button class="single-option' + (n === pageSize ? ' is-active' : '') + '" type="button" data-size="' + n + '">' + n + ' 条/页</button>';
+              }).join('') +
+            '</div>' +
+          '</div>' +
+          '<div class="pager">' +
+            '<button class="pager__btn" type="button" data-page="1"' + (currentPage <= 1 ? ' disabled' : '') + ' aria-label="首页">' +
+              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg></button>' +
+            '<button class="pager__btn" type="button" data-page="' + (currentPage - 1) + '"' + (currentPage <= 1 ? ' disabled' : '') + ' aria-label="上一页">' +
+              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg></button>' +
+            pageBtns +
+            '<button class="pager__btn" type="button" data-page="' + (currentPage + 1) + '"' + (currentPage >= pages ? ' disabled' : '') + ' aria-label="下一页">' +
+              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></button>' +
+            '<button class="pager__btn" type="button" data-page="' + pages + '"' + (currentPage >= pages ? ' disabled' : '') + ' aria-label="尾页">' +
+              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg></button>' +
+          '</div>' +
+          '<div class="page-jump">前往 <input data-role="page-jump" type="text" value="' + currentPage + '" /> 页</div>';
+
+        const sizeWrap = el.querySelector('[data-role="page-size-wrap"]');
+        const sizeTrigger = el.querySelector('[data-role="page-size-trigger"]');
+        const sizePanel = el.querySelector('[data-role="page-size-panel"]');
+
+        sizeTrigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const open = !sizePanel.classList.contains('is-open');
+          closeAllPanels(sizeWrap);
+          if (open) {
+            sizePanel.classList.add('is-open');
+            sizeTrigger.classList.add('is-open');
+            sizePanel.classList.remove('is-dropup');
+            const rect = sizeTrigger.getBoundingClientRect();
+            const panelHeight = sizePanel.scrollHeight || 160;
+            if (window.innerHeight - rect.bottom < panelHeight + 8) {
+              sizePanel.classList.add('is-dropup');
+            }
+          }
+        });
+        sizeWrap.addEventListener('click', function (e) { e.stopPropagation(); });
+        sizePanel.querySelectorAll('[data-size]').forEach(function (opt) {
+          opt.addEventListener('click', function () {
+            pageSize = Number(opt.getAttribute('data-size')) || 10;
+            currentPage = 1;
+            renderTable();
+          });
+        });
+        el.querySelectorAll('.pager [data-page]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            if (btn.disabled) return;
+            const next = Number(btn.getAttribute('data-page'));
+            if (!isFinite(next) || next < 1 || next > pages || next === currentPage) return;
+            currentPage = next;
+            renderTable();
+          });
+        });
+        el.querySelector('[data-role="page-jump"]').addEventListener('keydown', function (e) {
+          if (e.key !== 'Enter') return;
+          const next = Number(e.target.value);
+          if (!isFinite(next)) return;
+          currentPage = Math.min(pages, Math.max(1, Math.floor(next)));
+          renderTable();
+        });
       }
 
       function findTicket(id) {
@@ -1656,20 +2618,26 @@
         drawerTicketId = id;
         drawerStatus = row.status;
         const body = document.getElementById('drawerBody');
+        function field(label, valueHtml) {
+          return '<div class="detail-field"><div class="detail-field__label">' + label + '</div><div class="detail-field__value">' + valueHtml + '</div></div>';
+        }
         body.innerHTML =
-          '<div class="detail-block">' +
-            '<div class="detail-block__title">基本信息</div>' +
+          '<div class="detail-block detail-block--info">' +
             '<div class="detail-grid">' +
-              '<div class="detail-grid__label">工单ID</div><div class="detail-grid__value">' + escapeHtml(row.id) + '</div>' +
-              '<div class="detail-grid__label">产品</div><div class="detail-grid__value">' + escapeHtml(row.product) + '</div>' +
-              '<div class="detail-grid__label">平台</div><div class="detail-grid__value">' + escapeHtml(row.platform) + '</div>' +
-              '<div class="detail-grid__label">APP版本</div><div class="detail-grid__value">' + escapeHtml(row.version) + '</div>' +
-              '<div class="detail-grid__label">联系邮箱</div><div class="detail-grid__value">' + escapeHtml(row.email || '-') + '</div>' +
-              '<div class="detail-grid__label">UUID</div><div class="detail-grid__value"><span class="cell-id"><span class="cell-id__text">' + escapeHtml(row.uuid) + '</span><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.uuid) + '">' + COPY_ICON + '</button></span></div>' +
-              '<div class="detail-grid__label">设备ID</div><div class="detail-grid__value"><span class="cell-id"><span class="cell-id__text">' + escapeHtml(row.deviceId) + '</span><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.deviceId) + '">' + COPY_ICON + '</button></span></div>' +
-              '<div class="detail-grid__label">创建时间</div><div class="detail-grid__value">' + escapeHtml(row.createdAt) + '</div>' +
-              '<div class="detail-grid__label">更新时间</div><div class="detail-grid__value">' + escapeHtml(row.updatedAt) + '</div>' +
-              '<div class="detail-grid__label">当前状态</div><div class="detail-grid__value"><span class="tag ' + STATUS_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span></div>' +
+              field('工单ID', escapeHtml(row.id)) +
+              field('产品', escapeHtml(row.product)) +
+              field('平台', escapeHtml(row.platform)) +
+              field('APP版本', escapeHtml(row.version)) +
+              field('UUID', '<span class="cell-id"><span class="cell-id__text">' + escapeHtml(row.uuid) + '</span><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.uuid) + '" aria-label="复制UUID">' + COPY_ICON + '</button></span>') +
+              field('设备ID', '<span class="cell-id"><span class="cell-id__text">' + escapeHtml(row.deviceId) + '</span><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.deviceId) + '" aria-label="复制设备ID">' + COPY_ICON + '</button></span>') +
+              field('设备型号', escapeHtml(row.deviceModel || '-')) +
+              field('系统版本', escapeHtml(row.osVersion || '-')) +
+              field('设备时区', escapeHtml(row.timezone || '-')) +
+              field('国家地区', escapeHtml(row.region || '-')) +
+              field('创建时间', escapeHtml(row.createdAt)) +
+              field('更新时间', escapeHtml(row.updatedAt)) +
+              field('用户邮箱', '<span class="cell-id"><span class="cell-id__text">' + escapeHtml(row.email || '-') + '</span><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.email || '') + '" aria-label="复制用户邮箱">' + COPY_ICON + '</button></span>') +
+              field('当前状态', '<span class="tag ' + STATUS_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span>') +
             '</div>' +
           '</div>' +
           '<div class="detail-block">' +
@@ -1733,11 +2701,13 @@
         });
         document.getElementById('batchModal').classList.add('is-open');
         document.getElementById('batchModal').setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
       }
 
       function closeBatchModal() {
         document.getElementById('batchModal').classList.remove('is-open');
         document.getElementById('batchModal').setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
         batchStatus = null;
       }
 
@@ -1767,10 +2737,17 @@
           showMsg('暂无数据可导出', 'error');
           return;
         }
-        const header = ['工单ID', '产品', '平台', 'APP版本', '问题摘要', '状态', 'UUID', '设备ID', '创建时间', '更新时间'];
+        const header = [
+          '工单ID', '产品', '平台', 'APP版本', '问题详情', '状态',
+          'UUID', '设备ID', '设备型号', '系统版本', '设备时区', '国家地区',
+          '用户邮箱', '创建时间', '更新时间'
+        ];
         const lines = [header.join(',')].concat(filtered.map(function (r) {
-          return [r.id, r.product, r.platform, r.version, r.summary, r.status, r.uuid, r.deviceId, r.createdAt, r.updatedAt]
-            .map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; })
+          return [
+            r.id, r.product, r.platform, r.version, r.content || '', r.status,
+            r.uuid, r.deviceId, r.deviceModel || '', r.osVersion || '', r.timezone || '', r.region || '',
+            r.email || '', r.createdAt, r.updatedAt
+          ].map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; })
             .join(',');
         }));
         const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -1785,25 +2762,21 @@
 
       /* Events */
       document.getElementById('searchBtn').addEventListener('click', applyFilter);
-      document.getElementById('resetBtn').addEventListener('click', function () {
-        setDefaultDates();
-        platformValue = '全部';
-        document.getElementById('platformLabel').textContent = '全部';
-        document.querySelectorAll('#platformPanel .single-option').forEach(function (el) {
-          el.classList.toggle('is-active', el.getAttribute('data-value') === '全部');
-        });
-        selectedProducts = [];
-        selectedVersions = [];
-        productSelect.refresh();
-        versionSelect.refresh();
-        document.getElementById('contentKeyword').value = '';
-        document.getElementById('uuidKeyword').value = '';
-        document.getElementById('deviceKeyword').value = '';
-        applyFilter();
-        showMsg('已重置筛选条件');
-      });
       document.getElementById('exportBtn').addEventListener('click', exportCsv);
       document.getElementById('batchBtn').addEventListener('click', openBatchModal);
+
+      document.getElementById('ticketTable').addEventListener('click', function (e) {
+        const sortBtn = e.target.closest('.th-sort');
+        if (!sortBtn) return;
+        const key = sortBtn.getAttribute('data-key');
+        if (sortState.key === key) {
+          sortState.dir = sortState.dir === 'desc' ? 'asc' : 'desc';
+        } else {
+          sortState = { key: key, dir: 'desc' };
+        }
+        filtered = applySort(filtered);
+        renderTable();
+      });
 
       ticketBody.addEventListener('click', function (e) {
         const copyBtn = e.target.closest('[data-copy]');
@@ -1837,34 +2810,6 @@
         renderTable();
       });
 
-      document.getElementById('pagination').addEventListener('click', function (e) {
-        const btn = e.target.closest('[data-page]');
-        if (!btn || btn.disabled) return;
-        const val = btn.getAttribute('data-page');
-        const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
-        if (val === 'prev') currentPage = Math.max(1, currentPage - 1);
-        else if (val === 'next') currentPage = Math.min(pages, currentPage + 1);
-        else currentPage = Number(val);
-        renderTable();
-      });
-
-      document.getElementById('pagination').addEventListener('change', function (e) {
-        if (e.target.id === 'pageSize') {
-          pageSize = Number(e.target.value) || 10;
-          currentPage = 1;
-          renderTable();
-        }
-      });
-
-      document.getElementById('pagination').addEventListener('keydown', function (e) {
-        if (e.target.id === 'pageJump' && e.key === 'Enter') {
-          const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
-          let p = Number(e.target.value) || 1;
-          currentPage = Math.min(pages, Math.max(1, p));
-          renderTable();
-        }
-      });
-
       document.getElementById('drawerClose').addEventListener('click', closeDrawer);
       document.getElementById('drawerCancel').addEventListener('click', closeDrawer);
       document.getElementById('drawerSave').addEventListener('click', saveDrawerStatus);
@@ -1884,9 +2829,7 @@
       document.getElementById('batchClose').addEventListener('click', closeBatchModal);
       document.getElementById('batchCancel').addEventListener('click', closeBatchModal);
       document.getElementById('batchConfirm').addEventListener('click', confirmBatch);
-      document.getElementById('batchModal').addEventListener('click', function (e) {
-        if (e.target === this) closeBatchModal();
-      });
+      /* 点击遮罩不关闭 */
       document.getElementById('batchStatusQuick').addEventListener('click', function (e) {
         const btn = e.target.closest('[data-status]');
         if (!btn) return;
@@ -1902,7 +2845,7 @@
 
       document.querySelectorAll('[data-group-toggle]').forEach(function (btn) {
         btn.addEventListener('click', function () {
-          btn.closest('[data-group]').classList.toggle('is-open');
+          btn.closest('[data-group]').classList.toggle('is-collapsed');
         });
       });
 
