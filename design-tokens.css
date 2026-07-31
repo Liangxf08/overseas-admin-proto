@@ -1,288 +1,363 @@
 /**
- * Overseas Admin Design System Tokens
- * 海外中台设计规范（对齐 Arco Design 色板）
- * Primary / 主色: #165DFF
+ * 海外中台 · 设计变量
+ * 唯一真源：《设计规范》PDF + 《色板》
+ * 后续 HTML 原型必须引用本文件中的 CSS 变量，禁止硬编码色值/尺寸。
  */
 
 :root {
   /* ============================================================
-   * 1. Typography · 字体与排版
+   * 0. 色板原始阶（RGB 通道 · 供 rgb(var(--xxx)) 使用）
    * ============================================================ */
-  --font-family-base: "PingFang SC", "Microsoft YaHei", "Segoe UI",
-    -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial,
-    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol";
-  --font-family-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
-    Courier, monospace;
 
-  --font-size-metric: 28px;
-  --font-size-h1: 20px;
-  --font-size-h2: 16px;
-  --font-size-body: 14px;
-  --font-size-sm: 12px;
+  /* 主题色 Blue */
+  --blue-1: 232, 243, 255;   /* #E8F3FF */
+  --blue-2: 190, 218, 255;   /* #BEDAFF */
+  --blue-3: 148, 191, 255;   /* #94BFFF */
+  --blue-4: 106, 161, 255;   /* #6AA1FF */
+  --blue-5: 64, 128, 255;    /* #4080FF */
+  --blue-6: 22, 93, 255;     /* #165DFF */
+  --blue-7: 14, 66, 210;     /* #0E42D2 */
+  --blue-8: 7, 44, 166;      /* #072CA6 */
+  --blue-9: 3, 26, 121;      /* #031A79 */
+  --blue-10: 0, 13, 77;      /* #000D4D */
 
-  --line-height-metric: 36px;
-  --line-height-h1: 28px;
-  --line-height-h2: 24px;
-  --line-height-body: 22px;
-  --line-height-sm: 20px;
+  /* 成功色 Green */
+  --green-1: 232, 255, 234;  /* #E8FFEA */
+  --green-2: 175, 240, 181;  /* #AFF0B5 */
+  --green-3: 123, 225, 136;  /* #7BE188 */
+  --green-4: 76, 210, 99;    /* #4CD263 */
+  --green-5: 35, 195, 67;    /* #23C343 */
+  --green-6: 0, 180, 42;     /* #00B42A */
+  --green-7: 0, 154, 41;     /* #009A29 */
+  --green-8: 0, 128, 38;     /* #008026 */
+  --green-9: 0, 102, 34;     /* #006622 */
+  --green-10: 0, 77, 28;     /* #004D1C */
+
+  /* 告警色 Orange */
+  --orange-1: 255, 247, 232; /* #FFF7E8 */
+  --orange-2: 255, 228, 186; /* #FFE4BA */
+  --orange-3: 255, 207, 139; /* #FFCF8B */
+  --orange-4: 255, 182, 93;  /* #FFB65D */
+  --orange-5: 255, 154, 46;  /* #FF9A2E */
+  --orange-6: 255, 125, 0;   /* #FF7D00 */
+  --orange-7: 210, 95, 0;    /* #D25F00 */
+  --orange-8: 166, 69, 0;    /* #A64500 */
+  --orange-9: 121, 46, 0;    /* #792E00 */
+  --orange-10: 77, 27, 0;    /* #4D1B00 */
+
+  /* 错误色 Red */
+  --red-1: 255, 236, 232;    /* #FFECE8 */
+  --red-2: 253, 205, 197;    /* #FDCDC5 */
+  --red-3: 251, 172, 163;    /* #FBACA3 */
+  --red-4: 249, 137, 129;    /* #F98981 */
+  --red-5: 247, 101, 96;     /* #F76560 */
+  --red-6: 245, 63, 63;      /* #F53F3F */
+  --red-7: 203, 39, 45;      /* #CB272D */
+  --red-8: 161, 21, 30;      /* #A1151E */
+  --red-9: 119, 8, 19;       /* #770813 */
+  --red-10: 77, 0, 10;       /* #4D000A */
+
+  /* 数据色 Data */
+  --data-1: 64, 128, 255;    /* #4080FF */
+  --data-2: 190, 218, 255;   /* #BEDAFF */
+  --data-3: 85, 197, 253;    /* #55C5FD */
+  --data-4: 156, 220, 252;   /* #9CDCFC */
+  --data-5: 255, 125, 0;     /* #FF7D00 */
+  --data-6: 255, 207, 139;   /* #FFCF8B */
+  --data-7: 76, 210, 99;     /* #4CD263 */
+  --data-8: 175, 240, 181;   /* #AFF0B5 */
+  --data-9: 168, 113, 227;   /* #A871E3 */
+  --data-10: 221, 190, 246;  /* #DDBEF6 */
+  --data-11: 247, 186, 30;   /* #F7BA1E */
+  --data-12: 250, 220, 109;  /* #FADC6D */
+  --data-13: 159, 219, 29;   /* #9FDB1D */
+  --data-14: 201, 233, 104;  /* #C9E968 */
+  --data-15: 249, 121, 183;  /* #F979B7 */
+  --data-16: 251, 157, 199;  /* #FB9DC7 */
+  --data-17: 20, 201, 201;   /* #14C9C9 */
+  --data-18: 137, 233, 224;  /* #89E9E0 */
+  --data-19: 232, 101, 223;  /* #E865DF */
+  --data-20: 247, 186, 239;  /* #F7BAEF */
+
+  /* ============================================================
+   * 1. 全局色 Global（色板）
+   * ============================================================ */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  --color-gray-hover: #F5F7FA;
+  --color-brand-dark: #1B2B4C;
+  --color-brand: #165DFF; /* 品牌主色 · 对应 blue-6 / primary-6 */
+
+  /* 中性色 Gray（语义别名 · 供 border/fill/text 引用） */
+  --color-gray-1: #F7F8FA;
+  --color-gray-2: #F2F3F5;
+  --color-gray-3: #E5E6EB;
+  --color-gray-4: #C9CDD4;
+  --color-gray-5: #A9AEB8;
+  --color-gray-6: #86909C;
+  --color-gray-7: #6B7785;
+  --color-gray-8: #4E5969;
+  --color-gray-9: #272E3B;
+  --color-gray-10: #1D2129;
+
+  /* ============================================================
+   * 2. 主色 Primary（1 浅 → 7 深；6 为常规）
+   * ============================================================ */
+  --color-primary-1: rgb(var(--blue-1)); /* 浅色/白底悬浮 #E8F3FF */
+  --color-primary-2: rgb(var(--blue-2)); /* 文字禁用 #BEDAFF */
+  --color-primary-3: rgb(var(--blue-3)); /* 一般禁用 #94BFFF */
+  --color-primary-4: rgb(var(--blue-4)); /* 特殊场景 #6AA1FF */
+  --color-primary-5: rgb(var(--blue-5)); /* 悬浮 hover #4080FF */
+  --color-primary-6: rgb(var(--blue-6)); /* 常规 #165DFF */
+  --color-primary-7: rgb(var(--blue-7)); /* 点击 click #0E42D2 */
+  --color-primary: var(--color-primary-6);
+
+  /* ============================================================
+   * 3. 成功色 Success
+   * ============================================================ */
+  --color-success-1: rgb(var(--green-1));
+  --color-success-2: rgb(var(--green-2));
+  --color-success-3: rgb(var(--green-3));
+  --color-success-4: rgb(var(--green-4));
+  --color-success-5: rgb(var(--green-5)); /* hover */
+  --color-success-6: rgb(var(--green-6)); /* 常规 #00B42A */
+  --color-success-7: rgb(var(--green-7)); /* click */
+  --color-success: var(--color-success-6);
+
+  /* ============================================================
+   * 4. 警示色 Warning
+   * ============================================================ */
+  --color-warning-1: rgb(var(--orange-1));
+  --color-warning-2: rgb(var(--orange-2));
+  --color-warning-3: rgb(var(--orange-3));
+  --color-warning-4: rgb(var(--orange-4));
+  --color-warning-5: rgb(var(--orange-5)); /* hover */
+  --color-warning-6: rgb(var(--orange-6)); /* 常规 #FF7D00 */
+  --color-warning-7: rgb(var(--orange-7)); /* click */
+  --color-warning: var(--color-warning-6);
+
+  /* ============================================================
+   * 5. 错误色 / 危险色 Danger
+   * ============================================================ */
+  --color-danger-1: rgb(var(--red-1));
+  --color-danger-2: rgb(var(--red-2));
+  --color-danger-3: rgb(var(--red-3));
+  --color-danger-4: rgb(var(--red-4));
+  --color-danger-5: rgb(var(--red-5)); /* hover */
+  --color-danger-6: rgb(var(--red-6)); /* 常规 #F53F3F */
+  --color-danger-7: rgb(var(--red-7)); /* click */
+  --color-danger: var(--color-danger-6);
+  --color-error: var(--color-danger-6);
+
+  /* ============================================================
+   * 6. 链接色 Link（与主色阶一致）
+   * ============================================================ */
+  --color-link-1: rgb(var(--blue-1));
+  --color-link-2: rgb(var(--blue-2));
+  --color-link-3: rgb(var(--blue-3));
+  --color-link-4: rgb(var(--blue-4));
+  --color-link-5: rgb(var(--blue-5)); /* hover */
+  --color-link-6: rgb(var(--blue-6)); /* 常规 */
+  --color-link-7: rgb(var(--blue-7)); /* click */
+  --color-link: var(--color-link-6);
+
+  /* ============================================================
+   * 7. 数据色 Data
+   * ============================================================ */
+  --color-data-1: rgb(var(--data-1));
+  --color-data-2: rgb(var(--data-2));
+  --color-data-3: rgb(var(--data-3));
+  --color-data-4: rgb(var(--data-4));
+  --color-data-5: rgb(var(--data-5));
+  --color-data-6: rgb(var(--data-6));
+  --color-data-7: rgb(var(--data-7));
+  --color-data-8: rgb(var(--data-8));
+  --color-data-9: rgb(var(--data-9));
+  --color-data-10: rgb(var(--data-10));
+  --color-data-11: rgb(var(--data-11));
+  --color-data-12: rgb(var(--data-12));
+  --color-data-13: rgb(var(--data-13));
+  --color-data-14: rgb(var(--data-14));
+  --color-data-15: rgb(var(--data-15));
+  --color-data-16: rgb(var(--data-16));
+  --color-data-17: rgb(var(--data-17));
+  --color-data-18: rgb(var(--data-18));
+  --color-data-19: rgb(var(--data-19));
+  --color-data-20: rgb(var(--data-20));
+
+  /* ============================================================
+   * 8. 边框 / 填充 / 背景 / 文字
+   * ============================================================ */
+
+  /* 边框 Border */
+  --color-border-1: var(--color-gray-2); /* #F2F3F5 浅色 */
+  --color-border-2: var(--color-gray-3); /* #E5E6EB 一般 */
+  --color-border-3: var(--color-gray-4); /* #C9CDD4 深/悬浮 */
+  --color-border-4: var(--color-gray-6); /* #86909C 重/按钮描边 */
+  --color-border: var(--color-border-2);
+
+  /* 填充 Fill */
+  --color-fill-1: var(--color-gray-1); /* #F7F8FA 浅/禁用 */
+  --color-fill-2: var(--color-gray-2); /* #F2F3F5 常规/白底悬浮 */
+  --color-fill-3: var(--color-gray-3); /* #E5E6EB 深/灰底悬浮 */
+  --color-fill-4: var(--color-gray-4); /* #C9CDD4 重/特殊场景 */
+  --color-fill-8: var(--color-gray-8); /* #4E5969 强调/图标/特殊场景 */
+
+  /* 背景 Background */
+  --color-bg-layout: var(--color-gray-1);       /* #F7F8FA 画布背景 */
+  --color-bg-container: var(--color-white);     /* #FFFFFF 容器背景 */
+  --color-bg-mask: rgba(29, 33, 41, 0.6);       /* 遮罩层 · gray-10 @ 60% */
+  --color-bg-header: var(--color-brand-dark);   /* #1B2B4C 顶部导航 */
+  --color-bg-sidebar: var(--color-white);       /* #FFFFFF 侧边菜单 */
+  --color-bg-table-header: var(--color-gray-1); /* #F7F8FA 表头 */
+  --color-bg-table-hover: var(--color-gray-hover); /* #F5F7FA 行悬浮 */
+
+  /* 文字 Text */
+  --color-text-1: var(--color-gray-10); /* #1D2129 强调/正文标题 */
+  --color-text-2: var(--color-gray-8);  /* #4E5969 次强调/正文 */
+  --color-text-3: var(--color-gray-6);  /* #86909C 次要信息 */
+  --color-text-4: var(--color-gray-4);  /* #C9CDD4 置灰信息 */
+  --color-text-header: rgba(255, 255, 255, 0.7); /* Header 导航默认字色 */
+  --color-text-inverse: #FFFFFF;
+
+  /* ============================================================
+   * 9. 字号 / 字重 / 字体
+   * ============================================================ */
+  --font-size-body-1: 12px;     /* 辅助文案 */
+  --font-size-body-2: 14px;     /* 正文-常规 */
+  --font-size-title-1: 16px;    /* 标题-小 */
+  --font-size-title-2: 20px;    /* 标题-中 */
+  --font-size-title-3: 24px;    /* 标题-大 */
+  --font-size-display-1: 30px;  /* 运营标题-小 */
+  --font-size-display-2: 36px;  /* 运营标题-大 */
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font-family（跨平台） */
+  --font-family-base: "PingFang SC", "Microsoft YaHei", "Noto Sans",
+    -apple-system, "Helvetica Neue", "Segoe UI", Arial, Roboto, sans-serif;
+  --font-family-code: "SFMono-Regular", Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
 
   /* ============================================================
-   * 2. Color Library · 色库（1 → 10，第 6 阶为主色）
+   * 10. 尺寸 Size（基础网格 · size-N = 4 * N px）
    * ============================================================ */
+  --size-1: 4px;
+  --size-2: 8px;
+  --size-3: 12px;
+  --size-4: 16px;
+  --size-5: 20px;
+  --size-6: 24px;
+  --size-7: 28px;
+  --size-8: 32px;
+  --size-9: 36px;
+  --size-10: 40px;
 
-  /* Blue / ArcoBlue · 主色蓝阶 */
-  --blue-1: #E8F3FF;
-  --blue-2: #BEDAFF;
-  --blue-3: #94BFFF;
-  --blue-4: #6AA1FF;
-  --blue-5: #4080FF;
-  --blue-6: #165DFF; /* Primary Base */
-  --blue-7: #0E42D2;
-  --blue-8: #082DA5;
-  --blue-9: #031D79;
-  --blue-10: #00104D;
+  /* 组件尺寸 */
+  --size-mini: var(--size-6);     /* 24px 迷你 */
+  --size-small: var(--size-7);    /* 28px 较小 */
+  --size-default: var(--size-8);  /* 32px 默认 */
+  --size-large: var(--size-10);   /* 40px 较大 */
 
-  /* Green · 成功色阶 */
-  --green-1: #E8FFEA;
-  --green-2: #AFF0B5;
-  --green-3: #7BE188;
-  --green-4: #4CD263;
-  --green-5: #23C343;
-  --green-6: #00B42A; /* Success Base */
-  --green-7: #009A29;
-  --green-8: #008026;
-  --green-9: #006622;
-  --green-10: #004D1C;
-
-  /* Orange · 警告色阶 */
-  --orange-1: #FFF7E8;
-  --orange-2: #FFE4BA;
-  --orange-3: #FFCF8B;
-  --orange-4: #FFB65D;
-  --orange-5: #FF9A2E;
-  --orange-6: #FF7D00; /* Warning Base */
-  --orange-7: #D25F00;
-  --orange-8: #A64500;
-  --orange-9: #792E00;
-  --orange-10: #4D1B00;
-
-  /* Red · 错误/危险色阶 */
-  --red-1: #FFECE8;
-  --red-2: #FDCDC5;
-  --red-3: #FBACA3;
-  --red-4: #F98981;
-  --red-5: #F76560;
-  --red-6: #F53F3F; /* Error / Danger Base */
-  --red-7: #CB272D;
-  --red-8: #A1151E;
-  --red-9: #770813;
-  --red-10: #4D000A;
-
-  /* Gray / Neutral · 中性色阶 */
-  --gray-1: #F7F8FA;
-  --gray-2: #F2F3F5;
-  --gray-3: #E5E6EB;
-  --gray-4: #C9CDD4;
-  --gray-5: #A9AEB8;
-  --gray-6: #86909C;
-  --gray-7: #6B7785;
-  --gray-8: #4E5969;
-  --gray-9: #272E3B;
-  --gray-10: #1D2129;
+  /* 栅格间距 Spacing */
+  --spacing-xs: 4px;   /* 紧凑：图标与文字、标签间距 */
+  --spacing-sm: 8px;   /* 组件内部 */
+  --spacing-md: 16px;  /* 标准组件间距、容器内边距 */
+  --spacing-lg: 24px;  /* 大区块/模块间距 */
+  --spacing-xl: 32px;  /* 页面级大区块分割 */
 
   /* ============================================================
-   * 3. Functional Colors · 功能色
+   * 11. 边框宽度 / 圆角 / 阴影
    * ============================================================ */
+  --border-none: 0;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-3: 3px;
 
-  /* --- 主色 Primary（#165DFF） --- */
-  --color-primary: var(--blue-6);                 /* #165DFF Base */
-  --color-primary-hover: var(--blue-5);           /* #4080FF Hover */
-  --color-primary-active: var(--blue-7);          /* #0E42D2 Active */
-  --color-primary-disabled: var(--blue-3);        /* #94BFFF Disabled */
-  --color-primary-outline: rgba(22, 93, 255, 0.2);
-  --color-primary-bg: var(--blue-1);              /* #E8F3FF */
-  --color-primary-bg-hover: var(--blue-2);        /* #BEDAFF */
-  --color-primary-border: var(--blue-3);          /* #94BFFF */
-  --color-primary-border-hover: var(--blue-5);    /* #4080FF */
+  --border-radius-none: 0;
+  --border-radius-small: 2px;   /* 常规圆角 · 基础控件 */
+  --border-radius-medium: 4px;  /* 中等圆角 · 独立浮层 */
+  --border-radius-large: 8px;   /* 较大圆角 · 大型容器 */
+  --border-radius-circle: 50%;  /* 全圆角 · 头像/徽章 */
 
-  --color-primary-1: var(--blue-1);
-  --color-primary-2: var(--blue-2);
-  --color-primary-3: var(--blue-3);
-  --color-primary-4: var(--blue-4);
-  --color-primary-5: var(--blue-6); /* 业务主色别名 → #165DFF */
-  --color-primary-6: var(--blue-7);
-  --color-primary-7: var(--blue-8);
-
-  /* --- 成功色 Success（#00B42A） --- */
-  --color-success: var(--green-6);
-  --color-success-hover: var(--green-5);
-  --color-success-active: var(--green-7);
-  --color-success-disabled: var(--green-3);
-  --color-success-outline: rgba(0, 180, 42, 0.2);
-  --color-success-bg: var(--green-1);
-  --color-success-bg-hover: var(--green-2);
-  --color-success-border: var(--green-3);
-  --color-success-border-hover: var(--green-5);
-
-  --color-success-1: var(--green-1);
-  --color-success-2: var(--green-2);
-  --color-success-3: var(--green-3);
-  --color-success-4: var(--green-4);
-  --color-success-5: var(--green-6); /* 业务成功色别名 → #00B42A */
-  --color-success-6: var(--green-7);
-  --color-success-7: var(--green-8);
-
-  /* --- 警告色 Warning（#FF7D00） --- */
-  --color-warning: var(--orange-6);
-  --color-warning-hover: var(--orange-5);
-  --color-warning-active: var(--orange-7);
-  --color-warning-disabled: var(--orange-3);
-  --color-warning-outline: rgba(255, 125, 0, 0.2);
-  --color-warning-bg: var(--orange-1);
-  --color-warning-bg-hover: var(--orange-2);
-  --color-warning-border: var(--orange-3);
-  --color-warning-border-hover: var(--orange-5);
-
-  --color-warning-1: var(--orange-1);
-  --color-warning-2: var(--orange-2);
-  --color-warning-3: var(--orange-3);
-  --color-warning-4: var(--orange-4);
-  --color-warning-5: var(--orange-6); /* 业务警告色别名 → #FF7D00 */
-  --color-warning-6: var(--orange-7);
-  --color-warning-7: var(--orange-8);
-
-  /* --- 错误色 / 危险色 Error · Danger（#F53F3F） --- */
-  --color-error: var(--red-6);
-  --color-error-hover: var(--red-5);
-  --color-error-active: var(--red-7);
-  --color-error-disabled: var(--red-3);
-  --color-error-outline: rgba(245, 63, 63, 0.2);
-  --color-error-bg: var(--red-1);
-  --color-error-bg-hover: var(--red-2);
-  --color-error-border: var(--red-3);
-  --color-error-border-hover: var(--red-5);
-
-  --color-danger: var(--color-error);
-  --color-danger-hover: var(--color-error-hover);
-  --color-danger-active: var(--color-error-active);
-  --color-danger-bg: var(--color-error-bg);
-  --color-danger-border: var(--color-error-border);
-
-  --color-danger-1: var(--red-1);
-  --color-danger-2: var(--red-2);
-  --color-danger-3: var(--red-3);
-  --color-danger-4: var(--red-6); /* 业务危险色别名 → #F53F3F */
-  --color-danger-5: var(--red-7);
-  --color-danger-6: var(--red-8);
-  --color-danger-7: var(--red-9);
+  --shadow-special: 0 0 1px rgba(0, 0, 0, 0.3); /* 特殊细阴影/描边 */
+  --shadow-1: 0 2px 5px rgba(0, 0, 0, 0.1);     /* 浮层/卡片低投影 */
+  --shadow-2: 0 4px 10px rgba(0, 0, 0, 0.1);    /* 弹窗/下拉中投影 */
+  --shadow-3: 0 8px 20px rgba(0, 0, 0, 0.1);    /* 大浮层/抽屉高投影 */
 
   /* ============================================================
-   * 4. Neutral Tokens · 文本 / 边框 / 填充 / 图标
+   * 12. 布局 Layout
    * ============================================================ */
+  --header-height: 56px;
+  --header-z-index: 1000;
+  --sidebar-width: 224px;           /* 展开 */
+  --sidebar-width-collapsed: 64px;  /* 折叠 */
+  --sidebar-item-height: 40px;
+  --sidebar-z-index: 900;
+  --main-min-width: 1280px;
+  --main-padding: 16px;
+  --gutter-sm: 8px;  /* 筛选栏/工具栏 */
+  --gutter-md: 16px; /* 标准卡片/表单栅格 */
 
-  /* 文本色 Text */
-  --color-text-1: var(--gray-10);                 /* #1D2129 标题/强调 */
-  --color-text-2: var(--gray-8);                  /* #4E5969 正文 */
-  --color-text-3: var(--gray-6);                  /* #86909C 次要/说明 */
-  --color-text-4: var(--gray-4);                  /* #C9CDD4 禁用/占位 */
-  --color-text-inverse: #FFFFFF;
+  /* ============================================================
+   * 13. 容器 Container
+   * ============================================================ */
+  --container-bg: #FFFFFF;
+  --container-radius: 6px; /* 推荐 6px（硬朗紧凑）；可选 8px */
+  --container-border: 1px solid #E5E6EB;
+  --container-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --container-padding-compact: 12px 16px;
+  --container-padding-standard: 16px;
+  --container-padding-loose: 20px;
 
-  --color-text-heading: var(--color-text-1);
-  --color-text-primary: var(--color-text-1);
+  /* ============================================================
+   * 14. 表单 Form
+   * ============================================================ */
+  --form-label-control-gap: var(--spacing-sm); /* 8px */
+  --form-item-gap: var(--spacing-md);          /* 16px */
+  --form-label-width: 120px;                   /* 水平表单 Label 宽，可选 100px */
+  --form-control-height-compact: 28px;
+  --form-control-height: 32px;                 /* Medium 默认 */
+  --form-control-height-large: 40px;
+  --form-control-padding-compact: 0 8px;
+  --form-control-padding: 0 12px;
+  --form-control-padding-large: 0 16px;
+  --form-focus-shadow: 0 0 0 2px rgba(22, 93, 255, 0.2);
+  --form-error-gap: 4px; /* 错误提示与下方元素间隙 */
+
+  /* ============================================================
+   * 15. 表格 Table
+   * ============================================================ */
+  --table-row-height-compact: 40px;
+  --table-row-height: 44px;       /* Standard 默认 */
+  --table-row-height-loose: 56px;
+  --table-cell-padding-y: 12px;
+  --table-cell-padding-x: 16px;   /* Standard / Loose */
+  --table-cell-padding-x-compact: 12px;
+
+  /* ============================================================
+   * 16. 弹窗 Modal
+   * ============================================================ */
+  --modal-width-small: 420px;
+  --modal-width: 800px;           /* Medium 默认 */
+  --modal-width-large: 960px;
+  --modal-max-height: calc(100vh - 80px);
+  --modal-z-index: 1050;
+  --modal-mask: var(--color-bg-mask);
+
+  /* ============================================================
+   * 17. 兼容旧原型别名（新页优先用语义阶梯名）
+   * ============================================================ */
+  --color-primary-hover: var(--color-primary-5);
+  --color-primary-active: var(--color-primary-7);
+  --color-primary-bg: var(--color-primary-1);
+  --color-success-hover: var(--color-success-5);
+  --color-success-active: var(--color-success-7);
   --color-text-secondary: var(--color-text-2);
   --color-text-tertiary: var(--color-text-3);
-  --color-text-disabled: var(--color-text-4);
-
-  /* 图标色 Icon */
-  --color-icon-1: var(--color-text-1);
-  --color-icon-2: var(--color-text-2);
-  --color-icon-3: var(--color-text-3);
-  --color-icon-4: var(--color-text-4);
-
-  /* 边框色 Border */
-  --color-border-1: var(--gray-2);                /* #F2F3F5 浅边框 */
-  --color-border-2: var(--gray-3);                /* #E5E6EB 默认边框 */
-  --color-border-3: var(--gray-4);                /* #C9CDD4 深边框 */
-  --color-border-4: var(--gray-6);                /* #86909C 强调边框 */
-  --color-border-split: var(--gray-2);            /* 分割线 */
-  --color-border: var(--color-border-2);
-  --color-border-light: var(--color-border-1);
-  --color-border-base: var(--color-border-2);
-  --color-border-dark: var(--color-border-3);
-
-  /* 填充色 Fill */
-  --color-fill-1: var(--gray-1);                  /* #F7F8FA */
-  --color-fill-2: var(--gray-2);                  /* #F2F3F5 */
-  --color-fill-3: var(--gray-3);                  /* #E5E6EB */
-  --color-fill-4: var(--gray-4);                  /* #C9CDD4 */
-
-  /* ============================================================
-   * 5. Background · 背景色
-   * ============================================================ */
-  --color-bg-white: #FFFFFF;
-  --color-bg-1: #FFFFFF;                          /* 容器/卡片 */
-  --color-bg-2: var(--gray-1);                    /* #F7F8FA 次级背景 */
-  --color-bg-3: var(--gray-2);                    /* #F2F3F5 三级背景 */
-  --color-bg-4: var(--gray-3);                    /* #E5E6EB */
-  --color-bg-5: var(--gray-4);                    /* #C9CDD4 */
-
-  --color-bg-container: var(--color-bg-1);
-  --color-bg-page: var(--gray-1);                 /* #F7F8FA 页面画布 */
-  --color-bg-layout: var(--gray-1);
-  --color-bg-hover: var(--color-fill-2);
-  --color-bg-spotlight: var(--color-fill-1);
-  --color-bg-mask: rgba(29, 33, 41, 0.6);         /* 遮罩 */
-
-  /* 表格 Table */
-  --table-padding-x: 16px;                        /* 表格区域相对卡片的左右外边距 */
-  --table-cell-padding-x: 12px;                   /* 列左右 padding */
-  --color-table-border: #E5E6EB;                  /* 四周边框 / 内部分隔线 1px */
-  --color-table-header-bg: #F7F8FA;               /* 表头填充色 */
-  --color-table-row-hover: #F5F7FA;               /* 行移入色 */
-
-  /* 布局 Layout */
-  --sidebar-width: 240px;
-  --sidebar-item-height: 44px;
-  --sidebar-item-padding-x: 16px;
-  --main-padding: 16px;
-  --toolbar-padding: 16px;
-  --btn-height: 32px;
-  --btn-padding-x: 16px;
-  --icon-btn-size: 32px;
-  --nav-tab-height: 32px;
-  --nav-tab-padding-x: 8px;
-  --brand-font-size: 18px;
-
-  /* 深色导航 / 侧栏 */
-  --color-bg-header: #1B2B4C;                     /* 顶部导航栏填充色 */
-  --header-height: 56px;
-  --header-padding-x: 16px;
-  --color-bg-sidebar: #FFFFFF;
-  --color-bg-sidebar-dark: var(--gray-10);
-
-  /* ============================================================
-   * 6. Elevation · 圆角 / 阴影 / 遮罩
-   * ============================================================ */
-  --border-radius-none: 0;
-  --border-radius-sm: 2px;
-  --border-radius-base: 4px;
-  --border-radius-md: 4px;
-  --border-radius-lg: 8px;
-  --border-radius-circle: 50%;
-
-  /* 阴影 Shadow */
-  --shadow-1: 0 2px 5px rgba(0, 0, 0, 0.1);
-  --shadow-2: 0 4px 10px rgba(0, 0, 0, 0.1);
-  --shadow-3: 0 8px 20px rgba(0, 0, 0, 0.1);
-
-  --shadow-low: var(--shadow-1);
-  --shadow-medium: var(--shadow-2);
-  --shadow-high: var(--shadow-3);
-
-  --mask-bg: var(--color-bg-mask);
+  --color-bg-page: var(--color-bg-layout);
+  --font-size-body: var(--font-size-body-2);
 }

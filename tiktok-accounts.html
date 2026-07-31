@@ -1391,8 +1391,8 @@
           renderImportTable();
           const errCount = importRows.filter(function (r) { return r.error; }).length;
           if (errCount) {
-            showImportAlert('共 ' + importRows.length + ' 行，其中 ' + errCount + ' 行校验失败，请修正后重新上传');
-            showPageMsg('数据校验失败，请查看错误信息', 'error');
+            showImportAlert('共 ' + importRows.length + ' 行，其中 ' + errCount + ' 行校验失败；确认提交后将默认移除失败数据');
+            showPageMsg('有 ' + errCount + ' 行校验失败，确认后将自动移除', 'error');
           } else {
             hideImportAlert();
             showPageMsg('文件解析成功，共 ' + importRows.length + ' 行');
@@ -1414,15 +1414,17 @@
           return;
         }
 
-        const errors = importRows.filter(function (r) { return r.error; });
-        if (errors.length) {
-          showImportAlert('存在 ' + errors.length + ' 行错误数据，无法导入。请修正后重新上传');
-          showPageMsg('导入失败：存在错误数据', 'error');
+        const validRows = importRows.filter(function (r) { return !r.error; });
+        const removedCount = importRows.length - validRows.length;
+
+        if (!validRows.length) {
+          showImportAlert('全部数据校验失败，已无可提交内容');
+          showPageMsg('导入失败：没有可提交的有效数据', 'error');
           return;
         }
 
         let updated = 0;
-        importRows.forEach(function (row) {
+        validRows.forEach(function (row) {
           const existing = allRows.find(function (r) { return r.accountId === row.accountId; });
           if (!existing) return;
           let changed = false;
@@ -1443,7 +1445,11 @@
 
         closeImportModal();
         applyFilter();
-        showPageMsg('导入成功：已更新 ' + updated + ' 条账户归属');
+        if (removedCount) {
+          showPageMsg('导入成功：已更新 ' + updated + ' 条，已移除失败数据 ' + removedCount + ' 条');
+        } else {
+          showPageMsg('导入成功：已更新 ' + updated + ' 条账户归属');
+        }
       }
 
       function exportCsv() {

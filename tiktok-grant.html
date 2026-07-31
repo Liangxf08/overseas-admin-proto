@@ -467,6 +467,8 @@
     .btn:active { opacity: 0.85; }
     .btn--primary { background: var(--color-primary); color: #fff; }
     .btn--primary:hover { background: var(--color-primary-hover); }
+    .btn--success { background: var(--color-success); color: var(--color-text-inverse, #fff); }
+    .btn--success:hover { background: var(--color-success-hover); }
     .btn--default {
       background: #fff;
       color: #1D2129;
@@ -868,7 +870,154 @@
       padding: 12px 0 0;
     }
 
-    body.drawer-open { overflow: hidden; }
+    body.drawer-open,
+    body.modal-open { overflow: hidden; }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      z-index: var(--modal-z-index, 1050);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--modal-mask, var(--color-bg-mask));
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .modal-mask.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      width: var(--modal-width, 800px);
+      max-width: calc(100vw - 32px);
+      max-height: var(--modal-max-height, calc(100vh - 80px));
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg-container, #fff);
+      border-radius: var(--border-radius-large, 8px);
+      box-shadow: var(--shadow-3);
+      transform: translateY(8px);
+      transition: transform 0.2s;
+      overflow: hidden;
+    }
+
+    .modal-mask.is-open .modal { transform: translateY(0); }
+
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 var(--size-6);
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--color-border-2);
+    }
+
+    .modal__title {
+      font-size: var(--font-size-title-1);
+      font-weight: 500;
+      line-height: 24px;
+      color: var(--color-text-1);
+    }
+
+    .modal__close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--border-radius-medium);
+      color: var(--color-text-3);
+    }
+
+    .modal__close:hover {
+      background: var(--color-fill-2);
+      color: var(--color-text-1);
+    }
+
+    .modal__close svg { width: 14px; height: 14px; }
+
+    .modal__body {
+      padding: var(--size-6) var(--size-6) var(--size-2);
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .modal__footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--size-3);
+      padding: var(--size-4) var(--size-6) var(--size-5);
+      flex-shrink: 0;
+    }
+
+    .sync-tip {
+      margin-bottom: var(--size-4);
+      padding: var(--size-3) var(--size-4);
+      background: var(--color-fill-1);
+      border: 1px solid var(--color-border-2);
+      border-radius: var(--border-radius-medium);
+      font-size: var(--font-size-body-2);
+      line-height: 22px;
+      color: var(--color-text-2);
+    }
+
+    .sync-tip p { margin: 0; }
+
+    .sync-tip__lead { margin-bottom: var(--size-2); }
+
+    .sync-tip__title {
+      margin-bottom: var(--size-1);
+      font-weight: 500;
+      color: var(--color-text-1);
+    }
+
+    .sync-tip ol {
+      margin: 0;
+      padding-left: 1.25em;
+      list-style: decimal;
+    }
+
+    .sync-tip li + li { margin-top: var(--size-1); }
+
+    .sync-tip .link {
+      color: var(--color-link-6, var(--color-primary));
+      text-decoration: none;
+    }
+
+    .sync-tip .link:hover { color: var(--color-primary-5, var(--color-primary-hover)); }
+
+    .sync-textarea {
+      display: block;
+      width: 100%;
+      min-height: 160px;
+      padding: var(--size-2) var(--size-3);
+      border: 1px solid var(--color-border-2);
+      border-radius: var(--border-radius-medium);
+      background: var(--color-bg-container, #fff);
+      font-family: inherit;
+      font-size: var(--font-size-body-2);
+      line-height: 22px;
+      color: var(--color-text-1);
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .sync-textarea::placeholder { color: var(--color-text-3); }
+
+    .sync-textarea:hover { border-color: var(--color-primary); }
+
+    .sync-textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: var(--form-focus-shadow);
+    }
   </style>
 </head>
 <body>
@@ -973,6 +1122,7 @@
             <div class="filter-actions">
               <button class="btn btn--default" type="button" id="resetBtn">重置</button>
               <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+              <button class="btn btn--success" type="button" id="syncBtn">同步</button>
               <button class="btn btn--default" type="button" id="exportBtn">导出</button>
             </div>
           </div>
@@ -1008,6 +1158,34 @@
   </div>
 
   <div class="page-msg page-msg--success" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <div class="modal-mask" id="syncModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="syncTitle">同步</h2>
+        <button class="modal__close" type="button" id="syncClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="sync-tip">
+          <p class="sync-tip__lead">系统每日会自动执行一次拉取，如当日数据已更新，请勿频繁操作同步；如发现数据未更新可手动点击同步。</p>
+          <p class="sync-tip__title">手动同步流程：</p>
+          <ol>
+            <li>Chrome 浏览器安装扩展程序（<a class="link" href="https://chromewebstore.google.com/detail/cookie-exporter/fhnmmidekmgocpjdceeffppcodigillk" target="_blank" rel="noopener noreferrer">点击安装</a>）。</li>
+            <li>登录TikTok广告管理平台（任意账户），进入工具/结算/促销活动 页</li>
+            <li>打开浏览器安装好的插件，点击 Copy ，将文本粘贴在下方输入框</li>
+            <li>同步任务提交后，更新预计需要30-60分钟。</li>
+          </ol>
+        </div>
+        <textarea class="sync-textarea" id="syncCookieInput" placeholder="请将插件 Copy 的文本粘贴到此处" spellcheck="false"></textarea>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="syncCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="syncSubmit">提交</button>
+      </div>
+    </div>
+  </div>
 
   <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
@@ -1578,6 +1756,32 @@
         if (e.key === 'Enter') doSearch();
       });
 
+      function openSyncModal() {
+        document.getElementById('syncCookieInput').value = '';
+        document.getElementById('syncModal').classList.add('is-open');
+        document.getElementById('syncModal').setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+
+      function closeSyncModal() {
+        document.getElementById('syncModal').classList.remove('is-open');
+        document.getElementById('syncModal').setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+      }
+
+      document.getElementById('syncBtn').addEventListener('click', openSyncModal);
+      document.getElementById('syncClose').addEventListener('click', closeSyncModal);
+      document.getElementById('syncCancel').addEventListener('click', closeSyncModal);
+      document.getElementById('syncSubmit').addEventListener('click', () => {
+        const value = (document.getElementById('syncCookieInput').value || '').trim();
+        if (!value) {
+          showPageMsg('请先粘贴同步文本');
+          return;
+        }
+        closeSyncModal();
+        showPageMsg('同步任务已提交，预计 30-60 分钟完成');
+      });
+
       document.getElementById('grantTable').addEventListener('click', (e) => {
         const sortBtn = e.target.closest('.th-sort');
         if (sortBtn) {
@@ -1659,7 +1863,12 @@
         if (e.target === e.currentTarget) closeDrawer();
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeDrawer();
+        if (e.key !== 'Escape') return;
+        if (document.getElementById('syncModal').classList.contains('is-open')) {
+          closeSyncModal();
+          return;
+        }
+        closeDrawer();
       });
 
       document.querySelectorAll('[data-group-toggle]').forEach((btn) => {
