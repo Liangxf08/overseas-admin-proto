@@ -333,7 +333,8 @@
   --form-placeholder-color: var(--color-text-4); /* #C9CDD4 输入/选择器占位 */
   --select-option-height: 36px;
   --checkbox-size: 16px;
-  --checkbox-border-color: var(--color-border-2); /* #E5E6EB */
+  --checkbox-border-color: var(--color-border-2); /* #E5E6EB 选择器多选 */
+  --checkbox-border-color-table: var(--color-border-3); /* #C9CDD4 表格 */
   --tag-font-size: var(--font-size-body-1); /* 12px 表格状态标签 */
   --tag-height: 28px;
 
