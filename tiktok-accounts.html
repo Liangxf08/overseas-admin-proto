@@ -118,15 +118,14 @@
 
     .user-chip:hover { background: rgba(255, 255, 255, 0.08); }
     .user-avatar {
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: var(--color-primary);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
+      background: var(--color-fill-4, #C9CDD4);
+      display: block;
+      flex-shrink: 0;
+      object-fit: cover;
+      overflow: hidden;
     }
     .user-name { font-size: 14px; }
     .user-chip .chevron { width: 12px; height: 12px; opacity: 0.75; }
@@ -1135,7 +1134,7 @@
           </svg>
         </button>
         <button class="user-chip" type="button" aria-label="用户菜单">
-          <span class="user-avatar">风</span>
+          <img class="user-avatar" src="assets/avatar.jpg" width="32" height="32" alt="" />
           <span class="user-name">小风</span>
           <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 4.5L6 7.5L9 4.5"/>
@@ -1340,7 +1339,9 @@
         'Ocean Match',
         'Pixel Farm'
       ];
-      const OPTIMIZERS = ['佩奇', '木子', '阿哲', '小风', '用户A', '用户B', '用户C'];
+      const OPTIMIZERS = Array.from({ length: 12 }, function (_, i) {
+        return '用户' + String.fromCharCode(65 + i);
+      });
       const ACCOUNT_PREFIXES = ['CWSM_TT_BV', 'TMJ_TT_US', 'WP_TT_EU', 'SM_TT_SEA', 'OM_TT_NA', 'PF_TT_JP'];
       const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 
@@ -1678,7 +1679,7 @@
       function downloadTemplate() {
         const sampleId = '7658218295792517141';
         const sampleProduct = 'Color Water Sort Master';
-        const sampleOptimizer = '佩奇';
+        const sampleOptimizer = '用户A';
         // Excel 列宽 30 ≈ SpreadsheetML ss:Width 210
         const colW = '210';
         let emptyRows = '';

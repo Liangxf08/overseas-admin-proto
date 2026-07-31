@@ -293,6 +293,8 @@
    * ============================================================ */
   --header-height: 56px;
   --header-z-index: 1000;
+  --header-avatar-size: 32px;
+  --icon-placeholder-color: var(--color-fill-4); /* #C9CDD4 未同步图片的图标占位 */
   --sidebar-width: 224px;           /* 展开 */
   --sidebar-width-collapsed: 64px;  /* 折叠 */
   --sidebar-item-height: 44px;      /* 一/二级菜单项高 */
