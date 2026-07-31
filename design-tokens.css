@@ -295,7 +295,10 @@
   --header-z-index: 1000;
   --sidebar-width: 224px;           /* 展开 */
   --sidebar-width-collapsed: 64px;  /* 折叠 */
-  --sidebar-item-height: 40px;
+  --sidebar-item-height: 44px;      /* 一/二级菜单项高 */
+  --sidebar-item-padding-x: 16px;   /* 一级水平内边距 */
+  --sidebar-level2-padding-left: 40px; /* 二级：对齐一级文字（16+16+8） */
+  --sidebar-icon-size: 16px;
   --sidebar-z-index: 900;
   --main-min-width: 1280px;
   --main-padding: 16px;
@@ -327,6 +330,12 @@
   --form-control-padding-large: 0 16px;
   --form-focus-shadow: 0 0 0 2px rgba(22, 93, 255, 0.2);
   --form-error-gap: 4px; /* 错误提示与下方元素间隙 */
+  --form-placeholder-color: var(--color-text-4); /* #C9CDD4 输入/选择器占位 */
+  --select-option-height: 36px;
+  --checkbox-size: 16px;
+  --checkbox-border-color: var(--color-border-2); /* #E5E6EB */
+  --tag-font-size: var(--font-size-body-1); /* 12px 表格状态标签 */
+  --tag-height: 28px;
 
   /* ============================================================
    * 15. 表格 Table

@@ -46,7 +46,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      width: 240px;
+      width: var(--sidebar-width, 224px);
       height: 100%;
       padding-left: 16px;
       flex-shrink: 0;
@@ -130,21 +130,38 @@
     .body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
 
     .sidebar {
-      width: 240px;
       flex-shrink: 0;
-      background: #fff;
-      border-right: 1px solid var(--color-border-light);
+      width: var(--sidebar-width, 224px);
+      background: var(--color-bg-container, #fff);
+      border-right: 1px solid var(--color-border-2, #E5E6EB);
       display: flex;
       flex-direction: column;
+      transition: width 0.2s ease;
     }
 
-    .sidebar.is-collapsed { width: 64px; }
+    .sidebar.is-collapsed { width: var(--sidebar-width-collapsed, 64px); }
+
     .sidebar.is-collapsed .menu-group__title-text,
     .sidebar.is-collapsed .menu-item__text,
     .sidebar.is-collapsed .menu-group__arrow { display: none; }
+
+    .sidebar.is-collapsed .menu-item,
+    .sidebar.is-collapsed .menu-group__title {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
     .sidebar.is-collapsed .menu-children { display: none !important; }
 
-    .sidebar-nav { flex: 1; overflow-y: auto; padding: 4px 0; }
+    .sidebar-nav {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .menu-group { margin: 0; }
 
     .menu-group__title {
       display: flex;
@@ -152,37 +169,83 @@
       gap: 8px;
       width: 100%;
       height: 44px;
+      margin: 0;
       padding: 0 16px;
-      color: #1D2129;
-      font-size: 14px;
+      color: var(--color-text-1, #1D2129);
+      font-size: var(--font-size-body-2, 14px);
+      line-height: 22px;
+      box-sizing: border-box;
+      transition: background 0.15s, color 0.15s;
     }
 
-    .menu-group__title:hover { background: var(--color-bg-hover); }
-    .menu-group__title .menu-icon { width: 16px; height: 16px; flex-shrink: 0; }
-    .menu-group__title-text { flex: 1; text-align: left; }
-    .menu-group__arrow { width: 12px; height: 12px; transition: transform 0.2s; }
+    .menu-group__title:hover {
+      background: var(--color-bg-table-hover, #F5F7FA);
+    }
+
+    .menu-group__title .menu-icon,
+    .menu-group__title svg.menu-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--color-text-1, #1D2129);
+    }
+
+    .menu-group__title-text {
+      flex: 1;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .menu-group__arrow {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      color: var(--color-text-1, #1D2129);
+      transition: transform 0.2s;
+    }
+
     .menu-group.is-collapsed .menu-group__arrow { transform: rotate(-90deg); }
     .menu-group.is-collapsed .menu-children { display: none; }
+    .menu-children { padding: 0; }
 
     .menu-item {
       display: flex;
       align-items: center;
+      gap: 8px;
+      width: 100%;
       height: 44px;
+      margin: 0;
+      /* 对齐一级菜单文字起点：16(padding) + 16(icon) + 8(gap) = 40 */
       padding: 0 16px 0 40px;
-      color: #1D2129;
-      font-size: 14px;
+      color: var(--color-text-1, #1D2129);
+      font-size: var(--font-size-body-2, 14px);
+      line-height: 22px;
+      box-sizing: border-box;
+      transition: background 0.15s, color 0.15s;
     }
 
-    .menu-item:hover { background: var(--color-bg-hover); }
+    .menu-item .menu-icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: currentColor;
+    }
+
+    .menu-item:hover {
+      background: var(--color-bg-table-hover, #F5F7FA);
+    }
+
     .menu-item.is-active {
-      background: var(--color-primary-bg);
+      background: var(--color-primary-bg, #E8F3FF);
       color: var(--color-primary);
       font-weight: 500;
     }
 
     .sidebar-footer {
+      flex-shrink: 0;
       height: 48px;
-      border-top: 1px solid var(--color-border-light);
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
       display: flex;
       align-items: center;
       padding: 0 16px;
@@ -191,14 +254,17 @@
     .sidebar-collapse-btn {
       width: 32px;
       height: 32px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 4px;
-      color: #1D2129;
+      border-radius: var(--border-radius-medium, 4px);
+      color: var(--color-text-1, #1D2129);
     }
 
-    .sidebar-collapse-btn:hover { background: var(--color-bg-hover); }
+    .sidebar-collapse-btn:hover {
+      background: var(--color-bg-table-hover, #F5F7FA);
+    }
+
     .sidebar-collapse-btn svg { width: 18px; height: 18px; }
 
     .main {
@@ -226,7 +292,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 16px;
+      gap: 8px;
       padding: 16px;
     }
 
@@ -235,8 +301,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      /* 抵消 filter-bar 的 16px gap，使操作区与末筛选项间距为 8px */
-      margin-left: -8px;
     }
 
     .input, .select-trigger {
@@ -250,7 +314,7 @@
       transition: border-color 0.15s;
     }
 
-    .input::placeholder { color: #86909C; }
+    .input::placeholder { color: var(--color-text-4, #C9CDD4); }
     .input:hover, .select-trigger:hover { border-color: #94BFFF; }
     .input:focus, .select-trigger:focus, .select-trigger.is-open { border-color: var(--color-primary); }
 
@@ -272,7 +336,7 @@
       color: #1D2129;
     }
 
-    .select-trigger__text .muted { color: #86909C; }
+    .select-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
     .select-trigger__arrow {
       width: 12px;
       height: 12px;
@@ -332,6 +396,7 @@
       height: 100%;
       background: transparent;
     }
+    .multi-panel__search input::placeholder { color: var(--color-text-4, #C9CDD4); }
 
     .multi-panel__toolbar {
       display: flex;
@@ -384,7 +449,7 @@
     }
 
     .multi-option:hover { background: #F5F7FA; }
-    .multi-option.is-active { color: var(--color-primary); }
+    .multi-option.is-active { color: var(--color-primary); background: transparent; }
     .multi-option.is-active:hover { background: #F5F7FA; }
 
     .multi-option input[type="checkbox"] {
@@ -481,7 +546,6 @@
       flex: 1;
       min-height: 0;
       margin: 0 16px;
-      border: 1px solid #E5E6EB;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -492,6 +556,7 @@
       flex: 1;
       min-height: 0;
       overflow: auto;
+      scrollbar-gutter: stable;
     }
 
     .data-table {
@@ -666,8 +731,12 @@
       flex-wrap: wrap;
       gap: 8px;
       padding: 12px 16px 16px;
-      font-size: 14px;
-      color: #4E5969;
+      font-size: var(--font-size-body-2, 14px);
+      color: var(--color-text-2, #4E5969);
+    }
+
+    .pagination__total {
+      color: var(--color-text-1, #1D2129);
     }
 
     .pager {
@@ -680,10 +749,10 @@
       min-width: 32px;
       height: 32px;
       padding: 0 8px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      background: #fff;
-      color: #1D2129;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: var(--border-radius-medium, 4px);
+      background: var(--color-bg-container, #fff);
+      color: var(--color-text-1, #1D2129);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -697,19 +766,31 @@
     .pager__btn.is-active {
       background: var(--color-primary);
       border-color: var(--color-primary);
-      color: #fff;
+      color: var(--color-text-inverse, #fff);
     }
 
-    .pager__btn:disabled { color: #C9CDD4; cursor: not-allowed; }
+    .pager__btn:disabled { color: var(--color-text-4, #C9CDD4); cursor: not-allowed; }
     .pager__btn svg { width: 12px; height: 12px; }
 
-    .page-size {
-      height: 32px;
-      padding: 0 8px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      background: #fff;
-      outline: none;
+    .page-size-wrap {
+      position: relative;
+      width: 112px;
+      flex-shrink: 0;
+    }
+
+    .page-size-wrap .select-trigger {
+      width: 100%;
+    }
+
+    .page-size-wrap .single-panel {
+      min-width: 100%;
+      right: 0;
+      left: auto;
+    }
+
+    .page-size-wrap .single-panel.is-dropup {
+      top: auto;
+      bottom: calc(100% + 4px);
     }
 
     .page-jump {
@@ -722,9 +803,10 @@
       width: 48px;
       height: 32px;
       padding: 0 8px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: var(--border-radius-medium, 4px);
       text-align: center;
+      color: var(--color-text-1, #1D2129);
       outline: none;
     }
 
@@ -859,7 +941,7 @@
     }
 
     .single-option:hover { background: #F5F7FA; }
-    .single-option.is-active { color: var(--color-primary); }
+    .single-option.is-active { color: var(--color-primary); background: transparent; }
 
     .drawer .table-shell {
       margin: 0;
@@ -1011,7 +1093,7 @@
       transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .sync-textarea::placeholder { color: var(--color-text-3); }
+    .sync-textarea::placeholder { color: var(--color-text-4, #C9CDD4); }
 
     .sync-textarea:hover { border-color: var(--color-primary); }
 
@@ -1075,8 +1157,22 @@
               </svg>
             </button>
             <ul class="menu-children">
-              <li><a href="tiktok-accounts.html" class="menu-item"><span class="menu-item__text">Tiktok账户</span></a></li>
-              <li><a href="tiktok-grant.html" class="menu-item is-active"><span class="menu-item__text">TikTok赠款</span></a></li>
+              <li>
+                <a href="tiktok-accounts.html" class="menu-item">
+                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/>
+                  </svg>
+                  <span class="menu-item__text">Tiktok账户</span>
+                </a>
+              </li>
+              <li>
+                <a href="tiktok-grant.html" class="menu-item is-active">
+                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3v18M7 8h7a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h8"/>
+                  </svg>
+                  <span class="menu-item__text">TikTok赠款</span>
+                </a>
+              </li>
             </ul>
           </div>
         </nav>
@@ -1423,42 +1519,76 @@
         for (let i = start; i <= end; i += 1) pages.push(i);
 
         el.innerHTML = `
+          <span class="pagination__total">共 ${total} 条</span>
+          <div class="page-size-wrap" data-role="page-size-wrap">
+            <button class="select-trigger" type="button" data-role="page-size-trigger">
+              <span class="select-trigger__text">${currentSize} 条/页</span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" data-role="page-size-panel">
+              ${[10, 20, 50, 100].map((n) => `<button class="single-option${n === currentSize ? ' is-active' : ''}" type="button" data-size="${n}">${n} 条/页</button>`).join('')}
+            </div>
+          </div>
           <div class="pager">
             <button class="pager__btn" type="button" data-page="1" ${pageNo <= 1 ? 'disabled' : ''} aria-label="首页">
               <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg>
             </button>
             <button class="pager__btn" type="button" data-page="${pageNo - 1}" ${pageNo <= 1 ? 'disabled' : ''} aria-label="上一页">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7.5 2L3.5 6l4 4"/></svg>
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg>
             </button>
             ${pages.map((p) => `<button class="pager__btn${p === pageNo ? ' is-active' : ''}" type="button" data-page="${p}">${p}</button>`).join('')}
             <button class="pager__btn" type="button" data-page="${pageNo + 1}" ${pageNo >= totalPages ? 'disabled' : ''} aria-label="下一页">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4.5 2L8.5 6l-4 4"/></svg>
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg>
             </button>
-            <button class="pager__btn" type="button" data-page="${totalPages}" ${pageNo >= totalPages ? 'disabled' : ''} aria-label="末页">
+            <button class="pager__btn" type="button" data-page="${totalPages}" ${pageNo >= totalPages ? 'disabled' : ''} aria-label="尾页">
               <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg>
             </button>
           </div>
-          <select class="page-size" data-role="page-size">
-            <option value="10" ${currentSize === 10 ? 'selected' : ''}>10条/页</option>
-            <option value="20" ${currentSize === 20 ? 'selected' : ''}>20条/页</option>
-            <option value="50" ${currentSize === 50 ? 'selected' : ''}>50条/页</option>
-          </select>
           <div class="page-jump">
             前往 <input data-role="page-jump" type="text" value="${pageNo}" /> 页
           </div>
-          <span>共 ${total} 条记录</span>
         `;
+
+        const sizeWrap = el.querySelector('[data-role="page-size-wrap"]');
+        const sizeTrigger = el.querySelector('[data-role="page-size-trigger"]');
+        const sizePanel = el.querySelector('[data-role="page-size-panel"]');
+
+        sizeTrigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const open = !sizePanel.classList.contains('is-open');
+          document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open').forEach((p) => {
+            p.classList.remove('is-open');
+            p.classList.remove('is-dropup');
+          });
+          document.querySelectorAll('.select-trigger.is-open').forEach((t) => t.classList.remove('is-open'));
+          if (open) {
+            sizePanel.classList.add('is-open');
+            sizeTrigger.classList.add('is-open');
+            sizePanel.classList.remove('is-dropup');
+            const rect = sizeTrigger.getBoundingClientRect();
+            const panelHeight = sizePanel.scrollHeight || 160;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            if (spaceBelow < panelHeight + 8) {
+              sizePanel.classList.add('is-dropup');
+            }
+          }
+        });
+
+        sizeWrap.addEventListener('click', (e) => e.stopPropagation());
+
+        sizePanel.querySelectorAll('[data-size]').forEach((opt) => {
+          opt.addEventListener('click', () => {
+            onSizeChange(Number(opt.getAttribute('data-size')) || 20);
+          });
+        });
 
         el.querySelectorAll('[data-page]').forEach((btn) => {
           btn.addEventListener('click', () => {
+            if (btn.disabled) return;
             const next = Number(btn.getAttribute('data-page'));
             if (!Number.isFinite(next) || next < 1 || next > totalPages || next === pageNo) return;
             onPageChange(next);
           });
-        });
-
-        el.querySelector('[data-role="page-size"]').addEventListener('change', (e) => {
-          onSizeChange(Number(e.target.value) || 20);
         });
 
         el.querySelector('[data-role="page-jump"]').addEventListener('keydown', (e) => {
@@ -1844,6 +1974,13 @@
         if (!e.target.closest('#detailTypeWrap')) {
           detailTypePanel.classList.remove('is-open');
           detailTypeTrigger.classList.remove('is-open');
+        }
+        if (!e.target.closest('[data-role="page-size-wrap"]')) {
+          document.querySelectorAll('[data-role="page-size-panel"].is-open').forEach((p) => {
+            p.classList.remove('is-open');
+            p.classList.remove('is-dropup');
+          });
+          document.querySelectorAll('[data-role="page-size-trigger"].is-open').forEach((t) => t.classList.remove('is-open'));
         }
       });
       document.getElementById('detailTable').addEventListener('click', (e) => {
