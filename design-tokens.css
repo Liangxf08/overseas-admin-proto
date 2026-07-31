@@ -368,6 +368,8 @@
   --color-primary-bg: var(--color-primary-1);
   --color-success-hover: var(--color-success-5);
   --color-success-active: var(--color-success-7);
+  --color-danger-hover: var(--color-danger-5);
+  --color-danger-active: var(--color-danger-7);
   --color-text-secondary: var(--color-text-2);
   --color-text-tertiary: var(--color-text-3);
   --color-bg-page: var(--color-bg-layout);
