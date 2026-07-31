@@ -248,8 +248,9 @@
     .filter-actions {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-left: auto;
+      gap: 8px;
+      /* 抵消 filter-bar 的 16px gap，使操作区与末筛选项间距为 8px */
+      margin-left: -8px;
     }
 
     .input, .select-trigger {
@@ -438,12 +439,19 @@
       font-size: 14px;
       line-height: 22px;
       text-align: left;
+      border-right: 1px solid #E5E6EB;
       border-bottom: 1px solid #E5E6EB;
       vertical-align: middle;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      box-sizing: border-box;
     }
+
+    .data-table th:first-child,
+    .data-table td:first-child { border-left: 1px solid #E5E6EB; }
+
+    .data-table thead th { border-top: 1px solid #E5E6EB; }
 
     .data-table th {
       position: sticky;
@@ -1259,39 +1267,76 @@
         }).join('');
       }
 
-      /** Excel 文本格式：mso-number-format:@，避免长数字被科学计数法改写 */
+      /** SpreadsheetML 模板：微软雅黑 10pt、列宽 30、无边框无填充；账户ID 文本格式 */
       function downloadTemplate() {
         const sampleId = '7658218295792517141';
         const sampleProduct = 'Color Water Sort Master';
         const sampleOptimizer = '佩奇';
+        // Excel 列宽 30 ≈ SpreadsheetML ss:Width 210
+        const colW = '210';
         let emptyRows = '';
         for (let i = 0; i < 20; i++) {
-          emptyRows += '<tr><td class="text"></td><td></td><td></td></tr>';
+          emptyRows +=
+            '<Row>' +
+            '<Cell ss:StyleID="sText"><Data ss:Type="String"></Data></Cell>' +
+            '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
+            '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
+            '</Row>';
         }
-        const html =
-          '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+        const xml =
+          '<?xml version="1.0"?>' +
+          '<?mso-application progid="Excel.Sheet"?>' +
+          '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+          'xmlns:o="urn:schemas-microsoft-com:office:office" ' +
           'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
-          'xmlns="http://www.w3.org/TR/REC-html40">' +
-          '<head><meta charset="UTF-8">' +
-          '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>' +
-          '<x:ExcelWorksheet><x:Name>导入模板</x:Name>' +
-          '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
-          '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' +
-          '<style>' +
-          'td { border: 0.5pt solid #E5E6EB; font-size: 12pt; }' +
-          'td.text, .col-account-id { mso-number-format:"\\@"; }' +
-          '</style></head><body><table>' +
-          '<col class="col-account-id" />' +
-          '<col /><col />' +
-          '<tr><td class="text">账户ID</td><td>产品名称</td><td>优化师</td></tr>' +
-          '<tr>' +
-          '<td class="text">' + sampleId + '</td>' +
-          '<td>' + sampleProduct + '</td>' +
-          '<td>' + sampleOptimizer + '</td>' +
-          '</tr>' +
+          'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" ' +
+          'xmlns:html="http://www.w3.org/TR/REC-html40">' +
+          '<Styles>' +
+          '<Style ss:ID="Default" ss:Name="Normal">' +
+          '<Alignment ss:Vertical="Center"/>' +
+          '<Borders/>' +
+          '<Font ss:FontName="微软雅黑" x:CharSet="134" ss:Size="10"/>' +
+          '<Interior/>' +
+          '<NumberFormat/>' +
+          '<Protection/>' +
+          '</Style>' +
+          '<Style ss:ID="sCell">' +
+          '<Alignment ss:Vertical="Center"/>' +
+          '<Borders/>' +
+          '<Font ss:FontName="微软雅黑" x:CharSet="134" ss:Size="10"/>' +
+          '<Interior ss:Pattern="None"/>' +
+          '</Style>' +
+          '<Style ss:ID="sText">' +
+          '<Alignment ss:Vertical="Center"/>' +
+          '<Borders/>' +
+          '<Font ss:FontName="微软雅黑" x:CharSet="134" ss:Size="10"/>' +
+          '<Interior ss:Pattern="None"/>' +
+          '<NumberFormat ss:Format="@"/>' +
+          '</Style>' +
+          '</Styles>' +
+          '<Worksheet ss:Name="导入模板">' +
+          '<Table ss:DefaultRowHeight="18">' +
+          '<Column ss:StyleID="sText" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
+          '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
+          '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
+          '<Row>' +
+          '<Cell ss:StyleID="sText"><Data ss:Type="String">账户ID</Data></Cell>' +
+          '<Cell ss:StyleID="sCell"><Data ss:Type="String">产品名称</Data></Cell>' +
+          '<Cell ss:StyleID="sCell"><Data ss:Type="String">优化师</Data></Cell>' +
+          '</Row>' +
+          '<Row>' +
+          '<Cell ss:StyleID="sText"><Data ss:Type="String">' + sampleId + '</Data></Cell>' +
+          '<Cell ss:StyleID="sCell"><Data ss:Type="String">' + sampleProduct + '</Data></Cell>' +
+          '<Cell ss:StyleID="sCell"><Data ss:Type="String">' + sampleOptimizer + '</Data></Cell>' +
+          '</Row>' +
           emptyRows +
-          '</table></body></html>';
-        const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+          '</Table>' +
+          '<WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">' +
+          '<DisplayGridlines/>' +
+          '</WorksheetOptions>' +
+          '</Worksheet>' +
+          '</Workbook>';
+        const blob = new Blob(['\uFEFF' + xml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -1430,8 +1475,58 @@
         return buildImportRows(headers, dataLines, function (cols) { return cols; });
       }
 
+      function parseImportSpreadsheetML(xmlText) {
+        const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+        if (doc.querySelector('parsererror')) {
+          return { error: '无法解析模板表格，请使用下载的导入模板' };
+        }
+        const rows = Array.prototype.slice.call(doc.getElementsByTagName('Row'));
+        if (!rows.length) {
+          return { error: '文件内容为空，请使用下载的模板填写后重新上传' };
+        }
+
+        function cellIndex(cell, fallback) {
+          const raw =
+            cell.getAttribute('ss:Index') ||
+            cell.getAttribute('Index') ||
+            (cell.getAttributeNS && cell.getAttributeNS('urn:schemas-microsoft-com:office:spreadsheet', 'Index'));
+          const n = Number(raw);
+          return n > 0 ? n : fallback;
+        }
+
+        function rowCells(row) {
+          const cells = Array.prototype.slice.call(row.getElementsByTagName('Cell'));
+          const cols = [];
+          let nextIndex = 1;
+          cells.forEach(function (cell) {
+            const idx = cellIndex(cell, nextIndex);
+            while (nextIndex < idx) {
+              cols.push('');
+              nextIndex += 1;
+            }
+            const data = cell.getElementsByTagName('Data')[0];
+            cols.push(data ? String(data.textContent || '').trim() : '');
+            nextIndex += 1;
+          });
+          return cols;
+        }
+
+        const headers = rowCells(rows[0]);
+        const dataLines = rows.slice(1).map(rowCells).filter(function (cols) {
+          return cols.some(function (c) { return String(c).trim() !== ''; });
+        });
+        return buildImportRows(headers, dataLines, function (cols) { return cols; });
+      }
+
       function parseImportText(text) {
         const raw = String(text || '');
+        if (
+          /<Workbook[\s>]/i.test(raw) ||
+          /urn:schemas-microsoft-com:office:spreadsheet/i.test(raw) ||
+          /ss:Workbook/i.test(raw)
+        ) {
+          return parseImportSpreadsheetML(raw);
+        }
         if (/<html[\s>]/i.test(raw) || /<table[\s>]/i.test(raw)) {
           return parseImportHtml(raw);
         }
