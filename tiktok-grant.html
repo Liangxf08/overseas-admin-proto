@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TikTok赠款 - 海外中台</title>
-  <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -316,8 +315,11 @@
     }
 
     .input::placeholder { color: var(--color-text-4, #C9CDD4); }
-    .input:hover, .select-trigger:hover { border-color: #94BFFF; }
-    .input:focus, .select-trigger:focus, .select-trigger.is-open { border-color: var(--color-primary); }
+    .input:hover, .select-trigger:hover { border-color: var(--color-primary); }
+    .input:focus, .select-trigger:focus, .select-trigger.is-open {
+      border-color: var(--color-primary);
+      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
+    }
 
     .select-trigger {
       display: flex;
@@ -350,9 +352,12 @@
 
     .multi-panel {
       position: absolute;
-      top: calc(100% + 4px);
+      top: 100%;
+      margin-top: 4px;
       left: 0;
       width: 480px;
+      /* 双栏固定高度：搜索 + 工具栏 + 6 行选项 */
+      height: calc(12px + 32px + 8px + 8px + 22px + 1px + 36px * 6);
       background: #fff;
       border: 1px solid #E5E6EB;
       border-radius: 4px;
@@ -360,6 +365,7 @@
       z-index: 20;
       display: none;
       overflow: hidden;
+      box-sizing: border-box;
     }
 
     .multi-panel.is-open {
@@ -370,6 +376,7 @@
     .multi-panel__left,
     .multi-panel__right {
       width: 50%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -387,6 +394,7 @@
       border: 1px solid #E5E6EB;
       border-radius: 4px;
       flex-shrink: 0;
+      box-sizing: border-box;
     }
 
     .multi-panel__search svg { width: 14px; height: 14px; color: #86909C; flex-shrink: 0; }
@@ -405,6 +413,7 @@
       justify-content: flex-end;
       padding: 0 12px 8px;
       font-size: 13px;
+      line-height: 22px;
       color: #4E5969;
       flex-shrink: 0;
       border-bottom: 1px solid var(--color-border-base, #E5E6EB);
@@ -412,7 +421,9 @@
 
     .multi-panel__toolbar--right {
       justify-content: space-between;
-      padding: 12px;
+      height: 40px;
+      padding: 0 12px;
+      box-sizing: border-box;
       background: #F7F8FA;
       border-bottom: 1px solid var(--color-border-base, #E5E6EB);
     }
@@ -423,18 +434,39 @@
     }
 
     .multi-panel__list {
+      flex: 1;
       min-height: 0;
       overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
     }
 
-    /* 左侧列表固定展示 6 个选项高度，双栏整体随左侧适配 */
-    .multi-panel__left .multi-panel__list {
-      height: calc(36px * 6);
-      flex-shrink: 0;
+    .multi-panel__list::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
 
-    .multi-panel__right .multi-panel__list {
-      flex: 1;
+    .multi-panel__list::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .multi-panel__list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .multi-panel__list::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+
+    .multi-panel__list::-webkit-scrollbar-thumb:hover {
+      background: rgba(201, 205, 212, 0.85);
+    }
+
+    .multi-panel__list::-webkit-scrollbar-corner {
+      background: transparent;
     }
 
     .multi-option {
@@ -915,6 +947,7 @@
       top: calc(100% + 4px);
       left: 0;
       right: 0;
+      margin: 0;
       background: #fff;
       border: 1px solid #E5E6EB;
       border-radius: 4px;
@@ -925,9 +958,39 @@
       overflow-y: auto;
       padding: 4px 0;
       max-height: 256px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
     }
 
     .single-panel.is-open { display: block; }
+
+    .single-panel::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .single-panel::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .single-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .single-panel::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+
+    .single-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(201, 205, 212, 0.85);
+    }
+
+    .single-panel::-webkit-scrollbar-corner {
+      background: transparent;
+    }
 
     .single-option {
       display: block;
@@ -1114,8 +1177,8 @@
       <nav class="header-nav" aria-label="顶部导航">
         <a href="#" class="header-nav__item">首页</a>
         <a href="#" class="header-nav__item">看板</a>
-        <a href="#" class="header-nav__item is-active">产品</a>
-        <a href="#" class="header-nav__item">工具</a>
+        <a href="tiktok-accounts.html" class="header-nav__item is-active">产品</a>
+        <a href="feedback-tickets.html" class="header-nav__item">工具</a>
         <a href="menu-management.html" class="header-nav__item">管理</a>
       </nav>
       <div class="header-right">
@@ -1218,7 +1281,6 @@
               </div>
             </div>
             <div class="filter-actions">
-              <button class="btn btn--default" type="button" id="resetBtn">重置</button>
               <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
               <button class="btn btn--success" type="button" id="syncBtn">同步</button>
               <button class="btn btn--default" type="button" id="exportBtn">导出</button>
@@ -1689,19 +1751,6 @@
         renderTable();
       }
 
-      function resetFilters() {
-        document.getElementById('accountKeyword').value = '';
-        selectedOptimizers = [];
-        document.getElementById('optimizerSearch').value = '';
-        syncOptimizerLabel();
-        renderOptimizerList('');
-        sortState = { key: '', dir: '' };
-        page = 1;
-        pageSize = 20;
-        filtered = grantList.slice();
-        renderTable();
-      }
-
       function copyText(text) {
         const done = () => showPageMsg('复制成功');
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1882,7 +1931,6 @@
       });
 
       document.getElementById('searchBtn').addEventListener('click', doSearch);
-      document.getElementById('resetBtn').addEventListener('click', resetFilters);
       document.getElementById('exportBtn').addEventListener('click', () => showPageMsg('导出成功'));
       document.getElementById('accountKeyword').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') doSearch();

@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tiktok账户 - 海外中台</title>
-  <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -323,8 +322,11 @@
     }
 
     .input::placeholder { color: var(--color-text-4, #C9CDD4); }
-    .input:hover, .select-trigger:hover { border-color: #94BFFF; }
-    .input:focus, .select-trigger:focus, .select-trigger.is-open { border-color: var(--color-primary); }
+    .input:hover, .select-trigger:hover { border-color: var(--color-primary); }
+    .input:focus, .select-trigger:focus, .select-trigger.is-open {
+      border-color: var(--color-primary);
+      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
+    }
 
     .select-trigger {
       display: flex;
@@ -338,10 +340,19 @@
     .select-trigger__text {
       flex: 1;
       min-width: 0;
+      display: inline-flex;
+      align-items: center;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       color: #1D2129;
+    }
+
+    .select-trigger__text .select-option-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .select-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
@@ -356,6 +367,7 @@
       top: calc(100% + 4px);
       left: 0;
       right: 0;
+      margin: 0;
       background: #fff;
       border: 1px solid #E5E6EB;
       border-radius: 4px;
@@ -365,9 +377,39 @@
       max-height: 240px;
       overflow-y: auto;
       padding: 4px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
     }
 
     .single-panel.is-open { display: block; }
+
+    .single-panel::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .single-panel::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .single-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .single-panel::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+
+    .single-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(201, 205, 212, 0.85);
+    }
+
+    .single-panel::-webkit-scrollbar-corner {
+      background: transparent;
+    }
 
     .single-option {
       display: flex;
@@ -384,9 +426,12 @@
 
     .multi-panel {
       position: absolute;
-      top: calc(100% + 4px);
+      top: 100%;
       left: 0;
       width: 480px;
+      margin: 4px 0 0;
+      /* 双栏固定高度：搜索 + 工具栏 + 6 行选项 */
+      height: calc(12px + 32px + 8px + 8px + 22px + 1px + 36px * 6);
       background: #fff;
       border: 1px solid #E5E6EB;
       border-radius: 4px;
@@ -394,6 +439,7 @@
       z-index: 20;
       display: none;
       overflow: hidden;
+      box-sizing: border-box;
     }
 
     .multi-panel.is-open {
@@ -404,6 +450,7 @@
     .multi-panel__left,
     .multi-panel__right {
       width: 50%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -421,6 +468,7 @@
       border: 1px solid #E5E6EB;
       border-radius: 4px;
       flex-shrink: 0;
+      box-sizing: border-box;
     }
 
     .multi-panel__search svg { width: 14px; height: 14px; color: #86909C; flex-shrink: 0; }
@@ -439,6 +487,7 @@
       justify-content: flex-end;
       padding: 0 12px 8px;
       font-size: 13px;
+      line-height: 22px;
       color: #4E5969;
       flex-shrink: 0;
       border-bottom: 1px solid var(--color-border-2, #E5E6EB);
@@ -446,7 +495,9 @@
 
     .multi-panel__toolbar--right {
       justify-content: space-between;
-      padding: 12px;
+      height: 40px;
+      padding: 0 12px;
+      box-sizing: border-box;
       background: #F7F8FA;
       border-bottom: 1px solid var(--color-border-2, #E5E6EB);
     }
@@ -457,17 +508,39 @@
     }
 
     .multi-panel__list {
+      flex: 1;
       min-height: 0;
       overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
     }
 
-    .multi-panel__left .multi-panel__list {
-      height: calc(36px * 6);
-      flex-shrink: 0;
+    .multi-panel__list::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
 
-    .multi-panel__right .multi-panel__list {
-      flex: 1;
+    .multi-panel__list::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .multi-panel__list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .multi-panel__list::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+
+    .multi-panel__list::-webkit-scrollbar-thumb:hover {
+      background: rgba(201, 205, 212, 0.85);
+    }
+
+    .multi-panel__list::-webkit-scrollbar-corner {
+      background: transparent;
     }
 
     .multi-option {
@@ -922,7 +995,7 @@
     .modal-mask {
       position: fixed;
       inset: 0;
-      z-index: 1000;
+      z-index: 1050;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -943,7 +1016,7 @@
       max-height: calc(100vh - 48px);
       display: flex;
       flex-direction: column;
-      background: #fff;
+      background: var(--color-bg-container, #fff);
       border-radius: 8px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       transform: translateY(8px);
@@ -960,7 +1033,7 @@
       height: 48px;
       padding: 0 24px;
       flex-shrink: 0;
-      border-bottom: 1px solid #E5E6EB;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
     }
 
     .modal__title {
@@ -977,10 +1050,15 @@
       width: 28px;
       height: 28px;
       border-radius: 4px;
-      color: #86909C;
+      color: var(--color-text-3, #86909C);
+      transition: background 0.15s, color 0.15s;
     }
 
-    .modal__close:hover { background: #F2F3F5; color: #1D2129; }
+    .modal__close:hover {
+      background: var(--color-fill-2, #F2F3F5);
+      color: #1D2129;
+    }
+
     .modal__close svg { width: 14px; height: 14px; }
 
     .modal__body {
@@ -997,8 +1075,255 @@
       align-items: center;
       justify-content: flex-end;
       gap: 12px;
-      padding: 16px 24px 20px;
+      padding: 16px 24px;
       flex-shrink: 0;
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
+    }
+
+    .modal--form {
+      overflow: visible;
+    }
+
+    /* 与菜单管理「添加菜单」一致：body 底 8px + 末项 margin 20px */
+    .modal--form .modal__body {
+      padding: 24px 24px 8px;
+      overflow: visible;
+      display: block;
+      flex: none;
+    }
+
+    .form-item .select-trigger {
+      width: 100%;
+    }
+
+    .form-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .form-item__label {
+      width: 120px;
+      flex-shrink: 0;
+      padding: 8px;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .form-item__control {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .input:disabled,
+    .select-trigger:disabled,
+    .select-trigger.is-disabled {
+      background: var(--color-fill-1, #F7F8FA);
+      color: var(--color-text-4, #C9CDD4);
+      cursor: not-allowed;
+      border-color: var(--color-border-2, #E5E6EB);
+    }
+
+    .input:disabled:hover,
+    .select-trigger:disabled:hover,
+    .select-trigger.is-disabled:hover {
+      border-color: var(--color-border-2, #E5E6EB);
+    }
+
+    .select-trigger:disabled .select-trigger__text,
+    .select-trigger.is-disabled .select-trigger__text,
+    .select-trigger:disabled .select-trigger__text .muted,
+    .select-trigger.is-disabled .select-trigger__text .muted,
+    .select-trigger:disabled .select-trigger__arrow,
+    .select-trigger.is-disabled .select-trigger__arrow {
+      color: var(--color-text-4, #C9CDD4);
+    }
+
+    .select-clear {
+      position: absolute;
+      right: 12px;
+      top: 16px;
+      transform: translateY(-50%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--color-text-4, #C9CDD4);
+      z-index: 2;
+    }
+
+    .select-clear:hover { background: var(--color-text-3, #86909C); }
+
+    .select-clear svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* 有值悬停：清除与箭头同位置切换 */
+    .form-item__control.has-value:hover .select-clear,
+    .form-item__control.has-value:focus-within .select-clear {
+      display: inline-flex;
+    }
+
+    .form-item__control.has-value:hover .select-trigger__arrow,
+    .form-item__control.has-value:focus-within .select-trigger__arrow {
+      visibility: hidden;
+    }
+
+    .select-option-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
+
+    .select-option-icon img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .seg {
+      display: inline-flex;
+      flex-wrap: wrap;
+      background: transparent;
+    }
+
+    .seg__item {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 32px;
+      padding: 0;
+      font-size: 14px;
+      line-height: 22px;
+      color: #1D2129;
+      background: #fff;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      margin-left: -1px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, z-index 0s;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .seg__item:first-child {
+      margin-left: 0;
+      border-radius: 4px 0 0 4px;
+    }
+
+    .seg__item:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+
+    .seg__item:hover:not(.is-active) {
+      color: var(--color-primary);
+      z-index: 1;
+    }
+
+    .seg__item.is-active {
+      z-index: 2;
+      background: var(--color-primary-1, #E8F3FF);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .single-panel--search {
+      max-height: 280px;
+      padding: 0;
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+    }
+
+    .single-panel--search.is-open { display: flex; }
+
+    .single-panel__search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      margin: 8px 12px;
+      padding: 0 10px;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .single-panel__search svg {
+      width: 14px;
+      height: 14px;
+      color: #86909C;
+      flex-shrink: 0;
+    }
+
+    .single-panel__search input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      height: 100%;
+      background: transparent;
+      font-size: 14px;
+      color: #1D2129;
+    }
+
+    .single-panel__search input::placeholder { color: var(--color-text-4, #C9CDD4); }
+
+    .single-panel__list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 4px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
+    }
+
+    .single-panel__list::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .single-panel__list::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .single-panel__list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .single-panel__list::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+
+    .single-panel__list::-webkit-scrollbar-thumb:hover {
+      background: rgba(201, 205, 212, 0.85);
+    }
+
+    .single-panel__list::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    .single-panel__empty {
+      padding: 12px;
+      font-size: 14px;
+      color: var(--color-text-3, #86909C);
+      text-align: center;
     }
 
     .import-actions {
@@ -1330,6 +1655,184 @@
     </div>
   </div>
 
+  <!-- 编辑 TikTok 账户 -->
+  <div class="modal-mask" id="editModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="editTitle">编辑TikTok账户</h2>
+        <button class="modal__close" type="button" id="editClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label">账户名称</div>
+          <div class="form-item__control">
+            <input class="input" type="text" id="editAccountName" disabled />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">账户ID</div>
+          <div class="form-item__control">
+            <input class="input" type="text" id="editAccountId" disabled />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">优化师</div>
+          <div class="form-item__control" id="editOptimizerWrap">
+            <button class="select-trigger" type="button" id="editOptimizerTrigger">
+              <span class="select-trigger__text" id="editOptimizerLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button type="button" class="select-clear" id="editOptimizerClear" aria-label="清除" tabindex="-1">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel single-panel--search" id="editOptimizerPanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="editOptimizerSearch" placeholder="搜索优化师" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="editOptimizerList"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">产品名称</div>
+          <div class="form-item__control" id="editProductWrap">
+            <button class="select-trigger" type="button" id="editProductTrigger">
+              <span class="select-trigger__text" id="editProductLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button type="button" class="select-clear" id="editProductClear" aria-label="清除" tabindex="-1">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel single-panel--search" id="editProductPanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="editProductSearch" placeholder="搜索产品" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="editProductList"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="editStatusSeg" role="group" aria-label="状态">
+              <button type="button" class="seg__item is-active" data-value="启用">启用</button>
+              <button type="button" class="seg__item" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="editCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="editSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量修改产品 -->
+  <div class="modal-mask" id="batchProductModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchProductTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="batchProductTitle">修改产品</h2>
+        <button class="modal__close" type="button" id="batchProductClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label">产品名称</div>
+          <div class="form-item__control" id="batchProductWrap">
+            <button class="select-trigger" type="button" id="batchProductTrigger">
+              <span class="select-trigger__text" id="batchProductLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button type="button" class="select-clear" id="batchProductClear" aria-label="清除" tabindex="-1">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel single-panel--search" id="batchProductPanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="batchProductSearch" placeholder="搜索产品" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="batchProductList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchProductCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchProductSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量修改优化师 -->
+  <div class="modal-mask" id="batchOptimizerModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchOptimizerTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="batchOptimizerTitle">修改优化师</h2>
+        <button class="modal__close" type="button" id="batchOptimizerClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label">优化师</div>
+          <div class="form-item__control" id="batchOptimizerWrap">
+            <button class="select-trigger" type="button" id="batchOptimizerTrigger">
+              <span class="select-trigger__text" id="batchOptimizerLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button type="button" class="select-clear" id="batchOptimizerClear" aria-label="清除" tabindex="-1">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel single-panel--search" id="batchOptimizerPanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="batchOptimizerSearch" placeholder="搜索优化师" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="batchOptimizerList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchOptimizerCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchOptimizerSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量修改状态 -->
+  <div class="modal-mask" id="batchStatusModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchStatusTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="batchStatusTitle">修改状态</h2>
+        <button class="modal__close" type="button" id="batchStatusClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="batchStatusSeg" role="group" aria-label="状态">
+              <button type="button" class="seg__item is-active" data-value="启用">启用</button>
+              <button type="button" class="seg__item" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchStatusCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchStatusSave">提交</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const PRODUCTS = [
@@ -1340,6 +1843,12 @@
         'Ocean Match',
         'Pixel Farm'
       ];
+      const PLATFORM_ICONS = {
+        TikTok: 'assets/TikTok.png',
+        Android: 'assets/Android.png',
+        iOS: 'assets/iOS.png'
+      };
+      const PRODUCT_PLATFORM_ICON = PLATFORM_ICONS.TikTok;
       const OPTIMIZERS = Array.from({ length: 12 }, function (_, i) {
         return '用户' + String.fromCharCode(65 + i);
       });
@@ -1355,6 +1864,14 @@
       let filterStatus = '';
       let importRows = [];
       let msgTimer = null;
+      let editingId = null;
+      let editOptimizer = '';
+      let editProduct = '';
+      let editStatus = '启用';
+      let batchProduct = '';
+      let batchOptimizer = '';
+      let batchStatus = '启用';
+      const FORM_MODAL_IDS = ['editModal', 'batchProductModal', 'batchOptimizerModal', 'batchStatusModal'];
 
       function escapeHtml(str) {
         return String(str == null ? '' : str)
@@ -2066,6 +2583,251 @@
         showPageMsg('导出成功');
       }
 
+      function openFormModal(id) {
+        document.getElementById(id).classList.add('is-open');
+        document.getElementById(id).setAttribute('aria-hidden', 'false');
+      }
+
+      function closeFormModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+        document.getElementById(id).setAttribute('aria-hidden', 'true');
+        closePanels();
+      }
+
+      function closeAllFormModals() {
+        FORM_MODAL_IDS.forEach(closeFormModal);
+        editingId = null;
+      }
+
+      function setSelectLabel(labelId, value, wrapId, iconSrc) {
+        const label = document.getElementById(labelId);
+        if (!value) {
+          label.innerHTML = '<span class="muted">请选择</span>';
+        } else if (iconSrc) {
+          label.innerHTML =
+            '<span class="select-option-icon"><img src="' + iconSrc + '" alt="" /></span>' +
+            '<span class="select-option-text">' + escapeHtml(value) + '</span>';
+        } else {
+          label.textContent = value;
+        }
+        if (wrapId) {
+          document.getElementById(wrapId).classList.toggle('has-value', !!value);
+        }
+      }
+
+      function setSegValue(segId, value) {
+        document.querySelectorAll('#' + segId + ' .seg__item').forEach(function (el) {
+          el.classList.toggle('is-active', el.getAttribute('data-value') === value);
+        });
+      }
+
+      function getSegValue(segId) {
+        const active = document.querySelector('#' + segId + ' .seg__item.is-active');
+        return active ? active.getAttribute('data-value') : '';
+      }
+
+      function renderSearchList(listId, options, selected, keyword, iconSrc) {
+        const list = document.getElementById(listId);
+        const kw = (keyword || '').trim().toLowerCase();
+        const items = options.filter(function (name) {
+          return !kw || String(name).toLowerCase().indexOf(kw) !== -1;
+        });
+        if (!items.length) {
+          list.innerHTML = '<div class="single-panel__empty">无匹配项</div>';
+          return;
+        }
+        list.innerHTML = items.map(function (name) {
+          const iconHtml = iconSrc
+            ? '<span class="select-option-icon"><img src="' + iconSrc + '" alt="" /></span>'
+            : '';
+          return '<div class="single-option' + (name === selected ? ' is-active' : '') + '" data-value="' + escapeHtml(name) + '">' +
+            iconHtml + '<span class="select-option-text">' + escapeHtml(name) + '</span></div>';
+        }).join('');
+      }
+
+      function toggleSearchSelect(triggerId, panelId, searchId) {
+        const panel = document.getElementById(panelId);
+        const trigger = document.getElementById(triggerId);
+        const open = !panel.classList.contains('is-open');
+        document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open').forEach(function (p) {
+          if (p !== panel) {
+            p.classList.remove('is-open');
+            p.classList.remove('is-dropup');
+          }
+        });
+        document.querySelectorAll('.select-trigger.is-open').forEach(function (t) {
+          if (t !== trigger) t.classList.remove('is-open');
+        });
+        closeBatchMenu();
+        panel.classList.toggle('is-open', open);
+        trigger.classList.toggle('is-open', open);
+        if (open && searchId) {
+          const input = document.getElementById(searchId);
+          input.value = '';
+          setTimeout(function () { input.focus(); }, 0);
+        }
+      }
+
+      function refreshFilteredKeepSelection() {
+        const kw = document.getElementById('accountKeyword').value.trim().toLowerCase();
+        filteredRows = allRows.filter(function (row) {
+          if (kw) {
+            const nameHit = row.accountName.toLowerCase().indexOf(kw) !== -1;
+            const idHit = row.accountId.toLowerCase().indexOf(kw) !== -1;
+            if (!nameHit && !idHit) return false;
+          }
+          if (selectedOptimizers.length && selectedOptimizers.indexOf(row.optimizer) === -1) return false;
+          if (filterStatus && row.status !== filterStatus) return false;
+          return true;
+        });
+        const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize) || 1);
+        if (page > totalPages) page = totalPages;
+        renderTable();
+        renderPagination();
+        syncBatchBtn();
+      }
+
+      function openEditModal(rowId) {
+        const row = allRows.find(function (r) { return r.id === rowId; });
+        if (!row) return;
+        editingId = row.id;
+        editOptimizer = row.optimizer || '';
+        editProduct = row.productName || '';
+        editStatus = row.status || '启用';
+        document.getElementById('editAccountName').value = row.accountName;
+        document.getElementById('editAccountId').value = row.accountId;
+        setSelectLabel('editOptimizerLabel', editOptimizer, 'editOptimizerWrap');
+        setSelectLabel('editProductLabel', editProduct, 'editProductWrap', PRODUCT_PLATFORM_ICON);
+        setSegValue('editStatusSeg', editStatus);
+        document.getElementById('editOptimizerSearch').value = '';
+        document.getElementById('editProductSearch').value = '';
+        renderSearchList('editOptimizerList', OPTIMIZERS, editOptimizer, '');
+        renderSearchList('editProductList', PRODUCTS, editProduct, '', PRODUCT_PLATFORM_ICON);
+        closePanels();
+        openFormModal('editModal');
+      }
+
+      function saveEditModal() {
+        if (!editingId) return;
+        editStatus = getSegValue('editStatusSeg') || editStatus;
+        const row = allRows.find(function (r) { return r.id === editingId; });
+        if (!row) return;
+        row.optimizer = editOptimizer || '';
+        row.productName = editProduct || '';
+        row.status = editStatus;
+        closeFormModal('editModal');
+        editingId = null;
+        refreshFilteredKeepSelection();
+        showPageMsg('提交成功');
+      }
+
+      function openBatchProductModal() {
+        batchProduct = '';
+        setSelectLabel('batchProductLabel', '', 'batchProductWrap', PRODUCT_PLATFORM_ICON);
+        document.getElementById('batchProductSearch').value = '';
+        renderSearchList('batchProductList', PRODUCTS, batchProduct, '', PRODUCT_PLATFORM_ICON);
+        closePanels();
+        openFormModal('batchProductModal');
+      }
+
+      function openBatchOptimizerModal() {
+        batchOptimizer = '';
+        setSelectLabel('batchOptimizerLabel', '', 'batchOptimizerWrap');
+        document.getElementById('batchOptimizerSearch').value = '';
+        renderSearchList('batchOptimizerList', OPTIMIZERS, batchOptimizer, '');
+        closePanels();
+        openFormModal('batchOptimizerModal');
+      }
+
+      function openBatchStatusModal() {
+        batchStatus = '启用';
+        setSegValue('batchStatusSeg', batchStatus);
+        closePanels();
+        openFormModal('batchStatusModal');
+      }
+
+      function applyBatchUpdate(mutator, successMsg) {
+        if (!selectedIds.size) {
+          showPageMsg('请先选择账户', 'error');
+          return false;
+        }
+        allRows.forEach(function (row) {
+          if (selectedIds.has(row.id)) mutator(row);
+        });
+        selectedIds.clear();
+        closeBatchMenu();
+        refreshFilteredKeepSelection();
+        showPageMsg(successMsg);
+        return true;
+      }
+
+      function saveBatchProduct() {
+        if (applyBatchUpdate(function (row) { row.productName = batchProduct || ''; }, '批量修改产品成功')) {
+          closeFormModal('batchProductModal');
+        }
+      }
+
+      function saveBatchOptimizer() {
+        if (applyBatchUpdate(function (row) { row.optimizer = batchOptimizer || ''; }, '批量修改优化师成功')) {
+          closeFormModal('batchOptimizerModal');
+        }
+      }
+
+      function saveBatchStatus() {
+        batchStatus = getSegValue('batchStatusSeg') || batchStatus;
+        if (!batchStatus) {
+          showPageMsg('请选择状态', 'error');
+          return;
+        }
+        if (applyBatchUpdate(function (row) { row.status = batchStatus; }, '批量修改状态成功')) {
+          closeFormModal('batchStatusModal');
+        }
+      }
+
+      function bindSearchSelect(cfg) {
+        document.getElementById(cfg.triggerId).addEventListener('click', function (e) {
+          e.stopPropagation();
+          toggleSearchSelect(cfg.triggerId, cfg.panelId, cfg.searchId);
+          if (document.getElementById(cfg.panelId).classList.contains('is-open')) {
+            renderSearchList(cfg.listId, cfg.getOptions(), cfg.getValue(), '', cfg.iconSrc);
+          }
+        });
+        document.getElementById(cfg.wrapId).addEventListener('click', function (e) {
+          e.stopPropagation();
+        });
+        document.getElementById(cfg.searchId).addEventListener('input', function (e) {
+          renderSearchList(cfg.listId, cfg.getOptions(), cfg.getValue(), e.target.value, cfg.iconSrc);
+        });
+        document.getElementById(cfg.listId).addEventListener('click', function (e) {
+          const opt = e.target.closest('.single-option');
+          if (!opt) return;
+          const value = opt.getAttribute('data-value') || '';
+          cfg.setValue(value);
+          setSelectLabel(cfg.labelId, value, cfg.wrapId, cfg.iconSrc);
+          renderSearchList(cfg.listId, cfg.getOptions(), value, document.getElementById(cfg.searchId).value, cfg.iconSrc);
+          closePanels();
+        });
+        if (cfg.clearId) {
+          document.getElementById(cfg.clearId).addEventListener('click', function (e) {
+            e.stopPropagation();
+            cfg.setValue('');
+            setSelectLabel(cfg.labelId, '', cfg.wrapId, cfg.iconSrc);
+            renderSearchList(cfg.listId, cfg.getOptions(), '', document.getElementById(cfg.searchId).value, cfg.iconSrc);
+            closePanels();
+          });
+        }
+      }
+
+      function bindSeg(segId, onChange) {
+        document.getElementById(segId).addEventListener('click', function (e) {
+          const item = e.target.closest('.seg__item');
+          if (!item) return;
+          const value = item.getAttribute('data-value') || '';
+          setSegValue(segId, value);
+          if (onChange) onChange(value);
+        });
+      }
+
       function bindEvents() {
         document.getElementById('sidebarToggle').addEventListener('click', function () {
           document.getElementById('sidebar').classList.toggle('is-collapsed');
@@ -2180,13 +2942,87 @@
           const item = e.target.closest('[data-batch]');
           if (!item) return;
           const action = item.getAttribute('data-batch');
-          const labels = { product: '修改产品', optimizer: '修改优化师', status: '修改状态' };
           closeBatchMenu();
-          showPageMsg((labels[action] || '批量操作') + '功能开发中');
+          if (!selectedIds.size) {
+            showPageMsg('请先选择账户', 'error');
+            return;
+          }
+          if (action === 'product') openBatchProductModal();
+          else if (action === 'optimizer') openBatchOptimizerModal();
+          else if (action === 'status') openBatchStatusModal();
         });
         document.getElementById('batchWrap').addEventListener('click', function (e) {
           e.stopPropagation();
         });
+
+        bindSearchSelect({
+          wrapId: 'editOptimizerWrap',
+          triggerId: 'editOptimizerTrigger',
+          panelId: 'editOptimizerPanel',
+          searchId: 'editOptimizerSearch',
+          listId: 'editOptimizerList',
+          labelId: 'editOptimizerLabel',
+          clearId: 'editOptimizerClear',
+          getOptions: function () { return OPTIMIZERS; },
+          getValue: function () { return editOptimizer; },
+          setValue: function (v) { editOptimizer = v; }
+        });
+        bindSearchSelect({
+          wrapId: 'editProductWrap',
+          triggerId: 'editProductTrigger',
+          panelId: 'editProductPanel',
+          searchId: 'editProductSearch',
+          listId: 'editProductList',
+          labelId: 'editProductLabel',
+          clearId: 'editProductClear',
+          iconSrc: PRODUCT_PLATFORM_ICON,
+          getOptions: function () { return PRODUCTS; },
+          getValue: function () { return editProduct; },
+          setValue: function (v) { editProduct = v; }
+        });
+        bindSearchSelect({
+          wrapId: 'batchProductWrap',
+          triggerId: 'batchProductTrigger',
+          panelId: 'batchProductPanel',
+          searchId: 'batchProductSearch',
+          listId: 'batchProductList',
+          labelId: 'batchProductLabel',
+          clearId: 'batchProductClear',
+          iconSrc: PRODUCT_PLATFORM_ICON,
+          getOptions: function () { return PRODUCTS; },
+          getValue: function () { return batchProduct; },
+          setValue: function (v) { batchProduct = v; }
+        });
+        bindSearchSelect({
+          wrapId: 'batchOptimizerWrap',
+          triggerId: 'batchOptimizerTrigger',
+          panelId: 'batchOptimizerPanel',
+          searchId: 'batchOptimizerSearch',
+          listId: 'batchOptimizerList',
+          labelId: 'batchOptimizerLabel',
+          clearId: 'batchOptimizerClear',
+          getOptions: function () { return OPTIMIZERS; },
+          getValue: function () { return batchOptimizer; },
+          setValue: function (v) { batchOptimizer = v; }
+        });
+        bindSeg('editStatusSeg', function (v) { editStatus = v; });
+        bindSeg('batchStatusSeg', function (v) { batchStatus = v; });
+
+        document.getElementById('editClose').addEventListener('click', function () { closeFormModal('editModal'); editingId = null; });
+        document.getElementById('editCancel').addEventListener('click', function () { closeFormModal('editModal'); editingId = null; });
+        document.getElementById('editSave').addEventListener('click', saveEditModal);
+
+        document.getElementById('batchProductClose').addEventListener('click', function () { closeFormModal('batchProductModal'); });
+        document.getElementById('batchProductCancel').addEventListener('click', function () { closeFormModal('batchProductModal'); });
+        document.getElementById('batchProductSave').addEventListener('click', saveBatchProduct);
+
+        document.getElementById('batchOptimizerClose').addEventListener('click', function () { closeFormModal('batchOptimizerModal'); });
+        document.getElementById('batchOptimizerCancel').addEventListener('click', function () { closeFormModal('batchOptimizerModal'); });
+        document.getElementById('batchOptimizerSave').addEventListener('click', saveBatchOptimizer);
+
+        document.getElementById('batchStatusClose').addEventListener('click', function () { closeFormModal('batchStatusModal'); });
+        document.getElementById('batchStatusCancel').addEventListener('click', function () { closeFormModal('batchStatusModal'); });
+        document.getElementById('batchStatusSave').addEventListener('click', saveBatchStatus);
 
         document.getElementById('importBtn').addEventListener('click', openImportModal);
         document.getElementById('importClose').addEventListener('click', closeImportModal);
@@ -2234,7 +3070,7 @@
             return;
           }
           const edit = e.target.closest('[data-edit]');
-          if (edit) showPageMsg('编辑功能开发中');
+          if (edit) openEditModal(edit.getAttribute('data-edit'));
         });
 
         document.getElementById('pagination').addEventListener('click', function (e) {
@@ -2295,8 +3131,18 @@
         });
 
         document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && document.getElementById('importModal').classList.contains('is-open')) {
+          if (e.key !== 'Escape') return;
+          if (document.getElementById('importModal').classList.contains('is-open')) {
             closeImportModal();
+            return;
+          }
+          for (let i = 0; i < FORM_MODAL_IDS.length; i++) {
+            const id = FORM_MODAL_IDS[i];
+            if (document.getElementById(id).classList.contains('is-open')) {
+              closeFormModal(id);
+              if (id === 'editModal') editingId = null;
+              return;
+            }
           }
         });
       }

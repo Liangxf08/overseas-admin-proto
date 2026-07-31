@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>菜单管理 - 海外中台</title>
-  <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   <style>
@@ -1075,8 +1074,9 @@
       align-items: center;
       justify-content: flex-end;
       gap: 12px;
-      padding: 16px 24px 20px;
+      padding: 16px 24px;
       flex-shrink: 0;
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
     }
 
     .form-item {
@@ -1201,8 +1201,8 @@
     }
 
     .input:disabled {
-      background: #F7F8FA;
-      color: #86909C;
+      background: var(--color-fill-1, #F7F8FA);
+      color: var(--color-text-4, #C9CDD4);
       cursor: not-allowed;
     }
 
@@ -1282,7 +1282,7 @@
 
     .input:hover,
     .select:hover {
-      border-color: var(--color-primary-3, #94BFFF);
+      border-color: var(--color-primary);
     }
 
     .input:focus,
@@ -1335,10 +1335,10 @@
     }
 
     .combo.has-value .combo__trigger {
-      padding-right: 56px;
+      padding-right: 32px;
     }
 
-    .combo__trigger:hover { border-color: var(--color-primary-3, #94BFFF); }
+    .combo__trigger:hover { border-color: var(--color-primary); }
 
     .combo.is-open .combo__trigger {
       border-color: var(--color-primary);
@@ -1346,8 +1346,8 @@
     }
 
     .combo.is-disabled .combo__trigger {
-      background: #F7F8FA;
-      color: #86909C;
+      background: var(--color-fill-1, #F7F8FA);
+      color: var(--color-text-4, #C9CDD4);
       cursor: not-allowed;
     }
 
@@ -1375,7 +1375,7 @@
 
     .combo__clear {
       position: absolute;
-      right: 28px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
       display: none;
@@ -1385,17 +1385,23 @@
       height: 16px;
       border-radius: 50%;
       color: #fff;
-      background: #C9CDD4;
-      z-index: 1;
+      background: var(--color-text-4, #C9CDD4);
+      z-index: 2;
     }
 
-    .combo__clear:hover { background: #86909C; }
+    .combo__clear:hover { background: var(--color-text-3, #86909C); }
 
     .combo__clear svg { width: 10px; height: 10px; }
 
+    /* 有值悬停：清除与箭头同位置切换 */
     .combo.has-value:hover .combo__clear,
     .combo.has-value:focus-within .combo__clear {
       display: inline-flex;
+    }
+
+    .combo.has-value:hover .combo__caret,
+    .combo.has-value:focus-within .combo__caret {
+      visibility: hidden;
     }
 
     .combo.is-disabled .combo__clear { display: none !important; }
@@ -1418,7 +1424,8 @@
       position: absolute;
       left: 0;
       right: 0;
-      top: calc(100% + 4px);
+      top: 100%;
+      margin-top: 4px;
       z-index: 20;
       display: none;
       flex-direction: column;
@@ -1466,6 +1473,36 @@
       flex: 1;
       overflow-y: auto;
       padding: 4px 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
+    }
+
+    .combo__list::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .combo__list::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .combo__list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .combo__list::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.55);
+      border-radius: 6px;
+    }
+
+    .combo__list::-webkit-scrollbar-thumb:hover {
+      background: rgba(201, 205, 212, 0.85);
+    }
+
+    .combo__list::-webkit-scrollbar-corner {
+      background: transparent;
     }
 
     .combo__option {
@@ -1478,16 +1515,22 @@
       line-height: 22px;
       color: #1D2129;
       text-align: left;
-      transition: background 0.12s;
+      transition: background 0.12s, color 0.12s;
     }
 
     .combo__option:hover {
-      background: #F5F7FA;
+      background: var(--color-gray-hover, #F5F7FA);
       color: #1D2129;
     }
 
+    /* 选中态：仅主色文字，无蓝底填充 */
     .combo__option.is-active {
-      background: var(--color-primary-bg, #E8F3FF);
+      background: transparent;
+      color: var(--color-primary);
+    }
+
+    .combo__option.is-active:hover {
+      background: var(--color-gray-hover, #F5F7FA);
       color: var(--color-primary);
     }
 
@@ -1529,10 +1572,12 @@
     }
 
     .icon-grid__item.is-active {
-      background: var(--color-primary-bg, #E8F3FF);
+      background: transparent;
       color: var(--color-primary);
-      border-color: var(--color-primary-border, #94BFFF);
+      border-color: var(--color-primary);
     }
+
+    .icon-grid__item.is-active .icon-grid__name { color: var(--color-primary); }
 
     .icon-grid__item iconify-icon { font-size: 20px; }
 
@@ -1545,8 +1590,6 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-
-    .icon-grid__item.is-active .icon-grid__name { color: var(--color-primary); }
 
     .cell-icon iconify-icon {
       font-size: 16px;
@@ -1582,11 +1625,11 @@
       </div>
 
       <nav class="header-nav" aria-label="顶部导航">
-        <a href="#" class="header-nav__item">首页</a>
-        <a href="#" class="header-nav__item">看板</a>
-        <a href="#" class="header-nav__item">产品</a>
-        <a href="#" class="header-nav__item">工具</a>
-        <a href="#" class="header-nav__item is-active">管理</a>
+        <a href="#" class="header-nav__item" data-menu-name="首页">首页</a>
+        <a href="#" class="header-nav__item" data-menu-name="看板">看板</a>
+        <a href="tiktok-accounts.html" class="header-nav__item" data-menu-name="产品">产品</a>
+        <a href="feedback-tickets.html" class="header-nav__item" data-menu-name="工具">工具</a>
+        <a href="menu-management.html" class="header-nav__item is-active" data-menu-name="管理">管理</a>
       </nav>
 
       <div class="header-right">
@@ -1804,7 +1847,7 @@
             <div class="form-item__error" id="menuPermError">权限标识已存在</div>
           </div>
         </div>
-        <div class="form-item">
+        <div class="form-item" id="parentFormItem">
           <div class="form-item__label">上级菜单</div>
           <div class="form-item__control">
             <div class="combo" id="parentCombo">
@@ -1859,7 +1902,7 @@
       </form>
       <div class="modal__footer">
         <button class="btn btn--default" type="button" id="menuModalCancel">取消</button>
-        <button class="btn btn--primary" type="button" id="menuModalSave">保存</button>
+        <button class="btn btn--primary" type="button" id="menuModalSave">提交</button>
       </div>
     </div>
   </div>
@@ -2877,6 +2920,7 @@
 
       bindSeg(document.getElementById('menuTypeSeg'), document.getElementById('menuTypeInput'), (type) => {
         syncIconFieldByType(type);
+        syncParentFieldByType(type);
       });
       bindSeg(document.getElementById('menuStatusSeg'), document.getElementById('menuStatusInput'));
 
@@ -2954,12 +2998,31 @@
       function setParentValue(id, label) {
         menuParentSelect.value = id || '';
         const labelEl = document.getElementById('parentComboLabel');
+        const combo = document.getElementById('parentCombo');
         if (id && label) {
           labelEl.textContent = label;
           labelEl.classList.remove('is-placeholder');
+          if (combo) combo.classList.add('has-value');
         } else {
           labelEl.textContent = '请选择';
           labelEl.classList.add('is-placeholder');
+          if (combo) combo.classList.remove('has-value');
+        }
+      }
+
+      function parentAllowedForType(type) {
+        return type !== 'nav';
+      }
+
+      function syncParentFieldByType(type) {
+        const allowed = parentAllowedForType(type);
+        const formItem = document.getElementById('parentFormItem');
+        const combo = document.getElementById('parentCombo');
+        if (formItem) formItem.style.display = allowed ? '' : 'none';
+        if (combo) combo.classList.toggle('is-disabled', !allowed);
+        if (!allowed) {
+          setParentValue('', '');
+          closeCombo(combo);
         }
       }
 
@@ -3061,6 +3124,8 @@
       document.getElementById('parentComboTrigger').addEventListener('click', (e) => {
         e.stopPropagation();
         const combo = document.getElementById('parentCombo');
+        if (combo.classList.contains('is-disabled')) return;
+        if (!parentAllowedForType(document.getElementById('menuTypeInput').value)) return;
         if (combo.classList.contains('is-open')) closeCombo(combo);
         else {
           openCombo(combo);
@@ -3184,13 +3249,21 @@
 
       function syncNavigationUI() {
         const headerNav = document.querySelector('.header-nav');
+        const NAV_HREF = {
+          首页: '#',
+          看板: '#',
+          产品: 'tiktok-accounts.html',
+          工具: 'feedback-tickets.html',
+          管理: 'menu-management.html',
+        };
         if (headerNav) {
           const activeEl = headerNav.querySelector('.header-nav__item.is-active');
           const activeName = (activeEl && (activeEl.getAttribute('data-menu-name') || activeEl.textContent.trim())) || '管理';
           const navItems = menuFlat.filter((r) => r.type === 'nav' && r.status !== '禁用');
           headerNav.innerHTML = navItems.map((r) => {
             const isActive = r.name === activeName;
-            return `<a href="#" class="header-nav__item${isActive ? ' is-active' : ''}" data-menu-name="${r.name}">${r.name}</a>`;
+            const href = NAV_HREF[r.name] || '#';
+            return `<a href="${href}" class="header-nav__item${isActive ? ' is-active' : ''}" data-menu-name="${r.name}">${r.name}</a>`;
           }).join('');
         }
 
@@ -3378,6 +3451,7 @@
         document.querySelectorAll('[data-clearable]').forEach(syncClearable);
         setFormLockedFields(!!d.editId);
         syncIconFieldByType(type);
+        syncParentFieldByType(type);
       }
 
       function openMenuModal(defaults) {
@@ -3536,10 +3610,10 @@
         const name = menuNameInput.value.trim();
         const path = menuPathInput.value.trim();
         const parentId = menuParentSelect.value;
-        const parentRow = menuFlat.find((r) => r.id === parentId);
-        const parentName = parentRow ? parentRow.name : '-';
-        const status = document.getElementById('menuStatusInput').value;
         const type = document.getElementById('menuTypeInput').value;
+        const parentRow = type === 'nav' ? null : menuFlat.find((r) => r.id === parentId);
+        const parentName = type === 'nav' ? '-' : (parentRow ? parentRow.name : '-');
+        const status = document.getElementById('menuStatusInput').value;
         const icon = iconAllowedForType(type) ? menuIconSelect.value : '';
 
         if (editingId) {
