@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Feedback - Overseas SDK</title>
+  <style>
+    :root {
+      --color-text: #1A1A1A;
+      --color-text-secondary: #666666;
+      --color-placeholder: #B0B0B0;
+      --color-bg: #FFFFFF;
+      --color-input-bg: #F7F8FA;
+      --color-border: #E5E6EB;
+      --color-primary-1: #E8F3FF;
+      --color-primary-2: #BEDAFF;
+      --color-primary-3: #94BFFF;
+      --color-primary-4: #6AA1FF;
+      --color-primary-5: #4080FF;
+      --color-primary-6: #165DFF;
+      --color-primary-7: #0E42D2;
+      --color-primary: var(--color-primary-6);
+      --color-primary-hover: var(--color-primary-5);
+      --color-primary-pressed: var(--color-primary-7);
+      --color-primary-disabled: var(--color-primary-3);
+      --color-danger: #F53F3F;
+      --nav-height: 44px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --page-pad-x: 16px;
+      --radius-input: 10px;
+      --radius-btn: 24px;
+      --font: "PingFang SC", "PingFang TC", "SF Pro Text", "Helvetica Neue", "Microsoft YaHei", "Noto Sans JP", "Noto Sans KR", sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      color: var(--color-text);
+      background: #E8E8E8;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, input, textarea {
+      font-family: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    .preview {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px 16px;
+    }
+
+    .lang-switch {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      padding: 4px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .lang-switch__btn {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .lang-switch__btn:hover { background: var(--color-primary-1); color: var(--color-primary); }
+    .lang-switch__btn.is-active {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .phone {
+      width: 375px;
+      height: 812px;
+      max-height: calc(100vh - 96px);
+      background: var(--color-bg);
+      border-radius: 36px;
+      box-shadow:
+        0 0 0 10px #1C1C1E,
+        0 24px 64px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .status-bar {
+      flex-shrink: 0;
+      height: 44px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 24px 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text);
+      background: var(--color-bg);
+    }
+
+    .status-bar__icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-bar__icons svg { display: block; }
+
+    .app {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg);
+    }
+
+    .nav {
+      flex-shrink: 0;
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .nav__back {
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text);
+      cursor: pointer;
+    }
+
+    .nav__title {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 24px;
+      letter-spacing: 0.2px;
+    }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 20px var(--page-pad-x) 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .field { margin-bottom: 20px; }
+
+    .field__label {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 22px;
+      color: var(--color-text);
+      margin-bottom: 10px;
+    }
+
+    .field__req {
+      color: var(--color-danger);
+      margin-left: 2px;
+      font-weight: 600;
+    }
+
+    .input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 48px;
+      padding: 0 14px;
+      background: var(--color-input-bg);
+      border-radius: var(--radius-input);
+      border: 1px solid transparent;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .input:focus-within {
+      border-color: var(--color-primary-4);
+      background: var(--color-primary-1);
+    }
+
+    .input__icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      color: #8E8E93;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input__icon svg { width: 18px; height: 18px; display: block; }
+
+    .input__control {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      font-size: 15px;
+      line-height: 22px;
+      color: var(--color-text);
+    }
+
+    .input__control::placeholder { color: var(--color-placeholder); }
+
+    .textarea-wrap {
+      position: relative;
+      background: var(--color-input-bg);
+      border-radius: var(--radius-input);
+      border: 1px solid transparent;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .textarea-wrap:focus-within {
+      border-color: var(--color-primary-4);
+      background: var(--color-primary-1);
+    }
+
+    .textarea-wrap.is-error {
+      border-color: var(--color-danger);
+      background: #FFF8F8;
+    }
+
+    .textarea {
+      display: block;
+      width: 100%;
+      min-height: 140px;
+      padding: 12px 14px 28px;
+      font-size: 15px;
+      line-height: 22px;
+      color: var(--color-text);
+      resize: none;
+      background: transparent;
+    }
+
+    .textarea::placeholder { color: var(--color-placeholder); }
+
+    .textarea__count {
+      position: absolute;
+      right: 12px;
+      bottom: 8px;
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--color-placeholder);
+      pointer-events: none;
+    }
+
+    .field__error {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--color-danger);
+      display: none;
+    }
+
+    .field__error.is-show { display: block; }
+
+    .support {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 4px;
+      padding: 12px 0 8px;
+      font-size: 13px;
+      line-height: 20px;
+      color: var(--color-text-secondary);
+    }
+
+    .support__text {
+      display: inline;
+      min-width: 0;
+      word-break: break-all;
+    }
+
+    .support__email {
+      color: var(--color-text);
+      font-weight: 500;
+    }
+
+    .support__copy {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      margin-left: 8px;
+      border-radius: 4px;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      color: var(--color-text-secondary);
+      background: transparent;
+      cursor: pointer;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .support__copy svg { width: 14px; height: 14px; display: block; }
+    .support__copy:hover {
+      color: var(--color-primary);
+      background: var(--color-primary-1);
+    }
+    .support__copy:active {
+      color: var(--color-primary-pressed);
+      background: var(--color-primary-1);
+    }
+    .support__copy.is-done {
+      color: var(--color-primary);
+      background: transparent;
+    }
+    .support__copy .icon-check { display: none; }
+    .support__copy.is-done .icon-copy { display: none; }
+    .support__copy.is-done .icon-check { display: block; }
+
+    .footer {
+      flex-shrink: 0;
+      padding: 12px var(--page-pad-x) calc(16px + var(--safe-bottom));
+      background: var(--color-bg);
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-btn);
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 0.15s ease, opacity 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn-submit:hover { background: var(--color-primary-hover); }
+
+    .btn-submit:active {
+      background: var(--color-primary-pressed);
+      transform: scale(0.985);
+    }
+
+    .btn-submit:disabled {
+      background: var(--color-primary-disabled);
+      opacity: 1;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 96px;
+      transform: translateX(-50%) translateY(8px);
+      max-width: calc(100% - 48px);
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.78);
+      color: #fff;
+      font-size: 14px;
+      line-height: 20px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 20;
+    }
+
+    .toast.is-show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 480px) {
+      body { background: var(--color-bg); }
+      .preview {
+        padding: 0;
+        min-height: 100%;
+        align-items: stretch;
+        gap: 0;
+        justify-content: flex-start;
+      }
+      .lang-switch {
+        border-radius: 0;
+        box-shadow: none;
+        border-bottom: 1px solid var(--color-border);
+        flex-shrink: 0;
+      }
+      .phone {
+        width: 100%;
+        height: auto;
+        flex: 1;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .status-bar { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview">
+    <div class="lang-switch" role="tablist" aria-label="Language">
+      <button class="lang-switch__btn is-active" type="button" data-lang="zh-Hant" role="tab" aria-selected="true">繁體中文</button>
+      <button class="lang-switch__btn" type="button" data-lang="en" role="tab" aria-selected="false">English</button>
+      <button class="lang-switch__btn" type="button" data-lang="ja" role="tab" aria-selected="false">日本語</button>
+      <button class="lang-switch__btn" type="button" data-lang="ko" role="tab" aria-selected="false">한국어</button>
+    </div>
+
+    <div class="phone" id="phone">
+      <div class="status-bar" aria-hidden="true">
+        <span>9:41</span>
+        <div class="status-bar__icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="0.5"/><rect x="9" y="2" width="3" height="10" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 3.6c1.6 0 3.05.62 4.15 1.63l1.2-1.2A7.45 7.45 0 0 0 8 1.6 7.45 7.45 0 0 0 2.65 4.03l1.2 1.2A5.86 5.86 0 0 1 8 3.6zm0 3.2c.86 0 1.64.33 2.23.87l1.2-1.2A4.73 4.73 0 0 0 8 4.8a4.73 4.73 0 0 0-3.43 1.67l1.2 1.2A3.15 3.15 0 0 1 8 6.8zM8 11.2a1.4 1.4 0 1 0 0-2.8 1.4 1.4 0 0 0 0 2.8z"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+        </div>
+      </div>
+
+      <div class="app">
+        <header class="nav">
+          <button class="nav__back" type="button" id="btnBack" aria-label="Back">
+            <svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>
+          </button>
+          <h1 class="nav__title" id="i18nTitle">反饋</h1>
+        </header>
+
+        <main class="body">
+          <div class="field">
+            <label class="field__label" for="email" id="i18nEmailLabel">Email</label>
+            <div class="input">
+              <span class="input__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="5" width="18" height="14" rx="2"/>
+                  <path d="M3 7l9 6 9-6"/>
+                </svg>
+              </span>
+              <input class="input__control" id="email" type="email" inputmode="email" autocomplete="email" placeholder="E-mail" maxlength="100" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="desc">
+              <span id="i18nDescLabel">問題描述</span><span class="field__req">*</span>
+            </label>
+            <div class="textarea-wrap" id="descWrap">
+              <textarea class="textarea" id="desc" placeholder="" maxlength="240" rows="5"></textarea>
+              <span class="textarea__count" id="descCount">0/240</span>
+            </div>
+            <p class="field__error" id="descError"></p>
+          </div>
+
+          <div class="support">
+            <span class="support__text">
+              <span id="i18nContactPrefix">聯絡我們：</span><span class="support__email" id="supportEmail">support@wonder.com</span>
+            </span>
+            <button class="support__copy" type="button" id="btnCopy" aria-label="Copy">
+              <svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12l5 5L20 7"/>
+              </svg>
+            </button>
+          </div>
+        </main>
+
+        <footer class="footer">
+          <button class="btn-submit" type="button" id="btnSubmit">提交</button>
+        </footer>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const MAX = 240;
+      const SUPPORT_EMAIL = "support@wonder.com";
+
+      const I18N = {
+        "zh-Hant": {
+          htmlLang: "zh-Hant",
+          title: "反饋",
+          descLabel: "問題描述",
+          descPlaceholder: "請填寫問題詳情",
+          descError: "請填寫問題詳情",
+          contactPrefix: "聯絡我們：",
+          submit: "提交",
+          copyAria: "複製郵箱",
+          backAria: "返回",
+          toastCopied: "郵箱已複製",
+          toastCopyFail: "複製失敗，請長按郵箱手動複製",
+          toastSuccess: "提交成功，感謝您的反饋",
+          toastClose: "關閉反饋頁（原生回調）"
+        },
+        en: {
+          htmlLang: "en",
+          title: "Feedback",
+          descLabel: "Problem Description",
+          descPlaceholder: "Please describe your issue",
+          descError: "Please describe your issue",
+          contactPrefix: "Contact Us: ",
+          submit: "Submit",
+          copyAria: "Copy email",
+          backAria: "Back",
+          toastCopied: "Email copied",
+          toastCopyFail: "Copy failed. Please long-press the email to copy",
+          toastSuccess: "Submitted. Thank you for your feedback",
+          toastClose: "Close feedback (native callback)"
+        },
+        ja: {
+          htmlLang: "ja",
+          title: "フィードバック",
+          descLabel: "問題の詳細",
+          descPlaceholder: "詳細をご入力ください",
+          descError: "詳細をご入力ください",
+          contactPrefix: "お問い合わせ：",
+          submit: "送信",
+          copyAria: "メールをコピー",
+          backAria: "戻る",
+          toastCopied: "メールアドレスをコピーしました",
+          toastCopyFail: "コピーに失敗しました。メールを長押ししてコピーしてください",
+          toastSuccess: "送信完了。ご意見ありがとうございます",
+          toastClose: "フィードバックを閉じる（ネイティブ）"
+        },
+        ko: {
+          htmlLang: "ko",
+          title: "피드백",
+          descLabel: "문제 설명",
+          descPlaceholder: "상세 내용을 입력해 주세요",
+          descError: "상세 내용을 입력해 주세요",
+          contactPrefix: "문의하기: ",
+          submit: "제출",
+          copyAria: "이메일 복사",
+          backAria: "뒤로",
+          toastCopied: "이메일이 복사되었습니다",
+          toastCopyFail: "복사 실패. 이메일을 길게 눌러 복사해 주세요",
+          toastSuccess: "제출되었습니다. 소중한 의견 감사합니다",
+          toastClose: "피드백 닫기 (네이티브)"
+        }
+      };
+
+      let currentLang = "zh-Hant";
+      let t = I18N[currentLang];
+
+      const emailEl = document.getElementById("email");
+      const descEl = document.getElementById("desc");
+      const descWrap = document.getElementById("descWrap");
+      const descCount = document.getElementById("descCount");
+      const descError = document.getElementById("descError");
+      const supportEmailEl = document.getElementById("supportEmail");
+      const btnCopy = document.getElementById("btnCopy");
+      const btnSubmit = document.getElementById("btnSubmit");
+      const btnBack = document.getElementById("btnBack");
+      const toastEl = document.getElementById("toast");
+
+      supportEmailEl.textContent = SUPPORT_EMAIL;
+
+      function applyI18n(lang) {
+        currentLang = lang;
+        t = I18N[lang];
+        document.documentElement.lang = t.htmlLang;
+        document.title = t.title + " - Overseas SDK";
+        document.getElementById("i18nTitle").textContent = t.title;
+        document.getElementById("i18nDescLabel").textContent = t.descLabel;
+        document.getElementById("i18nContactPrefix").textContent = t.contactPrefix;
+        emailEl.placeholder = "E-mail";
+        descEl.placeholder = t.descPlaceholder;
+        descError.textContent = t.descError;
+        btnSubmit.textContent = t.submit;
+        btnCopy.setAttribute("aria-label", t.copyAria);
+        btnCopy.setAttribute("title", t.copyAria);
+        btnBack.setAttribute("aria-label", t.backAria);
+      }
+
+      document.querySelectorAll(".lang-switch__btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const lang = btn.getAttribute("data-lang");
+          document.querySelectorAll(".lang-switch__btn").forEach(function (b) {
+            const active = b === btn;
+            b.classList.toggle("is-active", active);
+            b.setAttribute("aria-selected", active ? "true" : "false");
+          });
+          applyI18n(lang);
+          clearDescError();
+        });
+      });
+
+      let toastTimer = null;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("is-show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toastEl.classList.remove("is-show");
+        }, 1800);
+      }
+
+      function updateCount() {
+        descCount.textContent = descEl.value.length + "/" + MAX;
+      }
+
+      function clearDescError() {
+        descWrap.classList.remove("is-error");
+        descError.classList.remove("is-show");
+      }
+
+      descEl.addEventListener("input", function () {
+        updateCount();
+        if (descEl.value.trim()) clearDescError();
+      });
+
+      btnCopy.addEventListener("click", async function () {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(SUPPORT_EMAIL);
+          } else {
+            const ta = document.createElement("textarea");
+            ta.value = SUPPORT_EMAIL;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.left = "-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+          }
+          btnCopy.classList.add("is-done");
+          showToast(t.toastCopied);
+          setTimeout(function () {
+            btnCopy.classList.remove("is-done");
+          }, 1600);
+        } catch (e) {
+          showToast(t.toastCopyFail);
+        }
+      });
+
+      btnSubmit.addEventListener("click", function () {
+        const desc = descEl.value.trim();
+        if (!desc) {
+          descWrap.classList.add("is-error");
+          descError.classList.add("is-show");
+          descEl.focus();
+          return;
+        }
+        clearDescError();
+        btnSubmit.disabled = true;
+        showToast(t.toastSuccess);
+        setTimeout(function () {
+          btnSubmit.disabled = false;
+          emailEl.value = "";
+          descEl.value = "";
+          updateCount();
+        }, 1200);
+      });
+
+      btnBack.addEventListener("click", function () {
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          showToast(t.toastClose);
+        }
+      });
+
+      applyI18n(currentLang);
+      updateCount();
+    })();
+  </script>
+</body>
+</html>
