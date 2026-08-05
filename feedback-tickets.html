@@ -2839,15 +2839,15 @@
           return;
         }
         const header = [
-          '工单ID', '产品', '平台', 'APP版本', '问题详情', '状态',
-          'UUID', '设备ID', '设备型号', '系统版本', '设备时区', '国家地区',
-          '用户邮箱', '创建时间', '更新时间'
+          '工单ID', '产品ID', '产品名称', '平台', 'APP版本', 'SDK版本', '问题详情',
+          'UUID', '设备ID', '数数访客ID', '设备型号', '系统版本', '国家地区',
+          '安装时间', '关卡ID', '用户邮箱', '状态', '创建时间', '更新时间'
         ];
         const lines = [header.join(',')].concat(filtered.map(function (r) {
           return [
-            r.id, r.product, r.platform, r.version, r.content || '', r.status,
-            r.uuid, r.deviceId, r.deviceModel || '', r.osVersion || '', r.timezone || '', r.region || '',
-            r.email || '', r.createdAt, r.updatedAt
+            r.id, r.productId || '', r.product, r.platform, r.version, r.sdkVersion || '', r.content || '',
+            r.uuid, r.deviceId, r.visitorId || '', r.deviceModel || '', r.osVersion || '', r.region || '',
+            r.installedAt || '', r.levelId != null ? r.levelId : '', r.email || '', r.status, r.createdAt, r.updatedAt
           ].map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; })
             .join(',');
         }));
