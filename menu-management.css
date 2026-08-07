@@ -65,41 +65,22 @@
 
 .icon-btn svg { width: 14px; height: 14px; }
 
+/* 菜单页仅覆盖定位；边框/阴影/图标色走 product-common 全局提示 */
 .page-msg {
-  position: fixed;
   top: 48px;
-  left: 50%;
+  opacity: 1;
+  visibility: visible;
   transform: translateX(-50%);
-  z-index: 1100;
   display: none;
-  align-items: center;
-  gap: 8px;
-  width: max-content;
-  max-width: min(480px, calc(100vw - 48px));
-  padding: 10px 16px;
-  background: #fff;
-  border: 1px solid #E5E6EB;
-  border-radius: 4px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  font-size: 14px;
-  line-height: 22px;
-  color: #1D2129;
   pointer-events: none;
-  box-sizing: border-box;
 }
 
-.page-msg.is-show { display: inline-flex; }
-
-.page-msg__icon {
+.page-msg.is-show {
   display: inline-flex;
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%);
 }
-
-.page-msg--warning .page-msg__icon { color: var(--color-warning, #FF7D00); }
-
-.page-msg--success .page-msg__icon { color: var(--color-success, #00B42A); }
 
 .drag-handle {
   display: none;

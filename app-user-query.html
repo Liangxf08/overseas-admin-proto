@@ -8,46 +8,188 @@
   <link rel="stylesheet" href="design-tokens.css" />
   <link rel="stylesheet" href="product-common.css" />
   <link rel="stylesheet" href="col-resize.css" />
+  <link rel="stylesheet" href="app-user-query.css" />
 </head>
 <body>
   <div class="app" id="appShell">
     <main class="main" data-main>
       <div class="content-card">
-        <div class="filter-bar">
-          <div class="filter-item">
-            <input class="input" id="filterKeyword" type="text" placeholder="用户ID / 设备ID" autocomplete="off" />
+        <div class="filter-bar" id="filterBar">
+          <div class="filter-item filter-item--date" id="dateRangeWrap">
+            <button class="date-range-trigger" type="button" id="dateRangeTrigger">
+              <span class="date-range-trigger__text" id="dateRangeLabel">日期：-</span>
+            </button>
+            <div class="date-panel" id="datePanel">
+              <div class="date-panel__shortcuts" id="dateShortcuts">
+                <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
+                <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
+                <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
+                <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
+              </div>
+              <div class="date-panel__calendars">
+                <div class="date-cal" id="dateCalLeft"></div>
+                <div class="date-cal" id="dateCalRight"></div>
+              </div>
+            </div>
           </div>
+
+          <div class="filter-item" id="productWrap">
+            <button class="select-trigger" type="button" id="productTrigger">
+              <span class="select-trigger__text" id="productLabel">产品：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="productClearIcon" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel" id="productPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="productSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="productSelectAll">全选</button>
+                </div>
+                <div class="multi-panel__list" id="productList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="productCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="productClear">清空</button>
+                </div>
+                <div class="multi-panel__list" id="productSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item">
+            <input class="input" id="filterAppId" type="text" placeholder="产品ID" autocomplete="off" />
+          </div>
+
+          <div class="filter-item">
+            <input class="input" id="filterBundleId" type="text" placeholder="包名" autocomplete="off" />
+          </div>
+
+          <div class="filter-item" id="versionWrap">
+            <button class="select-trigger" type="button" id="versionTrigger">
+              <span class="select-trigger__text" id="versionLabel">APP版本：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="versionClearIcon" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel" id="versionPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="versionSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="versionSelectAll">全选</button>
+                </div>
+                <div class="multi-panel__list" id="versionList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="versionCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="versionClear">清空</button>
+                </div>
+                <div class="multi-panel__list" id="versionSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="sdkVersionWrap">
+            <button class="select-trigger" type="button" id="sdkVersionTrigger">
+              <span class="select-trigger__text" id="sdkVersionLabel">SDK版本：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="sdkVersionClearIcon" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel" id="sdkVersionPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="sdkVersionSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="sdkVersionSelectAll">全选</button>
+                </div>
+                <div class="multi-panel__list" id="sdkVersionList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="sdkVersionCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="sdkVersionClear">清空</button>
+                </div>
+                <div class="multi-panel__list" id="sdkVersionSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="sandboxEnvWrap">
+            <button class="select-trigger" type="button" id="sandboxEnvTrigger">
+              <span class="select-trigger__text" id="sandboxEnvLabel">沙箱：全部</span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="sandboxEnvPanel">
+              <button class="single-option is-active" type="button" data-value="全部">全部</button>
+              <button class="single-option" type="button" data-value="开启">开启</button>
+              <button class="single-option" type="button" data-value="关闭">关闭</button>
+            </div>
+          </div>
+
+          <div class="filter-item">
+            <input class="input" id="filterUuid" type="text" placeholder="UUID" autocomplete="off" />
+          </div>
+
+          <div class="filter-item">
+            <input class="input" id="filterDeviceId" type="text" placeholder="设备ID" autocomplete="off" />
+          </div>
+
           <div class="filter-actions">
-            <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
             <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+            <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
           </div>
         </div>
 
-        <div class="data-panel">
+        <div class="data-panel has-toolbar" id="dataPanel">
+          <div class="table-toolbar">
+            <span class="tooltip-wrap" data-tip="刷新">
+              <button class="toolbar-icon-btn" type="button" id="refreshBtn" aria-label="刷新">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M38.837 18C36.463 12.136 30.715 8 24 8 15.163 8 8 15.163 8 24s7.163 16 16 16c7.455 0 13.72-5.1 15.496-12M40 8v10H30"/></svg>
+              </button>
+            </span>
+            <span class="tooltip-wrap" data-tip="全屏" id="fullscreenTip">
+              <button class="toolbar-icon-btn" type="button" id="fullscreenBtn" aria-label="全屏">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M42 17V9a1 1 0 0 0-1-1h-8M6 17V9a1 1 0 0 1 1-1h8m27 23v8a1 1 0 0 1-1 1h-8M6 31v8a1 1 0 0 0 1 1h8"/></svg>
+              </button>
+            </span>
+            <span class="tooltip-wrap" data-tip="自定义列">
+              <button class="toolbar-icon-btn" type="button" id="metricsBtn" aria-label="自定义列">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" aria-hidden="true"><path d="M7 7H20V20H7z"/><path d="M28 7H41V20H28z"/><path d="M7 28H20V41H7z"/><path d="M28 28H41V41H28z"/></svg>
+              </button>
+            </span>
+            <span class="tooltip-wrap" data-tip="下载">
+              <button class="toolbar-icon-btn" type="button" id="exportBtn" aria-label="下载">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="m33.072 22.071-9.07 9.071-9.072-9.07M24 5v26m16 4v6H8v-6"/></svg>
+              </button>
+            </span>
+          </div>
+
           <div class="table-shell">
             <div class="table-wrap">
               <table class="data-table" id="userTable">
-                <colgroup>
-                  <col data-col-width="160" />
-                  <col data-col-width="180" />
-                  <col data-col-width="160" />
-                  <col data-col-width="120" />
-                  <col data-col-width="160" />
-                  <col data-col-width="160" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>用户ID</th>
-                    <th>设备ID</th>
-                    <th>产品</th>
-                    <th>平台</th>
-                    <th>注册时间</th>
-                    <th>最近活跃</th>
-                  </tr>
-                </thead>
-                <tbody id="userBody"></tbody>
+                <colgroup id="tableColgroup"></colgroup>
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
               </table>
-              <div class="empty-tip" id="emptyTip">暂无数据</div>
+              <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
             </div>
           </div>
           <div class="pagination" id="pagination"></div>
@@ -56,61 +198,155 @@
     </main>
   </div>
 
+  <!-- 自定义列 -->
+  <div class="modal-mask" id="metricModal" aria-hidden="true">
+    <div class="modal metric-modal" role="dialog" aria-modal="true" aria-labelledby="metricModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="metricModalTitle">自定义列</div>
+        <button class="modal__close" type="button" data-close="metricModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body metric-modal__body">
+        <div class="metric-layout">
+          <div class="metric-main">
+            <div class="metric-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+              <input type="text" id="metricSearch" placeholder="搜索" autocomplete="off" />
+            </div>
+            <div class="metric-picker">
+              <nav class="metric-cats" id="metricCatList" aria-label="指标分组"></nav>
+              <div class="metric-options" id="metricOptions"></div>
+            </div>
+          </div>
+          <div class="metric-selected">
+            <div class="metric-selected__head">
+              <span id="metricSelectedCount">已选 0 列</span>
+              <button class="btn btn--text" type="button" id="metricClear">清空</button>
+            </div>
+            <div class="metric-selected__list" id="metricSelectedList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="metricModal">取消</button>
+        <button class="btn btn--primary" type="button" id="metricSubmit">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 沙箱开关确认 -->
+  <div class="modal-mask modal-mask--confirm" id="sandboxConfirmModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="sandboxConfirmTitle">
+      <button class="confirm-modal__close" type="button" data-close="sandboxConfirmModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon" aria-hidden="true">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3v4M6 9h.01"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="sandboxConfirmTitle">开启确认</h2>
+          <p class="confirm-modal__body" id="sandboxConfirmBody">确认开启沙箱状态吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="sandboxConfirmModal">取消</button>
+        <button class="btn btn--primary" type="button" id="sandboxConfirmOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑用户 -->
+  <div class="modal-mask" id="editModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="editModalTitle">编辑用户</div>
+        <button class="modal__close" type="button" data-close="editModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <label class="form-item__label">UUID</label>
+          <div class="form-item__control">
+            <input class="input" id="editUuid" type="text" readonly disabled autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">设备ID</label>
+          <div class="form-item__control">
+            <input class="input" id="editDeviceId" type="text" readonly disabled autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item" id="editInstallItem">
+          <label class="form-item__label is-required">安装时间</label>
+          <div class="form-item__control">
+            <div class="datetime-trigger-wrap" id="editInstallWrap">
+              <button class="select-trigger" type="button" id="editInstallTrigger">
+                <span class="select-trigger__text" id="editInstallLabel"><span class="muted">请选择日期时间</span></span>
+                <svg class="datetime-trigger__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="editInstallClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="datetime-panel" id="editInstallPanel">
+                <div class="datetime-panel__main">
+                  <div class="date-cal" id="editInstallCal"></div>
+                  <div class="time-panel">
+                    <div class="time-panel__display" id="editTimeDisplay">00:00:00</div>
+                    <div class="time-panel__cols">
+                      <div class="time-col" id="editTimeHour" data-unit="h"></div>
+                      <div class="time-col" id="editTimeMinute" data-unit="m"></div>
+                      <div class="time-col" id="editTimeSecond" data-unit="s"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-item__error">请选择安装时间</div>
+          </div>
+        </div>
+        <div class="form-item" id="editCountryItem">
+          <label class="form-item__label is-required">国家地区</label>
+          <div class="form-item__control" id="editCountryWrap">
+            <button class="select-trigger" type="button" id="editCountryTrigger">
+              <span class="select-trigger__text" id="editCountryLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="editCountryPanel"></div>
+            <div class="form-item__error">请选择国家地区</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="editModal">取消</button>
+        <button class="btn btn--primary" type="button" id="editSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑日志 -->
+  <div class="drawer-mask" id="logDrawer" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="logDrawerTitle">
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="logDrawerTitle">编辑日志</h2>
+        <button class="drawer__close" type="button" id="logDrawerClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="drawer__body" id="logDrawerBody"></div>
+      <div class="drawer__footer">
+        <button class="btn btn--default" type="button" id="logDrawerCancel">关闭</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="page-msg" id="pageMsg" role="status"></div>
+
   <script src="product-common.js"></script>
   <script src="product-sidebar.js"></script>
   <script src="col-resize.js"></script>
-  <script>
-    (function () {
-      'use strict';
-      var UI = window.ProductUI;
-      ProductShell.mount('app-user-query');
-
-      var state = { keyword: '', page: 1, pageSize: 20 };
-
-      function renderTable() {
-        var body = UI.$('userBody');
-        var tip = UI.$('emptyTip');
-        body.innerHTML = '';
-        if (tip) tip.hidden = false;
-        UI.renderPagination({
-          containerId: 'pagination',
-          total: 0,
-          page: state.page,
-          pageSize: state.pageSize,
-          onPageChange: function (p) {
-            state.page = p;
-            renderTable();
-          },
-          onPageSizeChange: function (size) {
-            state.pageSize = size;
-            state.page = 1;
-            renderTable();
-          }
-        });
-        if (window.ColResize) ColResize.refresh(UI.$('userTable'));
-      }
-
-      function doSearch() {
-        state.keyword = (UI.$('filterKeyword').value || '').trim();
-        state.page = 1;
-        renderTable();
-      }
-
-      function doReset() {
-        UI.$('filterKeyword').value = '';
-        state.keyword = '';
-        state.page = 1;
-        renderTable();
-      }
-
-      UI.$('searchBtn').addEventListener('click', doSearch);
-      UI.$('resetBtn').addEventListener('click', doReset);
-      UI.$('filterKeyword').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') doSearch();
-      });
-
-      renderTable();
-    })();
-  </script>
+  <script src="app-user-query.js"></script>
 </body>
 </html>

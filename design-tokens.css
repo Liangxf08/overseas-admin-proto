@@ -342,12 +342,17 @@
   --tag-font-size: var(--font-size-body-1); /* 12px 表格状态标签 */
   --tag-height: 28px;
 
-  /* Switch 开关（表格 / 表单统一 · 中间档 36×20） */
+  /* Switch 开关（表格 / 表单统一 · 中间档 36×20 · 小档 32×16） */
   --switch-width: 36px;
   --switch-height: 20px;
   --switch-thumb-size: 16px;
   --switch-thumb-offset: 2px;
   --switch-travel: 16px; /* width - thumb - 2*offset */
+  --switch-width-small: 32px;
+  --switch-height-small: 16px;
+  --switch-thumb-size-small: 12px;
+  --switch-thumb-offset-small: 2px;
+  --switch-travel-small: 16px; /* 32 - 12 - 2*2 */
 
   /* ============================================================
    * 15. 表格 Table

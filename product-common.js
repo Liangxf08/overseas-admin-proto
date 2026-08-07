@@ -16,15 +16,32 @@
       .replace(/"/g, '&quot;');
   }
 
+  /* Arco Message 状态图标（Icon*CircleFill） */
+  var MSG_ICON_PATHS = {
+    success: 'M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm10.207-24.379a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0L22 26.172l-4.878-4.88a1 1 0 0 0-1.415 0l-1.414 1.415a1 1 0 0 0 0 1.414l7 7a1 1 0 0 0 1.414 0l11.5-11.5Z',
+    error: 'M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm4.955-27.771-4.95 4.95-4.95-4.95a1 1 0 0 0-1.414 0l-1.414 1.414a1 1 0 0 0 0 1.414l4.95 4.95-4.95 4.95a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l4.95-4.95 4.95 4.95a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-4.95-4.95 4.95-4.95a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0Z',
+    warning: 'M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm-2-11a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2Zm4-18a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V15Z',
+    info: 'M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm2-30a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2Zm0 17h1a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h1v-8a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v11Z'
+  };
+
+  function msgIconHtml(type) {
+    var key = type === 'error' || type === 'warning' || type === 'info' || type === 'normal'
+      ? (type === 'normal' ? 'info' : type)
+      : 'success';
+    return '<svg class="page-msg__icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">' +
+      '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="' + MSG_ICON_PATHS[key] + '"/>' +
+      '</svg>';
+  }
+
   function showToast(text, type) {
     var el = $('pageMsg');
     if (!el) return;
     type = type || 'success';
-    var icon = type === 'error'
-      ? '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
-      : '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
+    if (type !== 'success' && type !== 'error' && type !== 'warning' && type !== 'info' && type !== 'normal') {
+      type = 'success';
+    }
     el.className = 'page-msg page-msg--' + type + ' is-show';
-    el.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
+    el.innerHTML = msgIconHtml(type) + '<span>' + escapeHtml(text) + '</span>';
     clearTimeout(msgTimer);
     msgTimer = setTimeout(function () {
       el.classList.remove('is-show');
@@ -66,6 +83,18 @@
       p.classList.remove('is-open');
       p.classList.remove('is-dropup');
       p.classList.remove('is-align-right');
+    });
+    document.querySelectorAll('.datetime-panel.is-open').forEach(function (p) {
+      p.classList.remove('is-open', 'is-fixed', 'is-dropup', 'is-align-right');
+      p.style.left = '';
+      p.style.top = '';
+      p.style.right = '';
+      p.style.bottom = '';
+      var host = p.__datetimeHost;
+      if (host && p.parentElement !== host) host.appendChild(p);
+    });
+    document.querySelectorAll('.datetime-trigger-wrap.is-panel-open').forEach(function (w) {
+      w.classList.remove('is-panel-open');
     });
     document.querySelectorAll('.select-trigger.is-open, .date-range-trigger.is-open, .btn--dropdown.is-open').forEach(function (t) {
       t.classList.remove('is-open');
@@ -861,6 +890,283 @@
   }
 
   /**
+   * 日期时间选择器（定版）
+   * 左月历 + 右 HH:mm:ss；面板挂 body + fixed 定位（适配弹窗 transform）
+   * 值格式：YYYY-MM-DD HH:mm:ss
+   *
+   * DOM：.datetime-trigger-wrap > .select-trigger + .select-clear + .datetime-panel
+   *      .datetime-panel__main > .date-cal + .time-panel(.time-panel__display + .time-col[data-unit=h|m|s])
+   */
+  function bindDateTime(cfg) {
+    var wrap = $(cfg.wrapId);
+    var trigger = $(cfg.triggerId);
+    var label = $(cfg.labelId);
+    var panel = $(cfg.panelId);
+    var cal = $(cfg.calId);
+    var hourEl = $(cfg.hourId);
+    var minuteEl = $(cfg.minuteId);
+    var secondEl = $(cfg.secondId);
+    var displayEl = $(cfg.displayId);
+    var clearBtn = cfg.clearId ? $(cfg.clearId) : null;
+    if (!wrap || !trigger || !panel || !label || !cal) return null;
+
+    var placeholder = cfg.placeholder != null ? cfg.placeholder : '请选择日期时间';
+    var value = '';
+    var timeParts = { h: 0, m: 0, s: 0 };
+    var viewMonth = null;
+
+    panel.__datetimeHost = wrap;
+
+    function parseDateTime(str) {
+      if (!str) return null;
+      var m = String(str).trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}):(\d{2}))?$/);
+      if (!m) {
+        var d = new Date(String(str).replace(/-/g, '/'));
+        return isNaN(d.getTime()) ? null : d;
+      }
+      return new Date(
+        Number(m[1]), Number(m[2]) - 1, Number(m[3]),
+        Number(m[4] || 0), Number(m[5] || 0), Number(m[6] || 0)
+      );
+    }
+
+    function formatHMS(h, m, s) {
+      return pad2(h) + ':' + pad2(m) + ':' + pad2(s);
+    }
+
+    function composeValue(dateObj) {
+      if (!dateObj) return '';
+      return formatDateYMD(dateObj) + ' ' + formatHMS(timeParts.h, timeParts.m, timeParts.s);
+    }
+
+    function syncLabel() {
+      if (!value) {
+        label.innerHTML = '<span class="muted">' + escapeHtml(placeholder) + '</span>';
+        wrap.classList.remove('has-value');
+      } else {
+        label.textContent = value;
+        wrap.classList.add('has-value');
+      }
+      if (displayEl) displayEl.textContent = formatHMS(timeParts.h, timeParts.m, timeParts.s);
+    }
+
+    function setFromDate(dateObj, silent) {
+      if (!dateObj) {
+        value = '';
+      } else {
+        value = composeValue(dateObj);
+      }
+      syncLabel();
+      if (!silent && typeof cfg.onChange === 'function') cfg.onChange(value);
+    }
+
+    function setValue(str, silent) {
+      value = str ? String(str) : '';
+      var dt = parseDateTime(value);
+      if (dt) {
+        timeParts = { h: dt.getHours(), m: dt.getMinutes(), s: dt.getSeconds() };
+        viewMonth = new Date(dt.getFullYear(), dt.getMonth(), 1);
+      } else {
+        timeParts = { h: 0, m: 0, s: 0 };
+        viewMonth = null;
+        if (value && !dt) value = '';
+      }
+      syncLabel();
+      if (!silent && typeof cfg.onChange === 'function') cfg.onChange(value);
+    }
+
+    function renderCalendar() {
+      if (!viewMonth) {
+        var base = parseDateTime(value) || new Date();
+        viewMonth = new Date(base.getFullYear(), base.getMonth(), 1);
+      }
+      var year = viewMonth.getFullYear();
+      var month = viewMonth.getMonth();
+      var selected = parseDateTime(value);
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var first = new Date(year, month, 1);
+      var startOffset = (first.getDay() + 6) % 7;
+      var start = new Date(first);
+      start.setDate(first.getDate() - startOffset);
+      var weeks = ['一', '二', '三', '四', '五', '六', '日'];
+      var leftNav =
+        '<div class="date-cal__nav">' +
+          '<button class="date-cal__btn" type="button" data-nav="prev-year" aria-label="上一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg></button>' +
+          '<button class="date-cal__btn" type="button" data-nav="prev-month" aria-label="上一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg></button>' +
+        '</div>';
+      var rightNav =
+        '<div class="date-cal__nav">' +
+          '<button class="date-cal__btn" type="button" data-nav="next-month" aria-label="下一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></button>' +
+          '<button class="date-cal__btn" type="button" data-nav="next-year" aria-label="下一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg></button>' +
+        '</div>';
+      var html = '<div class="date-cal__header">' + leftNav +
+        '<div class="date-cal__title">' + year + ' 年 ' + (month + 1) + ' 月</div>' + rightNav +
+        '</div><div class="date-cal__week">' + weeks.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div><div class="date-cal__grid">';
+      var i;
+      for (i = 0; i < 42; i++) {
+        var day = new Date(start);
+        day.setDate(start.getDate() + i);
+        var out = day.getMonth() !== month;
+        var ymd = formatDateYMD(day);
+        var cls = 'date-cal__day';
+        if (out) cls += ' is-out';
+        if (selected && formatDateYMD(selected) === ymd) cls += ' is-range-start is-range-end';
+        var dayOnly = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+        if (dayOnly.getTime() === today.getTime()) cls += ' is-today';
+        html += '<button class="' + cls + '" type="button" data-day="' + ymd + '"><span class="date-cal__day-num">' + day.getDate() + '</span></button>';
+      }
+      html += '</div>';
+      cal.innerHTML = html;
+    }
+
+    function renderTimeCol(el, max, active) {
+      if (!el) return;
+      var html = '';
+      var i;
+      for (i = 0; i <= max; i++) {
+        html += '<button class="time-col__item' + (i === active ? ' is-active' : '') +
+          '" type="button" data-val="' + i + '">' + pad2(i) + '</button>';
+      }
+      el.innerHTML = html;
+      var activeEl = el.querySelector('.is-active');
+      if (activeEl) {
+        el.scrollTop = Math.max(0, activeEl.offsetTop - el.clientHeight / 2 + activeEl.clientHeight / 2);
+      }
+    }
+
+    function renderTimeCols() {
+      renderTimeCol(hourEl, 23, timeParts.h);
+      renderTimeCol(minuteEl, 59, timeParts.m);
+      renderTimeCol(secondEl, 59, timeParts.s);
+      if (displayEl) displayEl.textContent = formatHMS(timeParts.h, timeParts.m, timeParts.s);
+    }
+
+    function positionPanel() {
+      if (!panel.classList.contains('is-open')) return;
+      var gap = 4;
+      var pad = 8;
+      var rect = trigger.getBoundingClientRect();
+      panel.classList.add('is-fixed');
+      panel.style.left = rect.left + 'px';
+      panel.style.top = (rect.bottom + gap) + 'px';
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+
+      var pRect = panel.getBoundingClientRect();
+      var top = rect.bottom + gap;
+      var left = rect.left;
+      if (pRect.height > window.innerHeight - rect.bottom - pad && rect.top - pad > window.innerHeight - rect.bottom - pad) {
+        top = Math.max(pad, rect.top - pRect.height - gap);
+      } else if (top + pRect.height > window.innerHeight - pad) {
+        top = Math.max(pad, window.innerHeight - pRect.height - pad);
+      }
+      if (left + pRect.width > window.innerWidth - pad) {
+        left = Math.max(pad, window.innerWidth - pRect.width - pad);
+      }
+      panel.style.top = top + 'px';
+      panel.style.left = left + 'px';
+    }
+
+    function closePanel() {
+      panel.classList.remove('is-open', 'is-fixed');
+      panel.style.left = '';
+      panel.style.top = '';
+      panel.style.right = '';
+      panel.style.bottom = '';
+      trigger.classList.remove('is-open');
+      wrap.classList.remove('is-panel-open');
+      if (panel.parentElement !== wrap) wrap.appendChild(panel);
+    }
+
+    function openPanel() {
+      closePanels();
+      if (panel.parentElement !== document.body) {
+        document.body.appendChild(panel);
+      }
+      panel.classList.add('is-open');
+      trigger.classList.add('is-open');
+      wrap.classList.add('is-panel-open');
+      renderCalendar();
+      renderTimeCols();
+      positionPanel();
+      requestAnimationFrame(positionPanel);
+    }
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (panel.classList.contains('is-open')) closePanel();
+      else openPanel();
+    });
+    wrap.addEventListener('click', function (e) { e.stopPropagation(); });
+    panel.addEventListener('click', function (e) { e.stopPropagation(); });
+    window.addEventListener('resize', function () {
+      if (panel.classList.contains('is-open')) positionPanel();
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        value = '';
+        timeParts = { h: 0, m: 0, s: 0 };
+        viewMonth = null;
+        syncLabel();
+        closePanel();
+        if (typeof cfg.onChange === 'function') cfg.onChange('');
+      });
+    }
+
+    cal.addEventListener('click', function (e) {
+      var nav = e.target.closest('[data-nav]');
+      if (nav) {
+        var type = nav.getAttribute('data-nav');
+        if (!viewMonth) viewMonth = new Date();
+        if (type === 'prev-month') viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1);
+        if (type === 'next-month') viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1);
+        if (type === 'prev-year') viewMonth = new Date(viewMonth.getFullYear() - 1, viewMonth.getMonth(), 1);
+        if (type === 'next-year') viewMonth = new Date(viewMonth.getFullYear() + 1, viewMonth.getMonth(), 1);
+        renderCalendar();
+        return;
+      }
+      var dayBtn = e.target.closest('[data-day]');
+      if (!dayBtn) return;
+      var parts = dayBtn.getAttribute('data-day').split('-');
+      var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      setFromDate(d);
+      renderCalendar();
+    });
+
+    panel.querySelectorAll('.time-col').forEach(function (col) {
+      col.addEventListener('click', function (e) {
+        var item = e.target.closest('[data-val]');
+        if (!item) return;
+        var unit = col.getAttribute('data-unit');
+        var val = Number(item.getAttribute('data-val'));
+        if (unit === 'h') timeParts.h = val;
+        if (unit === 'm') timeParts.m = val;
+        if (unit === 's') timeParts.s = val;
+        var base = parseDateTime(value) || new Date();
+        setFromDate(base);
+        renderTimeCols();
+      });
+    });
+
+    if (typeof cfg.getValue === 'function') {
+      setValue(cfg.getValue(), true);
+    } else {
+      syncLabel();
+    }
+
+    return {
+      getValue: function () { return value; },
+      setValue: function (v) { setValue(v, true); },
+      open: openPanel,
+      close: closePanel,
+      syncLabel: syncLabel
+    };
+  }
+
+  /**
    * 表头多列排序
    * 升序 / 降序为独立按钮：点击选中，再点同向取消；点另一向则切换方向（保持优先级）
    * 多列同时选中时，按选中先后作为优先级（先选优先）
@@ -1135,6 +1441,7 @@
     bindSingleSelect: bindSingleSelect,
     bindMultiSelect: bindMultiSelect,
     bindDateRange: bindDateRange,
+    bindDateTime: bindDateTime,
     bindInputClearable: bindInputClearable,
     bindFormHelp: bindFormHelp,
     bindThSort: bindThSort,
