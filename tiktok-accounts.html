@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -6,1556 +6,13 @@
   <title>Tiktok账户 - 海外中台</title>
   <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      font-family: var(--font-family-base);
-      font-size: var(--font-size-body);
-      line-height: 22px;
-      color: #1D2129;
-      background: var(--color-bg-page);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    button { font-family: inherit; cursor: pointer; border: none; background: none; }
-    a { color: inherit; text-decoration: none; }
-    ul { list-style: none; }
-    img { display: block; }
-    input, select { font-family: inherit; font-size: 14px; color: #1D2129; }
-
-    .app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      min-width: 1100px;
-      overflow: hidden;
-    }
-
-    .header {
-      flex-shrink: 0;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      background: #1B2B4C;
-      color: #fff;
-      z-index: 100;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: var(--sidebar-width, 224px);
-      height: 100%;
-      padding-left: 16px;
-      flex-shrink: 0;
-    }
-
-    .logo { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
-    .brand-name { font-size: 18px; font-weight: 600; line-height: 26px; white-space: nowrap; }
-
-    .header-nav {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      padding: 0 16px;
-      gap: 16px;
-    }
-
-    .header-nav__item {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      height: 32px;
-      padding: 0 8px;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.65);
-      white-space: nowrap;
-    }
-
-    .header-nav__item:hover { color: #fff; }
-    .header-nav__item.is-active { color: #fff; font-weight: 500; }
-    .header-nav__item.is-active::after {
-      content: '';
-      position: absolute;
-      left: 8px; right: 8px; bottom: 0;
-      height: 2px;
-      background: var(--color-primary);
-      border-radius: 1px 1px 0 0;
-    }
-
-    .header-right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding-right: 16px;
-    }
-
-    .header-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      color: rgba(255, 255, 255, 0.75);
-      border-radius: 4px;
-    }
-
-    .header-icon:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
-    .header-icon svg { width: 18px; height: 18px; }
-
-    .user-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 32px;
-      padding: 0 8px 0 4px;
-      color: #fff;
-      border-radius: 16px;
-    }
-
-    .user-chip:hover { background: rgba(255, 255, 255, 0.08); }
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--color-fill-4, #C9CDD4);
-      display: block;
-      flex-shrink: 0;
-      object-fit: cover;
-      overflow: hidden;
-    }
-    .user-name { font-size: 14px; }
-    .user-chip .chevron { width: 12px; height: 12px; opacity: 0.75; }
-
-    .body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
-
-    .sidebar {
-      flex-shrink: 0;
-      width: var(--sidebar-width, 224px);
-      background: var(--color-bg-container, #fff);
-      border-right: 1px solid var(--color-border-2, #E5E6EB);
-      display: flex;
-      flex-direction: column;
-      transition: width 0.2s ease;
-    }
-
-    .sidebar.is-collapsed { width: var(--sidebar-width-collapsed, 64px); }
-
-    .sidebar.is-collapsed .menu-group__title-text,
-    .sidebar.is-collapsed .menu-item__text,
-    .sidebar.is-collapsed .menu-group__arrow { display: none; }
-
-    .sidebar.is-collapsed .menu-item,
-    .sidebar.is-collapsed .menu-group__title {
-      justify-content: center;
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-    .sidebar.is-collapsed .menu-children { display: none !important; }
-
-    .sidebar-nav {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 4px 0;
-    }
-
-    .menu-group { margin: 0; }
-
-    .menu-group__title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      height: 44px;
-      margin: 0;
-      padding: 0 16px;
-      color: var(--color-text-1, #1D2129);
-      font-size: var(--font-size-body-2, 14px);
-      line-height: 22px;
-      box-sizing: border-box;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .menu-group__title:hover {
-      background: var(--color-bg-table-hover, #F5F7FA);
-    }
-
-    .menu-group__title .menu-icon,
-    .menu-group__title svg.menu-icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .menu-group__title-text {
-      flex: 1;
-      text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-
-    .menu-group__arrow {
-      width: 12px;
-      height: 12px;
-      flex-shrink: 0;
-      color: var(--color-text-1, #1D2129);
-      transition: transform 0.2s;
-    }
-
-    .menu-group.is-collapsed .menu-group__arrow { transform: rotate(-90deg); }
-    .menu-group.is-collapsed .menu-children { display: none; }
-    .menu-children { padding: 0; }
-
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      height: 44px;
-      margin: 0;
-      /* 对齐一级菜单文字起点：16(padding) + 16(icon) + 8(gap) = 40 */
-      padding: 0 16px 0 40px;
-      color: var(--color-text-1, #1D2129);
-      font-size: var(--font-size-body-2, 14px);
-      line-height: 22px;
-      box-sizing: border-box;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .menu-item .menu-icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      color: currentColor;
-    }
-
-    .menu-item:hover {
-      background: var(--color-bg-table-hover, #F5F7FA);
-    }
-
-    .menu-item.is-active {
-      background: var(--color-primary-bg, #E8F3FF);
-      color: var(--color-primary);
-      font-weight: 500;
-    }
-
-    .sidebar-footer {
-      flex-shrink: 0;
-      height: 48px;
-      border-top: 1px solid var(--color-border-2, #E5E6EB);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-    }
-
-    .sidebar-collapse-btn {
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--border-radius-medium, 4px);
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .sidebar-collapse-btn:hover {
-      background: var(--color-bg-table-hover, #F5F7FA);
-    }
-
-    .sidebar-collapse-btn svg { width: 18px; height: 18px; }
-
-    .main {
-      flex: 1;
-      min-width: 0;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .content-card {
-      flex: 1;
-      min-height: 0;
-      background: #fff;
-      border-radius: 4px;
-      box-shadow: var(--shadow-1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .filter-bar {
-      flex-shrink: 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 16px;
-      align-items: center;
-    }
-
-    .filter-item {
-      width: 200px;
-      position: relative;
-    }
-
-    .filter-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .input, .select-trigger {
-      width: 100%;
-      height: 32px;
-      padding: 0 12px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      background: #fff;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .input::placeholder { color: var(--color-text-4, #C9CDD4); }
-    .input:hover, .select-trigger:hover { border-color: var(--color-primary); }
-    .input:focus, .select-trigger:focus, .select-trigger.is-open {
-      border-color: var(--color-primary);
-      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
-    }
-
-    .select-trigger {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .select-trigger__text {
-      flex: 1;
-      min-width: 0;
-      display: inline-flex;
-      align-items: center;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: #1D2129;
-    }
-
-    .select-trigger__text .select-option-text {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .select-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
-    .select-trigger__arrow {
-      width: 12px; height: 12px; color: #86909C; flex-shrink: 0;
-      transition: transform 0.15s;
-    }
-    .select-trigger.is-open .select-trigger__arrow { transform: rotate(180deg); }
-
-    .single-panel {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      right: 0;
-      margin: 0;
-      background: #fff;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      z-index: 30;
-      display: none;
-      max-height: 240px;
-      overflow-y: auto;
-      padding: 4px 0;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
-    }
-
-    .single-panel.is-open { display: block; }
-
-    .single-panel::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    .single-panel::-webkit-scrollbar-button {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-
-    .single-panel::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .single-panel::-webkit-scrollbar-thumb {
-      background: rgba(201, 205, 212, 0.55);
-      border-radius: 6px;
-    }
-
-    .single-panel::-webkit-scrollbar-thumb:hover {
-      background: rgba(201, 205, 212, 0.85);
-    }
-
-    .single-panel::-webkit-scrollbar-corner {
-      background: transparent;
-    }
-
-    .single-option {
-      display: flex;
-      align-items: center;
-      height: 36px;
-      padding: 0 12px;
-      font-size: 14px;
-      color: #1D2129;
-      cursor: pointer;
-    }
-
-    .single-option:hover { background: #F5F7FA; }
-    .single-option.is-active { color: var(--color-primary); background: transparent; }
-
-    .multi-panel {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 480px;
-      margin: 4px 0 0;
-      /* 双栏固定高度：搜索 + 工具栏 + 6 行选项 */
-      height: calc(12px + 32px + 8px + 8px + 22px + 1px + 36px * 6);
-      background: #fff;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      z-index: 20;
-      display: none;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-
-    .multi-panel.is-open {
-      display: flex;
-      align-items: stretch;
-    }
-
-    .multi-panel__left,
-    .multi-panel__right {
-      width: 50%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .multi-panel__left { border-right: 1px solid #E5E6EB; }
-
-    .multi-panel__search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 12px 12px 8px;
-      height: 32px;
-      padding: 0 10px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      flex-shrink: 0;
-      box-sizing: border-box;
-    }
-
-    .multi-panel__search svg { width: 14px; height: 14px; color: #86909C; flex-shrink: 0; }
-    .multi-panel__search input {
-      flex: 1;
-      border: none;
-      outline: none;
-      height: 100%;
-      background: transparent;
-    }
-    .multi-panel__search input::placeholder { color: var(--color-text-4, #C9CDD4); }
-
-    .multi-panel__toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 0 12px 8px;
-      font-size: 13px;
-      line-height: 22px;
-      color: #4E5969;
-      flex-shrink: 0;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .multi-panel__toolbar--right {
-      justify-content: space-between;
-      height: 40px;
-      padding: 0 12px;
-      box-sizing: border-box;
-      background: #F7F8FA;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .multi-panel__link {
-      color: var(--color-primary);
-      font-size: 13px;
-    }
-
-    .multi-panel__list {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
-    }
-
-    .multi-panel__list::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    .multi-panel__list::-webkit-scrollbar-button {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-
-    .multi-panel__list::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .multi-panel__list::-webkit-scrollbar-thumb {
-      background: rgba(201, 205, 212, 0.55);
-      border-radius: 6px;
-    }
-
-    .multi-panel__list::-webkit-scrollbar-thumb:hover {
-      background: rgba(201, 205, 212, 0.85);
-    }
-
-    .multi-panel__list::-webkit-scrollbar-corner {
-      background: transparent;
-    }
-
-    .multi-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      height: 36px;
-      padding: 0 12px;
-      text-align: left;
-      font-size: 14px;
-      color: #1D2129;
-    }
-
-    .multi-option:hover { background: #F5F7FA; }
-    .multi-option.is-active { color: var(--color-primary); background: transparent; }
-    .multi-option.is-active:hover { background: #F5F7FA; }
-
-    .multi-option input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      flex-shrink: 0;
-      box-sizing: border-box;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 2px;
-      background: #fff;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .multi-option:hover input[type="checkbox"],
-    .multi-option input[type="checkbox"]:hover {
-      border-color: var(--color-primary);
-    }
-
-    .multi-option input[type="checkbox"]:checked {
-      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
-      border-color: var(--color-primary);
-    }
-
-    .multi-selected {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      width: 100%;
-      height: 36px;
-      padding: 0 12px;
-      font-size: 14px;
-      color: #1D2129;
-    }
-
-    .multi-selected:hover { background: #F5F7FA; }
-    .multi-selected__name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .multi-selected__remove {
-      width: 16px;
-      height: 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #C9CDD4;
-      flex-shrink: 0;
-      border-radius: 2px;
-    }
-
-    .multi-selected__remove:hover { color: #86909C; background: #F2F3F5; }
-    .multi-selected__remove svg { width: 10px; height: 10px; }
-
-    .multi-panel__empty {
-      padding: 24px 12px;
-      text-align: center;
-      color: #86909C;
-      font-size: 13px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      height: 32px;
-      padding: 0 16px;
-      font-size: 14px;
-      border-radius: 4px;
-      white-space: nowrap;
-      user-select: none;
-    }
-
-    .btn:active { opacity: 0.85; }
-    .btn--primary { background: var(--color-primary); color: #fff; }
-    .btn--primary:hover { background: var(--color-primary-hover); }
-    .btn--success { background: var(--color-success); color: var(--color-text-inverse, #fff); }
-    .btn--success:hover { background: var(--color-success-hover); }
-    .btn--default {
-      background: #fff;
-      color: #1D2129;
-      border: 1px solid #E5E6EB;
-    }
-    .btn--default:hover { color: var(--color-primary); border-color: var(--color-primary); }
-    .btn:disabled {
-      color: #C9CDD4;
-      border-color: #E5E6EB;
-      background: #F7F8FA;
-      cursor: not-allowed;
-    }
-
-    .btn--dropdown {
-      gap: 4px;
-      padding-right: 12px;
-    }
-
-    .btn__arrow {
-      width: 12px;
-      height: 12px;
-      flex-shrink: 0;
-      color: currentColor;
-      transition: transform 0.15s;
-    }
-
-    .btn--dropdown.is-open .btn__arrow { transform: rotate(180deg); }
-
-    .batch-wrap {
-      position: relative;
-    }
-
-    .batch-menu {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      min-width: 100%;
-      padding: 4px 0;
-      background: var(--color-bg-container, #fff);
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: var(--border-radius-medium, 4px);
-      box-shadow: var(--shadow-2);
-      z-index: 40;
-      display: none;
-    }
-
-    .batch-menu.is-open { display: block; }
-
-    .batch-menu__item {
-      display: block;
-      width: 100%;
-      height: 36px;
-      padding: 0 12px;
-      text-align: left;
-      font-size: 14px;
-      line-height: 36px;
-      color: var(--color-text-1, #1D2129);
-      white-space: nowrap;
-      background: transparent;
-    }
-
-    .batch-menu__item:hover {
-      background: var(--color-gray-hover, #F5F7FA);
-      color: var(--color-primary);
-    }
-
-    .table-shell {
-      flex: 1;
-      min-height: 0;
-      margin: 0 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .table-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
-      position: relative;
-      scrollbar-gutter: stable;
-    }
-
-    .data-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      table-layout: fixed;
-    }
-
-    .data-table th,
-    .data-table td {
-      height: 48px;
-      padding: 0 12px;
-      font-size: 14px;
-      line-height: 22px;
-      text-align: left;
-      border-right: 1px solid #E5E6EB;
-      border-bottom: 1px solid #E5E6EB;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      box-sizing: border-box;
-    }
-
-    .data-table th:first-child,
-    .data-table td:first-child { border-left: 1px solid #E5E6EB; }
-
-    .data-table thead th { border-top: 1px solid #E5E6EB; }
-
-    .data-table th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: #F7F8FA;
-      font-weight: 600;
-      color: #1D2129;
-    }
-
-    .data-table tbody tr:hover td { background: #F5F7FA; }
-
-    .col-check { width: 4%; text-align: center; padding-left: 12px; padding-right: 12px; }
-    .col-name,
-    .col-id,
-    .col-product,
-    .col-appid { width: 18%; }
-    .col-optimizer { width: 9%; }
-    .col-status { width: 7%; }
-    .col-action {
-      width: 8%;
-      position: sticky;
-      right: 0;
-      z-index: 1;
-      background: #fff;
-      padding-right: 24px;
-      box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
-    }
-    th.col-action { z-index: 3; background: #F7F8FA; }
-    .data-table tbody tr:hover td.col-action { background: #F5F7FA; }
-
-    .cell-check {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-    }
-
-    .cell-check input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      flex-shrink: 0;
-      box-sizing: border-box;
-      border: 1px solid var(--color-border-3, #C9CDD4);
-      border-radius: 2px;
-      background: #fff;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .cell-check input[type="checkbox"]:hover {
-      border-color: var(--color-primary);
-    }
-
-    .cell-check input[type="checkbox"]:checked {
-      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
-      border-color: var(--color-primary);
-    }
-
-    .cell-check input[type="checkbox"]:indeterminate {
-      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
-      border-color: var(--color-primary);
-    }
-
-    .cell-id {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      max-width: 100%;
-    }
-
-    .cell-id__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-
-    .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-      border-radius: 2px;
-      color: #86909C;
-    }
-
-    .copy-btn:hover { color: var(--color-primary); background: var(--color-primary-bg); }
-    .copy-btn svg { width: 14px; height: 14px; }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 40px;
-      height: 28px;
-      padding: 0 8px;
-      border-radius: 2px;
-      font-size: 12px;
-      line-height: 20px;
-      white-space: nowrap;
-    }
-
-    .tag--enabled { background: var(--color-success-1, #E8FFEA); color: var(--color-success-6, #00B42A); }
-    .tag--disabled { background: var(--color-danger-1, #FFECE8); color: var(--color-danger-6, #F53F3F); }
-
-    .link { color: var(--color-primary); font-size: 14px; }
-    .link:hover { opacity: 0.85; }
-
-    .empty-tip {
-      position: absolute;
-      inset: 48px 0 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #86909C;
-      font-size: 14px;
-      pointer-events: none;
-    }
-
-    .empty-tip[hidden] { display: none; }
-
-    .pagination {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px 16px 16px;
-      font-size: var(--font-size-body-2, 14px);
-      color: var(--color-text-2, #4E5969);
-    }
-
-    .pagination__total {
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .pager { display: inline-flex; align-items: center; gap: 4px; }
-
-    .pager__btn {
-      min-width: 32px;
-      height: 32px;
-      padding: 0 8px;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: var(--border-radius-medium, 4px);
-      background: var(--color-bg-container, #fff);
-      color: var(--color-text-1, #1D2129);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pager__btn:hover:not(:disabled):not(.is-active) {
-      color: var(--color-primary);
-      border-color: var(--color-primary);
-    }
-
-    .pager__btn.is-active {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-text-inverse, #fff);
-    }
-
-    .pager__btn:disabled { color: var(--color-text-4, #C9CDD4); cursor: not-allowed; }
-    .pager__btn svg { width: 12px; height: 12px; }
-
-    .page-size-wrap {
-      position: relative;
-      width: 112px;
-      flex-shrink: 0;
-    }
-
-    .page-size-wrap .select-trigger {
-      width: 100%;
-    }
-
-    .page-size-wrap .single-panel {
-      min-width: 100%;
-      right: 0;
-      left: auto;
-    }
-
-    .page-size-wrap .single-panel.is-dropup {
-      top: auto;
-      bottom: calc(100% + 4px);
-    }
-
-    .page-jump {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .page-jump input {
-      width: 48px;
-      height: 32px;
-      padding: 0 8px;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: var(--border-radius-medium, 4px);
-      text-align: center;
-      color: var(--color-text-1, #1D2129);
-      outline: none;
-    }
-
-    .page-msg {
-      position: fixed;
-      top: 72px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-8px);
-      z-index: 1200;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 4px;
-      background: #fff;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-      font-size: 14px;
-      color: #1D2129;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
-      max-width: min(560px, calc(100vw - 32px));
-    }
-
-    .page-msg.is-show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .page-msg--success { border: 1px solid #AFF0B5; }
-    .page-msg--error { border: 1px solid #FDCDC5; }
-    .page-msg__icon { width: 16px; height: 16px; flex-shrink: 0; }
-    .page-msg--success .page-msg__icon { color: #00B42A; }
-    .page-msg--error .page-msg__icon { color: #F53F3F; }
-
-    /* Modal · 导入 */
-    .modal-mask {
-      position: fixed;
-      inset: 0;
-      z-index: 1050;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(29, 33, 41, 0.6);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s, visibility 0.2s;
-    }
-
-    .modal-mask.is-open {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal {
-      width: 800px;
-      max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 48px);
-      display: flex;
-      flex-direction: column;
-      background: var(--color-bg-container, #fff);
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      transform: translateY(8px);
-      transition: transform 0.2s;
-      overflow: hidden;
-    }
-
-    .modal-mask.is-open .modal { transform: translateY(0); }
-
-    .modal__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 48px;
-      padding: 0 24px;
-      flex-shrink: 0;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .modal__title {
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 24px;
-      color: #1D2129;
-    }
-
-    .modal__close {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      color: var(--color-text-3, #86909C);
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .modal__close:hover {
-      background: var(--color-fill-2, #F2F3F5);
-      color: #1D2129;
-    }
-
-    .modal__close svg { width: 14px; height: 14px; }
-
-    .modal__body {
-      padding: 24px 24px 8px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      flex: 1;
-    }
-
-    .modal__footer {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
-      padding: 16px 24px;
-      flex-shrink: 0;
-      border-top: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .modal--form {
-      overflow: visible;
-    }
-
-    /* 与菜单管理「添加菜单」一致：body 底 8px + 末项 margin 20px */
-    .modal--form .modal__body {
-      padding: 24px 24px 8px;
-      overflow: visible;
-      display: block;
-      flex: none;
-    }
-
-    .form-item .select-trigger {
-      width: 100%;
-    }
-
-    .form-item {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 20px;
-    }
-
-    .form-item__label {
-      width: 120px;
-      flex-shrink: 0;
-      padding: 8px;
-      font-size: 14px;
-      line-height: 22px;
-      color: #1D2129;
-      text-align: left;
-      box-sizing: border-box;
-    }
-
-    .form-item__control {
-      position: relative;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .input:disabled,
-    .select-trigger:disabled,
-    .select-trigger.is-disabled {
-      background: var(--color-fill-1, #F7F8FA);
-      color: var(--color-text-4, #C9CDD4);
-      cursor: not-allowed;
-      border-color: var(--color-border-2, #E5E6EB);
-    }
-
-    .input:disabled:hover,
-    .select-trigger:disabled:hover,
-    .select-trigger.is-disabled:hover {
-      border-color: var(--color-border-2, #E5E6EB);
-    }
-
-    .select-trigger:disabled .select-trigger__text,
-    .select-trigger.is-disabled .select-trigger__text,
-    .select-trigger:disabled .select-trigger__text .muted,
-    .select-trigger.is-disabled .select-trigger__text .muted,
-    .select-trigger:disabled .select-trigger__arrow,
-    .select-trigger.is-disabled .select-trigger__arrow {
-      color: var(--color-text-4, #C9CDD4);
-    }
-
-    .select-clear {
-      position: absolute;
-      right: 12px;
-      top: 16px;
-      transform: translateY(-50%);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      color: #fff;
-      background: var(--color-text-4, #C9CDD4);
-      z-index: 2;
-    }
-
-    .select-clear:hover { background: var(--color-text-3, #86909C); }
-
-    .select-clear svg {
-      width: 10px;
-      height: 10px;
-    }
-
-    /* 有值悬停：清除与箭头同位置切换 */
-    .form-item__control.has-value:hover .select-clear,
-    .form-item__control.has-value:focus-within .select-clear {
-      display: inline-flex;
-    }
-
-    .form-item__control.has-value:hover .select-trigger__arrow,
-    .form-item__control.has-value:focus-within .select-trigger__arrow {
-      visibility: hidden;
-    }
-
-    .select-option-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      margin-right: 8px;
-    }
-
-    .select-option-icon img {
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
-      display: block;
-    }
-
-    .seg {
-      display: inline-flex;
-      flex-wrap: wrap;
-      background: transparent;
-    }
-
-    .seg__item {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 80px;
-      height: 32px;
-      padding: 0;
-      font-size: 14px;
-      line-height: 22px;
-      color: #1D2129;
-      background: #fff;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      margin-left: -1px;
-      transition: background 0.15s, color 0.15s, border-color 0.15s, z-index 0s;
-      white-space: nowrap;
-      box-sizing: border-box;
-    }
-
-    .seg__item:first-child {
-      margin-left: 0;
-      border-radius: 4px 0 0 4px;
-    }
-
-    .seg__item:last-child {
-      border-radius: 0 4px 4px 0;
-    }
-
-    .seg__item:hover:not(.is-active) {
-      color: var(--color-primary);
-      z-index: 1;
-    }
-
-    .seg__item.is-active {
-      z-index: 2;
-      background: var(--color-primary-1, #E8F3FF);
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
-
-    .single-panel--search {
-      max-height: 280px;
-      padding: 0;
-      overflow: hidden;
-      display: none;
-      flex-direction: column;
-    }
-
-    .single-panel--search.is-open { display: flex; }
-
-    .single-panel__search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      height: 32px;
-      margin: 8px 12px;
-      padding: 0 10px;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 4px;
-      flex-shrink: 0;
-    }
-
-    .single-panel__search svg {
-      width: 14px;
-      height: 14px;
-      color: #86909C;
-      flex-shrink: 0;
-    }
-
-    .single-panel__search input {
-      flex: 1;
-      min-width: 0;
-      border: none;
-      outline: none;
-      height: 100%;
-      background: transparent;
-      font-size: 14px;
-      color: #1D2129;
-    }
-
-    .single-panel__search input::placeholder { color: var(--color-text-4, #C9CDD4); }
-
-    .single-panel__list {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 4px 0;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
-    }
-
-    .single-panel__list::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    .single-panel__list::-webkit-scrollbar-button {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-
-    .single-panel__list::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .single-panel__list::-webkit-scrollbar-thumb {
-      background: rgba(201, 205, 212, 0.55);
-      border-radius: 6px;
-    }
-
-    .single-panel__list::-webkit-scrollbar-thumb:hover {
-      background: rgba(201, 205, 212, 0.85);
-    }
-
-    .single-panel__list::-webkit-scrollbar-corner {
-      background: transparent;
-    }
-
-    .single-panel__empty {
-      padding: 12px;
-      font-size: 14px;
-      color: var(--color-text-3, #86909C);
-      text-align: center;
-    }
-
-    .import-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 16px;
-      flex-shrink: 0;
-    }
-
-    .import-actions .link {
-      font-size: 14px;
-      color: var(--color-primary);
-    }
-
-    .import-alert {
-      display: none;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding: 10px 12px;
-      border-radius: 4px;
-      background: #FFECE8;
-      border: 1px solid #FDCDC5;
-      color: #F53F3F;
-      font-size: 13px;
-      line-height: 20px;
-      flex-shrink: 0;
-    }
-
-    .import-alert.is-show { display: flex; }
-    .import-alert__icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .import-table-shell {
-      flex: 1;
-      min-height: 280px;
-      max-height: 360px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-      background: #fff;
-    }
-
-    .import-table-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
-    }
-
-    .import-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      table-layout: fixed;
-    }
-
-    .import-table th,
-    .import-table td {
-      height: 44px;
-      padding: 0 12px;
-      font-size: 14px;
-      line-height: 22px;
-      text-align: left;
-      border-right: 1px solid #E5E6EB;
-      border-bottom: 1px solid #E5E6EB;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      box-sizing: border-box;
-    }
-
-    .import-table th:first-child,
-    .import-table td:first-child {
-      border-left: 1px solid #E5E6EB;
-    }
-
-    .import-table thead th {
-      border-top: 1px solid #E5E6EB;
-    }
-
-    .import-table th {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: #F7F8FA;
-      font-weight: 600;
-    }
-
-    .import-table tbody tr:hover td { background: #F5F7FA; }
-
-    .import-table .col-error { width: 28%; white-space: normal; color: #1D2129; }
-
-    .import-empty {
-      position: absolute;
-      inset: 44px 0 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #C9CDD4;
-      font-size: 14px;
-      pointer-events: none;
-    }
-
-    .import-empty[hidden] { display: none; }
-
-    body.modal-open { overflow: hidden; }
-  </style>
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="tiktok-accounts.css" />
   <link rel="stylesheet" href="col-resize.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="header">
-      <div class="header-left">
-        <img class="logo" src="assets/logo.png" width="32" height="32" alt="海外中台" />
-        <span class="brand-name">海外中台</span>
-      </div>
-      <nav class="header-nav" aria-label="顶部导航">
-        <a href="#" class="header-nav__item">首页</a>
-        <a href="#" class="header-nav__item">看板</a>
-        <a href="platform-config.html" class="header-nav__item is-active">产品</a>
-        <a href="feedback-tickets.html" class="header-nav__item">工具</a>
-        <a href="menu-management.html" class="header-nav__item">管理</a>
-      </nav>
-      <div class="header-right">
-        <button class="header-icon" type="button" title="下载" aria-label="下载">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/>
-          </svg>
-        </button>
-        <button class="header-icon" type="button" title="消息" aria-label="消息">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-        </button>
-        <a class="header-icon" href="https://m0v1x0i131y.feishu.cn/wiki/P7WcwmPrdigKg6keQbycBtYgn3d" target="_blank" rel="noopener noreferrer" title="帮助中心" aria-label="帮助中心">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>
-          </svg>
-        </a>
-        <button class="user-chip" type="button" aria-label="用户菜单">
-          <img class="user-avatar" src="assets/avatar.jpg" width="32" height="32" alt="" />
-          <span class="user-name">小风</span>
-          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 4.5L6 7.5L9 4.5"/>
-          </svg>
-        </button>
-      </div>
-    </header>
-
-    <div class="body">
-      <aside class="sidebar" id="sidebar">
-        <nav class="sidebar-nav">
-          <div class="menu-group is-collapsed" data-group>
-            <button class="menu-group__title" type="button" data-group-toggle>
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-              </svg>
-              <span class="menu-group__title-text">平台管理</span>
-              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 4.5L6 7.5L9 4.5"/>
-              </svg>
-            </button>
-            <ul class="menu-children">
-              <li><a href="platform-config.html" class="menu-item"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg><span class="menu-item__text">平台配置</span></a></li>
-              <li><a href="plugin-config.html" class="menu-item"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg><span class="menu-item__text">插件配置</span></a></li>
-              <li><a href="sdk-startup.html" class="menu-item"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg><span class="menu-item__text">SDK启动配置</span></a></li>
-              <li><a href="developer-account.html" class="menu-item"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg><span class="menu-item__text">开发者账号</span></a></li>
-            </ul>
-          </div>
-          <div class="menu-group is-collapsed" data-group>
-            <button class="menu-group__title" type="button" data-group-toggle>
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 18h6"/>
-              </svg>
-              <span class="menu-group__title-text">产品管理</span>
-              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 4.5L6 7.5L9 4.5"/>
-              </svg>
-            </button>
-            <ul class="menu-children">
-              <li><a href="app-apps.html" class="menu-item"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg><span class="menu-item__text">APP应用</span></a></li>
-              <li><a href="json-files.html" class="menu-item"><svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg><span class="menu-item__text">JSON文件</span></a></li>
-            </ul>
-          </div>
-          <div class="menu-group" data-group>
-            <button class="menu-group__title" type="button" data-group-toggle>
-              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span class="menu-group__title-text">资产管理</span>
-              <svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 4.5L6 7.5L9 4.5"/>
-              </svg>
-            </button>
-            <ul class="menu-children">
-              <li>
-                <a href="tiktok-accounts.html" class="menu-item is-active">
-                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/>
-                  </svg>
-                  <span class="menu-item__text">Tiktok账户</span>
-                </a>
-              </li>
-              <li>
-                <a href="tiktok-grant.html" class="menu-item">
-                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3v18M7 8h7a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h8"/>
-                  </svg>
-                  <span class="menu-item__text">TikTok赠款</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-        <div class="sidebar-footer">
-          <button class="sidebar-collapse-btn" id="sidebarToggle" type="button" title="折叠菜单">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 6h16M4 12h10M4 18h16"/><path d="M15 9l-3 3 3 3"/>
-            </svg>
-          </button>
-        </div>
-      </aside>
-
-      <main class="main">
+  <div class="app" id="appShell">
+    <main class="main" data-main>
         <div class="content-card">
           <div class="filter-bar">
             <div class="filter-item">
@@ -1615,6 +72,7 @@
             </div>
           </div>
 
+          <div class="data-panel">
           <div class="table-shell">
             <div class="table-wrap">
               <table class="data-table" id="accountTable">
@@ -1647,9 +105,9 @@
           </div>
 
           <div class="pagination" id="pagination"></div>
+          </div>
         </div>
       </main>
-    </div>
   </div>
 
   <div class="page-msg page-msg--success" id="pageMsg" role="status" aria-live="polite"></div>
@@ -1877,8 +335,20 @@
     </div>
   </div>
 
+  <script src="product-common.js"></script>
+  <script src="product-sidebar.js"></script>
   <script>
     (function () {
+      ProductShell.mount('tiktok-accounts');
+
+      const UI = window.ProductUI;
+      const escapeHtml = UI.escapeHtml;
+      const showPageMsg = UI.showToast;
+      const copyText = UI.copyText;
+      const closePanels = UI.closePanels;
+      let optimizerMulti = null;
+      let batchMenuApi = null;
+
       const PRODUCTS = [
         'Color Water Sort Master',
         'Tile Match Journey',
@@ -1897,7 +367,7 @@
         return '用户' + String.fromCharCode(65 + i);
       });
       const ACCOUNT_PREFIXES = ['CWSM_TT_BV', 'TMJ_TT_US', 'WP_TT_EU', 'SM_TT_SEA', 'OM_TT_NA', 'PF_TT_JP'];
-      const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      const COPY_ICON = UI.COPY_ICON;
 
       let allRows = [];
       let filteredRows = [];
@@ -1907,7 +377,6 @@
       let selectedOptimizers = [];
       let filterStatus = '';
       let importRows = [];
-      let msgTimer = null;
       let editingId = null;
       let editOptimizer = '';
       let editProduct = '';
@@ -1916,14 +385,6 @@
       let batchOptimizer = '';
       let batchStatus = '启用';
       const FORM_MODAL_IDS = ['editModal', 'batchProductModal', 'batchOptimizerModal', 'batchStatusModal'];
-
-      function escapeHtml(str) {
-        return String(str == null ? '' : str)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
 
       function padId(n, len) {
         const base = String(7000000000000000000n + BigInt(n));
@@ -1948,113 +409,6 @@
         return rows;
       }
 
-      function showPageMsg(text, type) {
-        const el = document.getElementById('pageMsg');
-        const icon = type === 'error'
-          ? '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>'
-          : '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
-        el.className = 'page-msg page-msg--' + (type || 'success') + ' is-show';
-        el.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
-        clearTimeout(msgTimer);
-        msgTimer = setTimeout(function () {
-          el.classList.remove('is-show');
-        }, 2800);
-      }
-
-      function copyText(text) {
-        const done = function () { showPageMsg('复制成功'); };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(done).catch(function () {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            done();
-          });
-        } else {
-          const ta = document.createElement('textarea');
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          done();
-        }
-      }
-
-      function closePanels() {
-        document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open').forEach(function (p) {
-          p.classList.remove('is-open');
-          p.classList.remove('is-dropup');
-        });
-        document.querySelectorAll('.select-trigger.is-open').forEach(function (t) {
-          t.classList.remove('is-open');
-        });
-        closeBatchMenu();
-      }
-
-      function placePageSizePanel(trigger, panel) {
-        panel.classList.remove('is-dropup');
-        const rect = trigger.getBoundingClientRect();
-        const panelHeight = panel.scrollHeight || 160;
-        const spaceBelow = window.innerHeight - rect.bottom;
-        if (spaceBelow < panelHeight + 8) {
-          panel.classList.add('is-dropup');
-        }
-      }
-
-      function syncOptimizerLabel() {
-        const label = document.getElementById('optimizerLabel');
-        const count = document.getElementById('optimizerCount');
-        count.textContent = '已选择 ' + selectedOptimizers.length + ' 项';
-        if (!selectedOptimizers.length) {
-          label.innerHTML = '优化师：<span class="muted">请选择</span>';
-        } else {
-          label.innerHTML = '优化师：已选 ' + selectedOptimizers.length + ' 项';
-        }
-        renderOptimizerSelected();
-      }
-
-      function renderOptimizerSelected() {
-        const box = document.getElementById('optimizerSelected');
-        if (!selectedOptimizers.length) {
-          box.innerHTML = '<div class="multi-panel__empty">暂无选择</div>';
-          return;
-        }
-        box.innerHTML = selectedOptimizers.map(function (name) {
-          return '<div class="multi-selected">' +
-            '<span class="multi-selected__name">' + escapeHtml(name) + '</span>' +
-            '<button class="multi-selected__remove" type="button" data-remove="' + escapeHtml(name) + '" aria-label="移除">' +
-            '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l6 6M8 2L2 8"/></svg>' +
-            '</button></div>';
-        }).join('');
-      }
-
-      function renderOptimizerList(keyword) {
-        const list = document.getElementById('optimizerList');
-        const kw = (keyword || '').trim().toLowerCase();
-        const items = OPTIMIZERS.filter(function (name) {
-          return !kw || name.toLowerCase().indexOf(kw) !== -1;
-        });
-        list.innerHTML = items.map(function (name) {
-          const checked = selectedOptimizers.indexOf(name) !== -1;
-          return '<label class="multi-option' + (checked ? ' is-active' : '') + '">' +
-            '<input type="checkbox" value="' + escapeHtml(name) + '"' + (checked ? ' checked' : '') + ' />' +
-            '<span>' + escapeHtml(name) + '</span></label>';
-        }).join('') || '<div class="multi-panel__empty">无匹配项</div>';
-      }
-
-      function updateStatusLabel() {
-        const label = document.getElementById('statusLabel');
-        if (!filterStatus) {
-          label.innerHTML = '状态：<span class="muted">请选择</span>';
-        } else {
-          label.innerHTML = '状态：' + escapeHtml(filterStatus);
-        }
-      }
-
       function applyFilter() {
         const kw = document.getElementById('accountKeyword').value.trim().toLowerCase();
         filteredRows = allRows.filter(function (row) {
@@ -2076,31 +430,12 @@
       }
 
       function syncBatchBtn() {
-        document.getElementById('batchBtn').disabled = selectedIds.size === 0;
-        if (selectedIds.size === 0) closeBatchMenu();
+        if (batchMenuApi) batchMenuApi.setDisabled(selectedIds.size === 0);
+        else document.getElementById('batchBtn').disabled = selectedIds.size === 0;
       }
 
       function closeBatchMenu() {
-        document.getElementById('batchMenu').classList.remove('is-open');
-        document.getElementById('batchBtn').classList.remove('is-open');
-      }
-
-      function toggleBatchMenu() {
-        if (document.getElementById('batchBtn').disabled) return;
-        const menu = document.getElementById('batchMenu');
-        const open = !menu.classList.contains('is-open');
-        document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open').forEach(function (p) {
-          p.classList.remove('is-open');
-        });
-        document.querySelectorAll('.select-trigger.is-open').forEach(function (t) {
-          t.classList.remove('is-open');
-        });
-        if (open) {
-          menu.classList.add('is-open');
-          document.getElementById('batchBtn').classList.add('is-open');
-        } else {
-          closeBatchMenu();
-        }
+        if (batchMenuApi) batchMenuApi.close();
       }
 
       function renderTable() {
@@ -2120,7 +455,6 @@
         empty.hidden = true;
         body.innerHTML = pageRows.map(function (row) {
           const checked = selectedIds.has(row.id);
-          const tagClass = row.status === '启用' ? 'tag--enabled' : 'tag--disabled';
           return '<tr>' +
             '<td class="col-check"><span class="cell-check"><input type="checkbox" data-check="' + escapeHtml(row.id) + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
             '<td class="col-name" title="' + escapeHtml(row.accountName) + '">' + escapeHtml(row.accountName) + '</td>' +
@@ -2133,7 +467,7 @@
             '<td class="col-product" title="' + escapeHtml(row.productName) + '">' + escapeHtml(row.productName) + '</td>' +
             '<td class="col-appid" title="' + escapeHtml(row.appId) + '">' + escapeHtml(row.appId) + '</td>' +
             '<td class="col-optimizer">' + escapeHtml(row.optimizer) + '</td>' +
-            '<td class="col-status"><span class="tag ' + tagClass + '">' + escapeHtml(row.status) + '</span></td>' +
+            '<td class="col-status">' + UI.statusTag(row.status) + '</td>' +
             '<td class="col-action"><button class="link" type="button" data-edit="' + escapeHtml(row.id) + '">编辑</button></td>' +
             '</tr>';
         }).join('');
@@ -2146,48 +480,12 @@
       }
 
       function renderPagination() {
-        const total = filteredRows.length;
-        const totalPages = Math.max(1, Math.ceil(total / pageSize) || 1);
-        if (page > totalPages) page = totalPages;
-        const el = document.getElementById('pagination');
-        const pages = [];
-        const maxShow = 5;
-        let start = Math.max(1, page - Math.floor(maxShow / 2));
-        let end = Math.min(totalPages, start + maxShow - 1);
-        start = Math.max(1, end - maxShow + 1);
-        for (let i = start; i <= end; i++) pages.push(i);
-
-        el.innerHTML =
-          '<span class="pagination__total">共 ' + total + ' 条</span>' +
-          '<div class="page-size-wrap" id="pageSizeWrap">' +
-            '<button class="select-trigger" type="button" id="pageSizeTrigger">' +
-              '<span class="select-trigger__text" id="pageSizeLabel">' + pageSize + ' 条/页</span>' +
-              '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
-            '</button>' +
-            '<div class="single-panel" id="pageSizePanel">' +
-              [10, 20, 50, 100].map(function (n) {
-                return '<div class="single-option' + (n === pageSize ? ' is-active' : '') + '" data-size="' + n + '">' + n + ' 条/页</div>';
-              }).join('') +
-            '</div>' +
-          '</div>' +
-          '<div class="pager">' +
-            '<button class="pager__btn" type="button" data-page="1" ' + (page <= 1 ? 'disabled' : '') + ' aria-label="首页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg>' +
-            '</button>' +
-            '<button class="pager__btn" type="button" data-page="prev" ' + (page <= 1 ? 'disabled' : '') + ' aria-label="上一页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg>' +
-            '</button>' +
-            pages.map(function (p) {
-              return '<button class="pager__btn' + (p === page ? ' is-active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
-            }).join('') +
-            '<button class="pager__btn" type="button" data-page="next" ' + (page >= totalPages ? 'disabled' : '') + ' aria-label="下一页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg>' +
-            '</button>' +
-            '<button class="pager__btn" type="button" data-page="' + totalPages + '" ' + (page >= totalPages ? 'disabled' : '') + ' aria-label="尾页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg>' +
-            '</button>' +
-          '</div>' +
-          '<div class="page-jump">前往 <input type="text" id="pageJumpInput" value="' + page + '" /> 页</div>';
+        UI.renderPagination({
+          containerId: 'pagination',
+          total: filteredRows.length,
+          page: page,
+          pageSize: pageSize
+        });
       }
 
       /* —— 导入 —— */
@@ -2196,18 +494,11 @@
         hideImportAlert();
         renderImportTable();
         document.getElementById('importFile').value = '';
-        document.getElementById('importModal').classList.add('is-open');
-        document.getElementById('importModal').setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
-        requestAnimationFrame(function () {
-          if (window.ColResize) ColResize.initAll(document.getElementById('importModal'));
-        });
+        UI.openModal('importModal');
       }
 
       function closeImportModal() {
-        document.getElementById('importModal').classList.remove('is-open');
-        document.getElementById('importModal').setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('modal-open');
+        UI.closeModal('importModal');
       }
 
       function showImportAlert(text) {
@@ -2595,8 +886,7 @@
           }
           if (changed) updated++;
         });
-        renderOptimizerList(document.getElementById('optimizerSearch').value);
-        syncOptimizerLabel();
+        if (optimizerMulti) optimizerMulti.render();
 
         closeImportModal();
         applyFilter();
@@ -2631,13 +921,11 @@
       }
 
       function openFormModal(id) {
-        document.getElementById(id).classList.add('is-open');
-        document.getElementById(id).setAttribute('aria-hidden', 'false');
+        UI.openModal(id);
       }
 
       function closeFormModal(id) {
-        document.getElementById(id).classList.remove('is-open');
-        document.getElementById(id).setAttribute('aria-hidden', 'true');
+        UI.closeModal(id);
         closePanels();
       }
 
@@ -2663,14 +951,11 @@
       }
 
       function setSegValue(segId, value) {
-        document.querySelectorAll('#' + segId + ' .seg__item').forEach(function (el) {
-          el.classList.toggle('is-active', el.getAttribute('data-value') === value);
-        });
+        UI.setSegValue(segId, value);
       }
 
       function getSegValue(segId) {
-        const active = document.querySelector('#' + segId + ' .seg__item.is-active');
-        return active ? active.getAttribute('data-value') : '';
+        return UI.getSegValue(segId);
       }
 
       function renderSearchList(listId, options, selected, keyword, iconSrc) {
@@ -2865,113 +1150,68 @@
         }
       }
 
-      function bindSeg(segId, onChange) {
-        document.getElementById(segId).addEventListener('click', function (e) {
-          const item = e.target.closest('.seg__item');
-          if (!item) return;
-          const value = item.getAttribute('data-value') || '';
-          setSegValue(segId, value);
-          if (onChange) onChange(value);
-        });
-      }
-
       function bindEvents() {
-        document.getElementById('sidebarToggle').addEventListener('click', function () {
-          document.getElementById('sidebar').classList.toggle('is-collapsed');
+
+        optimizerMulti = UI.bindMultiSelect({
+          wrapId: 'optimizerWrap',
+          triggerId: 'optimizerTrigger',
+          panelId: 'optimizerPanel',
+          listId: 'optimizerList',
+          selectedId: 'optimizerSelected',
+          countId: 'optimizerCount',
+          labelId: 'optimizerLabel',
+          searchId: 'optimizerSearch',
+          selectAllId: 'optimizerSelectAll',
+          clearId: 'optimizerClear',
+          prefix: '优化师：',
+          getOptions: function () { return OPTIMIZERS; },
+          getSelected: function () { return selectedOptimizers; },
+          setSelected: function (v) { selectedOptimizers = v; }
         });
 
-        document.querySelectorAll('[data-group-toggle]').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            btn.closest('[data-group]').classList.toggle('is-collapsed');
-          });
+        UI.bindSingleSelect({
+          wrapId: 'statusWrap',
+          triggerId: 'statusTrigger',
+          panelId: 'statusPanel',
+          labelId: 'statusLabel',
+          prefix: '状态：',
+          getValue: function () { return filterStatus; },
+          onChange: function (v) { filterStatus = v || ''; }
         });
 
-        document.getElementById('optimizerTrigger').addEventListener('click', function (e) {
-          e.stopPropagation();
-          const panel = document.getElementById('optimizerPanel');
-          const open = !panel.classList.contains('is-open');
-          document.querySelectorAll('.single-panel.is-open').forEach(function (p) {
-            p.classList.remove('is-open');
-          });
-          document.querySelectorAll('#statusTrigger.is-open').forEach(function (t) {
-            t.classList.remove('is-open');
-          });
-          closeBatchMenu();
-          panel.classList.toggle('is-open', open);
-          document.getElementById('optimizerTrigger').classList.toggle('is-open', open);
-        });
-
-        document.getElementById('statusTrigger').addEventListener('click', function (e) {
-          e.stopPropagation();
-          const panel = document.getElementById('statusPanel');
-          const open = !panel.classList.contains('is-open');
-          document.getElementById('optimizerPanel').classList.remove('is-open');
-          document.getElementById('optimizerTrigger').classList.remove('is-open');
-          closeBatchMenu();
-          panel.classList.toggle('is-open', open);
-          document.getElementById('statusTrigger').classList.toggle('is-open', open);
-        });
-
-        document.getElementById('optimizerSearch').addEventListener('input', function (e) {
-          renderOptimizerList(e.target.value);
-        });
-
-        document.getElementById('optimizerList').addEventListener('change', function (e) {
-          const input = e.target.closest('input[type="checkbox"]');
-          if (!input) return;
-          const name = input.value;
-          if (input.checked) {
-            if (selectedOptimizers.indexOf(name) === -1) selectedOptimizers.push(name);
-          } else {
-            selectedOptimizers = selectedOptimizers.filter(function (n) { return n !== name; });
+        UI.bindPagination({
+          containerId: 'pagination',
+          getTotal: function () { return filteredRows.length; },
+          getPage: function () { return page; },
+          getPageSize: function () { return pageSize; },
+          onPageChange: function (p) {
+            page = p;
+            renderTable();
+            renderPagination();
+          },
+          onPageSizeChange: function (size) {
+            pageSize = size;
+            page = 1;
+            renderTable();
+            renderPagination();
           }
-          syncOptimizerLabel();
-          renderOptimizerList(document.getElementById('optimizerSearch').value);
         });
 
-        document.getElementById('optimizerSelected').addEventListener('click', function (e) {
-          const btn = e.target.closest('[data-remove]');
-          if (!btn) return;
-          const name = btn.getAttribute('data-remove');
-          selectedOptimizers = selectedOptimizers.filter(function (n) { return n !== name; });
-          syncOptimizerLabel();
-          renderOptimizerList(document.getElementById('optimizerSearch').value);
+        batchMenuApi = UI.bindBatchMenu({
+          wrapId: 'batchWrap',
+          btnId: 'batchBtn',
+          menuId: 'batchMenu',
+          onAction: function (action) {
+            if (!selectedIds.size) {
+              showPageMsg('请先选择账户', 'error');
+              return;
+            }
+            if (action === 'product') openBatchProductModal();
+            else if (action === 'optimizer') openBatchOptimizerModal();
+            else if (action === 'status') openBatchStatusModal();
+          }
         });
-
-        document.getElementById('optimizerSelectAll').addEventListener('click', function () {
-          const kw = (document.getElementById('optimizerSearch').value || '').trim().toLowerCase();
-          const visible = OPTIMIZERS.filter(function (name) {
-            return !kw || name.toLowerCase().indexOf(kw) !== -1;
-          });
-          visible.forEach(function (name) {
-            if (selectedOptimizers.indexOf(name) === -1) selectedOptimizers.push(name);
-          });
-          syncOptimizerLabel();
-          renderOptimizerList(document.getElementById('optimizerSearch').value);
-        });
-
-        document.getElementById('optimizerClear').addEventListener('click', function () {
-          selectedOptimizers = [];
-          syncOptimizerLabel();
-          renderOptimizerList(document.getElementById('optimizerSearch').value);
-        });
-
-        document.getElementById('optimizerWrap').addEventListener('click', function (e) {
-          e.stopPropagation();
-        });
-
-        document.getElementById('statusPanel').addEventListener('click', function (e) {
-          const opt = e.target.closest('.single-option');
-          if (!opt) return;
-          filterStatus = opt.getAttribute('data-value') || '';
-          document.querySelectorAll('#statusPanel .single-option').forEach(function (el) {
-            el.classList.toggle('is-active', el === opt);
-          });
-          updateStatusLabel();
-          closePanels();
-        });
-
-        document.addEventListener('click', closePanels);
+        syncBatchBtn();
 
         document.getElementById('searchBtn').addEventListener('click', applyFilter);
         document.getElementById('accountKeyword').addEventListener('keydown', function (e) {
@@ -2979,28 +1219,6 @@
         });
 
         document.getElementById('exportBtn').addEventListener('click', exportCsv);
-        document.getElementById('batchBtn').addEventListener('click', function (e) {
-          e.stopPropagation();
-          if (!selectedIds.size) return;
-          toggleBatchMenu();
-        });
-        document.getElementById('batchMenu').addEventListener('click', function (e) {
-          e.stopPropagation();
-          const item = e.target.closest('[data-batch]');
-          if (!item) return;
-          const action = item.getAttribute('data-batch');
-          closeBatchMenu();
-          if (!selectedIds.size) {
-            showPageMsg('请先选择账户', 'error');
-            return;
-          }
-          if (action === 'product') openBatchProductModal();
-          else if (action === 'optimizer') openBatchOptimizerModal();
-          else if (action === 'status') openBatchStatusModal();
-        });
-        document.getElementById('batchWrap').addEventListener('click', function (e) {
-          e.stopPropagation();
-        });
 
         bindSearchSelect({
           wrapId: 'editOptimizerWrap',
@@ -3052,8 +1270,8 @@
           getValue: function () { return batchOptimizer; },
           setValue: function (v) { batchOptimizer = v; }
         });
-        bindSeg('editStatusSeg', function (v) { editStatus = v; });
-        bindSeg('batchStatusSeg', function (v) { batchStatus = v; });
+        UI.bindSeg('editStatusSeg', function (v) { editStatus = v; });
+        UI.bindSeg('batchStatusSeg', function (v) { batchStatus = v; });
 
         document.getElementById('editClose').addEventListener('click', function () { closeFormModal('editModal'); editingId = null; });
         document.getElementById('editCancel').addEventListener('click', function () { closeFormModal('editModal'); editingId = null; });
@@ -3082,10 +1300,6 @@
         document.getElementById('importFile').addEventListener('change', function (e) {
           const file = e.target.files && e.target.files[0];
           handleImportFile(file);
-        });
-
-        document.getElementById('importModal').addEventListener('click', function (e) {
-          if (e.target === this) closeImportModal();
         });
 
         document.getElementById('checkAll').addEventListener('change', function () {
@@ -3120,63 +1334,6 @@
           if (edit) openEditModal(edit.getAttribute('data-edit'));
         });
 
-        document.getElementById('pagination').addEventListener('click', function (e) {
-          const sizeOpt = e.target.closest('[data-size]');
-          if (sizeOpt) {
-            pageSize = Number(sizeOpt.getAttribute('data-size')) || 50;
-            page = 1;
-            renderTable();
-            renderPagination();
-            return;
-          }
-
-          const sizeTrigger = e.target.closest('#pageSizeTrigger');
-          if (sizeTrigger) {
-            e.stopPropagation();
-            const panel = document.getElementById('pageSizePanel');
-            const open = !panel.classList.contains('is-open');
-            document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open').forEach(function (p) {
-              p.classList.remove('is-open');
-              p.classList.remove('is-dropup');
-            });
-            document.querySelectorAll('.select-trigger.is-open').forEach(function (t) {
-              t.classList.remove('is-open');
-            });
-            closeBatchMenu();
-            if (open) {
-              panel.classList.add('is-open');
-              sizeTrigger.classList.add('is-open');
-              placePageSizePanel(sizeTrigger, panel);
-            }
-            return;
-          }
-
-          if (e.target.closest('#pageSizeWrap')) {
-            e.stopPropagation();
-            return;
-          }
-
-          const btn = e.target.closest('[data-page]');
-          if (!btn || btn.disabled) return;
-          const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize) || 1);
-          const val = btn.getAttribute('data-page');
-          if (val === 'prev') page = Math.max(1, page - 1);
-          else if (val === 'next') page = Math.min(totalPages, page + 1);
-          else page = Number(val) || 1;
-          renderTable();
-          renderPagination();
-        });
-
-        document.getElementById('pagination').addEventListener('keydown', function (e) {
-          if (e.target.id !== 'pageJumpInput' || e.key !== 'Enter') return;
-          const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize) || 1);
-          let n = parseInt(e.target.value, 10);
-          if (!Number.isFinite(n)) n = 1;
-          page = Math.min(totalPages, Math.max(1, n));
-          renderTable();
-          renderPagination();
-        });
-
         document.addEventListener('keydown', function (e) {
           if (e.key !== 'Escape') return;
           if (document.getElementById('importModal').classList.contains('is-open')) {
@@ -3196,9 +1353,6 @@
 
       allRows = buildData();
       filteredRows = allRows.slice();
-      syncOptimizerLabel();
-      renderOptimizerList('');
-      updateStatusLabel();
       renderTable();
       renderPagination();
       bindEvents();

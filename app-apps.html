@@ -14,6 +14,169 @@
       align-items: center;
       max-width: 100%;
     }
+    .product-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .product-cell__icon {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      border-radius: 4px;
+      background: var(--color-fill-4, #C9CDD4);
+    }
+    .product-cell__name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .col-name { width: 180px; }
+    .col-platform { width: 100px; }
+    .col-id { width: 140px; }
+    .col-package { width: 140px; }
+    .col-agg { width: 100px; }
+    .col-group { width: 100px; }
+    .col-type { width: 100px; }
+    .col-owner { width: 100px; }
+    .col-config { width: 112px; }
+    .col-status { width: 100px; }
+    .col-time { width: 160px; }
+    .col-action { width: 180px; }
+
+    /* 冻结：复选框 + 产品名称 */
+    .data-table .col-check.is-freeze { left: 0; }
+    .data-table .col-name.is-freeze { left: 64px; }
+    .data-table th.col-check.is-freeze { z-index: 5; }
+    .data-table th.col-name.is-freeze { z-index: 5; }
+
+    .product-cell__icon--img {
+      object-fit: cover;
+      background: transparent;
+    }
+
+    .form-item__label-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .store-link-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .store-link-row .input-clearable { flex: 1; min-width: 0; }
+    .store-link-row .btn { flex-shrink: 0; }
+
+    .date-trigger-wrap { position: relative; width: 100%; }
+    .date-trigger-wrap .select-trigger { width: 100%; }
+    .date-trigger-wrap .select-trigger__arrow { display: none; }
+    .date-trigger__icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      color: var(--color-text-3, #86909C);
+    }
+    /* 单日面板：对齐日期范围选择器单栏月历尺寸与内边距 */
+    .date-panel--single {
+      width: auto;
+      min-width: 0;
+    }
+    .date-panel--single .date-panel__calendars {
+      padding: 16px 8px 20px;
+    }
+    .date-panel--single .date-cal {
+      width: 308px;
+      padding: 0 20px;
+    }
+    #formModal.modal { overflow: visible; }
+    #formModal .modal__body {
+      overflow: auto;
+      position: relative;
+    }
+    /* 下拉展开时抬高当前行，避免被后续表单项盖住导致要点多次 */
+    #formModal .form-item { position: relative; z-index: 1; }
+    #formModal .form-item:has(.single-panel.is-open),
+    #formModal .form-item:has(.date-panel.is-open),
+    #formModal .form-item:has(.select-trigger.is-open) {
+      z-index: 30;
+    }
+    .date-trigger-wrap.has-value:hover .select-clear,
+    .date-trigger-wrap.has-value:focus-within .select-clear {
+      display: inline-flex;
+    }
+    .date-trigger-wrap.has-value:hover .date-trigger__icon,
+    .date-trigger-wrap.has-value:focus-within .date-trigger__icon {
+      visibility: hidden;
+    }
+
+    .upload-box {
+      width: 80px;
+      height: 80px;
+      border: 1px dashed var(--color-border-2, #E5E6EB);
+      border-radius: var(--border-radius-medium, 4px);
+      background: var(--color-fill-1, #F7F8FA);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--color-text-3, #86909C);
+      font-size: 12px;
+      line-height: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .upload-box:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .upload-box.has-file {
+      border-style: solid;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+    .upload-box__plus { width: 20px; height: 20px; flex-shrink: 0; }
+    .upload-box__text { line-height: 20px; }
+    .upload-box__img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+      background: transparent;
+    }
+    .upload-box.has-file .upload-box__plus,
+    .upload-box.has-file .upload-box__text { display: none; }
+    .upload-box.has-file .upload-box__img { display: block; }
+    .upload-box__remove {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .upload-box.has-file:hover .upload-box__remove { display: inline-flex; }
+    .upload-box__remove svg { width: 10px; height: 10px; }
+    .upload-tip {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--color-text-3, #86909C);
+    }
+
     .array-field { margin-bottom: 20px; }
     .array-field__title {
       font-size: 14px;
@@ -38,17 +201,237 @@
     }
     .array-row .form-item { margin-bottom: 12px; }
     .array-row .form-item:last-child { margin-bottom: 0; }
-    .plugin-section {
-      margin-bottom: 24px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+    /* 产品配置弹窗 · 仅本弹窗 1200 */
+    .modal--config {
+      width: 1200px;
+      max-width: calc(100vw - 32px);
+      height: calc(100vh - 80px);
+      max-height: calc(100vh - 80px);
     }
-    .plugin-section:last-child { border-bottom: none; }
-    .plugin-section__title {
+    .modal--config .modal__body {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+    .config-layout {
+      display: flex;
+      width: 100%;
+      min-height: 0;
+      flex: 1;
+    }
+    .config-nav {
+      width: 180px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--color-border-2, #E5E6EB);
+      padding: 16px 0;
+      overflow-y: auto;
+      background: #fff;
+    }
+    .config-nav__item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 44px;
+      padding: 0 20px;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1, #1D2129);
+      text-align: left;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    .config-nav__item:hover { background: var(--color-gray-hover, #F5F7FA); }
+    .config-nav__item.is-active {
+      background: var(--color-primary-1, #E8F3FF);
+      color: var(--color-primary, #165DFF);
+      font-weight: 500;
+    }
+    .config-main {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      padding: 24px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201, 205, 212, 0.2) transparent;
+    }
+    .config-main::-webkit-scrollbar { width: 4px; }
+    .config-main::-webkit-scrollbar-thumb {
+      background: rgba(201, 205, 212, 0.18);
+      border-radius: 4px;
+    }
+    .config-block { display: none; }
+    .config-block.is-active { display: block; }
+    .config-section { margin-bottom: 24px; }
+    .config-section:last-child { margin-bottom: 0; }
+    .config-section__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 40px;
+      padding: 0 16px;
+      margin-bottom: 16px;
+      background: var(--color-fill-1, #F7F8FA);
+      border-radius: 4px;
+    }
+    .config-section__title {
       font-size: 14px;
       font-weight: 600;
       color: var(--color-text-1, #1D2129);
-      margin-bottom: 16px;
+    }
+    .config-section__link {
+      font-size: 14px;
+      color: var(--color-primary, #165DFF);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    .config-section__link:hover { color: var(--color-primary-5, #4080FF); }
+    .config-alert {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      margin-bottom: 12px;
+      background: var(--color-fill-1, #F7F8FA);
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-2, #4E5969);
+    }
+    .config-alert svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--color-primary, #165DFF);
+    }
+    .config-sync-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .config-empty {
+      padding: 48px 16px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--color-text-3, #86909C);
+    }
+    .config-upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      padding: 0 16px;
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--color-text-1, #1D2129);
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .config-upload-btn:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .config-upload-btn svg { width: 16px; height: 16px; }
+    .config-upload-name {
+      margin-left: 8px;
+      font-size: 14px;
+      color: var(--color-text-3, #86909C);
+    }
+    .config-table-wrap {
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      min-width: 100%;
+    }
+    .config-table th,
+    .config-table td {
+      height: 48px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+      font-size: 14px;
+      line-height: 22px;
+      text-align: left;
+      color: var(--color-text-1, #1D2129);
+      box-sizing: border-box;
+      vertical-align: middle;
+    }
+    .config-table th {
+      background: var(--color-fill-1, #F7F8FA);
+      font-weight: 600;
+      color: var(--color-text-2, #4E5969);
+      position: relative;
+    }
+    .config-table tbody tr:last-child td { border-bottom: none; }
+    /* 复选列：单元格左右 12；勾选框本身无 padding，列宽固定 48 */
+    .config-table .col-check {
+      width: 48px !important;
+      min-width: 48px !important;
+      max-width: 48px !important;
+      text-align: center;
+      padding: 0 12px !important;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .config-table .col-check .cell-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .config-table .col-check input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 1px solid var(--color-border-3, #C9CDD4);
+    }
+    .config-table .input {
+      width: 100%;
+    }
+    .config-table .config-cell-text {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .config-table .th-filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .config-table .th-filter svg {
+      width: 12px;
+      height: 12px;
+      color: var(--color-text-3, #86909C);
+    }
+    .config-table .empty-cell {
+      height: 48px;
+      padding: 0 16px;
+      text-align: center;
+      color: var(--color-text-3, #86909C);
+      line-height: 48px;
+    }
+    #configModal .form-item__label {
+      width: 170px;
+    }
+    #configModal.modal { overflow: visible; }
+    #configModal .form-item { position: relative; z-index: 1; }
+    #configModal .form-item:has(.single-panel.is-open),
+    #configModal .form-item:has(.select-trigger.is-open) {
+      z-index: 30;
     }
     .param-table .input,
     .param-table select.input {
@@ -62,15 +445,6 @@
       gap: 8px;
     }
     .drawer__body .form-item:last-child { margin-bottom: 20px; }
-    .readonly-text {
-      height: 32px;
-      line-height: 32px;
-      color: var(--color-text-1, #1D2129);
-      padding: 0 12px;
-      background: var(--color-fill-1, #F7F8FA);
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 4px;
-    }
   </style>
 </head>
 <body>
@@ -78,36 +452,25 @@
     <main class="main" data-main>
       <div class="content-card">
         <div class="filter-bar">
-          <div class="filter-item filter-item--wide">
+          <div class="filter-item">
             <input class="input" id="filterKeyword" type="text" placeholder="产品名称/ID" autocomplete="off" />
           </div>
-          <div class="filter-item filter-item--wide">
+          <div class="filter-item">
             <input class="input" id="filterPackage" type="text" placeholder="包名" autocomplete="off" />
           </div>
 
           <div class="filter-item" id="platformWrap">
             <button class="select-trigger" type="button" id="platformTrigger">
-              <span class="select-trigger__text" id="platformLabel">平台：<span class="muted">请选择</span></span>
+              <span class="select-trigger__text" id="platformLabel">平台：全部</span>
               <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
             </button>
-            <div class="multi-panel" id="platformPanel">
-              <div class="multi-panel__left">
-                <div class="multi-panel__search">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                  <input id="platformSearch" type="text" placeholder="搜索" />
-                </div>
-                <div class="multi-panel__toolbar">
-                  <button class="multi-panel__link" type="button" id="platformSelectAll">全选</button>
-                  <button class="multi-panel__link" type="button" id="platformClear" style="margin-left:12px">清空</button>
-                </div>
-                <div class="multi-panel__list" id="platformList"></div>
-              </div>
-              <div class="multi-panel__right">
-                <div class="multi-panel__toolbar multi-panel__toolbar--right">
-                  <span id="platformCount">已选择 0 项</span>
-                </div>
-                <div class="multi-panel__list" id="platformSelected"></div>
-              </div>
+            <button class="select-clear" type="button" id="platformClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="platformPanel">
+              <div class="single-option is-active" data-value="全部">全部</div>
+              <div class="single-option" data-value="Android">Android</div>
+              <div class="single-option" data-value="iOS">iOS</div>
             </div>
           </div>
 
@@ -116,24 +479,11 @@
               <span class="select-trigger__text" id="groupLabel">产品组：<span class="muted">请选择</span></span>
               <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
             </button>
-            <div class="multi-panel" id="groupPanel">
-              <div class="multi-panel__left">
-                <div class="multi-panel__search">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                  <input id="groupSearch" type="text" placeholder="搜索" />
-                </div>
-                <div class="multi-panel__toolbar">
-                  <button class="multi-panel__link" type="button" id="groupSelectAll">全选</button>
-                  <button class="multi-panel__link" type="button" id="groupClear" style="margin-left:12px">清空</button>
-                </div>
-                <div class="multi-panel__list" id="groupList"></div>
-              </div>
-              <div class="multi-panel__right">
-                <div class="multi-panel__toolbar multi-panel__toolbar--right">
-                  <span id="groupCount">已选择 0 项</span>
-                </div>
-                <div class="multi-panel__list" id="groupSelected"></div>
-              </div>
+            <button class="select-clear" type="button" id="groupClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel multi-panel--simple" id="groupPanel">
+              <div class="multi-panel__list" id="groupList"></div>
             </div>
           </div>
 
@@ -142,49 +492,26 @@
               <span class="select-trigger__text" id="typeLabel">产品类型：<span class="muted">请选择</span></span>
               <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
             </button>
+            <button class="select-clear" type="button" id="typeClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
             <div class="multi-panel" id="typePanel">
               <div class="multi-panel__left">
                 <div class="multi-panel__search">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                  <input id="typeSearch" type="text" placeholder="搜索" />
+                  <input id="typeSearch" type="text" placeholder="搜索" autocomplete="off" />
                 </div>
                 <div class="multi-panel__toolbar">
                   <button class="multi-panel__link" type="button" id="typeSelectAll">全选</button>
-                  <button class="multi-panel__link" type="button" id="typeClear" style="margin-left:12px">清空</button>
                 </div>
                 <div class="multi-panel__list" id="typeList"></div>
               </div>
               <div class="multi-panel__right">
                 <div class="multi-panel__toolbar multi-panel__toolbar--right">
                   <span id="typeCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="typePanelClear">清空</button>
                 </div>
                 <div class="multi-panel__list" id="typeSelected"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter-item" id="seriesWrap">
-            <button class="select-trigger" type="button" id="seriesTrigger">
-              <span class="select-trigger__text" id="seriesLabel">产品系列：<span class="muted">请选择</span></span>
-              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-            </button>
-            <div class="multi-panel" id="seriesPanel">
-              <div class="multi-panel__left">
-                <div class="multi-panel__search">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                  <input id="seriesSearch" type="text" placeholder="搜索" />
-                </div>
-                <div class="multi-panel__toolbar">
-                  <button class="multi-panel__link" type="button" id="seriesSelectAll">全选</button>
-                  <button class="multi-panel__link" type="button" id="seriesClear" style="margin-left:12px">清空</button>
-                </div>
-                <div class="multi-panel__list" id="seriesList"></div>
-              </div>
-              <div class="multi-panel__right">
-                <div class="multi-panel__toolbar multi-panel__toolbar--right">
-                  <span id="seriesCount">已选择 0 项</span>
-                </div>
-                <div class="multi-panel__list" id="seriesSelected"></div>
               </div>
             </div>
           </div>
@@ -194,21 +521,24 @@
               <span class="select-trigger__text" id="ownerLabel">负责人：<span class="muted">请选择</span></span>
               <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
             </button>
+            <button class="select-clear" type="button" id="ownerClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
             <div class="multi-panel" id="ownerPanel">
               <div class="multi-panel__left">
                 <div class="multi-panel__search">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                  <input id="ownerSearch" type="text" placeholder="搜索" />
+                  <input id="ownerSearch" type="text" placeholder="搜索" autocomplete="off" />
                 </div>
                 <div class="multi-panel__toolbar">
                   <button class="multi-panel__link" type="button" id="ownerSelectAll">全选</button>
-                  <button class="multi-panel__link" type="button" id="ownerClear" style="margin-left:12px">清空</button>
                 </div>
                 <div class="multi-panel__list" id="ownerList"></div>
               </div>
               <div class="multi-panel__right">
                 <div class="multi-panel__toolbar multi-panel__toolbar--right">
                   <span id="ownerCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="ownerPanelClear">清空</button>
                 </div>
                 <div class="multi-panel__list" id="ownerSelected"></div>
               </div>
@@ -219,6 +549,9 @@
             <button class="select-trigger" type="button" id="configStatusTrigger">
               <span class="select-trigger__text" id="configStatusLabel">配置状态：全部</span>
               <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="configStatusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
             </button>
             <div class="single-panel" id="configStatusPanel">
               <div class="single-option is-active" data-value="全部">全部</div>
@@ -232,6 +565,9 @@
               <span class="select-trigger__text" id="statusLabel">状态：全部</span>
               <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
             </button>
+            <button class="select-clear" type="button" id="statusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
             <div class="single-panel" id="statusPanel">
               <div class="single-option is-active" data-value="全部">全部</div>
               <div class="single-option" data-value="启用">启用</div>
@@ -240,39 +576,59 @@
           </div>
 
           <div class="filter-actions">
+            <button class="btn btn--default" type="button" id="resetBtn">重置</button>
             <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
-            <button class="btn btn--default" type="button" id="addBtn">添加</button>
+            <button class="btn btn--success" type="button" id="addBtn">添加</button>
+            <div class="batch-wrap" id="batchWrap">
+              <button class="btn btn--default btn--dropdown" type="button" id="batchBtn" disabled>
+                批量操作
+                <svg class="btn__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="batch-menu" id="batchMenu" role="menu">
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="group">修改产品组</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="type">修改产品类型</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="owner">修改负责人</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="status">修改状态</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="table-shell">
+        <div class="data-panel">
+          <div class="table-shell">
           <div class="table-wrap">
             <table class="data-table" id="dataTable">
               <colgroup>
-                <col style="width:12%" />
-                <col style="width:10%" />
-                <col style="width:12%" />
-                <col style="width:7%" />
-                <col style="width:8%" />
-                <col style="width:7%" />
-                <col style="width:8%" />
-                <col style="width:6%" />
-                <col style="width:7%" />
-                <col style="width:6%" />
-                <col style="width:17%" />
+                <col class="col-check" data-col-width="64" />
+                <col class="col-name" data-col-width="180" />
+                <col class="col-platform" data-col-width="100" />
+                <col class="col-id" data-col-width="140" />
+                <col class="col-package" data-col-width="140" />
+                <col class="col-agg" data-col-width="100" />
+                <col class="col-group" data-col-width="100" />
+                <col class="col-type" data-col-width="100" />
+                <col class="col-owner" data-col-width="100" />
+                <col class="col-config" data-col-width="112" />
+                <col class="col-status" data-col-width="100" />
+                <col class="col-time" data-col-width="160" />
+                <col class="col-time" data-col-width="160" />
+                <col class="col-action" data-col-width="180" />
               </colgroup>
               <thead>
                 <tr>
-                  <th>产品名称</th>
-                  <th>产品ID</th>
-                  <th>包名</th>
-                  <th>平台</th>
-                  <th>产品组</th>
-                  <th>产品类型</th>
-                  <th>产品系列</th>
-                  <th>负责人</th>
-                  <th>配置状态</th>
-                  <th>状态</th>
+                  <th class="col-check is-freeze"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
+                  <th class="col-name is-freeze">产品名称</th>
+                  <th class="col-platform">平台</th>
+                  <th class="col-id">产品ID</th>
+                  <th class="col-package">包名</th>
+                  <th class="col-agg">聚合类型</th>
+                  <th class="col-group">产品组</th>
+                  <th class="col-type">产品类型</th>
+                  <th class="col-owner">负责人</th>
+                  <th class="col-config">配置状态</th>
+                  <th class="col-status">产品状态</th>
+                  <th class="col-time">创建时间</th>
+                  <th class="col-time">更新时间</th>
                   <th class="col-action">操作</th>
                 </tr>
               </thead>
@@ -283,6 +639,7 @@
         </div>
 
         <div class="pagination" id="pagination"></div>
+          </div>
       </div>
     </main>
   </div>
@@ -300,7 +657,7 @@
       </div>
       <div class="modal__body">
         <div class="form-item">
-          <div class="form-item__label is-required">平台</div>
+          <div class="form-item__label">平台</div>
           <div class="form-item__control">
             <div class="seg" id="platformSeg">
               <button class="seg__item is-active" type="button" data-value="Android">Android</button>
@@ -309,12 +666,37 @@
           </div>
         </div>
         <div class="form-item">
-          <div class="form-item__label is-required">产品名称</div>
+          <div class="form-item__label">聚合类型</div>
           <div class="form-item__control">
-            <input class="input" id="formName" type="text" placeholder="请输入产品名称" autocomplete="off" />
+            <div class="seg" id="aggSeg">
+              <button class="seg__item is-active" type="button" data-value="多聚合">多聚合</button>
+              <button class="seg__item" type="button" data-value="双聚合">双聚合</button>
+              <button class="seg__item" type="button" data-value="IS">IS</button>
+              <button class="seg__item" type="button" data-value="MAX">MAX</button>
+            </div>
           </div>
         </div>
-        <div class="form-item">
+        <div class="form-item" id="formNameItem">
+          <div class="form-item__label is-required">产品名称</div>
+          <div class="form-item__control">
+            <div class="input-clearable" id="formNameWrap">
+              <input class="input" id="formName" type="text" placeholder="请输入产品名称" autocomplete="off" />
+              <button class="select-clear" type="button" id="formNameClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>
+            </div>
+            <div class="form-item__error">请输入产品名称</div>
+          </div>
+        </div>
+        <div class="form-item" id="formPackageItem">
+          <div class="form-item__label is-required">包名</div>
+          <div class="form-item__control">
+            <div class="input-clearable" id="formPackageWrap">
+              <input class="input" id="formPackage" type="text" placeholder="请输入包名" autocomplete="off" />
+              <button class="select-clear" type="button" id="formPackageClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>
+            </div>
+            <div class="form-item__error">请输入包名</div>
+          </div>
+        </div>
+        <div class="form-item" id="formGroupItem">
           <div class="form-item__label is-required">产品组</div>
           <div class="form-item__control" id="formGroupWrap">
             <button class="select-trigger" type="button" id="formGroupTrigger">
@@ -323,9 +705,10 @@
               <span class="select-clear" id="formGroupClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
             </button>
             <div class="single-panel" id="formGroupPanel"></div>
+            <div class="form-item__error">请选择产品组</div>
           </div>
         </div>
-        <div class="form-item">
+        <div class="form-item" id="formTypeItem">
           <div class="form-item__label is-required">产品类型</div>
           <div class="form-item__control" id="formTypeWrap">
             <button class="select-trigger" type="button" id="formTypeTrigger">
@@ -334,20 +717,10 @@
               <span class="select-clear" id="formTypeClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
             </button>
             <div class="single-panel" id="formTypePanel"></div>
+            <div class="form-item__error">请选择产品类型</div>
           </div>
         </div>
-        <div class="form-item">
-          <div class="form-item__label">产品系列</div>
-          <div class="form-item__control" id="formSeriesWrap">
-            <button class="select-trigger" type="button" id="formSeriesTrigger">
-              <span class="select-trigger__text" id="formSeriesLabel"><span class="muted">请选择</span></span>
-              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-              <span class="select-clear" id="formSeriesClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
-            </button>
-            <div class="single-panel" id="formSeriesPanel"></div>
-          </div>
-        </div>
-        <div class="form-item">
+        <div class="form-item" id="formOwnerItem">
           <div class="form-item__label is-required">负责人</div>
           <div class="form-item__control" id="formOwnerWrap">
             <button class="select-trigger" type="button" id="formOwnerTrigger">
@@ -356,18 +729,57 @@
               <span class="select-clear" id="formOwnerClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
             </button>
             <div class="single-panel" id="formOwnerPanel"></div>
+            <div class="form-item__error">请选择负责人</div>
+          </div>
+        </div>
+        <div class="form-item" id="formStoreItem">
+          <div class="form-item__label">
+            <span class="form-item__label-row">
+              商店链接
+              <span class="form-help" data-tip="已上架产品填写链接可搜索填充产品名称、上线时间和图标" aria-label="说明" tabindex="0">?</span>
+            </span>
+          </div>
+          <div class="form-item__control">
+            <div class="store-link-row">
+              <div class="input-clearable" id="formStoreLinkWrap">
+                <input class="input" id="formStoreLink" type="text" placeholder="请输入商店链接" autocomplete="off" />
+                <button class="select-clear" type="button" id="formStoreLinkClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>
+              </div>
+              <button class="btn btn--primary" type="button" id="storeSearchBtn">搜索</button>
+            </div>
+            <div class="form-item__error">请输入商店链接</div>
           </div>
         </div>
         <div class="form-item">
-          <div class="form-item__label is-required">包名</div>
+          <div class="form-item__label">上线时间</div>
           <div class="form-item__control">
-            <input class="input" id="formPackage" type="text" placeholder="请输入包名" autocomplete="off" />
+            <div class="date-trigger-wrap" id="launchDateWrap">
+              <button class="select-trigger" type="button" id="launchDateTrigger">
+                <span class="select-trigger__text" id="launchDateLabel"><span class="muted">请选择日期</span></span>
+                <svg class="date-trigger__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+                <span class="select-clear" id="launchDateClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+              </button>
+              <div class="date-panel date-panel--single" id="launchDatePanel">
+                <div class="date-panel__calendars">
+                  <div class="date-cal" id="launchDateCal"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="form-item" id="storeIdItem" hidden>
-          <div class="form-item__label">StoreID</div>
+        <div class="form-item">
+          <div class="form-item__label">图标</div>
           <div class="form-item__control">
-            <input class="input" id="formStoreId" type="text" placeholder="请输入 StoreID" autocomplete="off" />
+            <div class="upload-box" id="iconUploadBox" role="button" tabindex="0" aria-label="上传产品图标">
+              <svg class="upload-box__plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              <span class="upload-box__text">上传图片</span>
+              <img class="upload-box__img" id="iconPreview" alt="" />
+              <button class="upload-box__remove" type="button" id="iconRemoveBtn" aria-label="删除图标">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+              </button>
+            </div>
+            <input type="file" id="iconFileInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden />
+            <div class="upload-tip">请上传小于2M的 jpg 或 png 图片，建议尺寸：512*512</div>
           </div>
         </div>
         <div class="form-item">
@@ -399,22 +811,28 @@
       <div class="modal__body">
         <div class="form-item">
           <div class="form-item__label">平台</div>
-          <div class="form-item__control"><div class="readonly-text" id="jsonPlatform"></div></div>
-        </div>
-        <div class="form-item">
-          <div class="form-item__label">产品名称</div>
-          <div class="form-item__control"><div class="readonly-text" id="jsonAppName"></div></div>
-        </div>
-        <div class="form-item">
-          <div class="form-item__label is-required">SDK版本号</div>
           <div class="form-item__control">
-            <input class="input" id="jsonSdkVersion" type="text" placeholder="请输入SDK版本号" autocomplete="off" />
+            <input class="input" id="jsonPlatform" type="text" disabled />
           </div>
         </div>
         <div class="form-item">
+          <div class="form-item__label">产品名称</div>
+          <div class="form-item__control">
+            <input class="input" id="jsonAppName" type="text" disabled />
+          </div>
+        </div>
+        <div class="form-item" id="jsonSdkItem">
+          <div class="form-item__label is-required">SDK版本号</div>
+          <div class="form-item__control">
+            <input class="input" id="jsonSdkVersion" type="text" placeholder="请输入SDK版本号" autocomplete="off" />
+            <div class="form-item__error">请输入SDK版本号</div>
+          </div>
+        </div>
+        <div class="form-item" id="jsonAppVerItem">
           <div class="form-item__label is-required">APP版本号</div>
           <div class="form-item__control">
             <input class="input" id="jsonAppVersion" type="text" placeholder="请输入APP版本号" autocomplete="off" />
+            <div class="form-item__error">请输入APP版本号</div>
           </div>
         </div>
       </div>
@@ -425,32 +843,147 @@
     </div>
   </div>
 
-  <!-- Config Drawer -->
-  <div class="drawer-mask" id="configDrawerMask" aria-hidden="true"></div>
-  <aside class="drawer" id="configDrawer" aria-hidden="true">
-    <div class="drawer__header">
-      <div class="drawer__title" id="configDrawerTitle">配置</div>
-      <button class="modal__close" type="button" id="configDrawerClose" aria-label="关闭">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
-      </button>
-    </div>
-    <div class="drawer__body">
-      <div class="drawer-tabs" id="configTabs">
-        <button class="drawer-tabs__item is-active" type="button" data-tab="startup">启动配置</button>
-        <button class="drawer-tabs__item" type="button" data-tab="plugin">插件配置</button>
-        <button class="drawer-tabs__item" type="button" data-tab="ad">广告配置</button>
-        <button class="drawer-tabs__item" type="button" data-tab="iap">内购配置</button>
+  <!-- 产品配置弹窗 · 宽 1020（非全局 800） -->
+  <div class="modal-mask" id="configModal" aria-hidden="true">
+    <div class="modal modal--form modal--config" role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="configModalTitle">产品配置</div>
+        <button class="modal__close" type="button" id="configModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
       </div>
-      <div class="config-block is-active" id="tabStartup"></div>
-      <div class="config-block" id="tabPlugin"></div>
-      <div class="config-block" id="tabAd"></div>
-      <div class="config-block" id="tabIap"></div>
+      <div class="modal__body">
+        <div class="config-layout">
+          <nav class="config-nav" id="configTabs" aria-label="配置分类">
+            <button class="config-nav__item is-active" type="button" data-tab="plugin">插件配置</button>
+            <button class="config-nav__item" type="button" data-tab="ad">广告配置</button>
+            <button class="config-nav__item" type="button" data-tab="iap">内购配置</button>
+            <button class="config-nav__item" type="button" data-tab="google">Google Services</button>
+            <button class="config-nav__item" type="button" data-tab="startup">启动配置</button>
+          </nav>
+          <div class="config-main">
+            <div class="config-block is-active" id="tabPlugin"></div>
+            <div class="config-block" id="tabAd"></div>
+            <div class="config-block" id="tabIap"></div>
+            <div class="config-block" id="tabGoogle"></div>
+            <div class="config-block" id="tabStartup"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="configDraftBtn">保存草稿</button>
+        <button class="btn btn--primary" type="button" id="configSubmitBtn">提交</button>
+      </div>
     </div>
-    <div class="drawer__footer">
-      <button class="btn btn--default" type="button" id="configCancelBtn">取消</button>
-      <button class="btn btn--primary" type="button" id="configSubmitBtn">提交</button>
+  </div>
+
+  <!-- 批量修改弹窗 -->
+  <div class="modal-mask" id="batchGroupModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改产品组</div>
+        <button class="modal__close" type="button" id="batchGroupClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">产品组</div>
+          <div class="form-item__control" id="batchGroupWrap">
+            <button class="select-trigger" type="button" id="batchGroupTrigger">
+              <span class="select-trigger__text" id="batchGroupLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="batchGroupPanel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchGroupCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchGroupSave">提交</button>
+      </div>
     </div>
-  </aside>
+  </div>
+
+  <div class="modal-mask" id="batchTypeModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改产品类型</div>
+        <button class="modal__close" type="button" id="batchTypeClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">产品类型</div>
+          <div class="form-item__control" id="batchTypeWrap">
+            <button class="select-trigger" type="button" id="batchTypeTrigger">
+              <span class="select-trigger__text" id="batchTypeLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="batchTypePanel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchTypeCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchTypeSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="batchOwnerModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改负责人</div>
+        <button class="modal__close" type="button" id="batchOwnerClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">负责人</div>
+          <div class="form-item__control" id="batchOwnerWrap">
+            <button class="select-trigger" type="button" id="batchOwnerTrigger">
+              <span class="select-trigger__text" id="batchOwnerLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="batchOwnerPanel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchOwnerCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchOwnerSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="batchStatusModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改状态</div>
+        <button class="modal__close" type="button" id="batchStatusClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">产品状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="batchStatusSeg">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchStatusCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchStatusSave">提交</button>
+      </div>
+    </div>
+  </div>
 
   <script src="col-resize.js"></script>
   <script src="product-common.js"></script>
@@ -463,14 +996,16 @@
 
       var UI = ProductUI;
       var escapeHtml = UI.escapeHtml;
-      var COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+      var COPY_ICON = UI.COPY_ICON;
       var LS_JSON_KEY = 'hwzt_json_files';
 
+      /* 与看板筛选选项对齐 */
       var PLATFORMS = ['Android', 'iOS'];
-      var GROUPS = ['益智解谜', '超休闲', '中重度', '三消', '合成'];
-      var TYPES = ['休闲', '超休闲', '中重度', '模拟经营', '解谜'];
-      var SERIES = ['Jam系列', 'Sort系列', 'Match系列', 'ASMR系列', 'Word系列'];
-      var OWNERS = Array.from({ length: 6 }, function (_, i) { return '用户' + String.fromCharCode(65 + i); });
+      var GROUPS = ['奇异果', '苹果组', '无花果', '坚果组', '硕果组', '外部联运'];
+      var TYPES = ['分类', '塔防', '益智', '逆袭', '难度', '消除', '找茬', '其他'];
+      var SERIES = ['Jam系列', 'Sort系列', 'Match系列', 'ASMR系列', 'Word系列', 'unknown'];
+      var AGGREGATIONS = ['多聚合', '双聚合', 'IS', 'MAX'];
+      var OWNERS = Array.from({ length: 8 }, function (_, i) { return '用户' + String.fromCharCode(65 + i); });
 
       var STARTUP_FIELDS = [
         { key: 'config_version', name: '配置版本', type: '数字输入', defaultValue: '200', min: 1, max: 999 },
@@ -509,46 +1044,84 @@
         }
       ];
 
-      var PLUGINS = [
+      /* Android 插件配置分区（参考图） */
+      var ANDROID_PLUGIN_SECTIONS = [
         {
-          jsonKey: 'sdk_config', name: 'SDK基础', platforms: ['通用', 'Android', 'iOS'],
-          params: [
-            { key: 'config_version', name: '配置版本' },
-            { key: 'app_sign_key', name: 'App Sign Key' },
-            { key: 'upload_key', name: 'Upload Key' },
-            { key: 'urlOfPrivacy', name: '隐私政策URL' },
-            { key: 'urlOfTerms', name: '用户协议URL' }
+          key: 'sdk_config', title: 'Android SDK配置', doc: false,
+          fields: [
+            { key: 'app_sign_key', label: '应用签名证书', required: true, placeholder: '请输入应用签名证书' },
+            { key: 'upload_key', label: '上传密钥证书', required: true, placeholder: '请输入上传密钥证书' },
+            { key: 'web_client_id', label: 'Web客户端ID', required: false, tip: 'GP账号授权登录必填', placeholder: '请输入Web客户端ID' }
           ]
         },
         {
-          jsonKey: 'adjust_config', name: 'Adjust', platforms: ['通用', 'Android', 'iOS'],
-          params: [
-            { key: 'app_token', name: 'App Token' },
-            { key: 'sdk_iap_revenue_token', name: 'IAP Revenue Token' }
+          key: 'ta_config', title: '数数配置', doc: true,
+          fields: [
+            { key: 'project_id', label: '项目ID', required: true, placeholder: '请输入项目ID' },
+            { key: 'app_id', label: 'APPID', required: true, placeholder: '请输入APPID' },
+            { key: 'server_url', label: '上报地址', required: true, placeholder: '请输入上报地址', defaultValue: 'https://ta-data.wondergame.net' }
           ]
         },
         {
-          jsonKey: 'ta_config', name: 'ThinkingData', platforms: ['通用', 'Android', 'iOS'],
-          params: [
-            { key: 'server_url', name: 'Server URL' },
-            { key: 'app_id', name: 'App ID' }
+          key: 'adjust_config', title: 'Adjust 配置', doc: true,
+          fields: [
+            { key: 'app_token', label: '应用Token', required: true, placeholder: '请输入应用Token' },
+            { key: 'sdk_iap_revenue_token', label: '内购Token', required: true, placeholder: '请输入内购Token' },
+            { key: 's2s_token', label: 'S2S Token', required: false, placeholder: '请输入S2S Token' }
           ]
         },
         {
-          jsonKey: 'fb_config', name: 'Facebook', platforms: ['通用', 'Android', 'iOS'],
-          params: [
-            { key: 'facebook_AppId', name: 'Facebook AppId' },
-            { key: 'facebook_client_token', name: 'Client Token' }
+          key: 'fb_config', title: 'Facebook 配置', doc: true,
+          fields: [
+            { key: 'facebook_AppId', label: 'App ID', required: true, tip: 'Facebook 开发者后台应用 ID', placeholder: '请输入App ID' },
+            { key: 'facebook_client_token', label: 'Client Token', required: true, placeholder: '请输入Client Token' }
           ]
         },
         {
-          jsonKey: 'tiktok_config', name: 'TikTok', platforms: ['通用', 'Android', 'iOS'],
-          params: [
-            { key: 'app_id', name: 'App ID' },
-            { key: 'tiktok_app_id', name: 'TikTok App ID' }
+          key: 'tiktok_config', title: 'TikTok IAA 事件回传', doc: true,
+          fields: [
+            { key: 'app_id', label: 'App ID', required: false, placeholder: '请输入App ID' },
+            { key: 'tiktok_app_id', label: 'TikTok App ID', required: false, placeholder: '请输入TikTok App ID' },
+            { key: 'app_secret', label: 'App Secret', required: false, placeholder: '请输入App Secret' }
+          ]
+        },
+        {
+          key: 'feedback_config', title: '用户反馈弹窗', doc: false,
+          fields: [
+            { key: 'ticket_email', label: '工单邮箱', required: false, placeholder: '请输入工单邮箱' }
           ]
         }
       ];
+
+      /* iOS：仅首个插件区不同（Store ID），其余分区同 Android */
+      var IOS_SDK_SECTION = {
+        key: 'sdk_config', title: 'iOS SDK配置', doc: false,
+        fields: [
+          { key: 'store_id', label: 'Store ID', required: true, placeholder: '请输入Store ID' }
+        ]
+      };
+
+      function getPluginSections(platform) {
+        if (platform === 'iOS') {
+          return [IOS_SDK_SECTION].concat(ANDROID_PLUGIN_SECTIONS.slice(1));
+        }
+        return ANDROID_PLUGIN_SECTIONS;
+      }
+
+      var PLUGINS = (function () {
+        var map = {};
+        ANDROID_PLUGIN_SECTIONS.concat([IOS_SDK_SECTION]).forEach(function (sec) {
+          if (!map[sec.key]) {
+            map[sec.key] = { jsonKey: sec.key, name: sec.title, platforms: ['通用', 'Android', 'iOS'], params: [] };
+          }
+          sec.fields.forEach(function (f) {
+            if (!map[sec.key].params.some(function (p) { return p.key === f.key; })) {
+              map[sec.key].params.push({ key: f.key, name: f.label });
+            }
+          });
+        });
+        return Object.keys(map).map(function (k) { return map[k]; });
+      })();
 
       var DEV_ACCOUNTS = {
         Android: ['gp_pub_a', 'gp_pub_b', 'gp_pub_c'],
@@ -567,7 +1140,8 @@
           maxReviewKey: '',
           maxPackage: '',
           admobAppId: '',
-          units: [{ network: 'MAX', adType: 'Banner', unitId: '', unitName: '', floor: '0' }]
+          units: [],
+          selectedUnitIds: []
         };
       }
 
@@ -576,8 +1150,13 @@
           developerAccount: '',
           licenseKey: '',
           sharedSecret: '',
-          products: [{ kind: 'consumable', productId: '', productName: '', dollarPrice: '' }]
+          products: [],
+          selectedProductIds: []
         };
+      }
+
+      function emptyGoogleConfig() {
+        return { fileName: '', fileData: '', apiKey: '' };
       }
 
       function defaultStartupValues() {
@@ -604,10 +1183,10 @@
 
       function defaultPluginValues(platform) {
         var values = {};
-        getPluginsForPlatform(platform).forEach(function (p) {
-          values[p.jsonKey] = {};
-          p.params.forEach(function (param) {
-            values[p.jsonKey][param.key] = '';
+        getPluginSections(platform).forEach(function (sec) {
+          values[sec.key] = {};
+          sec.fields.forEach(function (f) {
+            values[sec.key][f.key] = f.defaultValue != null ? String(f.defaultValue) : '';
           });
         });
         return values;
@@ -625,105 +1204,132 @@
 
       var rows = [
         {
-          id: 'yw0yqjwcunjjc2e9', name: 'Screw Pin Jam Puzzle', packageName: 'com.traffic.jam.hop.on.ios',
-          platform: 'iOS', group: '益智解谜', type: '解谜', series: 'Jam系列', owner: '用户A',
-          configStatus: '已配置', status: '启用', storeId: '6502597181', createdAt: '2026-07-30T10:00:00',
-          config: null
+          id: 'ywvt69aoqfdgyti2', name: 'Hotpot Match 3D', packageName: 'com.hotpot.match3d.ios',
+          platform: 'iOS', aggregation: '多聚合', group: '奇异果', type: '难度', series: 'Match系列', owner: '用户A',
+          configStatus: '未配置', status: '启用', storeId: '6502597181',
+          createdAt: '2026-07-20 10:11:18', updatedAt: '2026-07-20 10:11:18', config: null
         },
         {
-          id: 'and_tile_sort_01', name: 'Tile Sort 3D', packageName: 'com.tilesort.puzzle.and',
-          platform: 'Android', group: '益智解谜', type: '休闲', series: 'Sort系列', owner: '用户B',
-          configStatus: '已配置', status: '启用', storeId: '', createdAt: '2026-07-29T11:20:00',
-          config: null
+          id: 'yw1abauttjsdlfid', name: 'Pixel Bounce Jam (解压弹球馆)', packageName: 'com.jam.blast.pixel.bounce.puzzle.and',
+          platform: 'Android', aggregation: '双聚合', group: '奇异果', type: '益智', series: 'Jam系列', owner: '用户C',
+          configStatus: '未配置', status: '禁用', storeId: '',
+          createdAt: '2026-06-26 09:47:00', updatedAt: '2026-06-26 09:47:00', config: null
         },
         {
-          id: 'ios_hotpot_02', name: 'Hotpot Match 3D', packageName: 'com.hotpot.match3d.ios',
-          platform: 'iOS', group: '三消', type: '超休闲', series: 'Match系列', owner: '用户C',
-          configStatus: '未配置', status: '启用', storeId: '1488223344', createdAt: '2026-07-28T09:15:00',
-          config: null
+          id: 'ywdazzlejewel001a', name: 'Dazzle Jewel: Color by Number', packageName: 'com.dazzle.jewel.an',
+          platform: 'Android', aggregation: 'IS', group: '无花果', type: '其他', series: 'Word系列', owner: '用户B',
+          configStatus: '已配置', status: '启用', storeId: '',
+          createdAt: '2026-07-15 14:22:10', updatedAt: '2026-07-18 09:01:33', config: null
         },
         {
-          id: 'and_pixel_03', name: 'Pixel Bounce Jam', packageName: 'com.pixel.bounce.jam',
-          platform: 'Android', group: '超休闲', type: '超休闲', series: 'Jam系列', owner: '用户D',
-          configStatus: '已配置', status: '禁用', storeId: '', createdAt: '2026-07-26T16:40:00',
-          config: null
+          id: 'ywbrainsortcard02', name: 'Brain Sort: Card Matching (再闯多一关)', packageName: 'com.brain.sort.card.ios',
+          platform: 'iOS', aggregation: 'MAX', group: '无花果', type: '找茬', series: 'Sort系列', owner: '用户D',
+          configStatus: '已配置', status: '启用', storeId: '1488223344',
+          createdAt: '2026-07-10 11:05:00', updatedAt: '2026-07-12 16:40:21', config: null
         },
         {
-          id: 'ios_word_04', name: 'Jigword Word Search', packageName: 'com.jigword.search.ios',
-          platform: 'iOS', group: '益智解谜', type: '解谜', series: 'Word系列', owner: '用户E',
-          configStatus: '未配置', status: '启用', storeId: '1599001122', createdAt: '2026-07-24T08:30:00',
-          config: null
+          id: 'ywtilesort3d0003x', name: 'Tile Sort 3D (王牌分拣师)', packageName: 'com.tilesort.puzzle.and',
+          platform: 'Android', aggregation: '多聚合', group: '奇异果', type: '益智', series: 'Sort系列', owner: '用户E',
+          configStatus: '已配置', status: '启用', storeId: '',
+          createdAt: '2026-07-08 08:30:00', updatedAt: '2026-07-09 12:18:44', config: null
         },
         {
-          id: 'and_asmr_05', name: 'Perfect Care ASMR', packageName: 'com.perfect.care.asmr',
-          platform: 'Android', group: '中重度', type: '模拟经营', series: 'ASMR系列', owner: '用户F',
-          configStatus: '已配置', status: '启用', storeId: '', createdAt: '2026-07-20T14:05:00',
-          config: null
+          id: 'ywhagglesleuth04k', name: 'Haggle Sleuth (砍价大侦探)', packageName: 'com.haggle.sleuth.and',
+          platform: 'Android', aggregation: '双聚合', group: '外部联运', type: '分类', series: 'unknown', owner: '用户F',
+          configStatus: '未配置', status: '启用', storeId: '',
+          createdAt: '2026-07-01 19:20:15', updatedAt: '2026-07-01 19:20:15', config: null
         },
         {
-          id: 'and_haggle_06', name: 'Haggle Sleuth', packageName: 'com.haggle.sleuth.and',
-          platform: 'Android', group: '合成', type: '中重度', series: 'Sort系列', owner: '用户A',
-          configStatus: '未配置', status: '禁用', storeId: '', createdAt: '2026-07-18T12:00:00',
-          config: null
+          id: 'ywperfectcare05as', name: 'Perfect Care: Cleaning ASMR', packageName: 'com.perfect.care.asmr.ios',
+          platform: 'iOS', aggregation: 'IS', group: '外部联运', type: '其他', series: 'ASMR系列', owner: '用户G',
+          configStatus: '已配置', status: '禁用', storeId: '1599001122',
+          createdAt: '2026-06-20 10:00:00', updatedAt: '2026-06-28 15:33:09', config: null
+        },
+        {
+          id: 'ywstorymatch06pz', name: 'Story Match: Associate Puzzle', packageName: 'com.story.match.puzzle.and',
+          platform: 'Android', aggregation: 'MAX', group: '奇异果', type: '塔防', series: 'Match系列', owner: '用户H',
+          configStatus: '已配置', status: '启用', storeId: '',
+          createdAt: '2026-06-12 13:45:22', updatedAt: '2026-06-15 09:12:00', config: null
+        },
+        {
+          id: 'ywjigwordsearch7w', name: 'Jigword:Word Search Games', packageName: 'com.jigword.search.ios',
+          platform: 'iOS', aggregation: '多聚合', group: '无花果', type: '消除', series: 'Word系列', owner: '用户A',
+          configStatus: '未配置', status: '启用', storeId: '1600112233',
+          createdAt: '2026-06-05 17:08:41', updatedAt: '2026-06-05 17:08:41', config: null
+        },
+        {
+          id: 'ywcaptainwave08xx', name: '船长先别浪', packageName: 'com.captain.dont.wave.and',
+          platform: 'Android', aggregation: '双聚合', group: '外部联运', type: '难度', series: 'unknown', owner: '用户B',
+          configStatus: '已配置', status: '启用', storeId: '',
+          createdAt: '2026-05-28 09:00:00', updatedAt: '2026-06-01 11:26:55', config: null
         }
       ];
 
       rows.forEach(function (r) {
         if (r.configStatus === '已配置' && !r.config) {
+          /* 仅保留：数数上报地址默认值、本地默认聚合 MAX；其余字段不预填 */
           r.config = {
             startup: defaultStartupValues(),
             plugins: defaultPluginValues(r.platform),
             ad: emptyAdConfig(),
-            iap: emptyIapConfig()
+            iap: emptyIapConfig(),
+            google: emptyGoogleConfig()
           };
-          r.config.ad.isAppKey = '1c7ff2d1d';
-          r.config.ad.maxSdkKey = 'TThzkkct9KCI5q413MC9i71WqF5iUIow';
-          r.config.ad.maxPackage = r.packageName;
-          r.config.ad.admobAppId = 'ca-app-pub-4261668969289292~1670120290';
-          r.config.plugins.sdk_config.config_version = '200';
-          r.config.plugins.sdk_config.app_sign_key = '85:D2:05:6E:FA:D5:0D:97:52:50:5B:4F:AC:FD:0D:30';
-          r.config.plugins.adjust_config.app_token = 'c1izgym8fksg';
-          r.config.iap.developerAccount = DEV_ACCOUNTS[r.platform][0];
-          if (r.platform === 'Android') r.config.iap.licenseKey = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A';
-          else r.config.iap.sharedSecret = 'a1b2c3d4e5f6g7h8i9j0';
-          r.config.iap.products = [
-            { kind: 'consumable', productId: 'small_pack', productName: '小礼包', dollarPrice: '2.99' },
-            { kind: 'consumable', productId: 'big_pack', productName: '大礼包', dollarPrice: '9.99' }
-          ];
         }
       });
 
       var state = {
         keyword: '',
         packageKw: '',
-        platforms: [],
+        platform: '全部',
         groups: [],
         types: [],
-        series: [],
         owners: [],
         configStatus: '全部',
         status: '全部',
         page: 1,
         pageSize: 20,
+        selectedIds: new Set(),
         editingId: null,
         formGroup: '',
         formType: '',
-        formSeries: '',
         formOwner: '',
+        formLaunchDate: '',
+        formIcon: '',
+        batchGroup: '',
+        batchType: '',
+        batchOwner: '',
+        batchStatus: '启用',
         configAppId: null,
+        configTab: 'plugin',
         draft: null,
         jsonAppId: null
       };
+      var batchMenuApi = null;
 
-      function platformIcon(platform) {
-        var cls = platform === 'iOS' ? 'platform-icon--ios' : 'platform-icon--android';
-        var letter = platform === 'iOS' ? 'i' : 'A';
-        return '<span class="platform-icon ' + cls + '" aria-hidden="true">' + letter + '</span>';
+      function configStatusDot(status) {
+        var cls = status === '已配置' ? 'status-dot--done' : 'status-dot--error';
+        return '<span class="status-dot ' + cls + '">' + escapeHtml(status) + '</span>';
       }
 
-      function configStatusTag(status) {
-        var cls = status === '已配置' ? 'tag--info' : 'tag--warning';
-        return '<span class="tag ' + cls + '">' + escapeHtml(status) + '</span>';
+      function formatDisplayTime(str) {
+        if (!str) return '-';
+        return String(str).replace('T', ' ').slice(0, 19);
+      }
+
+      function nowText() {
+        var d = new Date();
+        function pad(n) { return String(n).padStart(2, '0'); }
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+          pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+      }
+
+      function syncBatchBtn() {
+        if (batchMenuApi) batchMenuApi.setDisabled(state.selectedIds.size === 0);
+        else {
+          var btn = UI.$('batchBtn');
+          if (btn) btn.disabled = state.selectedIds.size === 0;
+        }
       }
 
       function getFiltered() {
@@ -733,10 +1339,9 @@
           .filter(function (r) {
             if (kw && String(r.name).toLowerCase().indexOf(kw) === -1 && String(r.id).toLowerCase().indexOf(kw) === -1) return false;
             if (pkg && String(r.packageName).toLowerCase().indexOf(pkg) === -1) return false;
-            if (state.platforms.length && state.platforms.indexOf(r.platform) === -1) return false;
+            if (state.platform !== '全部' && r.platform !== state.platform) return false;
             if (state.groups.length && state.groups.indexOf(r.group) === -1) return false;
             if (state.types.length && state.types.indexOf(r.type) === -1) return false;
-            if (state.series.length && state.series.indexOf(r.series) === -1) return false;
             if (state.owners.length && state.owners.indexOf(r.owner) === -1) return false;
             if (state.configStatus !== '全部' && r.configStatus !== state.configStatus) return false;
             if (state.status !== '全部' && r.status !== state.status) return false;
@@ -759,35 +1364,61 @@
         if (!pageRows.length) {
           tbody.innerHTML = '';
           emptyTip.hidden = false;
+          UI.$('checkAll').checked = false;
+          UI.$('checkAll').indeterminate = false;
         } else {
           emptyTip.hidden = true;
           tbody.innerHTML = pageRows.map(function (r) {
-            var toggleLabel = r.status === '启用' ? '禁用' : '启用';
+            var checked = state.selectedIds.has(r.id);
+            var jsonDisabled = r.configStatus !== '已配置';
             return (
               '<tr data-id="' + escapeHtml(r.id) + '">' +
-                '<td title="' + escapeHtml(r.name) + '">' + escapeHtml(r.name) + '</td>' +
-                '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(r.id) + '">' + escapeHtml(r.id) + '</span>' +
-                  '<button class="copy-btn" type="button" data-copy="' + escapeHtml(r.id) + '" aria-label="复制">' + COPY_ICON + '</button></span></td>' +
-                '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(r.packageName) + '">' + escapeHtml(r.packageName) + '</span>' +
-                  '<button class="copy-btn" type="button" data-copy="' + escapeHtml(r.packageName) + '" aria-label="复制">' + COPY_ICON + '</button></span></td>' +
-                '<td><span class="cell-platform">' + platformIcon(r.platform) + escapeHtml(r.platform) + '</span></td>' +
+                '<td class="col-check is-freeze"><span class="cell-check"><input type="checkbox" data-check="' + escapeHtml(r.id) + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
+                '<td class="col-name is-freeze" title="' + escapeHtml(r.name) + '">' +
+                  '<span class="product-cell">' +
+                    (r.icon
+                      ? '<img class="product-cell__icon product-cell__icon--img" src="' + escapeHtml(r.icon) + '" alt="" />'
+                      : '<span class="product-cell__icon" aria-hidden="true"></span>') +
+                    '<span class="product-cell__name">' + escapeHtml(r.name) + '</span>' +
+                  '</span>' +
+                '</td>' +
+                '<td class="col-platform">' + escapeHtml(r.platform) + '</td>' +
+                '<td class="col-id">' +
+                  '<span class="cell-id">' +
+                    '<button class="copy-btn" type="button" data-copy="' + escapeHtml(r.id) + '" title="复制产品ID" aria-label="复制">' + COPY_ICON + '</button>' +
+                    '<span class="cell-id__text" title="' + escapeHtml(r.id) + '">' + escapeHtml(r.id) + '</span>' +
+                  '</span>' +
+                '</td>' +
+                '<td class="col-package">' +
+                  '<span class="cell-id">' +
+                    '<button class="copy-btn" type="button" data-copy="' + escapeHtml(r.packageName) + '" title="复制包名" aria-label="复制">' + COPY_ICON + '</button>' +
+                    '<span class="cell-id__text" title="' + escapeHtml(r.packageName) + '">' + escapeHtml(r.packageName) + '</span>' +
+                  '</span>' +
+                '</td>' +
+                '<td>' + escapeHtml(r.aggregation || '-') + '</td>' +
                 '<td>' + escapeHtml(r.group) + '</td>' +
                 '<td>' + escapeHtml(r.type) + '</td>' +
-                '<td>' + escapeHtml(r.series || '-') + '</td>' +
                 '<td>' + escapeHtml(r.owner) + '</td>' +
-                '<td>' + configStatusTag(r.configStatus) + '</td>' +
+                '<td>' + configStatusDot(r.configStatus) + '</td>' +
                 '<td>' + UI.statusTag(r.status) + '</td>' +
+                '<td title="' + escapeHtml(formatDisplayTime(r.createdAt)) + '">' + escapeHtml(formatDisplayTime(r.createdAt)) + '</td>' +
+                '<td title="' + escapeHtml(formatDisplayTime(r.updatedAt || r.createdAt)) + '">' + escapeHtml(formatDisplayTime(r.updatedAt || r.createdAt)) + '</td>' +
                 '<td class="col-action"><div class="action-links">' +
                   '<button class="link" type="button" data-action="edit" data-id="' + escapeHtml(r.id) + '">编辑</button>' +
                   '<button class="link" type="button" data-action="config" data-id="' + escapeHtml(r.id) + '">配置</button>' +
-                  '<button class="link" type="button" data-action="json" data-id="' + escapeHtml(r.id) + '">下载JSON</button>' +
-                  '<button class="link" type="button" data-action="toggle" data-id="' + escapeHtml(r.id) + '">' + toggleLabel + '</button>' +
+                  '<button class="link' + (jsonDisabled ? ' is-disabled' : '') + '" type="button" data-action="json" data-id="' + escapeHtml(r.id) + '"' + (jsonDisabled ? ' disabled' : '') + '>下载JSON</button>' +
                 '</div></td>' +
               '</tr>'
             );
           }).join('');
+
+          var pageIds = pageRows.map(function (r) { return r.id; });
+          var checkedCount = pageIds.filter(function (id) { return state.selectedIds.has(id); }).length;
+          UI.$('checkAll').checked = pageIds.length > 0 && checkedCount === pageIds.length;
+          UI.$('checkAll').indeterminate = checkedCount > 0 && checkedCount < pageIds.length;
         }
 
+        syncBatchBtn();
         UI.renderPagination({
           containerId: 'pagination',
           total: total,
@@ -802,27 +1433,124 @@
         }).join('');
       }
 
-      function syncStoreIdVisibility() {
-        var platform = UI.getSegValue('platformSeg') || 'Android';
-        UI.$('storeIdItem').hidden = platform !== 'iOS';
+      function pad2(n) { return String(n).padStart(2, '0'); }
+
+      function formatYMD(d) {
+        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
       }
+
+      function parseYMD(str) {
+        if (!str) return null;
+        var parts = String(str).split('-');
+        if (parts.length !== 3) return null;
+        var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        d.setHours(0, 0, 0, 0);
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      function yesterdayYMD() {
+        var d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - 1);
+        return formatYMD(d);
+      }
+
+      var MOCK_SEARCH_ICON = 'assets/product-icon.png';
+
+      function syncIconPreview() {
+        var box = UI.$('iconUploadBox');
+        var preview = UI.$('iconPreview');
+        if (!box || !preview) return;
+        if (state.formIcon) {
+          box.classList.add('has-file');
+          preview.src = state.formIcon;
+        } else {
+          box.classList.remove('has-file');
+          preview.removeAttribute('src');
+        }
+      }
+
+      function syncLaunchDateLabel() {
+        var label = UI.$('launchDateLabel');
+        var wrap = UI.$('launchDateWrap');
+        if (!label) return;
+        if (!state.formLaunchDate) {
+          label.innerHTML = '<span class="muted">请选择日期</span>';
+        } else {
+          label.textContent = state.formLaunchDate;
+        }
+        if (wrap) wrap.classList.toggle('has-value', !!state.formLaunchDate);
+      }
+
+      function renderLaunchCalendar() {
+        var cal = UI.$('launchDateCal');
+        if (!cal) return;
+        if (!launchDateView) {
+          launchDateView = parseYMD(state.formLaunchDate) || new Date();
+          launchDateView.setDate(1);
+          launchDateView.setHours(0, 0, 0, 0);
+        }
+        var year = launchDateView.getFullYear();
+        var month = launchDateView.getMonth();
+        var selected = parseYMD(state.formLaunchDate);
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var first = new Date(year, month, 1);
+        var startOffset = (first.getDay() + 6) % 7;
+        var start = new Date(first);
+        start.setDate(first.getDate() - startOffset);
+        var weeks = ['一', '二', '三', '四', '五', '六', '日'];
+        var leftNav =
+          '<div class="date-cal__nav">' +
+            '<button class="date-cal__btn" type="button" data-nav="prev-year" aria-label="上一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg></button>' +
+            '<button class="date-cal__btn" type="button" data-nav="prev-month" aria-label="上一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg></button>' +
+          '</div>';
+        var rightNav =
+          '<div class="date-cal__nav">' +
+            '<button class="date-cal__btn" type="button" data-nav="next-month" aria-label="下一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></button>' +
+            '<button class="date-cal__btn" type="button" data-nav="next-year" aria-label="下一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg></button>' +
+          '</div>';
+        var html = '<div class="date-cal__header">' + leftNav +
+          '<div class="date-cal__title">' + year + ' 年 ' + (month + 1) + ' 月</div>' + rightNav +
+          '</div><div class="date-cal__week">' + weeks.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div><div class="date-cal__grid">';
+        var i;
+        for (i = 0; i < 42; i++) {
+          var day = new Date(start);
+          day.setDate(start.getDate() + i);
+          var out = day.getMonth() !== month;
+          var ymd = formatYMD(day);
+          var cls = 'date-cal__day';
+          if (out) cls += ' is-out';
+          if (selected && formatYMD(selected) === ymd) cls += ' is-range-start is-range-end';
+          if (formatYMD(today) === ymd) cls += ' is-today';
+          html += '<button class="' + cls + '" type="button" data-day="' + ymd + '"><span class="date-cal__day-num">' + day.getDate() + '</span></button>';
+        }
+        html += '</div>';
+        cal.innerHTML = html;
+      }
+
+      var launchDateView = null;
 
       function openForm(row) {
         state.editingId = row ? row.id : null;
         UI.$('formModalTitle').textContent = row ? '编辑产品' : '添加产品';
         UI.setSegValue('platformSeg', row ? row.platform : 'Android');
+        UI.setSegValue('aggSeg', row && row.aggregation ? row.aggregation : '多聚合');
         UI.setSegValue('statusSeg', row ? row.status : '启用');
         UI.$('formName').value = row ? row.name : '';
         UI.$('formPackage').value = row ? row.packageName : '';
-        UI.$('formStoreId').value = row ? (row.storeId || '') : '';
+        UI.$('formStoreLink').value = row ? (row.storeLink || '') : '';
         state.formGroup = row ? row.group : '';
         state.formType = row ? row.type : '';
-        state.formSeries = row ? (row.series || '') : '';
         state.formOwner = row ? row.owner : '';
+        state.formLaunchDate = row ? (row.launchDate || '') : '';
+        state.formIcon = row ? (row.icon || '') : '';
         formSelects.group.syncLabel(state.formGroup);
         formSelects.type.syncLabel(state.formType);
-        formSelects.series.syncLabel(state.formSeries);
         formSelects.owner.syncLabel(state.formOwner);
+        syncLaunchDateLabel();
+        syncIconPreview();
+        launchDateView = null;
 
         var platformSeg = UI.$('platformSeg');
         var pkgInput = UI.$('formPackage');
@@ -833,62 +1561,72 @@
           platformSeg.classList.remove('is-readonly');
           pkgInput.disabled = false;
         }
-        ['formName', 'formPackage', 'formGroupTrigger', 'formTypeTrigger', 'formOwnerTrigger'].forEach(function (id) {
-          var el = UI.$(id);
-          if (el) el.classList.remove('is-error');
-        });
-        syncStoreIdVisibility();
+        clearFormErrors();
+        if (formClearApis.name) formClearApis.name.sync();
+        if (formClearApis.package) formClearApis.package.sync();
+        if (formClearApis.store) formClearApis.store.sync();
         UI.openModal('formModal');
       }
 
       function closeForm() {
         UI.closeModal('formModal');
         state.editingId = null;
+        UI.closePanels();
+      }
+
+      function clearFormErrors() {
+        ['formNameItem', 'formPackageItem', 'formGroupItem', 'formTypeItem', 'formOwnerItem', 'formStoreItem'].forEach(function (id) {
+          var item = UI.$(id);
+          if (item) item.classList.remove('is-error');
+        });
+      }
+
+      function setFormError(itemId, message) {
+        var item = UI.$(itemId);
+        if (!item) return;
+        item.classList.add('is-error');
+        var err = item.querySelector('.form-item__error');
+        if (err && message) err.textContent = message;
       }
 
       function submitForm() {
         var name = UI.$('formName').value.trim();
         var packageName = UI.$('formPackage').value.trim();
         var platform = UI.getSegValue('platformSeg') || 'Android';
+        var aggregation = UI.getSegValue('aggSeg') || '多聚合';
         var status = UI.getSegValue('statusSeg') || '启用';
-        var storeId = UI.$('formStoreId').value.trim();
+        var storeLink = UI.$('formStoreLink').value.trim();
 
-        ['formName', 'formPackage', 'formGroupTrigger', 'formTypeTrigger', 'formOwnerTrigger'].forEach(function (id) {
-          var el = UI.$(id);
-          if (el) el.classList.remove('is-error');
-        });
+        clearFormErrors();
 
         if (!name) {
-          UI.$('formName').classList.add('is-error');
-          UI.showToast('请输入产品名称', 'error');
-          return;
-        }
-        if (!state.formGroup) {
-          UI.$('formGroupTrigger').classList.add('is-error');
-          UI.showToast('请选择产品组', 'error');
-          return;
-        }
-        if (!state.formType) {
-          UI.$('formTypeTrigger').classList.add('is-error');
-          UI.showToast('请选择产品类型', 'error');
-          return;
-        }
-        if (!state.formOwner) {
-          UI.$('formOwnerTrigger').classList.add('is-error');
-          UI.showToast('请选择负责人', 'error');
+          setFormError('formNameItem', '请输入产品名称');
+          UI.$('formName').focus();
           return;
         }
         if (!packageName) {
-          UI.$('formPackage').classList.add('is-error');
-          UI.showToast('请输入包名', 'error');
+          setFormError('formPackageItem', '请输入包名');
+          UI.$('formPackage').focus();
+          return;
+        }
+        if (!state.formGroup) {
+          setFormError('formGroupItem', '请选择产品组');
+          return;
+        }
+        if (!state.formType) {
+          setFormError('formTypeItem', '请选择产品类型');
+          return;
+        }
+        if (!state.formOwner) {
+          setFormError('formOwnerItem', '请选择负责人');
           return;
         }
         var dup = rows.some(function (r) {
           return r.packageName.toLowerCase() === packageName.toLowerCase() && r.id !== state.editingId;
         });
         if (dup) {
-          UI.$('formPackage').classList.add('is-error');
-          UI.showToast('包名已存在，请重新输入', 'error');
+          setFormError('formPackageItem', '包名已存在，请重新输入');
+          UI.$('formPackage').focus();
           return;
         }
 
@@ -896,28 +1634,38 @@
           var target = rows.find(function (r) { return r.id === state.editingId; });
           if (target) {
             target.name = name;
+            if (!pkgInputDisabled()) target.packageName = packageName;
+            target.aggregation = aggregation;
             target.group = state.formGroup;
             target.type = state.formType;
-            target.series = state.formSeries;
             target.owner = state.formOwner;
             target.status = status;
-            if (target.platform === 'iOS') target.storeId = storeId;
+            target.storeLink = storeLink;
+            target.launchDate = state.formLaunchDate || '';
+            target.icon = state.formIcon || '';
+            target.updatedAt = nowText();
           }
           UI.showToast('保存成功');
         } else {
+          var ts = nowText();
           rows.push({
-            id: UI.uid('app'),
+            id: UI.uid('yw'),
             name: name,
             packageName: packageName,
             platform: platform,
+            aggregation: aggregation,
             group: state.formGroup,
             type: state.formType,
-            series: state.formSeries,
+            series: '',
             owner: state.formOwner,
             configStatus: '未配置',
             status: status,
-            storeId: platform === 'iOS' ? storeId : '',
-            createdAt: new Date().toISOString(),
+            storeId: '',
+            storeLink: storeLink,
+            launchDate: state.formLaunchDate || '',
+            icon: state.formIcon || '',
+            createdAt: ts,
+            updatedAt: ts,
             config: null
           });
           UI.showToast('添加成功');
@@ -926,19 +1674,33 @@
         renderTable();
       }
 
-      /* ========== Config Drawer ========== */
+      function pkgInputDisabled() {
+        var pkgInput = UI.$('formPackage');
+        return !!(pkgInput && pkgInput.disabled);
+      }
+
+      /* ========== 产品配置弹窗 ========== */
+      var FILTER_ICON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3h8L7 6.5V9l-2 1V6.5L2 3z"/></svg>';
+      var INFO_ICON = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM7.25 4.75a.75.75 0 111.5 0 .75.75 0 01-1.5 0zM7 7.5h1.5v4H7v-4z"/></svg>';
+      var UPLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V6M8 9l4-4 4 4M5 18h14"/></svg>';
+
       function openConfig(app) {
         state.configAppId = app.id;
-        UI.$('configDrawerTitle').textContent = '配置 · ' + app.name;
+        state.configTab = 'plugin';
+        UI.$('configModalTitle').textContent = '产品配置';
         state.draft = {
           startup: defaultStartupValues(),
           plugins: defaultPluginValues(app.platform),
           ad: emptyAdConfig(),
-          iap: emptyIapConfig()
+          iap: emptyIapConfig(),
+          google: emptyGoogleConfig()
         };
         if (app.config) {
           state.draft.ad = clone(app.config.ad || emptyAdConfig());
+          if (!Array.isArray(state.draft.ad.units)) state.draft.ad.units = [];
           state.draft.iap = clone(app.config.iap || emptyIapConfig());
+          if (!Array.isArray(state.draft.iap.products)) state.draft.iap.products = [];
+          state.draft.google = clone(app.config.google || emptyGoogleConfig());
           Object.keys(state.draft.startup).forEach(function (k) {
             if (app.config.startup && app.config.startup[k] !== undefined) {
               state.draft.startup[k] = clone(app.config.startup[k]);
@@ -954,164 +1716,106 @@
             }
           });
         }
-        switchTab('startup');
-        renderStartupTab();
-        renderPluginTab(app.platform);
-        renderAdTab();
-        renderIapTab(app.platform);
-        UI.openDrawer('configDrawerMask', 'configDrawer');
+        (state.draft.ad.units || []).forEach(function (u) {
+          if (u.checked == null) u.checked = true;
+        });
+        (state.draft.iap.products || []).forEach(function (p) {
+          if (p.checked == null) p.checked = true;
+        });
+        switchTab('plugin');
+        renderAllConfigTabs(app);
+        UI.openModal('configModal');
+        UI.bindFormHelp(UI.$('configModal'));
       }
 
       function closeConfig() {
-        UI.closeDrawer('configDrawerMask', 'configDrawer');
+        UI.closeModal('configModal');
         state.configAppId = null;
         state.draft = null;
       }
 
+      function renderAllConfigTabs(app) {
+        renderPluginTab(app.platform);
+        renderAdTab();
+        renderIapTab(app.platform);
+        renderGoogleTab();
+        renderStartupTab();
+      }
+
       function switchTab(tab) {
-        document.querySelectorAll('#configTabs .drawer-tabs__item').forEach(function (el) {
+        state.configTab = tab;
+        document.querySelectorAll('#configTabs .config-nav__item').forEach(function (el) {
           el.classList.toggle('is-active', el.getAttribute('data-tab') === tab);
         });
-        ['startup', 'plugin', 'ad', 'iap'].forEach(function (key) {
-          var map = { startup: 'tabStartup', plugin: 'tabPlugin', ad: 'tabAd', iap: 'tabIap' };
-          UI.$(map[key]).classList.toggle('is-active', key === tab);
-        });
-        requestAnimationFrame(function () {
-          if (window.ColResize) ColResize.initAll(UI.$('configDrawer'));
+        var map = { plugin: 'tabPlugin', ad: 'tabAd', iap: 'tabIap', google: 'tabGoogle', startup: 'tabStartup' };
+        Object.keys(map).forEach(function (key) {
+          var el = UI.$(map[key]);
+          if (el) el.classList.toggle('is-active', key === tab);
         });
       }
 
-      function renderFieldControl(field, value, dataAttr) {
-        var attr = dataAttr || '';
-        if (field.type === '数字输入') {
-          return '<input class="input" type="number" ' + attr + ' value="' + escapeHtml(value == null ? '' : value) + '" placeholder="请输入" />';
-        }
-        if (field.type === '文本输入') {
-          return '<input class="input" type="text" ' + attr + ' value="' + escapeHtml(value == null ? '' : value) + '" placeholder="' + escapeHtml(field.placeholder || '请输入') + '" />';
-        }
-        if (field.type === '开关') {
-          return '<button class="switch' + (value ? ' is-on' : '') + '" type="button" ' + attr + ' aria-label="开关"></button>';
-        }
-        if (field.type === '下拉选择') {
-          var opts = (field.options || []).map(function (o) {
-            var selected = String(o.value) === String(value) ? ' selected' : '';
-            return '<option value="' + escapeHtml(o.value) + '"' + selected + '>' + escapeHtml(o.label) + '</option>';
-          }).join('');
-          return '<select class="input" ' + attr + '>' + opts + '</select>';
-        }
-        return '';
+      function configFieldHtml(secKey, field, value) {
+        var req = field.required ? ' is-required' : '';
+        var tip = field.tip
+          ? '<span class="form-help" data-tip="' + escapeHtml(field.tip) + '" aria-label="说明" tabindex="0">?</span>'
+          : '';
+        var labelInner = tip
+          ? '<span class="form-item__label-row">' + escapeHtml(field.label) + tip + '</span>'
+          : escapeHtml(field.label);
+        return (
+          '<div class="form-item">' +
+            '<div class="form-item__label' + req + '">' + labelInner + '</div>' +
+            '<div class="form-item__control">' +
+              '<div class="input-clearable">' +
+                '<input class="input" type="text" data-plugin-key="' + escapeHtml(secKey) + '" data-param-key="' + escapeHtml(field.key) + '" value="' + escapeHtml(value == null ? '' : value) + '" placeholder="' + escapeHtml(field.placeholder || '请输入') + '" autocomplete="off" />' +
+                '<button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>' +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
       }
 
-      function renderStartupTab() {
-        var html = '';
-        STARTUP_FIELDS.forEach(function (field) {
-          if (field.type === 'Array') {
-            html += renderArrayField(field, state.draft.startup[field.key] || []);
-          } else {
-            html +=
-              '<div class="form-item">' +
-                '<div class="form-item__label">' + escapeHtml(field.name) + '</div>' +
-                '<div class="form-item__control">' +
-                  renderFieldControl(field, state.draft.startup[field.key], 'data-startup-key="' + escapeHtml(field.key) + '"') +
-                '</div>' +
-              '</div>';
-          }
-        });
-        UI.$('tabStartup').innerHTML = html;
-      }
-
-      function renderArrayField(field, rowsData) {
-        var maxRows = field.maxRows;
-        var showAdd = maxRows == null || maxRows === '' || Number(maxRows) > 1;
-        if (maxRows === 1) showAdd = false;
-        var countLabel = '';
-        if (maxRows != null && maxRows !== '' && Number(maxRows) > 1) {
-          countLabel = '（' + rowsData.length + '/' + maxRows + '）';
-        }
-        var addDisabled = maxRows != null && maxRows !== '' && rowsData.length >= Number(maxRows);
-        var html =
-          '<div class="array-field" data-array-key="' + escapeHtml(field.key) + '">' +
-            '<div class="param-toolbar">' +
-              '<div class="param-toolbar__title">' + escapeHtml(field.name) + countLabel + '</div>' +
-              (showAdd
-                ? '<button class="btn btn--text btn--sm" type="button" data-array-add="' + escapeHtml(field.key) + '"' + (addDisabled ? ' disabled' : '') + '>添加</button>'
-                : '') +
-            '</div>';
-
-        rowsData.forEach(function (row, idx) {
-          var canDelete = !(maxRows === 1) && idx > 0;
-          if (maxRows === 1) canDelete = false;
-          html +=
-            '<div class="array-row" data-array-index="' + idx + '">' +
-              '<div class="array-row__head">' +
-                '<span>第 ' + (idx + 1) + ' 行</span>' +
-                '<button class="link" type="button" data-array-del="' + escapeHtml(field.key) + '" data-index="' + idx + '"' + (canDelete ? '' : ' disabled') + '>删除</button>' +
-              '</div>';
-          (field.children || []).forEach(function (child) {
-            html +=
-              '<div class="form-item">' +
-                '<div class="form-item__label">' + escapeHtml(child.name) + '</div>' +
-                '<div class="form-item__control">' +
-                  renderFieldControl(child, row[child.key], 'data-array-field="' + escapeHtml(field.key) + '" data-index="' + idx + '" data-child="' + escapeHtml(child.key) + '"') +
-                '</div>' +
-              '</div>';
-          });
-          html += '</div>';
-        });
-        html += '</div>';
-        return html;
-      }
-
-      function collectStartupFromDom() {
-        var values = state.draft.startup;
-        STARTUP_FIELDS.forEach(function (field) {
-          if (field.type === 'Array') return;
-          var el = document.querySelector('[data-startup-key="' + field.key + '"]');
-          if (!el) return;
-          if (field.type === '开关') values[field.key] = el.classList.contains('is-on');
-          else values[field.key] = el.value;
-        });
-        STARTUP_FIELDS.filter(function (f) { return f.type === 'Array'; }).forEach(function (field) {
-          var rowsData = values[field.key] || [];
-          rowsData.forEach(function (row, idx) {
-            (field.children || []).forEach(function (child) {
-              var el = document.querySelector('[data-array-field="' + field.key + '"][data-index="' + idx + '"][data-child="' + child.key + '"]');
-              if (!el) return;
-              if (child.type === '开关') row[child.key] = el.classList.contains('is-on');
-              else row[child.key] = el.value;
-            });
-          });
+      function bindClearablesIn(root) {
+        if (!root) return;
+        root.querySelectorAll('.input-clearable').forEach(function (wrap) {
+          if (wrap.getAttribute('data-clear-bound') === '1') return;
+          wrap.setAttribute('data-clear-bound', '1');
+          UI.bindInputClearable({ wrap: wrap });
         });
       }
 
       function renderPluginTab(platform) {
-        var plugins = getPluginsForPlatform(platform);
-        var html = plugins.map(function (p) {
-          var section =
-            '<div class="plugin-section" data-plugin="' + escapeHtml(p.jsonKey) + '">' +
-              '<div class="plugin-section__title">' + escapeHtml(p.jsonKey) + '<span style="margin-left:8px;font-weight:400;color:var(--color-text-3)">（' + escapeHtml(p.name) + '）</span></div>';
-          p.params.forEach(function (param) {
-            var val = (state.draft.plugins[p.jsonKey] && state.draft.plugins[p.jsonKey][param.key]) || '';
-            section +=
-              '<div class="form-item">' +
-                '<div class="form-item__label">' + escapeHtml(param.name) + '</div>' +
-                '<div class="form-item__control">' +
-                  '<input class="input" type="text" data-plugin-key="' + escapeHtml(p.jsonKey) + '" data-param-key="' + escapeHtml(param.key) + '" value="' + escapeHtml(val) + '" placeholder="请输入" />' +
-                '</div>' +
-              '</div>';
-          });
-          section += '</div>';
-          return section;
+        var html = getPluginSections(platform).map(function (sec) {
+          var head =
+            '<div class="config-section__head">' +
+              '<div class="config-section__title">' + escapeHtml(sec.title) + '</div>' +
+              (sec.doc ? '<button class="config-section__link" type="button" data-doc="' + escapeHtml(sec.key) + '">集成文档</button>' : '') +
+            '</div>';
+          var body = sec.fields.map(function (f) {
+            var val = (state.draft.plugins[sec.key] && state.draft.plugins[sec.key][f.key]) || '';
+            if (!val && f.defaultValue) val = f.defaultValue;
+            return configFieldHtml(sec.key, f, val);
+          }).join('');
+          return '<div class="config-section" data-plugin="' + escapeHtml(sec.key) + '">' + head + body + '</div>';
         }).join('');
-        UI.$('tabPlugin').innerHTML = html || '<div class="empty-tip" style="position:static;inset:auto">暂无启用插件</div>';
+        UI.$('tabPlugin').innerHTML = html;
+        bindClearablesIn(UI.$('tabPlugin'));
+        UI.bindFormHelp(UI.$('tabPlugin'));
       }
 
       function collectPluginsFromDom() {
-        document.querySelectorAll('[data-plugin-key]').forEach(function (el) {
+        document.querySelectorAll('#tabPlugin [data-plugin-key]').forEach(function (el) {
           var jk = el.getAttribute('data-plugin-key');
           var pk = el.getAttribute('data-param-key');
           if (!state.draft.plugins[jk]) state.draft.plugins[jk] = {};
           state.draft.plugins[jk][pk] = el.value;
+        });
+      }
+
+      function initConfigTableResize(tableId) {
+        requestAnimationFrame(function () {
+          var table = UI.$(tableId);
+          if (table && window.ColResize) ColResize.refresh(table);
         });
       }
 
@@ -1120,83 +1824,137 @@
         var html =
           '<div class="form-item">' +
             '<div class="form-item__label">本地默认聚合</div>' +
-            '<div class="form-item__control">' +
-              '<div class="seg" id="adDefaultSeg">' +
+            '<div class="form-item__control" id="adDefaultWrap">' +
+              '<button class="select-trigger" type="button" id="adDefaultTrigger">' +
+                '<span class="select-trigger__text" id="adDefaultLabel">' + escapeHtml(ad.defaultSdk || 'MAX') + '</span>' +
+                '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
+              '</button>' +
+              '<div class="single-panel" id="adDefaultPanel">' +
                 AD_NETWORKS.map(function (n) {
-                  return '<button class="seg__item' + (ad.defaultSdk === n ? ' is-active' : '') + '" type="button" data-value="' + n + '">' + n + '</button>';
+                  return '<div class="single-option' + (ad.defaultSdk === n ? ' is-active' : '') + '" data-value="' + n + '">' + n + '</div>';
                 }).join('') +
               '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="form-item"><div class="form-item__label">IS AppKey</div><div class="form-item__control"><input class="input" id="adIsKey" type="text" value="' + escapeHtml(ad.isAppKey) + '" placeholder="请输入" /></div></div>' +
-          '<div class="form-item"><div class="form-item__label">MAX SDK Key</div><div class="form-item__control"><input class="input" id="adMaxKey" type="text" value="' + escapeHtml(ad.maxSdkKey) + '" placeholder="请输入" /></div></div>' +
-          '<div class="form-item"><div class="form-item__label">MAX Ad Review Key</div><div class="form-item__control"><input class="input" id="adMaxReview" type="text" value="' + escapeHtml(ad.maxReviewKey) + '" placeholder="请输入" /></div></div>' +
-          '<div class="form-item"><div class="form-item__label">MAX 包名</div><div class="form-item__control"><input class="input" id="adMaxPkg" type="text" value="' + escapeHtml(ad.maxPackage) + '" placeholder="请输入" /></div></div>' +
-          '<div class="form-item"><div class="form-item__label">Admob 应用ID</div><div class="form-item__control"><input class="input" id="adAdmobId" type="text" value="' + escapeHtml(ad.admobAppId) + '" placeholder="请输入" /></div></div>' +
-          '<div class="param-toolbar"><div class="param-toolbar__title">聚合广告位ID</div><div class="sync-row"><button class="btn btn--default btn--sm" type="button" id="adSyncBtn">同步</button></div></div>' +
-          '<div class="param-table-wrap"><table class="param-table"><thead><tr>' +
-            '<th style="width:14%">广告聚合</th><th style="width:16%">广告类型</th><th style="width:20%">广告位ID</th><th style="width:18%">广告位名称</th><th style="width:12%">底价</th><th class="col-op">操作</th>' +
-          '</tr></thead><tbody id="adUnitBody"></tbody></table></div>';
+          '<div class="form-item"><div class="form-item__label is-required">MAX 包名</div><div class="form-item__control"><div class="input-clearable"><input class="input" id="adMaxPkg" type="text" value="' + escapeHtml(ad.maxPackage) + '" placeholder="请输入 MAX 包名" autocomplete="off" /><button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button></div></div></div>' +
+          '<div class="form-item"><div class="form-item__label is-required">MAX SDK Key</div><div class="form-item__control"><div class="input-clearable"><input class="input" id="adMaxKey" type="text" value="' + escapeHtml(ad.maxSdkKey) + '" placeholder="请输入 MAX SDK Key" autocomplete="off" /><button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button></div></div></div>' +
+          '<div class="form-item"><div class="form-item__label is-required">MAX Ad ReviewKey</div><div class="form-item__control"><div class="input-clearable"><input class="input" id="adMaxReview" type="text" value="' + escapeHtml(ad.maxReviewKey) + '" placeholder="请输入 MAX Ad ReviewKey" autocomplete="off" /><button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button></div></div></div>' +
+          '<div class="form-item"><div class="form-item__label">IS AppKey</div><div class="form-item__control"><div class="input-clearable"><input class="input" id="adIsKey" type="text" value="' + escapeHtml(ad.isAppKey) + '" placeholder="请输入 IS AppKey" autocomplete="off" /><button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button></div></div></div>' +
+          '<div class="form-item"><div class="form-item__label">Admob 应用ID</div><div class="form-item__control"><div class="input-clearable"><input class="input" id="adAdmobId" type="text" value="' + escapeHtml(ad.admobAppId) + '" placeholder="请输入 Admob 应用ID" autocomplete="off" /><button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button></div></div></div>' +
+          '<div class="form-item">' +
+            '<div class="form-item__label">聚合广告位ID</div>' +
+            '<div class="form-item__control config-sync-row"><button class="btn btn--primary" type="button" id="adSyncBtn">同步</button></div>' +
+          '</div>' +
+          '<div class="config-alert">' + INFO_ICON + '<span>请勾选需要下发至SDK打包参数的广告位ID</span></div>' +
+          '<div class="config-table-wrap">' +
+            '<table class="config-table" id="adUnitTable">' +
+              '<colgroup>' +
+                '<col class="col-check" data-col-width="48" />' +
+                '<col data-col-width="120" />' +
+                '<col data-col-width="120" />' +
+                '<col data-col-width="180" />' +
+                '<col data-col-width="160" />' +
+                '<col data-col-width="120" />' +
+              '</colgroup>' +
+              '<thead><tr>' +
+                '<th class="col-check"><span class="cell-check"><input type="checkbox" id="adCheckAll" aria-label="全选" /></span></th>' +
+                '<th><span class="th-filter">广告聚合' + FILTER_ICON + '</span></th>' +
+                '<th><span class="th-filter">广告类型' + FILTER_ICON + '</span></th>' +
+                '<th><span class="th-filter">广告位ID' + FILTER_ICON + '</span></th>' +
+                '<th><span class="th-filter">广告位名称' + FILTER_ICON + '</span></th>' +
+                '<th><span class="th-filter">底价（无填0）' + FILTER_ICON + '</span></th>' +
+              '</tr></thead>' +
+              '<tbody id="adUnitBody"></tbody>' +
+            '</table>' +
+          '</div>';
         UI.$('tabAd').innerHTML = html;
+        bindClearablesIn(UI.$('tabAd'));
         renderAdUnits();
-        UI.bindSeg('adDefaultSeg', function (v) { state.draft.ad.defaultSdk = v; });
+        UI.bindSingleSelect({
+          wrapId: 'adDefaultWrap',
+          triggerId: 'adDefaultTrigger',
+          panelId: 'adDefaultPanel',
+          labelId: 'adDefaultLabel',
+          getValue: function () { return state.draft.ad.defaultSdk; },
+          onChange: function (v) { state.draft.ad.defaultSdk = v || 'MAX'; }
+        });
         UI.$('adSyncBtn').addEventListener('click', syncAdUnits);
+        var checkAll = UI.$('adCheckAll');
+        if (checkAll) {
+          checkAll.addEventListener('change', function () {
+            collectAdFromDom();
+            var on = checkAll.checked;
+            state.draft.ad.units.forEach(function (u) { u.checked = on; });
+            renderAdUnits();
+          });
+        }
       }
 
       function renderAdUnits() {
-        var units = state.draft.ad.units;
-        var clearDisabled = units.length <= 1;
-        UI.$('adUnitBody').innerHTML = units.map(function (u, idx) {
-          var delDisabled = idx === 0;
+        var units = state.draft.ad.units || [];
+        var body = UI.$('adUnitBody');
+        if (!body) return;
+        if (!units.length) {
+          body.innerHTML = '<tr><td class="empty-cell" colspan="6">暂无数据</td></tr>';
+          syncAdCheckAll();
+          initConfigTableResize('adUnitTable');
+          return;
+        }
+        body.innerHTML = units.map(function (u, idx) {
+          var checked = u.checked !== false;
           return (
             '<tr data-idx="' + idx + '">' +
-              '<td><select class="input" data-ad-field="network" data-idx="' + idx + '">' +
-                AD_NETWORKS.map(function (n) {
-                  return '<option value="' + n + '"' + (u.network === n ? ' selected' : '') + '>' + n + '</option>';
-                }).join('') +
-              '</select></td>' +
-              '<td><select class="input" data-ad-field="adType" data-idx="' + idx + '">' +
-                AD_TYPES.map(function (n) {
-                  return '<option value="' + n + '"' + (u.adType === n ? ' selected' : '') + '>' + n + '</option>';
-                }).join('') +
-              '</select></td>' +
-              '<td><input class="input" data-ad-field="unitId" data-idx="' + idx + '" value="' + escapeHtml(u.unitId) + '" placeholder="广告位ID" /></td>' +
-              '<td><input class="input" data-ad-field="unitName" data-idx="' + idx + '" value="' + escapeHtml(u.unitName) + '" placeholder="广告位名称" /></td>' +
-              '<td><input class="input" type="number" data-ad-field="floor" data-idx="' + idx + '" value="' + escapeHtml(u.floor) + '" placeholder="0" /></td>' +
-              '<td class="col-op"><div class="action-links">' +
-                '<button class="link" type="button" data-ad-del="' + idx + '"' + (delDisabled ? ' disabled' : '') + '>删除</button>' +
-                '<button class="link" type="button" data-ad-add>添加</button>' +
-                '<button class="link" type="button" data-ad-clear' + (clearDisabled ? ' disabled' : '') + '>清空</button>' +
-              '</div></td>' +
+              '<td class="col-check"><span class="cell-check"><input type="checkbox" data-ad-check="' + idx + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(u.network || '') + '">' + escapeHtml(u.network || '') + '</span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(u.adType || '') + '">' + escapeHtml(u.adType || '') + '</span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(u.unitId || '') + '">' + escapeHtml(u.unitId || '') + '</span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(u.unitName || '') + '">' + escapeHtml(u.unitName || '') + '</span></td>' +
+              '<td><input class="input" type="text" data-ad-floor="' + idx + '" value="' + escapeHtml(u.floor == null || u.floor === '' ? '0' : String(u.floor)) + '" /></td>' +
             '</tr>'
           );
         }).join('');
+        syncAdCheckAll();
+        initConfigTableResize('adUnitTable');
+      }
+
+      function syncAdCheckAll() {
+        var checkAll = UI.$('adCheckAll');
+        var units = state.draft.ad.units || [];
+        if (!checkAll) return;
+        if (!units.length) {
+          checkAll.checked = false;
+          checkAll.indeterminate = false;
+          return;
+        }
+        var checkedCount = units.filter(function (u) { return u.checked !== false; }).length;
+        checkAll.checked = checkedCount === units.length;
+        checkAll.indeterminate = checkedCount > 0 && checkedCount < units.length;
       }
 
       function collectAdFromDom() {
         var ad = state.draft.ad;
-        ad.defaultSdk = UI.getSegValue('adDefaultSeg') || ad.defaultSdk;
-        ad.isAppKey = (UI.$('adIsKey') && UI.$('adIsKey').value) || '';
-        ad.maxSdkKey = (UI.$('adMaxKey') && UI.$('adMaxKey').value) || '';
-        ad.maxReviewKey = (UI.$('adMaxReview') && UI.$('adMaxReview').value) || '';
-        ad.maxPackage = (UI.$('adMaxPkg') && UI.$('adMaxPkg').value) || '';
-        ad.admobAppId = (UI.$('adAdmobId') && UI.$('adAdmobId').value) || '';
-        document.querySelectorAll('#adUnitBody tr').forEach(function (tr) {
-          var idx = Number(tr.getAttribute('data-idx'));
-          if (!ad.units[idx]) return;
-          tr.querySelectorAll('[data-ad-field]').forEach(function (el) {
-            ad.units[idx][el.getAttribute('data-ad-field')] = el.value;
-          });
+        if (UI.$('adIsKey')) ad.isAppKey = UI.$('adIsKey').value || '';
+        if (UI.$('adMaxKey')) ad.maxSdkKey = UI.$('adMaxKey').value || '';
+        if (UI.$('adMaxReview')) ad.maxReviewKey = UI.$('adMaxReview').value || '';
+        if (UI.$('adMaxPkg')) ad.maxPackage = UI.$('adMaxPkg').value || '';
+        if (UI.$('adAdmobId')) ad.admobAppId = UI.$('adAdmobId').value || '';
+        document.querySelectorAll('#adUnitBody [data-ad-check]').forEach(function (el) {
+          var idx = Number(el.getAttribute('data-ad-check'));
+          if (ad.units[idx]) ad.units[idx].checked = !!el.checked;
+        });
+        document.querySelectorAll('#adUnitBody [data-ad-floor]').forEach(function (el) {
+          var idx = Number(el.getAttribute('data-ad-floor'));
+          if (ad.units[idx]) ad.units[idx].floor = el.value === '' ? '0' : el.value;
         });
       }
 
       function syncAdUnits() {
         collectAdFromDom();
         state.draft.ad.units = [
-          { network: 'MAX', adType: 'Banner', unitId: 'ec53f0d044866ff1', unitName: 'BN_D_0', floor: '0' },
-          { network: 'IS', adType: 'Interstitial', unitId: 'e3d8foamyn84eq5o', unitName: 'IS_INT_1', floor: '0' },
-          { network: 'ADMOB', adType: 'Rewarded', unitId: 'ca-app-pub-xxx/reward', unitName: 'RW_AD_1', floor: '0' },
-          { network: 'MAX', adType: 'Native', unitId: 'max_native_001', unitName: 'NT_D_0', floor: '0.1' }
+          { network: 'MAX', adType: 'Banner', unitId: 'ec53f0d044866ff1', unitName: 'BN_D_0', floor: '0', checked: true },
+          { network: 'IS', adType: '插屏', unitId: 'e3d8foamyn84eq5o', unitName: 'IS_INT_1', floor: '0', checked: true },
+          { network: 'ADMOB', adType: '激励', unitId: 'ca-app-pub-xxx/reward', unitName: 'RW_AD_1', floor: '0', checked: true },
+          { network: 'MAX', adType: '原生', unitId: 'max_native_001', unitName: 'NT_D_0', floor: '0', checked: true }
         ];
         renderAdUnits();
         UI.showToast('同步成功');
@@ -1204,74 +1962,126 @@
 
       function renderIapTab(platform) {
         var iap = state.draft.iap;
-        var accounts = DEV_ACCOUNTS[platform] || [];
-        var keyLabel = platform === 'iOS' ? 'SharedSecret' : 'LicenseKey';
-        var keyId = platform === 'iOS' ? 'iapSharedSecret' : 'iapLicenseKey';
-        var keyVal = platform === 'iOS' ? iap.sharedSecret : iap.licenseKey;
+        var accounts = DEV_ACCOUNTS[platform] || DEV_ACCOUNTS.Android;
+        var keyFieldHtml = '';
+        if (platform !== 'iOS') {
+          keyFieldHtml =
+            '<div class="form-item"><div class="form-item__label">LicenseKey</div><div class="form-item__control"><div class="input-clearable"><input class="input" id="iapLicenseKey" type="text" value="' + escapeHtml(iap.licenseKey || '') + '" placeholder="请输入 LicenseKey" autocomplete="off" /><button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button></div></div></div>';
+        }
         var html =
           '<div class="form-item">' +
             '<div class="form-item__label">开发者账号</div>' +
-            '<div class="form-item__control">' +
-              '<select class="input" id="iapDevAccount">' +
-                '<option value="">请选择</option>' +
+            '<div class="form-item__control" id="iapDevWrap">' +
+              '<button class="select-trigger" type="button" id="iapDevTrigger">' +
+                '<span class="select-trigger__text" id="iapDevLabel"><span class="muted">请选择开发者账号</span></span>' +
+                '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
+                '<span class="select-clear" id="iapDevClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>' +
+              '</button>' +
+              '<div class="single-panel" id="iapDevPanel">' +
                 accounts.map(function (a) {
-                  return '<option value="' + escapeHtml(a) + '"' + (iap.developerAccount === a ? ' selected' : '') + '>' + escapeHtml(a) + '</option>';
+                  return '<div class="single-option" data-value="' + escapeHtml(a) + '">' + escapeHtml(a) + '</div>';
                 }).join('') +
-              '</select>' +
+              '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="form-item"><div class="form-item__label">' + keyLabel + '</div><div class="form-item__control"><input class="input" id="' + keyId + '" type="text" value="' + escapeHtml(keyVal || '') + '" placeholder="请输入" /></div></div>' +
-          '<div class="param-toolbar"><div class="param-toolbar__title">商品列表</div><div class="sync-row"><button class="btn btn--default btn--sm" type="button" id="iapSyncBtn">同步</button></div></div>' +
-          '<div class="param-table-wrap"><table class="param-table"><thead><tr>' +
-            '<th style="width:18%">商品类型</th><th style="width:22%">商品ID</th><th style="width:22%">商品名称</th><th style="width:14%">美元定价</th><th class="col-op">操作</th>' +
-          '</tr></thead><tbody id="iapProductBody"></tbody></table></div>';
+          keyFieldHtml +
+          '<div class="form-item">' +
+            '<div class="form-item__label">商品列表</div>' +
+            '<div class="form-item__control config-sync-row"><button class="btn btn--primary" type="button" id="iapSyncBtn">同步</button></div>' +
+          '</div>' +
+          '<div class="config-alert">' + INFO_ICON + '<span>请勾选需要下发至SDK打包参数的商品ID</span></div>' +
+          '<div class="config-table-wrap">' +
+            '<table class="config-table" id="iapProductTable">' +
+              '<colgroup>' +
+                '<col class="col-check" data-col-width="48" />' +
+                '<col data-col-width="140" />' +
+                '<col data-col-width="180" />' +
+                '<col data-col-width="180" />' +
+                '<col data-col-width="120" />' +
+              '</colgroup>' +
+              '<thead><tr>' +
+                '<th class="col-check"><span class="cell-check"><input type="checkbox" id="iapCheckAll" aria-label="全选" /></span></th>' +
+                '<th><span class="th-filter">商品类型' + FILTER_ICON + '</span></th>' +
+                '<th><span class="th-filter">商品ID' + FILTER_ICON + '</span></th>' +
+                '<th><span class="th-filter">商品名称' + FILTER_ICON + '</span></th>' +
+                '<th><span class="th-filter">美元定价' + FILTER_ICON + '</span></th>' +
+              '</tr></thead>' +
+              '<tbody id="iapProductBody"></tbody>' +
+            '</table>' +
+          '</div>';
         UI.$('tabIap').innerHTML = html;
+        bindClearablesIn(UI.$('tabIap'));
         renderIapProducts();
+        UI.bindSingleSelect({
+          wrapId: 'iapDevWrap',
+          triggerId: 'iapDevTrigger',
+          panelId: 'iapDevPanel',
+          labelId: 'iapDevLabel',
+          clearId: 'iapDevClear',
+          getValue: function () { return state.draft.iap.developerAccount; },
+          onChange: function (v) { state.draft.iap.developerAccount = v || ''; }
+        });
         UI.$('iapSyncBtn').addEventListener('click', syncIapProducts);
+        var checkAll = UI.$('iapCheckAll');
+        if (checkAll) {
+          checkAll.addEventListener('change', function () {
+            collectIapFromDom(platform);
+            var on = checkAll.checked;
+            state.draft.iap.products.forEach(function (p) { p.checked = on; });
+            renderIapProducts();
+          });
+        }
       }
 
       function renderIapProducts() {
-        var products = state.draft.iap.products;
-        var clearDisabled = products.length <= 1;
-        UI.$('iapProductBody').innerHTML = products.map(function (p, idx) {
-          var delDisabled = idx === 0;
+        var products = state.draft.iap.products || [];
+        var body = UI.$('iapProductBody');
+        if (!body) return;
+        if (!products.length) {
+          body.innerHTML = '<tr><td class="empty-cell" colspan="5">暂无数据</td></tr>';
+          syncIapCheckAll();
+          initConfigTableResize('iapProductTable');
+          return;
+        }
+        body.innerHTML = products.map(function (p, idx) {
+          var checked = p.checked !== false;
           return (
             '<tr data-idx="' + idx + '">' +
-              '<td><select class="input" data-iap-field="kind" data-idx="' + idx + '">' +
-                PRODUCT_KINDS.map(function (k) {
-                  return '<option value="' + k + '"' + (p.kind === k ? ' selected' : '') + '>' + k + '</option>';
-                }).join('') +
-              '</select></td>' +
-              '<td><input class="input" data-iap-field="productId" data-idx="' + idx + '" value="' + escapeHtml(p.productId) + '" placeholder="商品ID" /></td>' +
-              '<td><input class="input" data-iap-field="productName" data-idx="' + idx + '" value="' + escapeHtml(p.productName) + '" placeholder="商品名称" /></td>' +
-              '<td><input class="input" data-iap-field="dollarPrice" data-idx="' + idx + '" value="' + escapeHtml(p.dollarPrice) + '" placeholder="0.00" /></td>' +
-              '<td class="col-op"><div class="action-links">' +
-                '<button class="link" type="button" data-iap-del="' + idx + '"' + (delDisabled ? ' disabled' : '') + '>删除</button>' +
-                '<button class="link" type="button" data-iap-add>添加</button>' +
-                '<button class="link" type="button" data-iap-clear' + (clearDisabled ? ' disabled' : '') + '>清空</button>' +
-              '</div></td>' +
+              '<td class="col-check"><span class="cell-check"><input type="checkbox" data-iap-check="' + idx + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(p.kind || '') + '">' + escapeHtml(p.kind || '') + '</span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(p.productId || '') + '">' + escapeHtml(p.productId || '') + '</span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(p.productName || '') + '">' + escapeHtml(p.productName || '') + '</span></td>' +
+              '<td><span class="config-cell-text" title="' + escapeHtml(p.dollarPrice || '') + '">' + escapeHtml(p.dollarPrice || '') + '</span></td>' +
             '</tr>'
           );
         }).join('');
+        syncIapCheckAll();
+        initConfigTableResize('iapProductTable');
+      }
+
+      function syncIapCheckAll() {
+        var checkAll = UI.$('iapCheckAll');
+        var products = state.draft.iap.products || [];
+        if (!checkAll) return;
+        if (!products.length) {
+          checkAll.checked = false;
+          checkAll.indeterminate = false;
+          return;
+        }
+        var checkedCount = products.filter(function (p) { return p.checked !== false; }).length;
+        checkAll.checked = checkedCount === products.length;
+        checkAll.indeterminate = checkedCount > 0 && checkedCount < products.length;
       }
 
       function collectIapFromDom(platform) {
         var iap = state.draft.iap;
-        var accountEl = UI.$('iapDevAccount');
-        if (accountEl) iap.developerAccount = accountEl.value;
-        if (platform === 'iOS') {
-          var ss = UI.$('iapSharedSecret');
-          if (ss) iap.sharedSecret = ss.value;
-        } else {
+        if (platform !== 'iOS') {
           var lk = UI.$('iapLicenseKey');
           if (lk) iap.licenseKey = lk.value;
         }
-        document.querySelectorAll('#iapProductBody tr').forEach(function (tr) {
-          var idx = Number(tr.getAttribute('data-idx'));
-          if (!iap.products[idx]) return;
-          tr.querySelectorAll('[data-iap-field]').forEach(function (el) {
-            iap.products[idx][el.getAttribute('data-iap-field')] = el.value;
-          });
+        document.querySelectorAll('#iapProductBody [data-iap-check]').forEach(function (el) {
+          var idx = Number(el.getAttribute('data-iap-check'));
+          if (iap.products[idx]) iap.products[idx].checked = !!el.checked;
         });
       }
 
@@ -1279,13 +2089,68 @@
         var app = rows.find(function (r) { return r.id === state.configAppId; });
         collectIapFromDom(app ? app.platform : 'Android');
         state.draft.iap.products = [
-          { kind: 'consumable', productId: 'small_st_jam', productName: 'Small Pack', dollarPrice: '2.99' },
-          { kind: 'consumable', productId: 'brilliant_st_jam', productName: 'Brilliant Pack', dollarPrice: '99.99' },
-          { kind: 'nonConsumable', productId: 'remove_ads', productName: 'Remove Ads', dollarPrice: '4.99' },
-          { kind: 'subscribe', productId: 'vip_month', productName: 'VIP Monthly', dollarPrice: '6.99' }
+          { kind: 'consumable', productId: 'small_st_jam', productName: 'Small Pack', dollarPrice: '2.99', checked: true },
+          { kind: 'consumable', productId: 'brilliant_st_jam', productName: 'Brilliant Pack', dollarPrice: '99.99', checked: true },
+          { kind: 'nonConsumable', productId: 'remove_ads', productName: 'Remove Ads', dollarPrice: '4.99', checked: true },
+          { kind: 'subscribe', productId: 'vip_month', productName: 'VIP Monthly', dollarPrice: '6.99', checked: true }
         ];
         renderIapProducts();
         UI.showToast('同步成功');
+      }
+
+      function renderGoogleTab() {
+        var g = state.draft.google || emptyGoogleConfig();
+        var nameHtml = g.fileName ? '<span class="config-upload-name">' + escapeHtml(g.fileName) + '</span>' : '';
+        var html =
+          '<div class="form-item">' +
+            '<div class="form-item__label is-required">Google Services</div>' +
+            '<div class="form-item__control">' +
+              '<button class="config-upload-btn" type="button" id="googleUploadBtn">' + UPLOAD_ICON + '<span>点击上传</span></button>' +
+              nameHtml +
+              '<input type="file" id="googleFileInput" accept=".json,application/json" hidden />' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-item">' +
+            '<div class="form-item__label is-required">API 密钥</div>' +
+            '<div class="form-item__control">' +
+              '<div class="input-clearable">' +
+                '<input class="input" id="googleApiKey" type="text" value="' + escapeHtml(g.apiKey || '') + '" placeholder="请输入 API 密钥" autocomplete="off" />' +
+                '<button class="select-clear" type="button" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        UI.$('tabGoogle').innerHTML = html;
+        bindClearablesIn(UI.$('tabGoogle'));
+        var btn = UI.$('googleUploadBtn');
+        var input = UI.$('googleFileInput');
+        if (btn && input) {
+          btn.addEventListener('click', function () { input.click(); });
+          input.addEventListener('change', function () {
+            var file = input.files && input.files[0];
+            if (!file) return;
+            state.draft.google.fileName = file.name;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              state.draft.google.fileData = String(e.target.result || '');
+              renderGoogleTab();
+            };
+            reader.readAsText(file);
+          });
+        }
+      }
+
+      function collectGoogleFromDom() {
+        if (!state.draft.google) state.draft.google = emptyGoogleConfig();
+        var el = UI.$('googleApiKey');
+        if (el) state.draft.google.apiKey = el.value || '';
+      }
+
+      function renderStartupTab() {
+        UI.$('tabStartup').innerHTML = '<div class="config-empty">暂无启用的启动配置字段</div>';
+      }
+
+      function collectStartupFromDom() {
+        /* 启动配置本期为空态，保留 draft.startup 结构供后续扩展 */
       }
 
       function collectDraft() {
@@ -1294,6 +2159,16 @@
         collectPluginsFromDom();
         collectAdFromDom();
         collectIapFromDom(app ? app.platform : 'Android');
+        collectGoogleFromDom();
+      }
+
+      function saveConfigDraft() {
+        collectDraft();
+        var app = rows.find(function (r) { return r.id === state.configAppId; });
+        if (!app) return;
+        app.config = clone(state.draft);
+        app.updatedAt = nowText();
+        UI.showToast('草稿已保存');
       }
 
       function submitConfig() {
@@ -1302,6 +2177,7 @@
         if (!app) return;
         app.config = clone(state.draft);
         app.configStatus = '已配置';
+        app.updatedAt = nowText();
         UI.showToast('配置成功');
         closeConfig();
         renderTable();
@@ -1309,14 +2185,32 @@
 
       /* ========== Download JSON ========== */
       function openJsonModal(app) {
+        if (app.configStatus !== '已配置') {
+          UI.showToast('未配置产品不可下载JSON', 'error');
+          return;
+        }
         state.jsonAppId = app.id;
-        UI.$('jsonPlatform').textContent = app.platform;
-        UI.$('jsonAppName').textContent = app.name;
+        UI.$('jsonPlatform').value = app.platform;
+        UI.$('jsonAppName').value = app.name;
         UI.$('jsonSdkVersion').value = '';
         UI.$('jsonAppVersion').value = '';
-        UI.$('jsonSdkVersion').classList.remove('is-error');
-        UI.$('jsonAppVersion').classList.remove('is-error');
+        clearJsonErrors();
         UI.openModal('jsonModal');
+      }
+
+      function clearJsonErrors() {
+        ['jsonSdkItem', 'jsonAppVerItem'].forEach(function (id) {
+          var item = UI.$(id);
+          if (item) item.classList.remove('is-error');
+        });
+      }
+
+      function setJsonError(itemId, message) {
+        var item = UI.$(itemId);
+        if (!item) return;
+        item.classList.add('is-error');
+        var err = item.querySelector('.form-item__error');
+        if (err && message) err.textContent = message;
       }
 
       function closeJsonModal() {
@@ -1329,7 +2223,8 @@
           startup: defaultStartupValues(),
           plugins: defaultPluginValues(app.platform),
           ad: emptyAdConfig(),
-          iap: emptyIapConfig()
+          iap: emptyIapConfig(),
+          google: emptyGoogleConfig()
         };
         var ad = cfg.ad || emptyAdConfig();
         var bannerIds = [];
@@ -1408,16 +2303,15 @@
       function submitJsonDownload() {
         var sdkVersion = UI.$('jsonSdkVersion').value.trim();
         var appVersion = UI.$('jsonAppVersion').value.trim();
-        UI.$('jsonSdkVersion').classList.remove('is-error');
-        UI.$('jsonAppVersion').classList.remove('is-error');
+        clearJsonErrors();
         if (!sdkVersion) {
-          UI.$('jsonSdkVersion').classList.add('is-error');
-          UI.showToast('请输入SDK版本号', 'error');
+          setJsonError('jsonSdkItem', '请输入SDK版本号');
+          UI.$('jsonSdkVersion').focus();
           return;
         }
         if (!appVersion) {
-          UI.$('jsonAppVersion').classList.add('is-error');
-          UI.showToast('请输入APP版本号', 'error');
+          setJsonError('jsonAppVerItem', '请输入APP版本号');
+          UI.$('jsonAppVersion').focus();
           return;
         }
         var app = rows.find(function (r) { return r.id === state.jsonAppId; });
@@ -1459,11 +2353,11 @@
           panelId: cfg.panelId,
           labelId: cfg.labelId,
           listId: cfg.listId,
-          selectedId: cfg.selectedId,
-          searchId: cfg.searchId,
-          countId: cfg.countId,
-          selectAllId: cfg.selectAllId,
-          clearId: cfg.clearId,
+          selectedId: cfg.selectedId || null,
+          searchId: cfg.searchId || null,
+          countId: cfg.countId || null,
+          selectAllId: cfg.selectAllId || null,
+          clearId: cfg.clearId || null,
           prefix: cfg.prefix,
           getOptions: cfg.getOptions,
           getSelected: cfg.getSelected,
@@ -1471,105 +2365,356 @@
         });
       }
 
-      bindMulti({
-        wrapId: 'platformWrap', triggerId: 'platformTrigger', panelId: 'platformPanel',
-        labelId: 'platformLabel', listId: 'platformList', selectedId: 'platformSelected',
-        searchId: 'platformSearch', countId: 'platformCount', selectAllId: 'platformSelectAll', clearId: 'platformClear',
-        prefix: '平台：', getOptions: function () { return PLATFORMS; },
-        getSelected: function () { return state.platforms; },
-        setSelected: function (arr) { state.platforms = arr; }
-      });
-      bindMulti({
-        wrapId: 'groupWrap', triggerId: 'groupTrigger', panelId: 'groupPanel',
-        labelId: 'groupLabel', listId: 'groupList', selectedId: 'groupSelected',
-        searchId: 'groupSearch', countId: 'groupCount', selectAllId: 'groupSelectAll', clearId: 'groupClear',
-        prefix: '产品组：', getOptions: function () { return GROUPS; },
-        getSelected: function () { return state.groups; },
-        setSelected: function (arr) { state.groups = arr; }
-      });
-      bindMulti({
-        wrapId: 'typeWrap', triggerId: 'typeTrigger', panelId: 'typePanel',
-        labelId: 'typeLabel', listId: 'typeList', selectedId: 'typeSelected',
-        searchId: 'typeSearch', countId: 'typeCount', selectAllId: 'typeSelectAll', clearId: 'typeClear',
-        prefix: '产品类型：', getOptions: function () { return TYPES; },
-        getSelected: function () { return state.types; },
-        setSelected: function (arr) { state.types = arr; }
-      });
-      bindMulti({
-        wrapId: 'seriesWrap', triggerId: 'seriesTrigger', panelId: 'seriesPanel',
-        labelId: 'seriesLabel', listId: 'seriesList', selectedId: 'seriesSelected',
-        searchId: 'seriesSearch', countId: 'seriesCount', selectAllId: 'seriesSelectAll', clearId: 'seriesClear',
-        prefix: '产品系列：', getOptions: function () { return SERIES; },
-        getSelected: function () { return state.series; },
-        setSelected: function (arr) { state.series = arr; }
-      });
-      bindMulti({
-        wrapId: 'ownerWrap', triggerId: 'ownerTrigger', panelId: 'ownerPanel',
-        labelId: 'ownerLabel', listId: 'ownerList', selectedId: 'ownerSelected',
-        searchId: 'ownerSearch', countId: 'ownerCount', selectAllId: 'ownerSelectAll', clearId: 'ownerClear',
-        prefix: '负责人：', getOptions: function () { return OWNERS; },
-        getSelected: function () { return state.owners; },
-        setSelected: function (arr) { state.owners = arr; }
+      var filterMultis = {
+        group: bindMulti({
+          wrapId: 'groupWrap', triggerId: 'groupTrigger', panelId: 'groupPanel',
+          labelId: 'groupLabel', listId: 'groupList', clearId: 'groupClear',
+          prefix: '产品组：', getOptions: function () { return GROUPS; },
+          getSelected: function () { return state.groups; },
+          setSelected: function (arr) { state.groups = arr; }
+        }),
+        type: bindMulti({
+          wrapId: 'typeWrap', triggerId: 'typeTrigger', panelId: 'typePanel',
+          labelId: 'typeLabel', listId: 'typeList', selectedId: 'typeSelected',
+          searchId: 'typeSearch', countId: 'typeCount', selectAllId: 'typeSelectAll', clearId: 'typeClear',
+          prefix: '产品类型：', getOptions: function () { return TYPES; },
+          getSelected: function () { return state.types; },
+          setSelected: function (arr) { state.types = arr; }
+        }),
+        owner: bindMulti({
+          wrapId: 'ownerWrap', triggerId: 'ownerTrigger', panelId: 'ownerPanel',
+          labelId: 'ownerLabel', listId: 'ownerList', selectedId: 'ownerSelected',
+          searchId: 'ownerSearch', countId: 'ownerCount', selectAllId: 'ownerSelectAll', clearId: 'ownerClear',
+          prefix: '负责人：', getOptions: function () { return OWNERS; },
+          getSelected: function () { return state.owners; },
+          setSelected: function (arr) { state.owners = arr; }
+        })
+      };
+
+      (function bindDualPanelClears() {
+        [
+          { id: 'typePanelClear', key: 'type', field: 'types' },
+          { id: 'ownerPanelClear', key: 'owner', field: 'owners' }
+        ].forEach(function (item) {
+          var btn = UI.$(item.id);
+          if (!btn || !filterMultis[item.key]) return;
+          btn.addEventListener('click', function () {
+            state[item.field] = [];
+            filterMultis[item.key].render();
+          });
+        });
+      })();
+
+      ['groupClear', 'typeClear', 'ownerClear'].forEach(function (id) {
+        var el = UI.$(id);
+        if (!el) return;
+        el.addEventListener('click', function (e) {
+          e.stopPropagation();
+          UI.closePanels();
+        });
       });
 
+      function refreshFilterSingleLabel(cfg, value) {
+        var v = value || '全部';
+        var label = UI.$(cfg.labelId);
+        var wrap = UI.$(cfg.wrapId);
+        var panel = UI.$(cfg.panelId);
+        if (label) label.innerHTML = cfg.prefix + escapeHtml(v);
+        if (wrap) wrap.classList.toggle('has-value', v !== '全部');
+        if (panel) {
+          panel.querySelectorAll('.single-option').forEach(function (opt) {
+            opt.classList.toggle('is-active', (opt.getAttribute('data-value') || '') === v);
+          });
+        }
+      }
+
       function bindFilterSingle(cfg) {
-        var api = UI.bindSingleSelect({
+        UI.bindSingleSelect({
           wrapId: cfg.wrapId,
           triggerId: cfg.triggerId,
           panelId: cfg.panelId,
           labelId: cfg.labelId,
+          clearId: cfg.clearId,
           prefix: cfg.prefix,
           getValue: function () { return cfg.getValue(); },
-          onChange: function (v) { cfg.onChange(v || '全部'); },
+          onChange: function (v) {
+            var next = v || '全部';
+            cfg.onChange(next);
+            /* bindSingleSelect 随后会 syncLabel；下一帧纠正「全部」不计 has-value */
+            setTimeout(function () { refreshFilterSingleLabel(cfg, next); }, 0);
+          },
           formatValue: function (v) { return v || '全部'; }
         });
-        api.syncLabel(cfg.getValue());
-        return api;
+        refreshFilterSingleLabel(cfg, cfg.getValue());
+        return {
+          syncLabel: function (v) { refreshFilterSingleLabel(cfg, v || '全部'); }
+        };
       }
 
-      bindFilterSingle({
-        wrapId: 'configStatusWrap', triggerId: 'configStatusTrigger', panelId: 'configStatusPanel', labelId: 'configStatusLabel',
-        prefix: '配置状态：',
-        getValue: function () { return state.configStatus; },
-        onChange: function (v) { state.configStatus = v; }
-      });
-      bindFilterSingle({
-        wrapId: 'statusWrap', triggerId: 'statusTrigger', panelId: 'statusPanel', labelId: 'statusLabel',
-        prefix: '状态：',
-        getValue: function () { return state.status; },
-        onChange: function (v) { state.status = v; }
-      });
+      var filterSingles = {
+        platform: bindFilterSingle({
+          wrapId: 'platformWrap', triggerId: 'platformTrigger', panelId: 'platformPanel',
+          labelId: 'platformLabel', clearId: 'platformClear',
+          prefix: '平台：',
+          getValue: function () { return state.platform; },
+          onChange: function (v) { state.platform = v; }
+        }),
+        config: bindFilterSingle({
+          wrapId: 'configStatusWrap', triggerId: 'configStatusTrigger', panelId: 'configStatusPanel',
+          labelId: 'configStatusLabel', clearId: 'configStatusClear',
+          prefix: '配置状态：',
+          getValue: function () { return state.configStatus; },
+          onChange: function (v) { state.configStatus = v; }
+        }),
+        status: bindFilterSingle({
+          wrapId: 'statusWrap', triggerId: 'statusTrigger', panelId: 'statusPanel',
+          labelId: 'statusLabel', clearId: 'statusClear',
+          prefix: '状态：',
+          getValue: function () { return state.status; },
+          onChange: function (v) { state.status = v; }
+        })
+      };
 
       fillSinglePanel('formGroupPanel', GROUPS);
       fillSinglePanel('formTypePanel', TYPES);
-      fillSinglePanel('formSeriesPanel', SERIES);
       fillSinglePanel('formOwnerPanel', OWNERS);
+      fillSinglePanel('batchGroupPanel', GROUPS);
+      fillSinglePanel('batchTypePanel', TYPES);
+      fillSinglePanel('batchOwnerPanel', OWNERS);
+
+      var formClearApis = {
+        name: UI.bindInputClearable({ wrapId: 'formNameWrap', onClear: function () { clearFormItemError('formNameItem'); } }),
+        package: UI.bindInputClearable({ wrapId: 'formPackageWrap', onClear: function () { clearFormItemError('formPackageItem'); } }),
+        store: UI.bindInputClearable({ wrapId: 'formStoreLinkWrap', onClear: function () { clearFormItemError('formStoreItem'); } })
+      };
+
+      function clearFormItemError(itemId) {
+        var item = UI.$(itemId);
+        if (item) item.classList.remove('is-error');
+      }
+
+      UI.$('formName').addEventListener('input', function () { clearFormItemError('formNameItem'); });
+      UI.$('formPackage').addEventListener('input', function () { clearFormItemError('formPackageItem'); });
+      UI.$('formStoreLink').addEventListener('input', function () { clearFormItemError('formStoreItem'); });
+
+      UI.bindFormHelp(UI.$('formModal') || document);
 
       var formSelects = {
         group: UI.bindSingleSelect({
           wrapId: 'formGroupWrap', triggerId: 'formGroupTrigger', panelId: 'formGroupPanel', labelId: 'formGroupLabel', clearId: 'formGroupClear',
           getValue: function () { return state.formGroup; },
-          onChange: function (v) { state.formGroup = v; UI.$('formGroupTrigger').classList.remove('is-error'); }
+          onChange: function (v) { state.formGroup = v; clearFormItemError('formGroupItem'); }
         }),
         type: UI.bindSingleSelect({
           wrapId: 'formTypeWrap', triggerId: 'formTypeTrigger', panelId: 'formTypePanel', labelId: 'formTypeLabel', clearId: 'formTypeClear',
           getValue: function () { return state.formType; },
-          onChange: function (v) { state.formType = v; UI.$('formTypeTrigger').classList.remove('is-error'); }
-        }),
-        series: UI.bindSingleSelect({
-          wrapId: 'formSeriesWrap', triggerId: 'formSeriesTrigger', panelId: 'formSeriesPanel', labelId: 'formSeriesLabel', clearId: 'formSeriesClear',
-          getValue: function () { return state.formSeries; },
-          onChange: function (v) { state.formSeries = v; }
+          onChange: function (v) { state.formType = v; clearFormItemError('formTypeItem'); }
         }),
         owner: UI.bindSingleSelect({
           wrapId: 'formOwnerWrap', triggerId: 'formOwnerTrigger', panelId: 'formOwnerPanel', labelId: 'formOwnerLabel', clearId: 'formOwnerClear',
           getValue: function () { return state.formOwner; },
-          onChange: function (v) { state.formOwner = v; UI.$('formOwnerTrigger').classList.remove('is-error'); }
+          onChange: function (v) { state.formOwner = v; clearFormItemError('formOwnerItem'); }
         })
       };
 
-      UI.bindSeg('platformSeg', function () { syncStoreIdVisibility(); });
+      var batchSelects = {
+        group: UI.bindSingleSelect({
+          wrapId: 'batchGroupWrap', triggerId: 'batchGroupTrigger', panelId: 'batchGroupPanel', labelId: 'batchGroupLabel',
+          getValue: function () { return state.batchGroup; },
+          onChange: function (v) { state.batchGroup = v; }
+        }),
+        type: UI.bindSingleSelect({
+          wrapId: 'batchTypeWrap', triggerId: 'batchTypeTrigger', panelId: 'batchTypePanel', labelId: 'batchTypeLabel',
+          getValue: function () { return state.batchType; },
+          onChange: function (v) { state.batchType = v; }
+        }),
+        owner: UI.bindSingleSelect({
+          wrapId: 'batchOwnerWrap', triggerId: 'batchOwnerTrigger', panelId: 'batchOwnerPanel', labelId: 'batchOwnerLabel',
+          getValue: function () { return state.batchOwner; },
+          onChange: function (v) { state.batchOwner = v; }
+        })
+      };
+      UI.bindSeg('batchStatusSeg', function (v) { state.batchStatus = v; });
+
+      function openBatchModal(kind) {
+        if (!state.selectedIds.size) {
+          UI.showToast('请先选择产品', 'error');
+          return;
+        }
+        if (kind === 'group') {
+          state.batchGroup = '';
+          batchSelects.group.syncLabel('');
+          UI.openModal('batchGroupModal');
+        } else if (kind === 'type') {
+          state.batchType = '';
+          batchSelects.type.syncLabel('');
+          UI.openModal('batchTypeModal');
+        } else if (kind === 'owner') {
+          state.batchOwner = '';
+          batchSelects.owner.syncLabel('');
+          UI.openModal('batchOwnerModal');
+        } else if (kind === 'status') {
+          state.batchStatus = '启用';
+          UI.setSegValue('batchStatusSeg', '启用');
+          UI.openModal('batchStatusModal');
+        }
+      }
+
+      function applyBatch(mutator, successMsg) {
+        var ts = nowText();
+        rows.forEach(function (row) {
+          if (!state.selectedIds.has(row.id)) return;
+          mutator(row);
+          row.updatedAt = ts;
+        });
+        state.selectedIds.clear();
+        UI.showToast(successMsg);
+        renderTable();
+      }
+
+      UI.bindSeg('platformSeg');
+      UI.bindSeg('aggSeg');
       UI.bindSeg('statusSeg');
+
+      /* 上线时间 · 单日 */
+      (function bindLaunchDate() {
+        var wrap = UI.$('launchDateWrap');
+        var trigger = UI.$('launchDateTrigger');
+        var panel = UI.$('launchDatePanel');
+        var cal = UI.$('launchDateCal');
+        var clearBtn = UI.$('launchDateClear');
+        if (!wrap || !trigger || !panel || !cal) return;
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (e.target.closest('.select-clear')) return;
+          var open = !panel.classList.contains('is-open');
+          UI.closePanels();
+          if (open) {
+            panel.classList.add('is-open');
+            trigger.classList.add('is-open');
+            renderLaunchCalendar();
+            UI.adjustDropdownPlacement(panel, trigger);
+          }
+        });
+
+        if (clearBtn) {
+          clearBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            state.formLaunchDate = '';
+            syncLaunchDateLabel();
+            UI.closePanels();
+          });
+        }
+
+        cal.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var nav = e.target.closest('[data-nav]');
+          if (nav) {
+            var action = nav.getAttribute('data-nav') || '';
+            if (!launchDateView) {
+              launchDateView = new Date();
+              launchDateView.setDate(1);
+              launchDateView.setHours(0, 0, 0, 0);
+            }
+            if (action === 'prev-year') launchDateView.setFullYear(launchDateView.getFullYear() - 1);
+            else if (action === 'next-year') launchDateView.setFullYear(launchDateView.getFullYear() + 1);
+            else if (action === 'prev-month') launchDateView.setMonth(launchDateView.getMonth() - 1);
+            else if (action === 'next-month') launchDateView.setMonth(launchDateView.getMonth() + 1);
+            else {
+              var delta = Number(action || 0);
+              if (delta) launchDateView.setMonth(launchDateView.getMonth() + delta);
+            }
+            renderLaunchCalendar();
+            return;
+          }
+          var dayBtn = e.target.closest('[data-day]');
+          if (!dayBtn) return;
+          state.formLaunchDate = dayBtn.getAttribute('data-day') || '';
+          syncLaunchDateLabel();
+          UI.closePanels();
+        });
+
+        wrap.addEventListener('click', function (e) { e.stopPropagation(); });
+        syncLaunchDateLabel();
+      })();
+
+      /* 图标上传 */
+      (function bindIconUpload() {
+        var box = UI.$('iconUploadBox');
+        var input = UI.$('iconFileInput');
+        var removeBtn = UI.$('iconRemoveBtn');
+        if (!box || !input) return;
+
+        function pick() { input.click(); }
+
+        box.addEventListener('click', function (e) {
+          if (e.target.closest('#iconRemoveBtn')) return;
+          pick();
+        });
+        box.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            pick();
+          }
+        });
+        if (removeBtn) {
+          removeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            state.formIcon = '';
+            input.value = '';
+            syncIconPreview();
+          });
+        }
+        input.addEventListener('change', function () {
+          var file = input.files && input.files[0];
+          if (!file) return;
+          if (!/\.jpe?g$|\.png$/i.test(file.name) && file.type !== 'image/jpeg' && file.type !== 'image/png') {
+            UI.showToast('请上传 jpg 或 png 图片', 'error');
+            input.value = '';
+            return;
+          }
+          if (file.size > 2 * 1024 * 1024) {
+            UI.showToast('图片需小于 2M', 'error');
+            input.value = '';
+            return;
+          }
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            state.formIcon = String(e.target.result || '');
+            syncIconPreview();
+          };
+          reader.readAsDataURL(file);
+        });
+      })();
+
+      UI.$('storeSearchBtn').addEventListener('click', function () {
+        var link = UI.$('formStoreLink').value.trim();
+        clearFormItemError('formStoreItem');
+        if (!link) {
+          setFormError('formStoreItem', '请输入商店链接');
+          UI.$('formStoreLink').focus();
+          return;
+        }
+        UI.$('formName').value = 'Store Search Demo';
+        clearFormItemError('formNameItem');
+        if (formClearApis.name) formClearApis.name.sync();
+        state.formLaunchDate = yesterdayYMD();
+        state.formIcon = MOCK_SEARCH_ICON;
+        syncLaunchDateLabel();
+        syncIconPreview();
+        UI.showToast('已回填产品名称、上线时间和图标');
+      });
+
+      batchMenuApi = UI.bindBatchMenu({
+        wrapId: 'batchWrap',
+        btnId: 'batchBtn',
+        menuId: 'batchMenu',
+        onAction: function (action) { openBatchModal(action); }
+      });
+      syncBatchBtn();
 
       UI.bindPagination({
         containerId: 'pagination',
@@ -1584,10 +2729,35 @@
         state.keyword = UI.$('filterKeyword').value || '';
         state.packageKw = UI.$('filterPackage').value || '';
         state.page = 1;
+        state.selectedIds.clear();
+        renderTable();
+      }
+
+      function doReset() {
+        UI.$('filterKeyword').value = '';
+        UI.$('filterPackage').value = '';
+        state.keyword = '';
+        state.packageKw = '';
+        state.platform = '全部';
+        state.groups = [];
+        state.types = [];
+        state.owners = [];
+        state.configStatus = '全部';
+        state.status = '全部';
+        state.page = 1;
+        state.selectedIds.clear();
+        ['group', 'type', 'owner'].forEach(function (key) {
+          var api = filterMultis[key];
+          if (api && api.render) api.render();
+        });
+        filterSingles.platform.syncLabel('全部');
+        filterSingles.config.syncLabel('全部');
+        filterSingles.status.syncLabel('全部');
         renderTable();
       }
 
       UI.$('searchBtn').addEventListener('click', doSearch);
+      UI.$('resetBtn').addEventListener('click', doReset);
       UI.$('filterKeyword').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
       UI.$('filterPackage').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
       UI.$('addBtn').addEventListener('click', function () { openForm(null); });
@@ -1597,99 +2767,76 @@
       UI.$('jsonCancelBtn').addEventListener('click', closeJsonModal);
       UI.$('jsonModalClose').addEventListener('click', closeJsonModal);
       UI.$('jsonSubmitBtn').addEventListener('click', submitJsonDownload);
-      UI.$('configCancelBtn').addEventListener('click', closeConfig);
-      UI.$('configDrawerClose').addEventListener('click', closeConfig);
+      UI.$('jsonSdkVersion').addEventListener('input', function () {
+        var item = UI.$('jsonSdkItem');
+        if (item) item.classList.remove('is-error');
+      });
+      UI.$('jsonAppVersion').addEventListener('input', function () {
+        var item = UI.$('jsonAppVerItem');
+        if (item) item.classList.remove('is-error');
+      });
+      UI.$('configDraftBtn').addEventListener('click', saveConfigDraft);
+      UI.$('configModalClose').addEventListener('click', closeConfig);
       UI.$('configSubmitBtn').addEventListener('click', submitConfig);
-      UI.$('configDrawerMask').addEventListener('click', closeConfig);
+      UI.$('configModal').addEventListener('click', function (e) {
+        if (e.target === UI.$('configModal')) e.stopPropagation();
+      });
 
       UI.$('configTabs').addEventListener('click', function (e) {
         var item = e.target.closest('[data-tab]');
         if (!item) return;
         var app = rows.find(function (r) { return r.id === state.configAppId; });
         collectDraft();
-        switchTab(item.getAttribute('data-tab'));
-        if (item.getAttribute('data-tab') === 'startup') renderStartupTab();
-        if (item.getAttribute('data-tab') === 'plugin' && app) renderPluginTab(app.platform);
-        if (item.getAttribute('data-tab') === 'ad') renderAdTab();
-        if (item.getAttribute('data-tab') === 'iap' && app) renderIapTab(app.platform);
+        var tab = item.getAttribute('data-tab');
+        switchTab(tab);
+        if (!app || !state.draft) return;
+        if (tab === 'plugin') renderPluginTab(app.platform);
+        if (tab === 'ad') renderAdTab();
+        if (tab === 'iap') renderIapTab(app.platform);
+        if (tab === 'google') renderGoogleTab();
+        if (tab === 'startup') renderStartupTab();
       });
 
-      UI.$('tabStartup').addEventListener('click', function (e) {
-        var sw = e.target.closest('.switch');
-        if (sw) {
-          sw.classList.toggle('is-on');
-          return;
-        }
-        var addBtn = e.target.closest('[data-array-add]');
-        if (addBtn && !addBtn.disabled) {
-          collectStartupFromDom();
-          var key = addBtn.getAttribute('data-array-add');
-          var field = STARTUP_FIELDS.find(function (f) { return f.key === key; });
-          if (!field) return;
-          var list = state.draft.startup[key] || [];
-          if (field.maxRows != null && field.maxRows !== '' && list.length >= Number(field.maxRows)) return;
-          list.push(emptyArrayRow(field));
-          state.draft.startup[key] = list;
-          renderStartupTab();
-          return;
-        }
-        var delBtn = e.target.closest('[data-array-del]');
-        if (delBtn && !delBtn.disabled) {
-          collectStartupFromDom();
-          var dkey = delBtn.getAttribute('data-array-del');
-          var didx = Number(delBtn.getAttribute('data-index'));
-          var dlist = state.draft.startup[dkey] || [];
-          if (didx > 0) dlist.splice(didx, 1);
-          state.draft.startup[dkey] = dlist;
-          renderStartupTab();
-        }
+      UI.$('tabPlugin').addEventListener('click', function (e) {
+        var doc = e.target.closest('[data-doc]');
+        if (doc) UI.showToast('集成文档（原型占位）');
       });
 
-      UI.$('tabAd').addEventListener('click', function (e) {
-        if (e.target.closest('[data-ad-add]')) {
-          collectAdFromDom();
-          state.draft.ad.units.push({ network: 'MAX', adType: 'Banner', unitId: '', unitName: '', floor: '0' });
-          renderAdUnits();
-          return;
-        }
-        var del = e.target.closest('[data-ad-del]');
-        if (del && !del.disabled) {
-          collectAdFromDom();
-          var idx = Number(del.getAttribute('data-ad-del'));
-          if (idx > 0) state.draft.ad.units.splice(idx, 1);
-          renderAdUnits();
-          return;
-        }
-        if (e.target.closest('[data-ad-clear]') && !e.target.closest('[data-ad-clear]').disabled) {
-          collectAdFromDom();
-          state.draft.ad.units = [{ network: 'MAX', adType: 'Banner', unitId: '', unitName: '', floor: '0' }];
-          renderAdUnits();
-        }
+      UI.$('tabAd').addEventListener('change', function (e) {
+        var ck = e.target.closest('[data-ad-check]');
+        if (!ck) return;
+        var idx = Number(ck.getAttribute('data-ad-check'));
+        if (state.draft.ad.units[idx]) state.draft.ad.units[idx].checked = !!ck.checked;
+        syncAdCheckAll();
       });
 
-      UI.$('tabIap').addEventListener('click', function (e) {
-        if (e.target.closest('[data-iap-add]')) {
-          var app = rows.find(function (r) { return r.id === state.configAppId; });
-          collectIapFromDom(app ? app.platform : 'Android');
-          state.draft.iap.products.push({ kind: 'consumable', productId: '', productName: '', dollarPrice: '' });
-          renderIapProducts();
-          return;
-        }
-        var del = e.target.closest('[data-iap-del]');
-        if (del && !del.disabled) {
-          var app2 = rows.find(function (r) { return r.id === state.configAppId; });
-          collectIapFromDom(app2 ? app2.platform : 'Android');
-          var idx = Number(del.getAttribute('data-iap-del'));
-          if (idx > 0) state.draft.iap.products.splice(idx, 1);
-          renderIapProducts();
-          return;
-        }
-        if (e.target.closest('[data-iap-clear]') && !e.target.closest('[data-iap-clear]').disabled) {
-          var app3 = rows.find(function (r) { return r.id === state.configAppId; });
-          collectIapFromDom(app3 ? app3.platform : 'Android');
-          state.draft.iap.products = [{ kind: 'consumable', productId: '', productName: '', dollarPrice: '' }];
-          renderIapProducts();
-        }
+      UI.$('tabIap').addEventListener('change', function (e) {
+        var ck = e.target.closest('[data-iap-check]');
+        if (!ck) return;
+        var idx = Number(ck.getAttribute('data-iap-check'));
+        if (state.draft.iap.products[idx]) state.draft.iap.products[idx].checked = !!ck.checked;
+        syncIapCheckAll();
+      });
+
+      UI.$('tableBody').addEventListener('change', function (e) {
+        var input = e.target.closest('[data-check]');
+        if (!input) return;
+        var id = input.getAttribute('data-check');
+        if (input.checked) state.selectedIds.add(id);
+        else state.selectedIds.delete(id);
+        renderTable();
+      });
+
+      UI.$('checkAll').addEventListener('change', function () {
+        var checked = this.checked;
+        var list = getFiltered();
+        var start = (state.page - 1) * state.pageSize;
+        var pageRows = list.slice(start, start + state.pageSize);
+        pageRows.forEach(function (row) {
+          if (checked) state.selectedIds.add(row.id);
+          else state.selectedIds.delete(row.id);
+        });
+        renderTable();
       });
 
       UI.$('tableBody').addEventListener('click', function (e) {
@@ -1699,7 +2846,7 @@
           return;
         }
         var btn = e.target.closest('[data-action]');
-        if (!btn) return;
+        if (!btn || btn.disabled || btn.classList.contains('is-disabled')) return;
         var id = btn.getAttribute('data-id');
         var action = btn.getAttribute('data-action');
         var row = rows.find(function (r) { return r.id === id; });
@@ -1707,11 +2854,42 @@
         if (action === 'edit') openForm(row);
         else if (action === 'config') openConfig(row);
         else if (action === 'json') openJsonModal(row);
-        else if (action === 'toggle') {
-          row.status = row.status === '启用' ? '禁用' : '启用';
-          UI.showToast(row.status === '启用' ? '已启用' : '已禁用');
-          renderTable();
+      });
+
+      function bindBatchModal(prefix, saveFn) {
+        UI.$(prefix + 'Close').addEventListener('click', function () { UI.closeModal(prefix + 'Modal'); });
+        UI.$(prefix + 'Cancel').addEventListener('click', function () { UI.closeModal(prefix + 'Modal'); });
+        UI.$(prefix + 'Save').addEventListener('click', saveFn);
+      }
+
+      bindBatchModal('batchGroup', function () {
+        if (!state.batchGroup) {
+          UI.showToast('请选择产品组', 'error');
+          return;
         }
+        applyBatch(function (row) { row.group = state.batchGroup; }, '批量修改产品组成功');
+        UI.closeModal('batchGroupModal');
+      });
+      bindBatchModal('batchType', function () {
+        if (!state.batchType) {
+          UI.showToast('请选择产品类型', 'error');
+          return;
+        }
+        applyBatch(function (row) { row.type = state.batchType; }, '批量修改产品类型成功');
+        UI.closeModal('batchTypeModal');
+      });
+      bindBatchModal('batchOwner', function () {
+        if (!state.batchOwner) {
+          UI.showToast('请选择负责人', 'error');
+          return;
+        }
+        applyBatch(function (row) { row.owner = state.batchOwner; }, '批量修改负责人成功');
+        UI.closeModal('batchOwnerModal');
+      });
+      bindBatchModal('batchStatus', function () {
+        var status = UI.getSegValue('batchStatusSeg') || state.batchStatus || '启用';
+        applyBatch(function (row) { row.status = status; }, '批量修改状态成功');
+        UI.closeModal('batchStatusModal');
       });
 
       UI.$('formModal').addEventListener('click', function (e) {
@@ -1725,7 +2903,11 @@
         if (e.key !== 'Escape') return;
         if (UI.$('formModal').classList.contains('is-open')) closeForm();
         else if (UI.$('jsonModal').classList.contains('is-open')) closeJsonModal();
-        else if (UI.$('configDrawer').classList.contains('is-open')) closeConfig();
+        else if (UI.$('batchGroupModal').classList.contains('is-open')) UI.closeModal('batchGroupModal');
+        else if (UI.$('batchTypeModal').classList.contains('is-open')) UI.closeModal('batchTypeModal');
+        else if (UI.$('batchOwnerModal').classList.contains('is-open')) UI.closeModal('batchOwnerModal');
+        else if (UI.$('batchStatusModal').classList.contains('is-open')) UI.closeModal('batchStatusModal');
+        else if (UI.$('configModal').classList.contains('is-open')) closeConfig();
       });
 
       renderTable();

@@ -207,6 +207,7 @@
   --color-bg-layout: var(--color-gray-1);       /* #F7F8FA 画布背景 */
   --color-bg-container: var(--color-white);     /* #FFFFFF 容器背景 */
   --color-bg-mask: rgba(29, 33, 41, 0.6);       /* 遮罩层 · gray-10 @ 60% */
+  --color-tooltip-bg: rgba(29, 33, 41, 0.95);   /* 气泡/Tooltip · gray-10 @ 95% */
   --color-bg-header: var(--color-brand-dark);   /* #1B2B4C 顶部导航 */
   --color-bg-sidebar: var(--color-white);       /* #FFFFFF 侧边菜单 */
   --color-bg-table-header: var(--color-gray-1); /* #F7F8FA 表头 */
@@ -322,8 +323,9 @@
    * 14. 表单 Form
    * ============================================================ */
   --form-label-control-gap: var(--spacing-sm); /* 8px */
-  --form-item-gap: var(--spacing-md);          /* 16px */
-  --form-label-width: 152px;                   /* 水平表单 Label 宽（8 网格 · 兼容长英文字段） */
+  --form-item-gap: var(--spacing-md);          /* 16px · 页面/卡片内表单项间距 */
+  --modal-form-item-gap: 20px;                 /* 弹窗/抽屉表单行距（含末项） */
+  --form-label-width: 150px;                   /* 弹窗/抽屉水平表单 Label 宽 */
   --form-control-height-compact: 28px;
   --form-control-height: 32px;                 /* Medium 默认 */
   --form-control-height-large: 40px;
@@ -366,7 +368,7 @@
   --modal-max-height: calc(100vh - 80px);
   --modal-z-index: 1050;
   --modal-mask: var(--color-bg-mask);
-  --drawer-width: 960px;          /* 抽屉默认宽 */
+  --drawer-width: 1020px;         /* 抽屉默认宽 */
 
   /* ============================================================
    * 17. 兼容旧原型别名（新页优先用语义阶梯名）

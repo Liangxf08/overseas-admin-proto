@@ -1,0 +1,202 @@
+/* TikTok 赠款 · 页内特例（公共壳见 product-common） */
+
+.filter-item { width: 200px; }
+
+.col-name,
+.col-id { width: 16%; }
+
+.col-optimizer { width: 7%; }
+.col-metric { width: 10%; }
+
+#detailTable .col-datetime {
+  width: 15%;
+  text-align: left;
+  padding-left: 12px;
+  padding-right: 12px;
+  box-sizing: border-box;
+}
+
+#detailTable th.col-datetime .th-sort {
+  justify-content: flex-start;
+  width: auto;
+}
+
+#detailTable td.col-datetime {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+td.col-num,
+td.col-align-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+th.col-num,
+th.col-align-right {
+  text-align: right;
+}
+
+th.col-num .th-sort,
+th.col-align-right .th-sort {
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.summary-row td {
+  background: var(--color-fill-1, #F7F8FA);
+  font-weight: 600;
+}
+
+.data-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--color-fill-1, #F7F8FA);
+  font-weight: 600;
+  border-top: 1px solid var(--color-border-2, #E5E6EB);
+}
+
+.data-table tfoot td.col-action {
+  z-index: 3;
+  background: var(--color-fill-1, #F7F8FA);
+}
+
+.col-action {
+  width: 110px;
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: var(--color-bg-container, #fff);
+  padding-right: 24px;
+  box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+th.col-action {
+  z-index: 3;
+  background: var(--color-fill-1, #F7F8FA);
+}
+
+.data-table tbody tr:hover td.col-action {
+  background: var(--color-gray-hover, #F5F7FA);
+}
+
+.drawer__meta {
+  font-size: 14px;
+  color: var(--color-text-2, #4E5969);
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.drawer__meta strong {
+  color: var(--color-text-1, #1D2129);
+  font-weight: 500;
+}
+
+.drawer-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.drawer-filter .filter-item {
+  width: 160px;
+}
+
+/* 赠款详情：Body 不整体滚，表格区域框高、表内滚动 */
+#detailDrawer .drawer__body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#detailDrawer .table-shell {
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#detailDrawer .table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+#detailDrawer .data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+#detailDrawer .pagination {
+  margin-top: 12px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.sync-tip {
+  margin-bottom: var(--size-4, 16px);
+  padding: var(--size-3, 12px) var(--size-4, 16px);
+  background: var(--color-fill-1, #F7F8FA);
+  border: 1px solid var(--color-border-2, #E5E6EB);
+  border-radius: var(--border-radius-medium, 4px);
+  font-size: var(--font-size-body-2, 14px);
+  line-height: 22px;
+  color: var(--color-text-2, #4E5969);
+}
+
+.sync-tip p { margin: 0; }
+.sync-tip__lead { margin-bottom: var(--size-2, 8px); }
+
+.sync-tip__title {
+  margin-bottom: var(--size-1, 4px);
+  font-weight: 500;
+  color: var(--color-text-1, #1D2129);
+}
+
+.sync-tip ol {
+  margin: 0;
+  padding-left: 1.25em;
+  list-style: decimal;
+}
+
+.sync-tip li + li { margin-top: var(--size-1, 4px); }
+
+.sync-tip .link {
+  color: var(--color-link-6, var(--color-primary));
+  text-decoration: none;
+}
+
+.sync-tip .link:hover {
+  color: var(--color-primary-5, #4080FF);
+}
+
+.sync-textarea {
+  display: block;
+  width: 100%;
+  min-height: 160px;
+  padding: var(--size-2, 8px) var(--size-3, 12px);
+  border: 1px solid var(--color-border-2, #E5E6EB);
+  border-radius: var(--border-radius-medium, 4px);
+  background: var(--color-bg-container, #fff);
+  font-family: inherit;
+  font-size: var(--font-size-body-2, 14px);
+  line-height: 22px;
+  color: var(--color-text-1, #1D2129);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sync-textarea::placeholder { color: var(--color-text-4, #C9CDD4); }
+.sync-textarea:hover { border-color: var(--color-primary); }
+.sync-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--form-focus-shadow);
+}

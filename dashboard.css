@@ -1,4 +1,4 @@
-/* 看板模块专属样式 · 消费 design-tokens / product-common */
+﻿/* 鐪嬫澘妯″潡涓撳睘鏍峰紡 路 娑堣垂 design-tokens / product-common */
 
 .board-sidebar {
   flex-shrink: 0;
@@ -499,9 +499,11 @@
   margin: 0;
   padding: var(--size-4, 16px);
   background: var(--color-bg-container, #fff);
-  border: 1px solid var(--color-border-2, #E5E6EB);
+  border: none;
   border-radius: 6px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 5;
 }
 
 #dynamicFilters { display: contents; }
@@ -629,6 +631,98 @@
   color: var(--color-danger-6, #F53F3F);
 }
 
+.col-change {
+  white-space: nowrap;
+}
+
+.change-cell {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-2, #4E5969);
+  cursor: default;
+}
+
+.change-cell.is-up {
+  color: var(--color-success-6, #00B42A);
+}
+
+.change-cell.is-down {
+  color: var(--color-danger-6, #F53F3F);
+}
+
+.compare-tip {
+  position: fixed;
+  z-index: 1200;
+  min-width: 168px;
+  max-width: 280px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(29, 33, 41, 0.92);
+  color: #fff;
+  font-size: 12px;
+  line-height: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.compare-tip[hidden] {
+  display: none !important;
+}
+
+.compare-tip__title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.compare-tip__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.compare-tip__row + .compare-tip__row {
+  margin-top: 2px;
+}
+
+.compare-tip__label {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.compare-tip__val {
+  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.compare-tip__row--muted .compare-tip__label,
+.compare-tip__row--muted .compare-tip__val,
+.compare-tip__label--muted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.compare-tip__row--strong .compare-tip__label,
+.compare-tip__row--strong .compare-tip__val {
+  color: #fff;
+}
+
+.compare-tip__val.is-up {
+  color: var(--color-success-6, #00B42A);
+}
+
+.compare-tip__val.is-down {
+  color: #F98981;
+}
+
 .filter-gear {
   width: 32px;
   height: 32px;
@@ -657,7 +751,7 @@
   flex-direction: column;
   overflow: hidden;
   background: var(--color-bg-container, #fff);
-  border: 1px solid var(--color-border-2, #E5E6EB);
+  border: none;
   border-radius: 6px;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
@@ -710,7 +804,6 @@
 
 .board-data .data-table {
   width: 100%;
-  min-width: 100%;
 }
 
 .board-data .pagination {
@@ -815,209 +908,15 @@
   background: linear-gradient(90deg, var(--color-fill-3, #E5E6EB) 0%, var(--color-fill-2, #F2F3F5) 100%);
 }
 
-/* Date range */
-.date-range-trigger {
-  width: 100%;
-  height: 32px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--color-border-2, #E5E6EB);
-  border-radius: 4px;
-  background: #fff;
-  text-align: left;
-  cursor: pointer;
-}
+/* 日期范围样式已定版收敛至 product-common.css，看板勿再维护副本 */
 
-.date-range-trigger:hover { border-color: var(--color-primary); }
-.date-range-trigger.is-open {
-  border-color: var(--color-primary);
-  box-shadow: var(--form-focus-shadow);
-}
-
-.date-range-trigger__text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px;
-  color: var(--color-text-1, #1D2129);
-}
-
-.date-range-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
-
-.date-panel {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 6px;
-  z-index: 40;
-  display: none;
-  background: #fff;
-  border: 1px solid var(--color-border-2, #E5E6EB);
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-}
-
-.date-panel.is-open {
-  display: flex;
-  align-items: stretch;
-}
-
-.date-panel.is-align-right {
-  left: auto;
-  right: 0;
-}
-
-.date-panel.is-dropup {
-  top: auto;
-  bottom: 100%;
-  margin-top: 0;
-  margin-bottom: 6px;
-}
-
-.date-panel__shortcuts {
-  width: 112px;
-  flex-shrink: 0;
-  padding: 12px 0;
-  border-right: 1px solid var(--color-border-2, #E5E6EB);
-}
-
-.date-shortcut {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 36px;
-  padding: 0 16px;
-  font-size: 14px;
-  color: var(--color-text-1, #1D2129);
-  text-align: left;
-}
-
-.date-shortcut:hover { background: var(--color-gray-hover, #F5F7FA); }
-.date-shortcut.is-active {
-  background: var(--color-gray-hover, #F5F7FA);
-  color: var(--color-primary);
-  font-weight: 500;
-}
-
-.date-panel__calendars {
-  display: flex;
-  padding: 16px 8px 20px;
-}
-
-.date-cal {
-  width: 280px;
-  padding: 0 16px;
-}
-
-.date-cal + .date-cal {
-  border-left: 1px solid var(--color-border-2, #E5E6EB);
-}
-
-.date-cal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 36px;
-  margin-bottom: 8px;
-}
-
-.date-cal__title {
-  flex: 1;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.date-cal__nav { display: inline-flex; gap: 2px; }
-
-.date-cal__btn {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  color: var(--color-text-3, #86909C);
-}
-
-.date-cal__btn:hover {
-  background: var(--color-gray-hover, #F5F7FA);
-  color: var(--color-primary);
-}
-
-.date-cal__btn svg { width: 12px; height: 12px; }
-
-.date-cal__week,
-.date-cal__grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-}
-
-.date-cal__week span {
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: var(--color-text-3, #86909C);
-}
-
-.date-cal__day {
-  position: relative;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: var(--color-text-1, #1D2129);
-  background: transparent;
-  z-index: 1;
-}
-
-.date-cal__day.is-out { color: var(--color-text-4, #C9CDD4); }
-
-.date-cal__day.is-in-range::before {
-  content: '';
-  position: absolute;
-  inset: 4px 0;
-  background: var(--color-primary-1, #E8F3FF);
-  z-index: -1;
-}
-
-.date-cal__day.is-range-start.is-in-range::before { left: 50%; right: 0; }
-.date-cal__day.is-range-end.is-in-range::before { left: 0; right: 50%; }
-.date-cal__day.is-range-start.is-range-end.is-in-range::before { display: none; }
-
-.date-cal__day-num {
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.date-cal__day.is-range-start .date-cal__day-num,
-.date-cal__day.is-range-end .date-cal__day-num {
-  background: var(--color-primary);
-  color: #fff;
-}
-
-.date-cal__day.is-today:not(.is-range-start):not(.is-range-end) .date-cal__day-num {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-/* Filter settings modal */
+/* Filter settings modal · 行距与弹窗表单统一 20px */
 .filter-check-grid {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 8px 0 16px;
+  gap: var(--modal-form-item-gap, 20px);
+  row-gap: var(--modal-form-item-gap, 20px);
+  padding: 0;
 }
 
 .modal--filter-settings {
@@ -1027,8 +926,7 @@
 }
 
 .modal--filter-settings .modal__body {
-  padding-left: 24px;
-  padding-right: 24px;
+  padding: 24px;
   overflow: visible;
 }
 
@@ -1101,6 +999,26 @@
 .filter-setting-control .date-range-trigger,
 .filter-setting-control .input,
 .filter-setting-control .select-trigger--input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: var(--font-size-body-2, 14px);
+}
+
+.filter-setting-control .select-trigger--input {
+  min-width: 0;
+}
+
+.filter-setting-control .select-trigger__prefix {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.filter-setting-control .select-trigger__field {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-setting-control .multi-panel--simple {
   width: 100%;
 }
 
@@ -1517,7 +1435,7 @@
 .form-item__control--count .input { padding-right: 48px; }
 
 
-/* 页头操作按权限显隐；系统看板保留更新时间 + 保存 */
+/* 椤靛ご鎿嶄綔鎸夋潈闄愭樉闅愶紱绯荤粺鐪嬫澘淇濈暀鏇存柊鏃堕棿 + 淇濆瓨 */
 .is-shared-board .board-edit-btn,
 .is-shared-board .board-save-btn,
 .is-shared-board .board-share-btn,
@@ -1540,7 +1458,7 @@
   right: 0;
   top: calc(100% + 6px);
   padding: 6px 10px;
-  background: rgba(29, 33, 41, 0.9);
+  background: var(--color-tooltip-bg, rgba(29, 33, 41, 0.95));
   color: #fff;
   font-size: 12px;
   line-height: 20px;
@@ -1558,7 +1476,7 @@
   visibility: visible;
 }
 
-/* 添加看板弹窗：下拉完整展示，不被弹窗/页脚裁切遮挡 */
+/* 娣诲姞鐪嬫澘寮圭獥锛氫笅鎷夊畬鏁村睍绀猴紝涓嶈寮圭獥/椤佃剼瑁佸垏閬尅 */
 #addBoardModal .modal {
   overflow: visible !important;
 }

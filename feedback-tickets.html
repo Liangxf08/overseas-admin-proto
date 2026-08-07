@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -6,1458 +6,8 @@
   <title>用户反馈 - 海外中台</title>
   <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      height: 100%;
-      font-family: var(--font-family-base);
-      font-size: var(--font-size-body);
-      line-height: 22px;
-      color: #1D2129;
-      background: var(--color-bg-page);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    button { font-family: inherit; cursor: pointer; border: none; background: none; }
-    a { color: inherit; text-decoration: none; }
-    ul { list-style: none; }
-    img { display: block; }
-    input, select { font-family: inherit; font-size: 14px; color: #1D2129; }
-
-    .app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      min-width: 1280px;
-      overflow: hidden;
-    }
-
-    .header {
-      flex-shrink: 0;
-      height: var(--header-height, 56px);
-      display: flex;
-      align-items: center;
-      background: var(--color-bg-header, #1B2B4C);
-      color: #fff;
-      z-index: 1000;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: var(--sidebar-width, 224px);
-      height: 100%;
-      padding-left: 16px;
-      flex-shrink: 0;
-    }
-
-    .logo { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
-    .brand-name { font-size: 18px; font-weight: 600; line-height: 26px; white-space: nowrap; }
-
-    .header-nav {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      padding: 0 16px;
-      gap: 16px;
-    }
-
-    .header-nav__item {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      height: 32px;
-      padding: 0 8px;
-      font-size: 14px;
-      color: var(--color-text-header, rgba(255, 255, 255, 0.7));
-      white-space: nowrap;
-    }
-
-    .header-nav__item:hover { color: #fff; }
-    .header-nav__item.is-active { color: #fff; font-weight: 500; }
-    .header-nav__item.is-active::after {
-      content: '';
-      position: absolute;
-      left: 8px; right: 8px; bottom: 0;
-      height: 2px;
-      background: var(--color-primary);
-      border-radius: 1px 1px 0 0;
-    }
-
-    .header-right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding-right: 16px;
-    }
-
-    .header-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      color: rgba(255, 255, 255, 0.75);
-      border-radius: 4px;
-    }
-
-    .header-icon:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
-    .header-icon svg { width: 18px; height: 18px; }
-
-    .user-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 32px;
-      padding: 0 8px 0 4px;
-      color: #fff;
-      border-radius: 16px;
-    }
-
-    .user-chip:hover { background: rgba(255, 255, 255, 0.08); }
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--color-fill-4, #C9CDD4);
-      display: block;
-      flex-shrink: 0;
-      object-fit: cover;
-      overflow: hidden;
-    }
-    .user-name { font-size: 14px; }
-    .user-chip .chevron { width: 12px; height: 12px; opacity: 0.75; }
-
-    .body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
-
-    .sidebar {
-      flex-shrink: 0;
-      width: var(--sidebar-width, 224px);
-      background: var(--color-bg-container, #fff);
-      border-right: 1px solid var(--color-border-2, #E5E6EB);
-      display: flex;
-      flex-direction: column;
-      transition: width 0.2s ease;
-      z-index: 900;
-    }
-
-    .sidebar.is-collapsed { width: var(--sidebar-width-collapsed, 64px); }
-    .sidebar.is-collapsed .menu-group__title-text,
-    .sidebar.is-collapsed .menu-item__text,
-    .sidebar.is-collapsed .menu-group__arrow { display: none; }
-    .sidebar.is-collapsed .menu-item,
-    .sidebar.is-collapsed .menu-group__title {
-      justify-content: center;
-      padding-left: 0;
-      padding-right: 0;
-    }
-    .sidebar.is-collapsed .menu-children { display: none !important; }
-
-    .sidebar-nav {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 4px 0;
-    }
-
-    .menu-group { margin: 0; }
-
-    .menu-group__title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      height: 44px;
-      margin: 0;
-      padding: 0 16px;
-      color: var(--color-text-1, #1D2129);
-      font-size: var(--font-size-body-2, 14px);
-      line-height: 22px;
-      box-sizing: border-box;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .menu-group__title:hover { background: var(--color-bg-table-hover, #F5F7FA); }
-
-    .menu-group__title .menu-icon,
-    .menu-group__title svg.menu-icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .menu-group__title-text {
-      flex: 1;
-      text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-
-    .menu-group__arrow {
-      width: 12px;
-      height: 12px;
-      flex-shrink: 0;
-      color: var(--color-text-1, #1D2129);
-      transition: transform 0.2s;
-    }
-
-    .menu-group.is-collapsed .menu-group__arrow { transform: rotate(-90deg); }
-    .menu-group.is-collapsed .menu-children { display: none; }
-    .menu-children { padding: 0; }
-
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      height: 44px;
-      margin: 0;
-      padding: 0 16px 0 40px;
-      color: var(--color-text-1, #1D2129);
-      font-size: var(--font-size-body-2, 14px);
-      line-height: 22px;
-      box-sizing: border-box;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .menu-item .menu-icon {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      color: currentColor;
-    }
-
-    .menu-item:hover { background: var(--color-bg-table-hover, #F5F7FA); }
-    .menu-item.is-active {
-      background: var(--color-primary-bg, #E8F3FF);
-      color: var(--color-primary);
-      font-weight: 500;
-    }
-
-    .sidebar-footer {
-      flex-shrink: 0;
-      height: 48px;
-      border-top: 1px solid var(--color-border-2, #E5E6EB);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-    }
-
-    .sidebar-collapse-btn {
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--border-radius-medium, 4px);
-      color: var(--color-text-1, #1D2129);
-    }
-    .sidebar-collapse-btn:hover { background: var(--color-bg-table-hover, #F5F7FA); }
-    .sidebar-collapse-btn svg { width: 18px; height: 18px; }
-
-    .main {
-      flex: 1;
-      min-width: 0;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .content-card {
-      flex: 1;
-      min-height: 0;
-      background: #fff;
-      border-radius: 4px;
-      box-shadow: var(--shadow-1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .filter-bar {
-      flex-shrink: 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 16px;
-      align-items: center;
-    }
-
-    .filter-item {
-      width: 200px;
-      position: relative;
-    }
-
-    .filter-item--date { width: 280px; }
-
-    .filter-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .input, .select-trigger {
-      width: 100%;
-      height: 32px;
-      padding: 0 12px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      background: #fff;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .input::placeholder { color: var(--color-text-4, #C9CDD4); }
-    .input:hover, .select-trigger:hover { border-color: var(--color-primary); }
-    .input:focus, .select-trigger:focus, .select-trigger.is-open {
-      border-color: var(--color-primary);
-      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
-    }
-
-    .date-range-trigger {
-      width: 100%;
-      height: 32px;
-      padding: 0 12px;
-      display: flex;
-      align-items: center;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 4px;
-      background: #fff;
-      text-align: left;
-      cursor: pointer;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-
-    .date-range-trigger:hover { border-color: var(--color-primary); }
-    .date-range-trigger.is-open {
-      border-color: var(--color-primary);
-      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
-    }
-
-    .date-range-trigger__text {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 14px;
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .date-range-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
-
-    .date-panel {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      margin-top: 4px;
-      z-index: 40;
-      display: none;
-      background: #fff;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 6px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-    }
-
-    .date-panel.is-open {
-      display: flex;
-      align-items: stretch;
-    }
-
-    .date-panel__shortcuts {
-      width: 112px;
-      flex-shrink: 0;
-      padding: 12px 0;
-      border-right: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .date-shortcut {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      height: 36px;
-      padding: 0 16px;
-      font-size: 14px;
-      line-height: 22px;
-      color: var(--color-text-1, #1D2129);
-      text-align: left;
-      background: transparent;
-    }
-
-    .date-shortcut:hover { background: var(--color-bg-table-hover, #F5F7FA); }
-    .date-shortcut.is-active {
-      background: var(--color-bg-table-hover, #F5F7FA);
-      color: var(--color-primary);
-      font-weight: 500;
-    }
-
-    .date-panel__calendars {
-      display: flex;
-      align-items: stretch;
-      padding: 16px 8px 20px;
-    }
-
-    .date-cal {
-      width: 308px;
-      padding: 0 20px;
-    }
-
-    .date-cal + .date-cal {
-      border-left: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .date-cal__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 36px;
-      margin-bottom: 12px;
-    }
-
-    .date-cal__title {
-      flex: 1;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .date-cal__nav {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .date-cal__btn {
-      width: 28px;
-      height: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      color: var(--color-text-3, #86909C);
-    }
-
-    .date-cal__btn:hover {
-      background: var(--color-bg-table-hover, #F5F7FA);
-      color: var(--color-primary);
-    }
-
-    .date-cal__btn svg { width: 12px; height: 12px; }
-
-    .date-cal__week {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      margin-bottom: 8px;
-    }
-
-    .date-cal__week span {
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: var(--color-text-3, #86909C);
-    }
-
-    .date-cal__grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-    }
-
-    .date-cal__day {
-      position: relative;
-      height: 40px;
-      padding: 4px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: var(--color-text-1, #1D2129);
-      background: transparent;
-      z-index: 1;
-    }
-
-    .date-cal__day.is-out { color: var(--color-text-4, #C9CDD4); }
-
-    .date-cal__day.is-in-range::before {
-      content: '';
-      position: absolute;
-      inset: 4px 0;
-      background: var(--color-primary-1, #E8F3FF);
-      z-index: -1;
-    }
-
-    .date-cal__day.is-range-start.is-in-range::before { left: 50%; right: 0; }
-    .date-cal__day.is-range-end.is-in-range::before { left: 0; right: 50%; }
-    .date-cal__day.is-range-start.is-range-end.is-in-range::before { display: none; }
-
-    .date-cal__day-num {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      line-height: 1;
-    }
-
-    .date-cal__day:hover:not(.is-range-start):not(.is-range-end) .date-cal__day-num {
-      background: var(--color-bg-table-hover, #F5F7FA);
-    }
-
-    .date-cal__day.is-range-start .date-cal__day-num,
-    .date-cal__day.is-range-end .date-cal__day-num {
-      background: var(--color-primary);
-      color: #fff;
-    }
-
-    .date-cal__day.is-today:not(.is-range-start):not(.is-range-end) .date-cal__day-num {
-      box-shadow: inset 0 0 0 1px var(--color-primary);
-      color: var(--color-primary);
-    }
-
-    .select-trigger {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .select-trigger__text {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: #1D2129;
-    }
-
-    .select-trigger__text .muted { color: var(--color-text-4, #C9CDD4); }
-    .select-trigger__arrow {
-      width: 12px; height: 12px; color: #86909C; flex-shrink: 0;
-      transition: transform 0.15s;
-    }
-    .select-trigger.is-open .select-trigger__arrow { transform: rotate(180deg); }
-
-    .single-panel {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      margin-top: 4px;
-      background: #fff;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      z-index: 30;
-      display: none;
-      max-height: 240px;
-      overflow-y: auto;
-      padding: 4px 0;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
-    }
-
-    .single-panel.is-open { display: block; }
-    .single-panel.is-dropup {
-      top: auto;
-      bottom: 100%;
-      margin-top: 0;
-      margin-bottom: 4px;
-    }
-
-    .single-panel::-webkit-scrollbar { width: 6px; height: 6px; }
-    .single-panel::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
-    .single-panel::-webkit-scrollbar-track { background: transparent; }
-    .single-panel::-webkit-scrollbar-thumb {
-      background: rgba(201, 205, 212, 0.55);
-      border-radius: 6px;
-    }
-    .single-panel::-webkit-scrollbar-thumb:hover { background: rgba(201, 205, 212, 0.85); }
-    .single-panel::-webkit-scrollbar-corner { background: transparent; }
-
-    .single-option {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      height: 36px;
-      padding: 0 12px;
-      font-size: 14px;
-      color: #1D2129;
-      cursor: pointer;
-      background: transparent;
-      text-align: left;
-    }
-
-    .single-option:hover { background: #F5F7FA; }
-    .single-option.is-active { color: var(--color-primary); background: transparent; }
-
-    .multi-panel {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 480px;
-      margin: 4px 0 0;
-      height: calc(12px + 32px + 8px + 8px + 22px + 1px + 36px * 6);
-      background: #fff;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      z-index: 30;
-      display: none;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-
-    .multi-panel.is-open { display: flex; align-items: stretch; }
-    .multi-panel.is-align-right {
-      left: auto;
-      right: 0;
-    }
-
-    .date-panel.is-align-right {
-      left: auto;
-      right: 0;
-    }
-
-    .multi-panel__left,
-    .multi-panel__right {
-      width: 50%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .multi-panel__left { border-right: 1px solid #E5E6EB; }
-
-    .multi-panel__search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 12px 12px 8px;
-      height: 32px;
-      padding: 0 10px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      flex-shrink: 0;
-      box-sizing: border-box;
-    }
-
-    .multi-panel__search svg { width: 14px; height: 14px; color: #86909C; flex-shrink: 0; }
-    .multi-panel__search input {
-      flex: 1;
-      min-width: 0;
-      height: 100%;
-      border: none;
-      outline: none;
-      background: transparent;
-    }
-    .multi-panel__search input::placeholder { color: var(--color-text-4, #C9CDD4); }
-
-    .multi-panel__toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 0 12px 8px;
-      font-size: 13px;
-      line-height: 22px;
-      color: #4E5969;
-      flex-shrink: 0;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .multi-panel__toolbar--right {
-      justify-content: space-between;
-      height: 40px;
-      padding: 0 12px;
-      box-sizing: border-box;
-      background: #F7F8FA;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .multi-panel__link {
-      color: var(--color-primary);
-      font-size: 13px;
-    }
-
-    .multi-panel__list {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(201, 205, 212, 0.55) transparent;
-    }
-
-    .multi-panel__list::-webkit-scrollbar { width: 6px; height: 6px; }
-    .multi-panel__list::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
-    .multi-panel__list::-webkit-scrollbar-track { background: transparent; }
-    .multi-panel__list::-webkit-scrollbar-thumb {
-      background: rgba(201, 205, 212, 0.55);
-      border-radius: 6px;
-    }
-    .multi-panel__list::-webkit-scrollbar-thumb:hover { background: rgba(201, 205, 212, 0.85); }
-    .multi-panel__list::-webkit-scrollbar-corner { background: transparent; }
-
-    .multi-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      height: 36px;
-      padding: 0 12px;
-      font-size: 14px;
-      color: #1D2129;
-      cursor: pointer;
-    }
-
-    .multi-option:hover { background: #F5F7FA; }
-
-    .multi-option__label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    .multi-option__label > span:not(.select-option-icon) {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .select-option-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
-    .select-option-icon img {
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
-      display: block;
-    }
-
-    .multi-option input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 2px;
-      flex-shrink: 0;
-      cursor: pointer;
-      background: #fff;
-      box-sizing: border-box;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .multi-option:hover input[type="checkbox"],
-    .multi-option input[type="checkbox"]:hover {
-      border-color: var(--color-primary);
-    }
-
-    .multi-option input[type="checkbox"]:checked {
-      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
-      border-color: var(--color-primary);
-    }
-
-    .multi-selected {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      height: 36px;
-      padding: 0 12px;
-      font-size: 14px;
-    }
-
-    .multi-selected:hover { background: #F5F7FA; }
-    .multi-selected__name {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .multi-selected__name > span:not(.select-option-icon) {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .multi-selected__remove {
-      width: 16px; height: 16px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #C9CDD4;
-      border-radius: 2px;
-    }
-
-    .multi-selected__remove:hover { color: #86909C; background: #F2F3F5; }
-    .multi-selected__remove svg { width: 10px; height: 10px; }
-
-    .multi-panel__empty {
-      padding: 24px 12px;
-      text-align: center;
-      color: #86909C;
-      font-size: 13px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      height: 32px;
-      padding: 0 16px;
-      font-size: 14px;
-      border-radius: 4px;
-      white-space: nowrap;
-      user-select: none;
-    }
-
-    .btn:active { opacity: 0.85; }
-    .btn--primary { background: var(--color-primary); color: #fff; }
-    .btn--primary:hover { background: var(--color-primary-hover, #4080FF); }
-    .btn--default {
-      background: #fff;
-      color: #1D2129;
-      border: 1px solid #E5E6EB;
-    }
-    .btn--default:hover { color: var(--color-primary); border-color: var(--color-primary); }
-    .btn:disabled {
-      color: #C9CDD4;
-      border-color: #E5E6EB;
-      background: #F7F8FA;
-      cursor: not-allowed;
-    }
-
-    .table-shell {
-      flex: 1;
-      min-height: 0;
-      margin: 0 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .table-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
-      position: relative;
-      scrollbar-gutter: stable;
-    }
-
-    .data-table {
-      width: 100%;
-      min-width: 1480px;
-      border-collapse: separate;
-      border-spacing: 0;
-      table-layout: fixed;
-    }
-
-    .data-table th,
-    .data-table td {
-      height: 48px;
-      padding: 0 12px;
-      font-size: 14px;
-      line-height: 22px;
-      text-align: left;
-      border-right: 1px solid #E5E6EB;
-      border-bottom: 1px solid #E5E6EB;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      box-sizing: border-box;
-    }
-
-    .data-table th:first-child,
-    .data-table td:first-child { border-left: 1px solid #E5E6EB; }
-
-    .data-table thead th { border-top: 1px solid #E5E6EB; }
-
-    .data-table th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: var(--color-bg-table-header, #F7F8FA);
-      font-weight: 600;
-      color: var(--color-text-2, #4E5969);
-    }
-
-    .data-table tbody tr:hover td { background: var(--color-bg-table-hover, #F5F7FA); }
-
-    .th-sort {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      user-select: none;
-      color: inherit;
-      font: inherit;
-      font-weight: 600;
-    }
-
-    .th-sort__icons {
-      display: inline-flex;
-      flex-direction: column;
-      width: 10px;
-      color: var(--color-text-4, #C9CDD4);
-      line-height: 0;
-    }
-
-    .th-sort__icons svg { width: 10px; height: 8px; }
-    .th-sort.is-asc .th-sort__icons .asc,
-    .th-sort.is-desc .th-sort__icons .desc { color: var(--color-primary); }
-
-    .col-check { width: 48px; text-align: center; }
-    .col-product { width: 14%; }
-    .col-platform { width: 7%; }
-    .col-version { width: 8%; }
-    .col-summary { width: 16%; }
-    .col-status { width: 8%; }
-    .col-uuid { width: 10%; }
-    .col-device { width: 10%; }
-    .col-time { width: 11%; }
-
-    .col-action {
-      width: 100px;
-      position: sticky;
-      right: 0;
-      z-index: 1;
-      background: #fff;
-      padding-left: 12px;
-      padding-right: 24px;
-      box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
-    }
-
-    th.col-action { z-index: 3; background: var(--color-bg-table-header, #F7F8FA); }
-    .data-table tbody tr:hover td.col-action { background: var(--color-bg-table-hover, #F5F7FA); }
-
-    .cell-check {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-    }
-
-    .cell-check input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      margin: 0;
-      flex-shrink: 0;
-      box-sizing: border-box;
-      border: 1px solid var(--color-border-3, #C9CDD4);
-      border-radius: 2px;
-      background: #fff;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .cell-check input[type="checkbox"]:hover {
-      border-color: var(--color-primary);
-    }
-
-    .cell-check input[type="checkbox"]:checked {
-      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5L6.5 11.5L12.5 4.5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
-      border-color: var(--color-primary);
-    }
-
-    .cell-check input[type="checkbox"]:indeterminate {
-      background: var(--color-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
-      border-color: var(--color-primary);
-    }
-
-    .cell-id {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      max-width: 100%;
-    }
-
-    .cell-id__text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-
-    .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-      border-radius: 2px;
-      color: #86909C;
-    }
-
-    .copy-btn:hover { color: var(--color-primary); background: var(--color-primary-bg, #E8F3FF); }
-    .copy-btn svg { width: 14px; height: 14px; }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 52px;
-      height: 28px;
-      padding: 0 8px;
-      border-radius: 2px;
-      font-size: 12px;
-      line-height: 20px;
-      white-space: nowrap;
-    }
-
-    .tag--pending { background: var(--color-warning-1, #FFF7E8); color: var(--color-warning-6, #FF7D00); }
-    .tag--processing { background: var(--color-primary-1, #E8F3FF); color: var(--color-primary-6, #165DFF); }
-    .tag--done { background: var(--color-success-1, #E8FFEA); color: var(--color-success-6, #00B42A); }
-    .tag--ignored { background: var(--color-fill-2, #F2F3F5); color: var(--color-text-3, #86909C); }
-
-    .status-dot {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      line-height: 22px;
-      color: var(--color-text-1, #1D2129);
-      white-space: nowrap;
-    }
-
-    .status-dot::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .status-dot--pending::before { background: var(--color-warning-6, #FF7D00); }
-    .status-dot--processing::before { background: var(--color-primary-6, #165DFF); }
-    .status-dot--done::before { background: var(--color-success-6, #00B42A); }
-    .status-dot--ignored::before { background: var(--color-text-3, #86909C); }
-
-    .link { color: var(--color-primary); font-size: 14px; }
-    .link:hover { opacity: 0.85; }
-
-    .empty-tip {
-      position: absolute;
-      inset: 48px 0 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #86909C;
-      font-size: 14px;
-      pointer-events: none;
-    }
-
-    .empty-tip[hidden] { display: none; }
-
-    .pagination {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px 16px 16px;
-      font-size: var(--font-size-body-2, 14px);
-      color: var(--color-text-2, #4E5969);
-    }
-
-    .pagination__total {
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .pager { display: inline-flex; align-items: center; gap: 4px; }
-
-    .pager__btn {
-      min-width: 32px;
-      height: 32px;
-      padding: 0 8px;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: var(--border-radius-medium, 4px);
-      background: var(--color-bg-container, #fff);
-      color: var(--color-text-1, #1D2129);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pager__btn:hover:not(:disabled):not(.is-active) {
-      color: var(--color-primary);
-      border-color: var(--color-primary);
-    }
-
-    .pager__btn.is-active {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-text-inverse, #fff);
-    }
-
-    .pager__btn:disabled { color: var(--color-text-4, #C9CDD4); cursor: not-allowed; }
-    .pager__btn svg { width: 12px; height: 12px; }
-
-    .page-size-wrap {
-      position: relative;
-      width: 112px;
-      flex-shrink: 0;
-    }
-
-    .page-size-wrap .select-trigger { width: 100%; }
-
-    .page-size-wrap .single-panel {
-      min-width: 100%;
-      right: 0;
-      left: auto;
-    }
-
-    .page-jump {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .page-jump input {
-      width: 48px;
-      height: 32px;
-      padding: 0 8px;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 4px;
-      text-align: center;
-      outline: none;
-    }
-
-    .page-jump input:hover { border-color: var(--color-primary); }
-    .page-jump input:focus {
-      border-color: var(--color-primary);
-      box-shadow: var(--form-focus-shadow, 0 0 0 2px rgba(22, 93, 255, 0.2));
-    }
-
-    .page-msg {
-      position: fixed;
-      top: 72px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-8px);
-      z-index: 1000;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 4px;
-      background: #fff;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-      font-size: 14px;
-      color: #1D2129;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
-    }
-
-    .page-msg.is-show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .page-msg--success { border: 1px solid #AFF0B5; }
-    .page-msg--error { border: 1px solid #FDCDC5; }
-    .page-msg__icon { width: 16px; height: 16px; flex-shrink: 0; }
-    .page-msg--success .page-msg__icon { color: #00B42A; }
-    .page-msg--error .page-msg__icon { color: #F53F3F; }
-
-    .drawer-mask {
-      position: fixed;
-      inset: 0;
-      background: var(--color-bg-mask, rgba(29, 33, 41, 0.6));
-      z-index: 1050;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s, visibility 0.2s;
-    }
-
-    .drawer-mask.is-open { opacity: 1; visibility: visible; }
-
-    .drawer {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 1020px;
-      max-width: calc(100vw - 32px);
-      height: 100%;
-      background: #fff;
-      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
-      display: flex;
-      flex-direction: column;
-      transform: translateX(100%);
-      transition: transform 0.25s ease;
-    }
-
-    .drawer-mask.is-open .drawer { transform: translateX(0); }
-
-    .drawer__header {
-      flex-shrink: 0;
-      height: 48px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .drawer__title { font-size: 16px; font-weight: 500; }
-
-    .drawer__close,
-    .modal__close {
-      width: 28px; height: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      color: var(--color-text-3, #86909C);
-    }
-
-    .drawer__close:hover,
-    .modal__close:hover { background: var(--color-fill-2, #F2F3F5); color: #1D2129; }
-    .drawer__close svg,
-    .modal__close svg { width: 12px; height: 12px; }
-
-    .drawer__body {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 24px var(--size-10, 40px) 8px;
-    }
-
-    .drawer__footer {
-      flex-shrink: 0;
-      padding: 16px 24px;
-      border-top: 1px solid var(--color-border-2, #E5E6EB);
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-    }
-
-    .detail-block { margin: 0; }
-    .detail-block + .detail-block { margin-top: 24px; }
-
-    .detail-block--info {
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .detail-block__title {
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 22px;
-      margin: 0 0 16px;
-      color: var(--color-text-1, #1D2129);
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px 40px;
-      align-items: center;
-    }
-
-    .detail-field {
-      display: flex;
-      align-items: center;
-      min-width: 0;
-      min-height: 28px;
-      gap: var(--spacing-sm, 8px);
-    }
-
-    .detail-field__label {
-      flex-shrink: 0;
-      width: 72px;
-      font-size: 14px;
-      line-height: 22px;
-      color: var(--color-text-3, #86909C);
-      box-sizing: border-box;
-    }
-
-    .detail-field__value {
-      flex: 1;
-      min-width: 0;
-      min-height: 28px;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      font-size: 14px;
-      line-height: 22px;
-      color: var(--color-text-1, #1D2129);
-      word-break: break-all;
-    }
-
-    .detail-desc {
-      height: 120px;
-      overflow-y: auto;
-      padding: 12px;
-      border: 1px solid var(--color-border-2, #E5E6EB);
-      border-radius: 4px;
-      background: var(--color-fill-1, #F7F8FA);
-      font-size: 14px;
-      line-height: 22px;
-      color: var(--color-text-1, #1D2129);
-      white-space: pre-wrap;
-      word-break: break-word;
-      box-sizing: border-box;
-    }
-
-    .status-quick {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding-top: 0;
-    }
-
-    .status-quick__btn {
-      height: 32px;
-      padding: 0 14px;
-      border: 1px solid #E5E6EB;
-      border-radius: 4px;
-      background: #fff;
-      font-size: 14px;
-      color: #1D2129;
-    }
-
-    .status-quick__btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-    .status-quick__btn.is-active {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-      background: transparent;
-    }
-
-    /* Modal */
-    .modal-mask {
-      position: fixed;
-      inset: 0;
-      z-index: 1050;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--color-bg-mask, rgba(29, 33, 41, 0.6));
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s, visibility 0.2s;
-    }
-
-    .modal-mask.is-open { opacity: 1; visibility: visible; }
-
-    .modal {
-      width: 800px;
-      max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 80px);
-      display: flex;
-      flex-direction: column;
-      background: var(--color-bg-container, #fff);
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      overflow: hidden;
-    }
-
-    .modal--form { overflow: visible; }
-
-    .modal__header {
-      height: 48px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .modal__title { font-size: 16px; font-weight: 500; line-height: 24px; color: #1D2129; }
-
-    .modal__body {
-      padding: 24px 24px 8px;
-      overflow: visible;
-    }
-
-    .modal__hint {
-      margin: 0 0 20px;
-      font-size: 14px;
-      line-height: 22px;
-      color: var(--color-text-2, #4E5969);
-    }
-
-    .modal__footer {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 12px;
-      padding: 16px 24px;
-      flex-shrink: 0;
-      border-top: 1px solid var(--color-border-2, #E5E6EB);
-    }
-
-    .form-item {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 20px;
-    }
-
-    .form-item__label {
-      width: 120px;
-      flex-shrink: 0;
-      padding: 5px 8px;
-      font-size: 14px;
-      line-height: 22px;
-      color: #1D2129;
-      text-align: left;
-      box-sizing: border-box;
-    }
-
-    .form-item__label .req { color: var(--color-danger-6, #F53F3F); margin-left: 2px; }
-
-    .form-item__control {
-      position: relative;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .drawer .form-item__control {
-      min-height: 32px;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      font-size: 14px;
-      line-height: 22px;
-      color: var(--color-text-1, #1D2129);
-      word-break: break-all;
-    }
-
-    body.drawer-open,
-    body.modal-open { overflow: hidden; }
-  </style>
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="feedback-tickets.css" />
   <link rel="stylesheet" href="col-resize.css" />
 </head>
 <body>
@@ -1468,11 +18,11 @@
         <span class="brand-name">海外中台</span>
       </div>
       <nav class="header-nav" aria-label="顶部导航">
-        <a href="#" class="header-nav__item">首页</a>
-        <a href="#" class="header-nav__item">看板</a>
-        <a href="tiktok-accounts.html" class="header-nav__item">产品</a>
-        <a href="#" class="header-nav__item is-active">工具</a>
-        <a href="menu-management.html" class="header-nav__item">管理</a>
+        <a href="#" class="header-nav__item" data-menu-name="首页">首页</a>
+        <a href="dashboard.html" class="header-nav__item" data-menu-name="看板">看板</a>
+        <a href="tiktok-accounts.html" class="header-nav__item" data-menu-name="产品">产品</a>
+        <a href="feedback-tickets.html" class="header-nav__item is-active" data-menu-name="工具">工具</a>
+        <a href="menu-management.html" class="header-nav__item" data-menu-name="管理">管理</a>
       </nav>
       <div class="header-right">
         <button class="header-icon" type="button" title="下载" aria-label="下载">
@@ -1703,9 +253,23 @@
             </div>
           </div>
 
+          <div class="data-panel">
           <div class="table-shell">
             <div class="table-wrap">
               <table class="data-table" id="ticketTable">
+                <colgroup>
+                  <col class="col-check" />
+                  <col class="col-product" />
+                  <col class="col-platform" />
+                  <col class="col-version" />
+                  <col class="col-summary" />
+                  <col class="col-status" />
+                  <col class="col-uuid" />
+                  <col class="col-device" />
+                  <col class="col-time" />
+                  <col class="col-time" />
+                  <col class="col-action" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th class="col-check"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
@@ -1732,6 +296,7 @@
           </div>
 
           <div class="pagination" id="pagination"></div>
+          </div>
         </div>
       </main>
     </div>
@@ -1786,8 +351,10 @@
     </div>
   </div>
 
+  <script src="product-common.js"></script>
   <script>
     (function () {
+      const UI = window.ProductUI;
       const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 
       const PRODUCT_CATALOG = [
@@ -1832,19 +399,6 @@
       }
 
       const STATUSES = ['待处理', '处理中', '已处理', '不处理'];
-      const STATUS_CLASS = {
-        '待处理': 'tag--pending',
-        '处理中': 'tag--processing',
-        '已处理': 'tag--done',
-        '不处理': 'tag--ignored'
-      };
-      const STATUS_DOT_CLASS = {
-        '待处理': 'status-dot--pending',
-        '处理中': 'status-dot--processing',
-        '已处理': 'status-dot--done',
-        '不处理': 'status-dot--ignored'
-      };
-
       const FEEDBACK_CONTENTS = [
         '一打开游戏就闪退，进不去主页，重装了还是一样。',
         '刚才充值成功了钱扣了但是钻石没到账，麻烦看一下。',
@@ -1890,14 +444,6 @@
         if (!str) return null;
         const d = new Date(str.replace(/-/g, '/'));
         return isNaN(d.getTime()) ? null : d;
-      }
-
-      function escapeHtml(str) {
-        return String(str)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
       }
 
       function hashHex(seed, len) {
@@ -1994,387 +540,29 @@
       let drawerTicketId = null;
       let drawerStatus = null;
       let batchStatus = null;
-      let rangeStart = null;
-      let rangeEnd = null;
-      let pickingStart = null;
-      let activeShortcut = 'last7';
-      let viewMonth = null;
 
       const ticketBody = document.getElementById('ticketBody');
       const emptyTip = document.getElementById('emptyTip');
       const checkAll = document.getElementById('checkAll');
       const batchBtn = document.getElementById('batchBtn');
-      const dateRangeTrigger = document.getElementById('dateRangeTrigger');
-      const dateRangeLabel = document.getElementById('dateRangeLabel');
-      const datePanel = document.getElementById('datePanel');
 
-      function startOfDay(d) {
-        const x = new Date(d);
-        x.setHours(0, 0, 0, 0);
-        return x;
-      }
+      const escapeHtml = UI.escapeHtml;
+      const showMsg = function (text, type) { UI.showToast(text, type); };
+      const copyText = function (text) { UI.copyText(text); };
 
-      function addDays(d, n) {
-        const x = startOfDay(d);
-        x.setDate(x.getDate() + n);
-        return x;
-      }
+      const dateRange = UI.bindDateRange({
+        wrapId: 'dateRangeWrap',
+        triggerId: 'dateRangeTrigger',
+        labelId: 'dateRangeLabel',
+        panelId: 'datePanel',
+        shortcutsId: 'dateShortcuts',
+        calLeftId: 'dateCalLeft',
+        calRightId: 'dateCalRight',
+        prefix: '日期：',
+        defaultShortcut: 'last7'
+      });
 
-      function sameDay(a, b) {
-        return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-      }
-
-      function dayKey(d) {
-        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-      }
-
-      function mondayOf(d) {
-        const x = startOfDay(d);
-        const day = x.getDay();
-        const diff = day === 0 ? -6 : 1 - day;
-        return addDays(x, diff);
-      }
-
-      function getShortcutRange(key) {
-        const today = startOfDay(new Date());
-        if (key === 'today') return [today, today];
-        if (key === 'yesterday') {
-          const y = addDays(today, -1);
-          return [y, y];
-        }
-        if (key === 'last7') return [addDays(today, -6), today];
-        if (key === 'last30') return [addDays(today, -29), today];
-        if (key === 'thisWeek') return [mondayOf(today), today];
-        if (key === 'lastWeek') {
-          const thisMon = mondayOf(today);
-          const lastMon = addDays(thisMon, -7);
-          return [lastMon, addDays(lastMon, 6)];
-        }
-        if (key === 'thisMonth') {
-          return [new Date(today.getFullYear(), today.getMonth(), 1), today];
-        }
-        if (key === 'lastMonth') {
-          const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-          const last = new Date(today.getFullYear(), today.getMonth(), 0);
-          return [first, last];
-        }
-        return [addDays(today, -6), today];
-      }
-
-      function matchShortcut(start, end) {
-        const keys = ['today', 'yesterday', 'last7', 'last30', 'thisWeek', 'lastWeek', 'thisMonth', 'lastMonth'];
-        for (let i = 0; i < keys.length; i++) {
-          const r = getShortcutRange(keys[i]);
-          if (sameDay(start, r[0]) && sameDay(end, r[1])) return keys[i];
-        }
-        return '';
-      }
-
-      function syncDateLabel() {
-        if (!rangeStart) {
-          dateRangeLabel.innerHTML = '日期：<span class="muted">请选择</span>';
-          return;
-        }
-        if (!rangeEnd) {
-          dateRangeLabel.textContent = '日期：' + formatDate(rangeStart) + ' - ...';
-          return;
-        }
-        dateRangeLabel.textContent = '日期：' + formatDate(rangeStart) + ' - ' + formatDate(rangeEnd);
-      }
-
-      function syncShortcutActive() {
-        document.querySelectorAll('#dateShortcuts .date-shortcut').forEach(function (btn) {
-          btn.classList.toggle('is-active', btn.getAttribute('data-shortcut') === activeShortcut);
-        });
-      }
-
-      function setRange(start, end, shortcut) {
-        rangeStart = startOfDay(start);
-        rangeEnd = startOfDay(end);
-        if (rangeStart > rangeEnd) {
-          const t = rangeStart;
-          rangeStart = rangeEnd;
-          rangeEnd = t;
-        }
-        pickingStart = null;
-        activeShortcut = shortcut == null ? matchShortcut(rangeStart, rangeEnd) : shortcut;
-        viewMonth = new Date(rangeEnd.getFullYear(), rangeEnd.getMonth() - 1, 1);
-        syncDateLabel();
-        syncShortcutActive();
-        renderCalendars();
-      }
-
-      function renderOneCalendar(el, year, month, navLeft, navRight) {
-        const weekLabels = ['一', '二', '三', '四', '五', '六', '日'];
-        const first = new Date(year, month, 1);
-        const startOffset = (first.getDay() + 6) % 7;
-        const gridStart = addDays(first, -startOffset);
-        const today = startOfDay(new Date());
-        let selStart = rangeStart;
-        let selEnd = rangeEnd;
-        if (pickingStart && !rangeEnd) {
-          selStart = pickingStart;
-          selEnd = pickingStart;
-        }
-
-        let daysHtml = '';
-        for (let i = 0; i < 42; i++) {
-          const d = addDays(gridStart, i);
-          const out = d.getMonth() !== month;
-          const key = dayKey(d);
-          const isStart = selStart && sameDay(d, selStart);
-          const isEnd = selEnd && sameDay(d, selEnd);
-          const inRange = selStart && selEnd && d >= selStart && d <= selEnd && !sameDay(selStart, selEnd);
-          const cls = [
-            'date-cal__day',
-            out ? 'is-out' : '',
-            sameDay(d, today) ? 'is-today' : '',
-            isStart ? 'is-range-start' : '',
-            isEnd ? 'is-range-end' : '',
-            inRange || isStart || isEnd ? 'is-in-range' : ''
-          ].filter(Boolean).join(' ');
-          daysHtml += '<button class="' + cls + '" type="button" data-day="' + key + '"><span class="date-cal__day-num">' + d.getDate() + '</span></button>';
-        }
-
-        const leftNav = navLeft
-          ? '<div class="date-cal__nav">' +
-              '<button class="date-cal__btn" type="button" data-nav="prev-year" aria-label="上一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg></button>' +
-              '<button class="date-cal__btn" type="button" data-nav="prev-month" aria-label="上一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg></button>' +
-            '</div>'
-          : '<div class="date-cal__nav" style="width:52px"></div>';
-        const rightNav = navRight
-          ? '<div class="date-cal__nav">' +
-              '<button class="date-cal__btn" type="button" data-nav="next-month" aria-label="下一月"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></button>' +
-              '<button class="date-cal__btn" type="button" data-nav="next-year" aria-label="下一年"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg></button>' +
-            '</div>'
-          : '<div class="date-cal__nav" style="width:52px"></div>';
-
-        el.innerHTML =
-          '<div class="date-cal__header">' + leftNav +
-            '<div class="date-cal__title">' + year + ' 年 ' + (month + 1) + ' 月</div>' + rightNav +
-          '</div>' +
-          '<div class="date-cal__week">' + weekLabels.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
-          '<div class="date-cal__grid">' + daysHtml + '</div>';
-      }
-
-      function renderCalendars() {
-        if (!viewMonth) viewMonth = new Date();
-        const left = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1);
-        const right = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1);
-        renderOneCalendar(document.getElementById('dateCalLeft'), left.getFullYear(), left.getMonth(), true, false);
-        renderOneCalendar(document.getElementById('dateCalRight'), right.getFullYear(), right.getMonth(), false, true);
-      }
-
-      function closeDatePanel() {
-        datePanel.classList.remove('is-open');
-        dateRangeTrigger.classList.remove('is-open');
-      }
-
-      function openDatePanel() {
-        closeAllPanels(document.getElementById('dateRangeWrap'));
-        datePanel.classList.add('is-open');
-        dateRangeTrigger.classList.add('is-open');
-        renderCalendars();
-        fitDropdownPanel(datePanel);
-      }
-
-      function setDefaultDates() {
-        const r = getShortcutRange('last7');
-        setRange(r[0], r[1], 'last7');
-      }
-
-      function showMsg(text, type) {
-        const el = document.getElementById('pageMsg');
-        const icon = type === 'error'
-          ? '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>'
-          : '<svg class="page-msg__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>';
-        el.className = 'page-msg page-msg--' + (type || 'success') + ' is-show';
-        el.innerHTML = icon + '<span>' + escapeHtml(text) + '</span>';
-        clearTimeout(showMsg._t);
-        showMsg._t = setTimeout(function () { el.classList.remove('is-show'); }, 2000);
-      }
-
-      async function copyText(text) {
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-          } else {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.setAttribute('readonly', '');
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-          }
-          showMsg('已复制');
-        } catch (e) {
-          showMsg('复制失败', 'error');
-        }
-      }
-
-      function closeAllPanels(except) {
-        document.querySelectorAll('.select-trigger.is-open, .date-range-trigger.is-open').forEach(function (el) {
-          if (except && (el === except || except.contains(el))) return;
-          el.classList.remove('is-open');
-        });
-        document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open, .date-panel.is-open').forEach(function (el) {
-          if (except && except.contains(el)) return;
-          el.classList.remove('is-open');
-          el.classList.remove('is-dropup');
-          el.classList.remove('is-align-right');
-        });
-      }
-
-      function fitDropdownPanel(panel) {
-        if (!panel) return;
-        panel.classList.remove('is-align-right');
-        const rect = panel.getBoundingClientRect();
-        const margin = 16;
-        if (rect.right > window.innerWidth - margin) {
-          panel.classList.add('is-align-right');
-        }
-      }
-
-      function createMultiSelect(cfg) {
-        const trigger = document.getElementById(cfg.triggerId);
-        const panel = document.getElementById(cfg.panelId);
-        const listEl = document.getElementById(cfg.listId);
-        const selectedEl = document.getElementById(cfg.selectedId);
-        const countEl = document.getElementById(cfg.countId);
-        const labelEl = document.getElementById(cfg.labelId);
-        const searchEl = document.getElementById(cfg.searchId);
-        let selected = cfg.getSelected();
-
-        function syncSelectedRef() {
-          selected = cfg.getSelected();
-        }
-
-        function optionLabel(value) {
-          return cfg.getLabel ? cfg.getLabel(value) : value;
-        }
-
-        function optionIcon(value) {
-          return cfg.getIconHtml ? cfg.getIconHtml(value) : '';
-        }
-
-        function optionContentHtml(value) {
-          const icon = optionIcon(value);
-          const label = optionLabel(value);
-          const text = escapeHtml(label);
-          const title = ' title="' + escapeHtml(label) + '"';
-          if (!icon) return '<span' + title + '>' + text + '</span>';
-          return icon + '<span' + title + '>' + text + '</span>';
-        }
-
-        function matchesKeyword(value, kw) {
-          if (!kw) return true;
-          return optionLabel(value).toLowerCase().indexOf(kw) !== -1;
-        }
-
-        function updateLabel() {
-          syncSelectedRef();
-          countEl.textContent = '已选择 ' + selected.length + ' 项';
-          const prefix = cfg.prefix || '';
-          if (!selected.length) {
-            labelEl.innerHTML = prefix + '<span class="muted">请选择</span>';
-          } else {
-            labelEl.textContent = prefix + '已选 ' + selected.length + ' 项';
-          }
-        }
-
-        function renderSelected() {
-          syncSelectedRef();
-          if (!selected.length) {
-            selectedEl.innerHTML = '<div class="multi-panel__empty">暂无选择</div>';
-            return;
-          }
-          selectedEl.innerHTML = selected.map(function (name) {
-            return '<div class="multi-selected"><span class="multi-selected__name">' + optionContentHtml(name) + '</span>' +
-              '<button class="multi-selected__remove" type="button" data-remove="' + escapeHtml(name) + '" aria-label="移除">' +
-              '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l6 6M8 2L2 8"/></svg></button></div>';
-          }).join('');
-        }
-
-        function renderList() {
-          syncSelectedRef();
-          const kw = (searchEl.value || '').trim().toLowerCase();
-          const items = cfg.options.filter(function (name) {
-            return matchesKeyword(name, kw);
-          });
-          listEl.innerHTML = items.map(function (name) {
-            const checked = selected.indexOf(name) !== -1;
-            return '<label class="multi-option"><input type="checkbox" value="' + escapeHtml(name) + '"' + (checked ? ' checked' : '') + ' /><span class="multi-option__label">' + optionContentHtml(name) + '</span></label>';
-          }).join('') || '<div class="multi-panel__empty">无匹配项</div>';
-        }
-
-        function refresh() {
-          updateLabel();
-          renderSelected();
-          renderList();
-        }
-
-        trigger.addEventListener('click', function (e) {
-          e.stopPropagation();
-          const willOpen = !panel.classList.contains('is-open');
-          closeAllPanels(document.getElementById(cfg.wrapId));
-          if (willOpen) {
-            trigger.classList.add('is-open');
-            panel.classList.add('is-open');
-            refresh();
-            fitDropdownPanel(panel);
-          }
-        });
-
-        listEl.addEventListener('change', function (e) {
-          const input = e.target;
-          if (input.tagName !== 'INPUT') return;
-          const val = input.value;
-          const next = cfg.getSelected().slice();
-          if (input.checked) {
-            if (next.indexOf(val) === -1) next.push(val);
-          } else {
-            const idx = next.indexOf(val);
-            if (idx !== -1) next.splice(idx, 1);
-          }
-          cfg.setSelected(next);
-          refresh();
-        });
-
-        selectedEl.addEventListener('click', function (e) {
-          const btn = e.target.closest('[data-remove]');
-          if (!btn) return;
-          const name = btn.getAttribute('data-remove');
-          cfg.setSelected(cfg.getSelected().filter(function (n) { return n !== name; }));
-          refresh();
-        });
-
-        document.getElementById(cfg.selectAllId).addEventListener('click', function () {
-          const kw = (searchEl.value || '').trim().toLowerCase();
-          const visible = cfg.options.filter(function (name) {
-            return matchesKeyword(name, kw);
-          });
-          const next = cfg.getSelected().slice();
-          visible.forEach(function (name) {
-            if (next.indexOf(name) === -1) next.push(name);
-          });
-          cfg.setSelected(next);
-          refresh();
-        });
-
-        document.getElementById(cfg.clearId).addEventListener('click', function () {
-          cfg.setSelected([]);
-          refresh();
-        });
-
-        searchEl.addEventListener('input', renderList);
-
-        return { refresh: refresh, updateLabel: updateLabel };
-      }
-
-      const productSelect = createMultiSelect({
+      UI.bindMultiSelect({
         wrapId: 'productWrap',
         triggerId: 'productTrigger',
         panelId: 'productPanel',
@@ -2393,7 +581,7 @@
         setSelected: function (v) { selectedProducts = v; }
       });
 
-      const versionSelect = createMultiSelect({
+      UI.bindMultiSelect({
         wrapId: 'versionWrap',
         triggerId: 'versionTrigger',
         panelId: 'versionPanel',
@@ -2410,7 +598,7 @@
         setSelected: function (v) { selectedVersions = v; }
       });
 
-      const sdkVersionSelect = createMultiSelect({
+      UI.bindMultiSelect({
         wrapId: 'sdkVersionWrap',
         triggerId: 'sdkVersionTrigger',
         panelId: 'sdkVersionPanel',
@@ -2427,110 +615,50 @@
         setSelected: function (v) { selectedSdkVersions = v; }
       });
 
-      /* Platform single select */
-      (function () {
-        const trigger = document.getElementById('platformTrigger');
-        const panel = document.getElementById('platformPanel');
-        const label = document.getElementById('platformLabel');
-        trigger.addEventListener('click', function (e) {
-          e.stopPropagation();
-          const willOpen = !panel.classList.contains('is-open');
-          closeAllPanels(document.getElementById('platformWrap'));
-          if (willOpen) {
-            trigger.classList.add('is-open');
-            panel.classList.add('is-open');
-          }
-        });
-        panel.addEventListener('click', function (e) {
-          const opt = e.target.closest('.single-option');
-          if (!opt) return;
-          platformValue = opt.getAttribute('data-value');
-          label.textContent = '平台：' + platformValue;
-          panel.querySelectorAll('.single-option').forEach(function (el) {
-            el.classList.toggle('is-active', el === opt);
-          });
-          closeAllPanels();
-        });
-      })();
-
-      /* Status single select */
-      (function () {
-        const trigger = document.getElementById('statusTrigger');
-        const panel = document.getElementById('statusPanel');
-        const label = document.getElementById('statusLabel');
-        trigger.addEventListener('click', function (e) {
-          e.stopPropagation();
-          const willOpen = !panel.classList.contains('is-open');
-          closeAllPanels(document.getElementById('statusWrap'));
-          if (willOpen) {
-            trigger.classList.add('is-open');
-            panel.classList.add('is-open');
-          }
-        });
-        panel.addEventListener('click', function (e) {
-          const opt = e.target.closest('.single-option');
-          if (!opt) return;
-          statusValue = opt.getAttribute('data-value');
-          label.textContent = '状态：' + statusValue;
-          panel.querySelectorAll('.single-option').forEach(function (el) {
-            el.classList.toggle('is-active', el === opt);
-          });
-          closeAllPanels();
-        });
-      })();
-
-      document.addEventListener('click', function () { closeAllPanels(); });
-      document.querySelectorAll('.multi-panel, .single-panel, .filter-item, .date-panel').forEach(function (el) {
-        el.addEventListener('click', function (e) { e.stopPropagation(); });
+      UI.bindSingleSelect({
+        wrapId: 'platformWrap',
+        triggerId: 'platformTrigger',
+        panelId: 'platformPanel',
+        labelId: 'platformLabel',
+        prefix: '平台：',
+        getValue: function () { return platformValue; },
+        onChange: function (v) { platformValue = v || '全部'; }
       });
 
-      dateRangeTrigger.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (datePanel.classList.contains('is-open')) closeDatePanel();
-        else openDatePanel();
+      UI.bindSingleSelect({
+        wrapId: 'statusWrap',
+        triggerId: 'statusTrigger',
+        panelId: 'statusPanel',
+        labelId: 'statusLabel',
+        prefix: '状态：',
+        getValue: function () { return statusValue; },
+        onChange: function (v) { statusValue = v || '全部'; }
       });
 
-      document.getElementById('dateShortcuts').addEventListener('click', function (e) {
-        const btn = e.target.closest('[data-shortcut]');
-        if (!btn) return;
-        const key = btn.getAttribute('data-shortcut');
-        const r = getShortcutRange(key);
-        setRange(r[0], r[1], key);
-        closeDatePanel();
+      UI.bindPagination({
+        containerId: 'pagination',
+        getTotal: function () { return filtered.length; },
+        getPage: function () { return currentPage; },
+        getPageSize: function () { return pageSize; },
+        onPageChange: function (p) { currentPage = p; renderTable(); },
+        onPageSizeChange: function (s) { pageSize = s; currentPage = 1; renderTable(); }
       });
 
-      datePanel.addEventListener('click', function (e) {
-        const nav = e.target.closest('[data-nav]');
-        if (nav) {
-          const type = nav.getAttribute('data-nav');
-          if (type === 'prev-month') viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1);
-          if (type === 'next-month') viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1);
-          if (type === 'prev-year') viewMonth = new Date(viewMonth.getFullYear() - 1, viewMonth.getMonth(), 1);
-          if (type === 'next-year') viewMonth = new Date(viewMonth.getFullYear() + 1, viewMonth.getMonth(), 1);
-          renderCalendars();
-          return;
+      const thSort = UI.bindThSort({
+        root: '#ticketTable',
+        getState: function () { return sortState; },
+        setState: function (next) { sortState = next; },
+        onChange: function () {
+          filtered = applySort(filtered);
+          renderTable();
         }
-        const dayBtn = e.target.closest('[data-day]');
-        if (!dayBtn) return;
-        const d = parseDate(dayBtn.getAttribute('data-day'));
-        if (!d) return;
-        if (!pickingStart) {
-          pickingStart = startOfDay(d);
-          rangeStart = pickingStart;
-          rangeEnd = null;
-          activeShortcut = '';
-          syncShortcutActive();
-          syncDateLabel();
-          renderCalendars();
-          return;
-        }
-        setRange(pickingStart, d, null);
-        closeDatePanel();
       });
+
+      UI.bindSidebar();
 
       function applyFilter() {
-        const start = rangeStart;
-        const end = rangeEnd;
+        const start = dateRange.getStart();
+        const end = dateRange.getEnd();
         let endTs = end ? end.getTime() + 86400000 - 1 : null;
         const contentKw = (document.getElementById('contentKeyword').value || '').trim().toLowerCase();
         const uuidKw = (document.getElementById('uuidKeyword').value || '').trim().toLowerCase();
@@ -2573,15 +701,6 @@
         });
       }
 
-      function syncSortHeaders() {
-        document.querySelectorAll('#ticketTable .th-sort').forEach(function (btn) {
-          const key = btn.getAttribute('data-key');
-          const active = !!sortState.key && sortState.key === key;
-          btn.classList.toggle('is-asc', active && sortState.dir === 'asc');
-          btn.classList.toggle('is-desc', active && sortState.dir === 'desc');
-        });
-      }
-
       function updateBatchBtn() {
         batchBtn.disabled = selectedIds.size === 0;
       }
@@ -2602,7 +721,7 @@
             '<td>' + escapeHtml(row.platform) + '</td>' +
             '<td>' + escapeHtml(row.version) + '</td>' +
             '<td title="' + escapeHtml(row.content) + '">' + escapeHtml(truncateSummary(row.content)) + '</td>' +
-            '<td><span class="status-dot ' + STATUS_DOT_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span></td>' +
+            '<td>' + UI.taskStatusDot(row.status) + '</td>' +
             '<td><span class="cell-id"><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.uuid) + '" aria-label="复制UUID">' + COPY_ICON + '</button><span class="cell-id__text" title="' + escapeHtml(row.uuid) + '">' + escapeHtml(row.uuid) + '</span></span></td>' +
             '<td><span class="cell-id"><button class="copy-btn" type="button" data-copy="' + escapeHtml(row.deviceId) + '" aria-label="复制设备ID">' + COPY_ICON + '</button><span class="cell-id__text" title="' + escapeHtml(row.deviceId) + '">' + escapeHtml(row.deviceId) + '</span></span></td>' +
             '<td title="' + escapeHtml(row.createdAt) + '">' + escapeHtml(row.createdAt) + '</td>' +
@@ -2615,99 +734,21 @@
         checkAll.checked = pageChecked;
         checkAll.indeterminate = !pageChecked && pageRows.some(function (r) { return selectedIds.has(r.id); });
 
-        renderPagination(total, pages);
+        UI.renderPagination({
+          containerId: 'pagination',
+          total: total,
+          page: currentPage,
+          pageSize: pageSize
+        });
         updateBatchBtn();
-        syncSortHeaders();
-      }
-
-      function renderPagination(total, pages) {
-        const el = document.getElementById('pagination');
-        const maxShow = 5;
-        let from = Math.max(1, currentPage - 2);
-        let to = Math.min(pages, from + maxShow - 1);
-        from = Math.max(1, to - maxShow + 1);
-
-        let pageBtns = '';
-        for (let p = from; p <= to; p++) {
-          pageBtns += '<button class="pager__btn' + (p === currentPage ? ' is-active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
-        }
-
-        el.innerHTML =
-          '<span class="pagination__total">共 ' + total + ' 条</span>' +
-          '<div class="page-size-wrap" data-role="page-size-wrap">' +
-            '<button class="select-trigger" type="button" data-role="page-size-trigger">' +
-              '<span class="select-trigger__text">' + pageSize + ' 条/页</span>' +
-              '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
-            '</button>' +
-            '<div class="single-panel" data-role="page-size-panel">' +
-              [10, 20, 50, 100].map(function (n) {
-                return '<button class="single-option' + (n === pageSize ? ' is-active' : '') + '" type="button" data-size="' + n + '">' + n + ' 条/页</button>';
-              }).join('') +
-            '</div>' +
-          '</div>' +
-          '<div class="pager">' +
-            '<button class="pager__btn" type="button" data-page="1"' + (currentPage <= 1 ? ' disabled' : '') + ' aria-label="首页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2L2 6l4 4M10 2L6 6l4 4"/></svg></button>' +
-            '<button class="pager__btn" type="button" data-page="' + (currentPage - 1) + '"' + (currentPage <= 1 ? ' disabled' : '') + ' aria-label="上一页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2L4 6l4 4"/></svg></button>' +
-            pageBtns +
-            '<button class="pager__btn" type="button" data-page="' + (currentPage + 1) + '"' + (currentPage >= pages ? ' disabled' : '') + ' aria-label="下一页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 2l4 4-4 4"/></svg></button>' +
-            '<button class="pager__btn" type="button" data-page="' + pages + '"' + (currentPage >= pages ? ' disabled' : '') + ' aria-label="尾页">' +
-              '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l4 4-4 4M6 2l4 4-4 4"/></svg></button>' +
-          '</div>' +
-          '<div class="page-jump">前往 <input data-role="page-jump" type="text" value="' + currentPage + '" /> 页</div>';
-
-        const sizeWrap = el.querySelector('[data-role="page-size-wrap"]');
-        const sizeTrigger = el.querySelector('[data-role="page-size-trigger"]');
-        const sizePanel = el.querySelector('[data-role="page-size-panel"]');
-
-        sizeTrigger.addEventListener('click', function (e) {
-          e.stopPropagation();
-          const open = !sizePanel.classList.contains('is-open');
-          closeAllPanels(sizeWrap);
-          if (open) {
-            sizePanel.classList.add('is-open');
-            sizeTrigger.classList.add('is-open');
-            sizePanel.classList.remove('is-dropup');
-            const rect = sizeTrigger.getBoundingClientRect();
-            const panelHeight = sizePanel.scrollHeight || 160;
-            if (window.innerHeight - rect.bottom < panelHeight + 8) {
-              sizePanel.classList.add('is-dropup');
-            }
-          }
-        });
-        sizeWrap.addEventListener('click', function (e) { e.stopPropagation(); });
-        sizePanel.querySelectorAll('[data-size]').forEach(function (opt) {
-          opt.addEventListener('click', function () {
-            pageSize = Number(opt.getAttribute('data-size')) || 10;
-            currentPage = 1;
-            renderTable();
-          });
-        });
-        el.querySelectorAll('.pager [data-page]').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            if (btn.disabled) return;
-            const next = Number(btn.getAttribute('data-page'));
-            if (!isFinite(next) || next < 1 || next > pages || next === currentPage) return;
-            currentPage = next;
-            renderTable();
-          });
-        });
-        el.querySelector('[data-role="page-jump"]').addEventListener('keydown', function (e) {
-          if (e.key !== 'Enter') return;
-          const next = Number(e.target.value);
-          if (!isFinite(next)) return;
-          currentPage = Math.min(pages, Math.max(1, Math.floor(next)));
-          renderTable();
-        });
+        if (thSort) thSort.sync();
       }
 
       function findTicket(id) {
         return allTickets.find(function (r) { return r.id === id; });
       }
 
-      function openDrawer(id) {
+      function openTicketDrawer(id) {
         const row = findTicket(id);
         if (!row) return;
         drawerTicketId = id;
@@ -2738,7 +779,7 @@
               field('安装时间', escapeHtml(row.installedAt || '-')) +
               field('关卡ID', escapeHtml(row.levelId != null ? String(row.levelId) : '-')) +
               field('用户邮箱', copyField(row.email, '复制用户邮箱')) +
-              field('当前状态', '<span class="tag ' + STATUS_CLASS[row.status] + '">' + escapeHtml(row.status) + '</span>') +
+              field('当前状态', UI.taskStatusTag(row.status)) +
             '</div>' +
           '</div>' +
           '<div class="detail-block">' +
@@ -2754,15 +795,11 @@
             '</div>' +
           '</div>';
 
-        document.getElementById('detailDrawer').classList.add('is-open');
-        document.getElementById('detailDrawer').setAttribute('aria-hidden', 'false');
-        document.body.classList.add('drawer-open');
+        UI.openDrawer('detailDrawer');
       }
 
-      function closeDrawer() {
-        document.getElementById('detailDrawer').classList.remove('is-open');
-        document.getElementById('detailDrawer').setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('drawer-open');
+      function closeTicketDrawer() {
+        UI.closeDrawer('detailDrawer');
         drawerTicketId = null;
         drawerStatus = null;
       }
@@ -2779,7 +816,7 @@
         row.updatedAt = formatDateTime(new Date());
         row.updatedTs = Date.now();
         showMsg('状态已更新为「' + drawerStatus + '」');
-        closeDrawer();
+        closeTicketDrawer();
         applyFilterKeepPage();
       }
 
@@ -2800,15 +837,11 @@
         document.querySelectorAll('#batchStatusQuick .status-quick__btn').forEach(function (btn) {
           btn.classList.remove('is-active');
         });
-        document.getElementById('batchModal').classList.add('is-open');
-        document.getElementById('batchModal').setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
+        UI.openModal('batchModal');
       }
 
       function closeBatchModal() {
-        document.getElementById('batchModal').classList.remove('is-open');
-        document.getElementById('batchModal').setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('modal-open');
+        UI.closeModal('batchModal');
         batchStatus = null;
       }
 
@@ -2866,19 +899,6 @@
       document.getElementById('exportBtn').addEventListener('click', exportCsv);
       document.getElementById('batchBtn').addEventListener('click', openBatchModal);
 
-      document.getElementById('ticketTable').addEventListener('click', function (e) {
-        const sortBtn = e.target.closest('.th-sort');
-        if (!sortBtn) return;
-        const key = sortBtn.getAttribute('data-key');
-        if (sortState.key === key) {
-          sortState.dir = sortState.dir === 'desc' ? 'asc' : 'desc';
-        } else {
-          sortState = { key: key, dir: 'desc' };
-        }
-        filtered = applySort(filtered);
-        renderTable();
-      });
-
       ticketBody.addEventListener('click', function (e) {
         const copyBtn = e.target.closest('[data-copy]');
         if (copyBtn) {
@@ -2887,7 +907,7 @@
         }
         const detailBtn = e.target.closest('[data-detail]');
         if (detailBtn) {
-          openDrawer(detailBtn.getAttribute('data-detail'));
+          openTicketDrawer(detailBtn.getAttribute('data-detail'));
           return;
         }
       });
@@ -2911,11 +931,11 @@
         renderTable();
       });
 
-      document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-      document.getElementById('drawerCancel').addEventListener('click', closeDrawer);
+      document.getElementById('drawerClose').addEventListener('click', closeTicketDrawer);
+      document.getElementById('drawerCancel').addEventListener('click', closeTicketDrawer);
       document.getElementById('drawerSave').addEventListener('click', saveDrawerStatus);
       document.getElementById('detailDrawer').addEventListener('click', function (e) {
-        if (e.target === this) closeDrawer();
+        if (e.target === this) closeTicketDrawer();
         const copyBtn = e.target.closest('[data-copy]');
         if (copyBtn) copyText(copyBtn.getAttribute('data-copy'));
         const statusBtn = e.target.closest('#drawerStatusQuick [data-status]');
@@ -2940,20 +960,6 @@
         });
       });
 
-      document.getElementById('sidebarToggle').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.toggle('is-collapsed');
-      });
-
-      document.querySelectorAll('[data-group-toggle]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          btn.closest('[data-group]').classList.toggle('is-collapsed');
-        });
-      });
-
-      setDefaultDates();
-      productSelect.refresh();
-      versionSelect.refresh();
-      sdkVersionSelect.refresh();
       applyFilter();
     })();
   </script>

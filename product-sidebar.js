@@ -1,10 +1,11 @@
-/* 产品板块侧栏：产品管理 / 平台管理 / 资产管理 */
+/* 产品板块侧栏：APP管理 / 平台管理 / 平台工具 / 资产管理 */
 (function (global) {
   'use strict';
 
   var ICONS = {
     platform: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
     product: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 18h6"/></svg>',
+    tool: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
     asset: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
     page: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>',
     arrow: '<svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5L6 7.5L9 4.5"/></svg>'
@@ -12,12 +13,11 @@
 
   var MENUS = [
     {
-      key: 'product',
-      title: '产品管理',
+      key: 'app',
+      title: 'APP管理',
       icon: ICONS.product,
       children: [
-        { key: 'app-apps', label: 'APP应用', href: 'app-apps.html' },
-        { key: 'json-files', label: 'JSON文件', href: 'json-files.html' }
+        { key: 'app-apps', label: 'APP应用', href: 'app-apps.html' }
       ]
     },
     {
@@ -28,6 +28,14 @@
         { key: 'platform-config', label: '平台配置', href: 'platform-config.html' },
         { key: 'plugin-config', label: '插件配置', href: 'plugin-config.html' },
         { key: 'developer-account', label: '开发者账号', href: 'developer-account.html' }
+      ]
+    },
+    {
+      key: 'platform-tools',
+      title: '平台工具',
+      icon: ICONS.tool,
+      children: [
+        { key: 'app-user-query', label: 'APP用户查询', href: 'app-user-query.html' }
       ]
     },
     {

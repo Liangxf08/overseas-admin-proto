@@ -133,7 +133,8 @@
   var DEMO_METRICS = ['总收入', '花费', '利润', '当日ROAS', '累计ROAS', 'DAU', 'ARPU', '新用户', '新增单价'];
   var DEMO_FILTERS = ['date', 'compare', 'product', 'channel'];
   var DEMO_DIMENSIONS = ['日期'];
-  var DIM_COL_PCT = 12;
+  var DIM_COL_WIDTH = 120;
+  var METRIC_COL_WIDTH = 112;
 
   var state = {
     treeKeyword: '',
@@ -168,7 +169,8 @@
     comparePickingStart: null,
     sortKey: null,
     sortDir: 'desc',
-    sortInteractive: false
+    sortInteractive: false,
+    colWidths: {}
   };
 
   var store = {
@@ -758,7 +760,8 @@
   }
 
   function useDualMulti(key) {
-    return filterOptions(key).length >= 7;
+    /* 设计规范：多选 >7 才双栏；≤7 单栏 */
+    return filterOptions(key).length > 7;
   }
 
   function multiPanelHtml(key, dual, idPrefix) {
@@ -821,11 +824,12 @@
       if (key === 'campaign') {
         var campaignVal = state.filterValues.campaign || '';
         html +=
-          '<div class="filter-item" data-filter-key="campaign" style="display:inline-block;vertical-align:top">' +
+          '<div class="filter-item' + (campaignVal ? ' has-value' : '') + '" id="filterWrap_campaign" data-filter-key="campaign" style="display:inline-block;vertical-align:top;position:relative">' +
             '<label class="select-trigger select-trigger--input" for="filter_campaign">' +
               '<span class="select-trigger__prefix">推广活动：</span>' +
               '<input class="select-trigger__field" type="text" id="filter_campaign" placeholder="请输入" value="' + escapeHtml(campaignVal) + '" autocomplete="off" />' +
             '</label>' +
+            '<button class="select-clear" type="button" id="filterClear_campaign" data-clear-filter="campaign" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>' +
           '</div>';
         return;
       }
@@ -882,6 +886,63 @@
     syncShortcutActive();
     renderCalendars();
     bindDynamicFilterControls();
+    bindMainDateFilter();
+  }
+
+  function bindMainDateFilter() {
+    var wrap = $('dateRangeWrap');
+    if (!wrap) return;
+    /* 开合由 document capture 统一处理；此处仅阻止冒泡以免点空白处误关其它面板 */
+    wrap.addEventListener('click', function (e) {
+      if (e.target.closest('#dateRangeTrigger, #datePanel')) e.stopPropagation();
+    });
+  }
+
+  function toggleMainDatePanel() {
+    var trigger = $('dateRangeTrigger');
+    var panel = $('datePanel');
+    if (!trigger || !panel) return;
+    var willOpen = !panel.classList.contains('is-open');
+    closeAddMenu();
+    closeCtx();
+    closeFsDatePanel();
+    closeComparePanels();
+    UI.closePanels();
+    closeDatePanel();
+    if (willOpen) {
+      panel.classList.add('is-open');
+      trigger.classList.add('is-open');
+      renderCalendars();
+      if (UI.adjustDropdownPlacement) UI.adjustDropdownPlacement(panel, trigger);
+    }
+  }
+
+  function toggleFsDatePanel() {
+    var trigger = $('fsDateTrigger');
+    var panel = $('fsDatePanel');
+    if (!trigger || !panel) return;
+    var willOpen = !panel.classList.contains('is-open');
+    closeDatePanel();
+    closeComparePanels();
+    UI.closePanels();
+    closeFsDatePanel();
+    if (willOpen) {
+      panel.classList.add('is-open');
+      trigger.classList.add('is-open');
+      renderFsCalendars();
+      if (UI.adjustDropdownPlacement) UI.adjustDropdownPlacement(panel, trigger);
+    }
+  }
+
+  function closeComparePanels() {
+    ['filterPanel_compare', 'fsPanel_compare', 'compareCustomPanel', 'fsCompareCustomPanel'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.classList.remove('is-open', 'is-dropup', 'is-align-right');
+    });
+    ['filterTrigger_compare', 'fsTrigger_compare'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.classList.remove('is-open');
+    });
   }
 
   function parseProductOption(key) {
@@ -984,12 +1045,13 @@
       var open = !panel.classList.contains('is-open');
       UI.closePanels();
       closeFsDatePanel();
+      closeComparePanels();
       if (customPanel) customPanel.classList.remove('is-open');
       if (open) {
         renderComparePanel(p);
         panel.classList.add('is-open');
         trigger.classList.add('is-open');
-        UI.adjustDropdownPlacement(panel, trigger);
+        if (UI.adjustDropdownPlacement) UI.adjustDropdownPlacement(panel, trigger);
       }
     });
 
@@ -1005,7 +1067,7 @@
         renderCompareCustomCalendars(p === 'fs' ? 'fs' : '');
         if (customPanel) {
           customPanel.classList.add('is-open');
-          UI.adjustDropdownPlacement(customPanel, trigger);
+          if (UI.adjustDropdownPlacement) UI.adjustDropdownPlacement(customPanel, trigger);
         }
         return;
       }
@@ -1015,7 +1077,6 @@
       trigger.classList.remove('is-open');
       syncCompareLabel('filter');
       syncCompareLabel('fs');
-      renderTable();
     });
 
     wrap.addEventListener('click', function (e) { e.stopPropagation(); });
@@ -1059,9 +1120,17 @@
         trigger.classList.remove('is-open');
         syncCompareLabel('filter');
         syncCompareLabel('fs');
-        renderTable();
       });
     }
+  }
+
+  function syncCampaignHasValue(prefix) {
+    var p = prefix || 'filter';
+    var wrap = $(p === 'fs' ? 'fsWrap_campaign' : 'filterWrap_campaign');
+    var input = $(p === 'fs' ? 'fs_campaign' : 'filter_campaign');
+    if (!wrap) return;
+    var has = !!(input && String(input.value || '').trim());
+    wrap.classList.toggle('has-value', has);
   }
 
   function bindDynamicFilterControls() {
@@ -1072,9 +1141,32 @@
         var input = $('filter_campaign');
         if (!input) return;
         if (state.filterValues.campaign == null) state.filterValues.campaign = '';
+        syncCampaignHasValue('filter');
         input.addEventListener('input', function () {
           state.filterValues.campaign = input.value;
+          syncCampaignHasValue('filter');
+          var fsInput = $('fs_campaign');
+          if (fsInput) {
+            fsInput.value = input.value;
+            syncCampaignHasValue('fs');
+          }
         });
+        var clearBtn = $('filterClear_campaign');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = '';
+            state.filterValues.campaign = '';
+            syncCampaignHasValue('filter');
+            var fsInput = $('fs_campaign');
+            if (fsInput) {
+              fsInput.value = '';
+              syncCampaignHasValue('fs');
+            }
+            input.focus();
+          });
+        }
         return;
       }
 
@@ -1195,30 +1287,38 @@
     return Math.floor(base * 50000 + 100);
   }
 
-  function genCompareDelta(name, i, mi) {
-    var base = seeded(i * 31 + mi * 7 + 9);
-    return base * 40 - 18;
-  }
-
   function formatDelta(pct) {
     if (!isFinite(pct)) return '—';
-    var sign = pct > 0 ? '+' : '';
-    return sign + formatPlainNumber(pct, 2) + '%';
+    var body = formatPlainNumber(Math.abs(pct), 2) + '%';
+    if (pct > 0) return body + ' ↑';
+    if (pct < 0) return '-' + body + ' ↓';
+    return '0.00%';
   }
 
-  function metricCellHtml(name, row, withCompare) {
-    var valueText = formatMetricValue(name, row[name]);
-    if (!withCompare) return escapeHtml(valueText);
-    var delta = row['__delta_' + name];
-    var deltaCls = 'metric-cell__delta';
-    if (isFinite(delta)) {
-      if (delta > 0) deltaCls += ' is-up';
-      else if (delta < 0) deltaCls += ' is-down';
-    }
-    return '<div class="metric-cell">' +
-      '<div class="metric-cell__value">' + escapeHtml(valueText) + '</div>' +
-      '<div class="' + deltaCls + '">' + escapeHtml(formatDelta(delta)) + '</div>' +
-    '</div>';
+  function formatDeltaPlain(pct) {
+    if (!isFinite(pct)) return '—';
+    return formatPlainNumber(pct, 2) + '%';
+  }
+
+  function deltaClassName(pct) {
+    if (!isFinite(pct)) return 'change-cell';
+    if (pct > 0) return 'change-cell is-up';
+    if (pct < 0) return 'change-cell is-down';
+    return 'change-cell';
+  }
+
+  function buildDisplayCols(dims, metrics, showCompare) {
+    var cols = [];
+    dims.forEach(function (d) {
+      cols.push({ key: d, label: d, kind: 'dim' });
+    });
+    metrics.forEach(function (m) {
+      cols.push({ key: m, label: m, kind: 'metric', metric: m });
+      if (showCompare) {
+        cols.push({ key: '__delta_' + m, label: '% 变化', kind: 'delta', metric: m });
+      }
+    });
+    return cols;
   }
 
   function getRangeDays() {
@@ -1242,9 +1342,18 @@
     var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
     var metrics = (state.draft && state.draft.metrics) || [];
     var days = getRangeDays();
+    var showCompare = isCompareEnabled();
+    var cmpRange = showCompare ? getCompareRangeByType(state.filterValues.compare) : null;
     var rows = [];
     days.forEach(function (day, i) {
-      var row = { _i: i, _day: day };
+      var row = { _i: i, _day: day, __curDay: formatDate(day) };
+      if (cmpRange) {
+        var cmpSpan = Math.max(0, Math.round((cmpRange[1].getTime() - cmpRange[0].getTime()) / 86400000));
+        var cmpOffset = days.length > 1 ? Math.round(i * cmpSpan / (days.length - 1)) : 0;
+        var cmpDay = addDays(cmpRange[0], cmpOffset);
+        row.__cmpDay = formatDate(cmpDay);
+        row._cmpOffset = cmpOffset;
+      }
       dims.forEach(function (d) {
         if (d === '日期') row[d] = formatDate(day);
         else if (d === '按周') {
@@ -1254,7 +1363,7 @@
           row[d] = formatDate(weekStart) + ' ~ ' + formatDate(weekEnd);
         } else if (d === '按月') {
           row[d] = day.getFullYear() + '-' + pad(day.getMonth() + 1);
-        }         else if (d === '平台') row[d] = PLATFORMS[(i % 2) + 1];
+        } else if (d === '平台') row[d] = PLATFORMS[(i % 2) + 1];
         else if (d === '产品') row[d] = productOptionLabel(PRODUCT_OPTIONS[i % PRODUCT_OPTIONS.length]);
         else if (d === '国家地区') row[d] = COUNTRIES[i % COUNTRIES.length];
         else if (d === '优化师') row[d] = OPTIMIZERS[i % OPTIMIZERS.length];
@@ -1264,7 +1373,16 @@
       });
       metrics.forEach(function (m, mi) {
         row[m] = genMetricRaw(m, i, mi);
-        row['__delta_' + m] = genCompareDelta(m, i, mi);
+        if (cmpRange) {
+          var cmpVal = genMetricRaw(m, 1000 + (row._cmpOffset || 0), mi);
+          row['__cmp_' + m] = cmpVal;
+          row['__delta_' + m] = Math.abs(cmpVal) < 1e-9
+            ? NaN
+            : ((row[m] - cmpVal) / Math.abs(cmpVal)) * 100;
+        } else {
+          row['__cmp_' + m] = null;
+          row['__delta_' + m] = null;
+        }
       });
       rows.push(row);
     });
@@ -1274,7 +1392,15 @@
   function compareSortValues(a, b, key) {
     var av = a[key];
     var bv = b[key];
-    if (key === '日期' || /^\d{4}-\d{2}-\d{2}$/.test(String(av)) && /^\d{4}-\d{2}-\d{2}$/.test(String(bv))) {
+    if (String(key).indexOf('__delta_') === 0) {
+      var ad = Number(av);
+      var bd = Number(bv);
+      if (!isFinite(ad) && !isFinite(bd)) return 0;
+      if (!isFinite(ad)) return 1;
+      if (!isFinite(bd)) return -1;
+      return ad - bd;
+    }
+    if (key === '日期' || (/^\d{4}-\d{2}-\d{2}$/.test(String(av)) && /^\d{4}-\d{2}-\d{2}$/.test(String(bv)))) {
       return String(av).localeCompare(String(bv));
     }
     if (METRIC_META[key] || typeof av === 'number' || typeof bv === 'number') {
@@ -1325,60 +1451,51 @@
   function renderTable() {
     var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
     var metrics = (state.draft && state.draft.metrics) || [];
-    var cols = dims.concat(metrics);
     var showCompare = isCompareEnabled();
-    if (state.sortInteractive && state.sortKey && cols.indexOf(state.sortKey) < 0) {
+    var displayCols = buildDisplayCols(dims, metrics, showCompare);
+    var sortKeys = displayCols.map(function (c) { return c.key; });
+    if (state.sortInteractive && state.sortKey && sortKeys.indexOf(state.sortKey) < 0) {
       state.sortKey = null;
       state.sortDir = 'desc';
       state.sortInteractive = false;
     }
-    var rows = applySort(genRows(), cols);
+    var rows = applySort(genRows(), sortKeys);
     var total = rows.length;
     var start = (state.page - 1) * state.pageSize;
     var pageRows = rows.slice(start, start + state.pageSize);
     var freezeLeft = 0;
     var freezeOffsets = {};
-    var dimCount = dims.length;
-    var metricCount = metrics.length;
-    var dimPct = dimCount ? Math.min(DIM_COL_PCT, Math.floor(40 / dimCount)) : 0;
-    var dimTotalPct = dimPct * dimCount;
-    var metricPct = metricCount ? (100 - dimTotalPct) / metricCount : 0;
-    var widthMap = {};
-    cols.forEach(function (c, idx) {
-      if (dims.indexOf(c) >= 0) widthMap[c] = dimPct;
-      else if (idx === cols.length - 1) {
-        var used = 0;
-        cols.forEach(function (name, i) {
-          if (i === cols.length - 1) return;
-          used += widthMap[name] || 0;
-        });
-        widthMap[c] = Math.round((100 - used) * 10000) / 10000;
-      } else {
-        widthMap[c] = metricPct;
-      }
+    state._displayCols = displayCols;
+
+    var widthList = displayCols.map(function (c) {
+      return getColWidthPx(c);
     });
 
-    dims.forEach(function (d) {
+    dims.forEach(function (d, idx) {
+      var col = displayCols[idx];
       freezeOffsets[d] = freezeLeft;
-      freezeLeft += widthMap[d];
+      freezeLeft += widthList[idx] || DIM_COL_WIDTH;
     });
 
-    $('dataTable').style.width = '100%';
-    $('dataTable').style.minWidth = '100%';
+    var widthSum = widthList.reduce(function (s, w) { return s + w; }, 0);
+    var table = $('dataTable');
+    table.style.width = '100%';
+    table.style.minWidth = widthSum + 'px';
 
-    $('tableColgroup').innerHTML = cols.map(function (c) {
-      return '<col style="width:' + widthMap[c] + '%" />';
+    $('tableColgroup').innerHTML = displayCols.map(function (c, idx) {
+      return '<col data-col-key="' + escapeHtml(c.key) + '" style="width:' + widthList[idx] + 'px" />';
     }).join('');
 
-    $('tableHead').innerHTML = '<tr>' + cols.map(function (c) {
-      var isDim = dims.indexOf(c) >= 0;
-      var isMetric = !isDim;
+    $('tableHead').innerHTML = '<tr>' + displayCols.map(function (c) {
       var cls = [];
-      if (isMetric) cls.push('is-num', 'col-num');
-      if (isDim) cls.push('is-freeze');
-      var style = isDim ? ' style="left:' + freezeOffsets[c] + '%"' : '';
-      return '<th class="' + cls.join(' ') + '"' + style + '>' + thSortHtml(c, c) + '</th>';
+      if (c.kind !== 'dim') cls.push('is-num', 'col-num');
+      if (c.kind === 'dim') cls.push('is-freeze');
+      if (c.kind === 'delta') cls.push('col-change');
+      var style = c.kind === 'dim' ? ' style="left:' + freezeOffsets[c.key] + 'px"' : '';
+      return '<th class="' + cls.join(' ') + '"' + style + '>' + thSortHtml(c.label, c.key) + '</th>';
     }).join('') + '</tr>';
+
+    hideCompareTip();
 
     if (!pageRows.length) {
       $('tableBody').innerHTML = '';
@@ -1387,17 +1504,38 @@
     } else {
       $('tableEmpty').hidden = true;
       $('tableBody').innerHTML = pageRows.map(function (row) {
-        return '<tr>' + cols.map(function (c) {
-          var isDim = dims.indexOf(c) >= 0;
-          var isMetric = !isDim;
+        return '<tr>' + displayCols.map(function (c) {
           var cls = [];
-          if (isMetric) cls.push('is-num');
-          if (isDim) cls.push('is-freeze');
-          var style = isDim ? ' style="left:' + freezeOffsets[c] + '%"' : '';
-          var text = isMetric
-            ? metricCellHtml(c, row, showCompare)
-            : escapeHtml(String(row[c] == null ? '' : row[c]));
-          return '<td class="' + cls.join(' ') + '"' + style + '>' + text + '</td>';
+          var style = '';
+          var text = '';
+          if (c.kind === 'dim') {
+            cls.push('is-freeze');
+            style = ' style="left:' + freezeOffsets[c.key] + 'px"';
+            text = escapeHtml(String(row[c.key] == null ? '' : row[c.key]));
+            return '<td class="' + cls.join(' ') + '"' + style + '>' + text + '</td>';
+          }
+          cls.push('is-num');
+          if (c.kind === 'metric') {
+            text = escapeHtml(formatMetricValue(c.metric, row[c.metric]));
+            return '<td class="' + cls.join(' ') + '">' + text + '</td>';
+          }
+          /* delta */
+          cls.push('col-change');
+          var delta = row[c.key];
+          var tipPayload = {
+            metric: c.metric,
+            cmpDay: row.__cmpDay || '',
+            curDay: row.__curDay || '',
+            cmpVal: formatMetricValue(c.metric, row['__cmp_' + c.metric]),
+            curVal: formatMetricValue(c.metric, row[c.metric]),
+            delta: formatDeltaPlain(delta),
+            deltaNum: isFinite(delta) ? delta : null
+          };
+          return '<td class="' + cls.join(' ') + '">' +
+            '<span class="' + deltaClassName(delta) + '" data-compare-tip="' + encodeURIComponent(JSON.stringify(tipPayload)) + '">' +
+              escapeHtml(formatDelta(delta)) +
+            '</span>' +
+          '</td>';
         }).join('') + '</tr>';
       }).join('');
 
@@ -1405,30 +1543,56 @@
       metrics.forEach(function (m) {
         var meta = METRIC_META[m] || { type: 'decimal', digits: 2, aggregate: 'sum' };
         var sum = 0;
+        var cmpSum = 0;
         var n = 0;
+        var cn = 0;
         rows.forEach(function (r) {
           var v = Number(r[m]);
-          if (!isFinite(v)) return;
-          sum += v;
-          n += 1;
+          if (isFinite(v)) {
+            sum += v;
+            n += 1;
+          }
+          var cv = Number(r['__cmp_' + m]);
+          if (isFinite(cv)) {
+            cmpSum += cv;
+            cn += 1;
+          }
         });
         if (!n) {
           totals[m] = '—';
+          totals['__delta_' + m] = '—';
           return;
         }
         var raw = meta.aggregate === 'avg' ? (sum / n) : sum;
         totals[m] = formatMetricValue(m, raw);
+        if (showCompare && cn) {
+          var cmpRaw = meta.aggregate === 'avg' ? (cmpSum / cn) : cmpSum;
+          var dlt = Math.abs(cmpRaw) < 1e-9 ? NaN : ((raw - cmpRaw) / Math.abs(cmpRaw)) * 100;
+          totals['__delta_' + m] = formatDelta(dlt);
+          totals['__deltaNum_' + m] = dlt;
+        } else {
+          totals['__delta_' + m] = '—';
+        }
       });
 
-      $('tableFoot').innerHTML = '<tr>' + cols.map(function (c, idx) {
-        var isDim = dims.indexOf(c) >= 0;
+      $('tableFoot').innerHTML = '<tr>' + displayCols.map(function (c, idx) {
         var cls = [];
-        if (!isDim) cls.push('is-num');
-        if (isDim) cls.push('is-freeze');
-        var style = isDim ? ' style="left:' + freezeOffsets[c] + '%"' : '';
-        if (idx === 0) return '<td class="' + cls.join(' ') + '"' + style + '>合计</td>';
-        if (isDim) return '<td class="' + cls.join(' ') + '"' + style + '></td>';
-        return '<td class="' + cls.join(' ') + '"' + style + '>' + escapeHtml(String(totals[c] || '')) + '</td>';
+        var style = '';
+        if (c.kind === 'dim') {
+          cls.push('is-freeze');
+          style = ' style="left:' + freezeOffsets[c.key] + 'px"';
+          if (idx === 0) return '<td class="' + cls.join(' ') + '"' + style + '>合计</td>';
+          return '<td class="' + cls.join(' ') + '"' + style + '></td>';
+        }
+        cls.push('is-num');
+        if (c.kind === 'metric') {
+          return '<td class="' + cls.join(' ') + '">' + escapeHtml(String(totals[c.key] || '')) + '</td>';
+        }
+        cls.push('col-change');
+        var dlt = totals['__deltaNum_' + c.metric];
+        return '<td class="' + cls.join(' ') + '"><span class="' + deltaClassName(dlt) + '">' +
+          escapeHtml(String(totals[c.key] || '—')) +
+        '</span></td>';
       }).join('') + '</tr>';
     }
 
@@ -1445,9 +1609,10 @@
         getPage: function () { return state.page; },
         getPageSize: function () { return state.pageSize; },
         getTotal: function () {
-          var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
-          var metrics = (state.draft && state.draft.metrics) || [];
-          return applySort(genRows(), dims.concat(metrics)).length;
+          var dims2 = state.dimSelected.length ? state.dimSelected : ['日期'];
+          var metrics2 = (state.draft && state.draft.metrics) || [];
+          var keys = buildDisplayCols(dims2, metrics2, isCompareEnabled()).map(function (c) { return c.key; });
+          return applySort(genRows(), keys).length;
         },
         onPageChange: function (p) {
           state.page = p;
@@ -1460,6 +1625,113 @@
         }
       });
     }
+
+    bindBoardTableColResize(widthList);
+  }
+
+  function getColWidthPx(col) {
+    if (state.colWidths[col.key] != null) return state.colWidths[col.key];
+    if (col.kind === 'dim') return DIM_COL_WIDTH;
+    return METRIC_COL_WIDTH;
+  }
+
+  function syncBoardFreezeOffsets(table) {
+    var cols = state._displayCols || [];
+    var colgroup = table && table.querySelector('colgroup');
+    if (!colgroup) return;
+    var left = 0;
+    cols.forEach(function (c, i) {
+      if (c.kind !== 'dim') return;
+      var colEl = colgroup.children[i];
+      var w = colEl ? (parseFloat(colEl.style.width) || DIM_COL_WIDTH) : DIM_COL_WIDTH;
+      var th = table.querySelectorAll('thead th')[i];
+      if (th) th.style.left = left + 'px';
+      table.querySelectorAll('tbody tr').forEach(function (tr) {
+        var td = tr.children[i];
+        if (td) td.style.left = left + 'px';
+      });
+      var footRow = table.querySelector('tfoot tr');
+      if (footRow && footRow.children[i]) footRow.children[i].style.left = left + 'px';
+      left += w;
+    });
+  }
+
+  function bindBoardTableColResize(widthList) {
+    var table = $('dataTable');
+    if (!table || !window.ColResize) return;
+    var cols = state._displayCols || [];
+    requestAnimationFrame(function () {
+      ColResize.refresh(table, {
+        force: true,
+        includeLast: true,
+        minWidth: 72,
+        widths: widthList,
+        onLayout: function () {
+          syncBoardFreezeOffsets(table);
+        },
+        onResize: function (index, width) {
+          var col = cols[index];
+          if (!col) return;
+          state.colWidths[col.key] = width;
+          syncBoardFreezeOffsets(table);
+        }
+      });
+    });
+  }
+
+  function ensureCompareTip() {
+    var tip = $('compareTip');
+    if (tip) return tip;
+    tip = document.createElement('div');
+    tip.id = 'compareTip';
+    tip.className = 'compare-tip';
+    tip.hidden = true;
+    tip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tip);
+    return tip;
+  }
+
+  function hideCompareTip() {
+    var tip = $('compareTip');
+    if (!tip) return;
+    tip.hidden = true;
+    tip.setAttribute('aria-hidden', 'true');
+    tip.classList.remove('is-show');
+  }
+
+  function showCompareTip(anchor, payload) {
+    var tip = ensureCompareTip();
+    var deltaValCls = 'compare-tip__val';
+    if (isFinite(payload.deltaNum)) {
+      if (payload.deltaNum > 0) deltaValCls += ' is-up';
+      else if (payload.deltaNum < 0) deltaValCls += ' is-down';
+    }
+    tip.innerHTML =
+      '<div class="compare-tip__title">' + escapeHtml(payload.metric || '') + '</div>' +
+      '<div class="compare-tip__row compare-tip__row--muted">' +
+        '<span class="compare-tip__label">' + escapeHtml(payload.cmpDay) + '</span>' +
+        '<span class="compare-tip__val">' + escapeHtml(payload.cmpVal) + '</span>' +
+      '</div>' +
+      '<div class="compare-tip__row compare-tip__row--strong">' +
+        '<span class="compare-tip__label">' + escapeHtml(payload.curDay) + '</span>' +
+        '<span class="compare-tip__val">' + escapeHtml(payload.curVal) + '</span>' +
+      '</div>' +
+      '<div class="compare-tip__row">' +
+        '<span class="compare-tip__label compare-tip__label--muted">%变更</span>' +
+        '<span class="' + deltaValCls + '">' + escapeHtml(payload.delta) + '</span>' +
+      '</div>';
+    tip.hidden = false;
+    tip.setAttribute('aria-hidden', 'false');
+    tip.classList.add('is-show');
+    var rect = anchor.getBoundingClientRect();
+    var tipRect = tip.getBoundingClientRect();
+    var left = rect.left + rect.width / 2 - tipRect.width / 2;
+    var top = rect.top - tipRect.height - 8;
+    if (left < 8) left = 8;
+    if (left + tipRect.width > window.innerWidth - 8) left = window.innerWidth - tipRect.width - 8;
+    if (top < 8) top = rect.bottom + 8;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
   }
 
   /* ========== Modals ========== */
@@ -1694,11 +1966,12 @@
     }
     if (key === 'campaign') {
       var campaignVal = state.filterValues.campaign || '';
-      return '<div class="filter-setting-control">' +
+      return '<div class="filter-setting-control' + (campaignVal ? ' has-value' : '') + '" id="fsWrap_campaign">' +
         '<label class="select-trigger select-trigger--input" for="fs_campaign">' +
           '<span class="select-trigger__prefix">推广活动：</span>' +
           '<input class="select-trigger__field" type="text" id="fs_campaign" placeholder="请输入" value="' + escapeHtml(campaignVal) + '" autocomplete="off" />' +
         '</label>' +
+        '<button class="select-clear" type="button" id="fsClear_campaign" data-fs-clear-icon="campaign" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>' +
       '</div>';
     }
     if (key === 'compare') {
@@ -1751,10 +2024,31 @@
         var input = $('fs_campaign');
         if (!input) return;
         if (state.filterValues.campaign == null) state.filterValues.campaign = '';
+        syncCampaignHasValue('fs');
         input.addEventListener('input', function () {
           state.filterValues.campaign = input.value;
+          syncCampaignHasValue('fs');
+          var mainInput = $('filter_campaign');
+          if (mainInput) {
+            mainInput.value = input.value;
+            syncCampaignHasValue('filter');
+          }
         });
         input.addEventListener('click', function (e) { e.stopPropagation(); });
+        var clearBtn = $('fsClear_campaign');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = '';
+            state.filterValues.campaign = '';
+            syncCampaignHasValue('fs');
+            syncCampaignHasValue('filter');
+            var mainInput = $('filter_campaign');
+            if (mainInput) mainInput.value = '';
+            input.focus();
+          });
+        }
         return;
       }
 
@@ -2133,6 +2427,7 @@
     closeAddMenu();
     closeDatePanel();
     closeFsDatePanel();
+    closeComparePanels();
   });
 
   $('sidebarToggle').addEventListener('click', function () {
@@ -2309,7 +2604,10 @@
 
   $('addBoardSubmit').addEventListener('click', submitAddBoard);
   $('folderSubmit').addEventListener('click', submitFolder);
-  $('filterSettingBtn').addEventListener('click', openFilterSettings);
+  $('filterSettingBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    openFilterSettings();
+  });
   $('filterSubmit').addEventListener('click', submitFilterSettings);
   $('metricsBtn').addEventListener('click', openMetricModal);
   $('metricSubmit').addEventListener('click', submitMetrics);
@@ -2336,6 +2634,27 @@
     state.page = 1;
     renderTable();
   });
+
+  $('tableBody').addEventListener('mouseover', function (e) {
+    var cell = e.target.closest('[data-compare-tip]');
+    if (!cell || !$('tableBody').contains(cell)) return;
+    if (e.relatedTarget && cell.contains(e.relatedTarget)) return;
+    try {
+      var payload = JSON.parse(decodeURIComponent(cell.getAttribute('data-compare-tip') || ''));
+      showCompareTip(cell, payload);
+    } catch (err) {
+      hideCompareTip();
+    }
+  });
+
+  $('tableBody').addEventListener('mouseout', function (e) {
+    var cell = e.target.closest('[data-compare-tip]');
+    if (!cell) return;
+    if (e.relatedTarget && cell.contains(e.relatedTarget)) return;
+    hideCompareTip();
+  });
+
+  window.addEventListener('scroll', hideCompareTip, true);
 
   $('renameBoardBtn').addEventListener('click', function () {
     var board = findNode(state.activeBoardId);
@@ -2398,41 +2717,17 @@
     UI.closePanels();
   });
 
-  /* Date panel delegated */
+  /* Date panel：触发器开合 + 面板内操作（capture，先读开合状态再 closePanels） */
   document.addEventListener('click', function (e) {
-    var trigger = e.target.closest('#dateRangeTrigger');
-    if (trigger) {
+    if (e.target.closest('#dateRangeTrigger')) {
       e.stopPropagation();
-      UI.closePanels();
-      closeAddMenu();
-      closeCtx();
-      closeFsDatePanel();
-      var panel = $('datePanel');
-      var open = !panel.classList.contains('is-open');
-      closeDatePanel();
-      if (open) {
-        panel.classList.add('is-open');
-        trigger.classList.add('is-open');
-        renderCalendars();
-        if (UI.adjustDropdownPlacement) UI.adjustDropdownPlacement(panel, trigger);
-      }
+      toggleMainDatePanel();
       return;
     }
 
-    var fsTrigger = e.target.closest('#fsDateTrigger');
-    if (fsTrigger) {
+    if (e.target.closest('#fsDateTrigger')) {
       e.stopPropagation();
-      UI.closePanels();
-      closeDatePanel();
-      var fsPanel = $('fsDatePanel');
-      var fsOpen = !fsPanel.classList.contains('is-open');
-      closeFsDatePanel();
-      if (fsOpen) {
-        fsPanel.classList.add('is-open');
-        fsTrigger.classList.add('is-open');
-        renderFsCalendars();
-        if (UI.adjustDropdownPlacement) UI.adjustDropdownPlacement(fsPanel, fsTrigger);
-      }
+      toggleFsDatePanel();
       return;
     }
 
@@ -2485,6 +2780,7 @@
       return;
     }
 
+    /* 仅面板内部点击阻止关闭，勿包含触发器父级 wrap（否则会阻断开合） */
     if (e.target.closest('#datePanel, #fsDatePanel')) e.stopPropagation();
   }, true);
 
