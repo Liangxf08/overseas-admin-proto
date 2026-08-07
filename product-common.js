@@ -507,12 +507,12 @@
 
     el.innerHTML =
       '<span class="pagination__total">共 ' + total + ' 条</span>' +
-      '<div class="page-size-wrap" id="pageSizeWrap">' +
-        '<button class="select-trigger" type="button" id="pageSizeTrigger">' +
+      '<div class="page-size-wrap">' +
+        '<button class="select-trigger" type="button" data-page-size-trigger>' +
           '<span class="select-trigger__text">' + pageSize + ' 条/页</span>' +
           '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
         '</button>' +
-        '<div class="single-panel" id="pageSizePanel">' +
+        '<div class="single-panel">' +
           [10, 20, 50, 100].map(function (n) {
             return '<div class="single-option' + (n === pageSize ? ' is-active' : '') + '" data-size="' + n + '">' + n + ' 条/页</div>';
           }).join('') +
@@ -533,22 +533,25 @@
           '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2l4 4-4 4M9 2v8"/></svg>' +
         '</button>' +
       '</div>' +
-      '<div class="page-jump">前往 <input id="pageJumpInput" type="text" value="' + page + '" /> 页</div>';
+      '<div class="page-jump">前往 <input class="page-jump__input" type="text" value="' + page + '" /> 页</div>';
   }
 
   function bindPagination(cfg) {
     var el = $(cfg.containerId);
-    if (!el) return;
+    if (!el || el.__paginationBound) return;
+    el.__paginationBound = true;
     el.addEventListener('click', function (e) {
       var sizeOpt = e.target.closest('[data-size]');
-      if (sizeOpt) {
+      if (sizeOpt && el.contains(sizeOpt)) {
         cfg.onPageSizeChange(Number(sizeOpt.getAttribute('data-size')) || 20);
         return;
       }
-      var sizeTrigger = e.target.closest('#pageSizeTrigger');
-      if (sizeTrigger) {
+      var sizeTrigger = e.target.closest('[data-page-size-trigger]');
+      if (sizeTrigger && el.contains(sizeTrigger)) {
         e.stopPropagation();
-        var panel = $('pageSizePanel');
+        var wrap = sizeTrigger.closest('.page-size-wrap');
+        var panel = wrap ? wrap.querySelector('.single-panel') : null;
+        if (!panel) return;
         var open = !panel.classList.contains('is-open');
         closePanels();
         if (open) {
@@ -559,12 +562,13 @@
         }
         return;
       }
-      if (e.target.closest('#pageSizeWrap')) {
+      var sizeWrap = e.target.closest('.page-size-wrap');
+      if (sizeWrap && el.contains(sizeWrap)) {
         e.stopPropagation();
         return;
       }
       var btn = e.target.closest('[data-page]');
-      if (!btn || btn.disabled) return;
+      if (!btn || !el.contains(btn) || btn.disabled) return;
       var val = btn.getAttribute('data-page');
       var totalPages = Math.max(1, Math.ceil((cfg.getTotal() || 0) / cfg.getPageSize()) || 1);
       var page = cfg.getPage();
@@ -575,9 +579,10 @@
     });
 
     el.addEventListener('keydown', function (e) {
-      if (e.target.id !== 'pageJumpInput' || e.key !== 'Enter') return;
+      var jump = e.target.closest('.page-jump__input');
+      if (!jump || !el.contains(jump) || e.key !== 'Enter') return;
       var totalPages = Math.max(1, Math.ceil((cfg.getTotal() || 0) / cfg.getPageSize()) || 1);
-      var n = parseInt(e.target.value, 10);
+      var n = parseInt(jump.value, 10);
       if (!Number.isFinite(n)) n = 1;
       cfg.onPageChange(Math.min(totalPages, Math.max(1, n)));
     });

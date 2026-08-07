@@ -236,29 +236,42 @@
     });
   }
 
-  /* 沙箱用户预置日志：覆盖沙箱开关 / 国家地区 / 安装时间 */
-  ALL_ROWS.slice(0, 2).forEach(function (row, idx) {
-    var base = new Date(Date.now() - (idx + 1) * 3600000);
-    var prevInstall = new Date(row.installTs - 86400000 * (idx + 2) - 3600000);
-    var otherCountry = COUNTRIES[(idx + 3) % COUNTRIES.length];
-    var otherLabel = otherCountry.name + ' (' + otherCountry.code + ')';
-    /* unshift 后时间倒序：先压旧、后压新 */
-    pushEditLog(row.uuid, [{
-      field: '沙箱',
-      from: '关闭',
-      to: '开启'
-    }], OPERATORS[idx % OPERATORS.length], formatDateTime(new Date(base.getTime() - 7200000)));
-    pushEditLog(row.uuid, [{
-      field: '国家地区',
-      from: otherLabel,
-      to: countryLabel(row.country_code)
-    }], OPERATORS[(idx + 1) % OPERATORS.length], formatDateTime(new Date(base.getTime() - 3600000)));
-    pushEditLog(row.uuid, [{
-      field: '安装时间',
-      from: formatDateTime(prevInstall),
-      to: row.install_time
-    }], OPERATORS[(idx + 2) % OPERATORS.length], formatDateTime(base));
-  });
+  /* 沙箱用户预置日志：三类变更 + 高频量，便于分页演示 */
+  function seedEditLogs(row, count, seedOffset) {
+    var kinds = ['sandbox', 'country', 'install'];
+    var i;
+    for (i = count - 1; i >= 0; i--) {
+      var t = new Date(Date.now() - (seedOffset * 3600000) - i * 180000 - (i % 7) * 1000);
+      var op = OPERATORS[(seedOffset + i) % OPERATORS.length];
+      var kind = kinds[i % 3];
+      if (kind === 'sandbox') {
+        var on = i % 2 === 0;
+        pushEditLog(row.uuid, [{
+          field: '沙箱',
+          from: on ? '关闭' : '开启',
+          to: on ? '开启' : '关闭'
+        }], op, formatDateTime(t));
+      } else if (kind === 'country') {
+        var fromC = COUNTRIES[(i + seedOffset + 1) % COUNTRIES.length];
+        var toC = COUNTRIES[(i + seedOffset + 2) % COUNTRIES.length];
+        pushEditLog(row.uuid, [{
+          field: '国家地区',
+          from: fromC.name + ' (' + fromC.code + ')',
+          to: toC.name + ' (' + toC.code + ')'
+        }], op, formatDateTime(t));
+      } else {
+        var fromTs = new Date(row.installTs - (i + 1) * 3600000);
+        var toTs = new Date(row.installTs - i * 1800000);
+        pushEditLog(row.uuid, [{
+          field: '安装时间',
+          from: formatDateTime(fromTs),
+          to: formatDateTime(toTs)
+        }], op, formatDateTime(t));
+      }
+    }
+  }
+  if (ALL_ROWS[0]) seedEditLogs(ALL_ROWS[0], 3, 1);
+  if (ALL_ROWS[1]) seedEditLogs(ALL_ROWS[1], 3, 2);
 
   /* ========== 状态 ========== */
   var state = {
@@ -283,7 +296,12 @@
     applied: null,
     editUuid: null,
     editCountry: '',
-    editInstallTime: ''
+    editInstallTime: '',
+    logUuid: null,
+    logPage: 1,
+    logPageSize: 20,
+    paginationBound: false,
+    logPaginationBound: false
   };
 
   /* ========== 筛选绑定 ========== */
@@ -585,17 +603,26 @@
       containerId: 'pagination',
       total: total,
       page: state.page,
-      pageSize: state.pageSize,
-      onPageChange: function (p) {
-        state.page = p;
-        renderTable();
-      },
-      onPageSizeChange: function (size) {
-        state.pageSize = size;
-        state.page = 1;
-        renderTable();
-      }
+      pageSize: state.pageSize
     });
+    if (!state.paginationBound) {
+      state.paginationBound = true;
+      UI.bindPagination({
+        containerId: 'pagination',
+        getPage: function () { return state.page; },
+        getPageSize: function () { return state.pageSize; },
+        getTotal: function () { return getFilteredRows().length; },
+        onPageChange: function (p) {
+          state.page = p;
+          renderTable();
+        },
+        onPageSizeChange: function (size) {
+          state.pageSize = size;
+          state.page = 1;
+          renderTable();
+        }
+      });
+    }
 
     if (window.ColResize) ColResize.refresh($('userTable'));
   }
@@ -1054,39 +1081,92 @@
     renderTable();
   }
 
-  function openLogDrawer(row) {
-    if (!row) return;
-    var logs = EDIT_LOGS[row.uuid] || [];
+  function renderLogDrawer() {
     var body = $('logDrawerBody');
+    var pager = $('logPagination');
+    var uuid = state.logUuid;
+    var row = ALL_ROWS.find(function (r) { return r.uuid === uuid; });
+    var logs = uuid ? (EDIT_LOGS[uuid] || []) : [];
     $('logDrawerTitle').textContent = '编辑日志';
+
     if (!logs.length) {
       body.innerHTML = '<div class="log-table__empty">暂无编辑日志</div>';
-    } else {
-      body.innerHTML =
-        '<div class="log-table-shell"><table class="log-table">' +
-          '<colgroup><col style="width:168px"/><col style="width:88px"/><col style="width:200px"/><col/></colgroup>' +
-          '<thead><tr><th>操作时间</th><th>操作人</th><th>UUID</th><th>变更内容</th></tr></thead>' +
-          '<tbody>' +
-          logs.map(function (log) {
-            var changeHtml = (log.changes || []).map(function (c) {
-              return '<div class="log-table__change-item">' +
-                escapeHtml(c.field) + '：' + escapeHtml(c.from) + ' → ' + escapeHtml(c.to) +
-              '</div>';
-            }).join('') || '-';
-            return '<tr>' +
-              '<td>' + escapeHtml(log.time) + '</td>' +
-              '<td>' + escapeHtml(log.operator) + '</td>' +
-              '<td class="log-table__uuid" title="' + escapeHtml(row.uuid) + '">' + escapeHtml(row.uuid) + '</td>' +
-              '<td><div class="log-table__change">' + changeHtml + '</div></td>' +
-            '</tr>';
-          }).join('') +
-          '</tbody></table></div>';
+      if (pager) {
+        pager.hidden = true;
+        pager.innerHTML = '';
+      }
+      return;
     }
+
+    var total = logs.length;
+    var totalPages = Math.max(1, Math.ceil(total / state.logPageSize));
+    if (state.logPage > totalPages) state.logPage = totalPages;
+    var start = (state.logPage - 1) * state.logPageSize;
+    var pageLogs = logs.slice(start, start + state.logPageSize);
+    var uuidText = row ? row.uuid : uuid;
+
+    body.innerHTML =
+      '<div class="log-table-shell"><table class="log-table">' +
+        '<colgroup><col style="width:168px"/><col style="width:88px"/><col style="width:200px"/><col/></colgroup>' +
+        '<thead><tr><th>操作时间</th><th>操作人</th><th>UUID</th><th>变更内容</th></tr></thead>' +
+        '<tbody>' +
+        pageLogs.map(function (log) {
+          var changeHtml = (log.changes || []).map(function (c) {
+            return '<div class="log-table__change-item">' +
+              escapeHtml(c.field) + '：' + escapeHtml(c.from) + ' → ' + escapeHtml(c.to) +
+            '</div>';
+          }).join('') || '-';
+          return '<tr>' +
+            '<td>' + escapeHtml(log.time) + '</td>' +
+            '<td>' + escapeHtml(log.operator) + '</td>' +
+            '<td class="log-table__uuid" title="' + escapeHtml(uuidText) + '">' + escapeHtml(uuidText) + '</td>' +
+            '<td><div class="log-table__change">' + changeHtml + '</div></td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table></div>';
+
+    if (pager) {
+      pager.hidden = false;
+      UI.renderPagination({
+        containerId: 'logPagination',
+        total: total,
+        page: state.logPage,
+        pageSize: state.logPageSize
+      });
+      if (!state.logPaginationBound) {
+        state.logPaginationBound = true;
+        UI.bindPagination({
+          containerId: 'logPagination',
+          getPage: function () { return state.logPage; },
+          getPageSize: function () { return state.logPageSize; },
+          getTotal: function () {
+            return state.logUuid ? (EDIT_LOGS[state.logUuid] || []).length : 0;
+          },
+          onPageChange: function (p) {
+            state.logPage = p;
+            renderLogDrawer();
+          },
+          onPageSizeChange: function (size) {
+            state.logPageSize = size;
+            state.logPage = 1;
+            renderLogDrawer();
+          }
+        });
+      }
+    }
+  }
+
+  function openLogDrawer(row) {
+    if (!row) return;
+    state.logUuid = row.uuid;
+    state.logPage = 1;
+    renderLogDrawer();
     UI.openDrawer('logDrawer');
   }
 
   function closeLogDrawer() {
     UI.closeDrawer('logDrawer');
+    state.logUuid = null;
   }
 
   document.querySelectorAll('[data-close="editModal"]').forEach(function (btn) {
@@ -1097,7 +1177,6 @@
   });
   $('editSubmit').addEventListener('click', submitEdit);
   $('logDrawerClose').addEventListener('click', closeLogDrawer);
-  $('logDrawerCancel').addEventListener('click', closeLogDrawer);
   $('logDrawer').addEventListener('click', function (e) {
     if (e.target === e.currentTarget) closeLogDrawer();
   });

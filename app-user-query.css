@@ -55,6 +55,27 @@
   width: 120px;
 }
 
+#logDrawer .drawer {
+  display: flex;
+  flex-direction: column;
+}
+
+#logDrawer .drawer__body {
+  padding-bottom: 16px;
+}
+
+#logDrawer .drawer__pager {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-border-2, #E5E6EB);
+  background: var(--color-bg-container, #fff);
+}
+
+#logDrawer .drawer__pager {
+  padding: 12px 24px;
+}
+
+#logPagination[hidden] { display: none !important; }
+
 .log-table-shell {
   border: 1px solid var(--color-border-2, #E5E6EB);
   border-radius: 4px;
