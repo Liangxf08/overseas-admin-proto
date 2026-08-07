@@ -3025,50 +3025,84 @@
     var btn = $('fullscreenBtn');
     var tip = $('fullscreenTip');
     if (!panel) return;
-    panel.classList.toggle('is-fullscreen', !!on);
-    var label = on ? '退出全屏' : '全屏';
+    var enable = !!on;
+    panel.classList.toggle('is-fullscreen', enable);
+    document.body.classList.toggle('board-fs-open', enable);
+    var label = enable ? '退出全屏' : '全屏';
     if (btn) btn.setAttribute('aria-label', label);
     if (tip) tip.setAttribute('data-tip', label);
     if (window.ColResize && $('dataTable')) {
-      ColResize.refresh($('dataTable'));
+      try { ColResize.refresh($('dataTable')); } catch (err) { /* ignore */ }
     }
   }
 
   function exportCurrentBoardList() {
-    var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
-    var metrics = (state.draft && state.draft.metrics) || [];
-    var showCompare = isCompareEnabled();
-    var displayCols = buildDisplayCols(dims, metrics, showCompare);
-    var sortKeys = displayCols.map(function (c) { return c.key; });
-    var rows = applySort(genRows(), sortKeys);
-    if (!rows.length) {
-      showToast('暂无数据可导出', 'error');
-      return;
+    try {
+      var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
+      var metrics = (state.draft && state.draft.metrics) || [];
+      var showCompare = isCompareEnabled();
+      var displayCols = buildDisplayCols(dims, metrics, showCompare);
+      var sortKeys = displayCols.map(function (c) { return c.key; });
+      var rows = applySort(genRows(), sortKeys);
+      if (!rows.length) {
+        showToast('暂无数据可导出', 'error');
+        return;
+      }
+      function csvCell(v) {
+        return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      }
+      function cellText(col, row) {
+        if (col.kind === 'dim') return row[col.key] == null ? '' : row[col.key];
+        if (col.kind === 'metric') return formatMetricValue(col.metric, row[col.metric]);
+        return formatDeltaPlain(row[col.key]);
+      }
+      var header = displayCols.map(function (c) { return csvCell(c.label); }).join(',');
+      var lines = [header].concat(rows.map(function (row) {
+        return displayCols.map(function (col) { return csvCell(cellText(col, row)); }).join(',');
+      }));
+      var activeBoard = findNode(state.activeBoardId);
+      var boardName = (activeBoard && activeBoard.name) || '看板';
+      var stamp = formatDate(new Date()).replace(/-/g, '');
+      var safeName = String(boardName).replace(/[\\/:*?"<>|]/g, '_');
+      var filename = safeName + '_' + stamp + '.csv';
+      var content = '\ufeff' + lines.join('\n');
+      if (UI.downloadText) {
+        UI.downloadText(filename, content, 'text/csv;charset=utf-8');
+      } else {
+        var blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+      showToast('已导出当前列表');
+    } catch (err) {
+      showToast('导出失败', 'error');
     }
-    function csvCell(v) {
-      return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-    }
-    function cellText(col, row) {
-      if (col.kind === 'dim') return row[col.key] == null ? '' : row[col.key];
-      if (col.kind === 'metric') return formatMetricValue(col.metric, row[col.metric]);
-      return formatDeltaPlain(row[col.key]);
-    }
-    var header = displayCols.map(function (c) { return csvCell(c.label); }).join(',');
-    var lines = [header].concat(rows.map(function (row) {
-      return displayCols.map(function (col) { return csvCell(cellText(col, row)); }).join(',');
-    }));
-    var activeBoard = findNode(state.activeBoardId);
-    var boardName = (activeBoard && activeBoard.name) || '看板';
-    var stamp = formatDate(new Date()).replace(/-/g, '');
-    var safeName = String(boardName).replace(/[\\/:*?"<>|]/g, '_');
-    UI.downloadText(safeName + '_' + stamp + '.csv', '\ufeff' + lines.join('\n'), 'text/csv;charset=utf-8');
-    showToast('已导出当前列表');
   }
 
-  $('fullscreenBtn').addEventListener('click', function () {
-    setBoardFullscreen(!$('boardData').classList.contains('is-fullscreen'));
-  });
-  $('exportBtn').addEventListener('click', exportCurrentBoardList);
+  var fullscreenBtn = $('fullscreenBtn');
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var panel = $('boardData');
+      if (!panel) return;
+      setBoardFullscreen(!panel.classList.contains('is-fullscreen'));
+    });
+  }
+  var exportBtn = $('exportBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      exportCurrentBoardList();
+    });
+  }
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && $('boardData') && $('boardData').classList.contains('is-fullscreen')) {
       setBoardFullscreen(false);

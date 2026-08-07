@@ -763,9 +763,14 @@
 .board-data.is-fullscreen {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 1100; /* 高于 Header(1000) / Sidebar(900) */
   border-radius: 0;
   margin: 0;
+  box-shadow: none;
+}
+
+body.board-fs-open {
+  overflow: hidden;
 }
 
 .board-table-toolbar {
