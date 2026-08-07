@@ -1,0 +1,839 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>平台配置 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <style>
+    .name-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+    }
+    .name-cell__icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 0;
+      flex-shrink: 0;
+      object-fit: contain;
+      background: transparent;
+      display: block;
+    }
+    .name-cell__icon--placeholder {
+      display: inline-block;
+      background: var(--color-fill-4, #C9CDD4);
+      border-radius: 4px;
+    }
+    .name-cell__text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .upload-box {
+      width: 80px;
+      height: 80px;
+      border: 1px dashed var(--color-border-2, #E5E6EB);
+      border-radius: var(--border-radius-medium, 4px);
+      background: var(--color-fill-1, #F7F8FA);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--color-text-3, #86909C);
+      font-size: 12px;
+      line-height: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .upload-box:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .upload-box.has-file {
+      border-style: solid;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+    .upload-box__plus {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .upload-box__text {
+      line-height: 20px;
+    }
+    .upload-box__img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+      background: transparent;
+    }
+    .upload-box.has-file .upload-box__plus,
+    .upload-box.has-file .upload-box__text {
+      display: none;
+    }
+    .upload-box.has-file .upload-box__img {
+      display: block;
+    }
+    .upload-box__remove {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .upload-box.has-file:hover .upload-box__remove { display: inline-flex; }
+    .upload-box__remove svg { width: 10px; height: 10px; }
+    .upload-tip {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--color-text-3, #86909C);
+    }
+
+    .form-alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      background: var(--color-danger-1, #FFECE8);
+      border: 1px solid #FDCDC5;
+      color: var(--color-danger-6, #F53F3F);
+      font-size: 13px;
+      line-height: 20px;
+    }
+    .form-alert__icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .plugin-modal .modal__body {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .plugin-table-shell {
+      flex: 1;
+      min-height: 280px;
+      max-height: 420px;
+      overflow: auto;
+      margin-bottom: 20px;
+    }
+    .plugin-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+    .plugin-table th,
+    .plugin-table td {
+      height: 48px;
+      padding: 0 12px;
+      font-size: 14px;
+      text-align: left;
+      border-right: 1px solid var(--color-border-2, #E5E6EB);
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    .plugin-table th:first-child,
+    .plugin-table td:first-child {
+      border-left: 1px solid var(--color-border-2, #E5E6EB);
+    }
+    .plugin-table thead th {
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
+    }
+    .plugin-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--color-fill-1, #F7F8FA);
+      font-weight: 600;
+      color: var(--color-text-2, #4E5969);
+    }
+    .plugin-table .col-switch { width: 80px; }
+    .plugin-table .col-key { width: 40%; }
+  </style>
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-bar">
+          <div class="filter-item">
+            <input class="input" id="filterName" type="text" placeholder="平台名称" autocomplete="off" />
+          </div>
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="statusClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </span>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <div class="single-option is-active" data-value="">全部</div>
+              <div class="single-option" data-value="启用">启用</div>
+              <div class="single-option" data-value="禁用">禁用</div>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+            <button class="btn btn--success" type="button" id="addBtn">添加</button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="dataTable">
+              <colgroup>
+                <col style="width:14%" />
+                <col style="width:12%" />
+                <col style="width:10%" />
+                <col style="width:10%" />
+                <col style="width:14%" />
+                <col style="width:8%" />
+                <col style="width:16%" />
+                <col style="width:16%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>平台名称</th>
+                  <th>平台标识</th>
+                  <th>平台类型</th>
+                  <th>关联插件</th>
+                  <th>备注</th>
+                  <th>状态</th>
+                  <th>更新时间</th>
+                  <th class="col-action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status"></div>
+
+  <!-- 添加 / 编辑平台 -->
+  <div class="modal-mask" id="formModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="formModalTitle">添加平台</div>
+        <button class="modal__close" type="button" id="formModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">平台类型</div>
+          <div class="form-item__control">
+            <div class="seg" id="typeSeg">
+              <button class="seg__item is-active" type="button" data-value="APP">APP</button>
+              <button class="seg__item" type="button" data-value="小游戏">小游戏</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-item" data-field="code">
+          <div class="form-item__label is-required">平台标识</div>
+          <div class="form-item__control">
+            <input class="input" id="formCode" type="text" placeholder="请输入平台标识" autocomplete="off" />
+            <div class="form-item__error" id="formCodeError">请输入平台标识</div>
+          </div>
+        </div>
+        <div class="form-item" data-field="name">
+          <div class="form-item__label is-required">平台名称</div>
+          <div class="form-item__control">
+            <input class="input" id="formName" type="text" placeholder="请输入平台名称" autocomplete="off" />
+            <div class="form-item__error" id="formNameError">请输入平台名称</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">平台图标</div>
+          <div class="form-item__control">
+            <div class="upload-box" id="iconUploadBox" role="button" tabindex="0" aria-label="上传平台图标">
+              <svg class="upload-box__plus" id="iconUploadPlus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              <span class="upload-box__text" id="iconUploadText">上传图片</span>
+              <img class="upload-box__img" id="iconPreview" alt="" />
+              <button class="upload-box__remove" type="button" id="iconRemoveBtn" aria-label="删除图标">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+              </button>
+            </div>
+            <input type="file" id="iconFileInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden />
+            <div class="upload-tip">请上传小于2M的 jpg 或 png 图片，建议尺寸：512*512</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">备注</div>
+          <div class="form-item__control">
+            <input class="input" id="formRemark" type="text" placeholder="请输入备注" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="statusSeg">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="formCancelBtn">取消</button>
+        <button class="btn btn--primary" type="button" id="formSubmitBtn">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 插件配置 -->
+  <div class="modal-mask" id="pluginModal" aria-hidden="true">
+    <div class="modal modal--form plugin-modal" role="dialog" aria-modal="true" aria-labelledby="pluginModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="pluginModalTitle">插件配置</div>
+        <button class="modal__close" type="button" id="pluginModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-alert" role="status">
+          <svg class="form-alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/>
+          </svg>
+          <span>开启或关闭插件仅控制线上参数下发路由，实际生效须以客户端SDK版本集成为准。</span>
+        </div>
+        <div class="plugin-table-shell">
+          <table class="plugin-table">
+            <thead>
+              <tr>
+                <th class="col-switch">开关</th>
+                <th>插件名称</th>
+                <th class="col-key">JSON Key</th>
+              </tr>
+            </thead>
+            <tbody id="pluginBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="pluginCancelBtn">取消</button>
+        <button class="btn btn--primary" type="button" id="pluginSubmitBtn">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="col-resize.js"></script>
+  <script src="product-common.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      ProductShell.mount('platform-config');
+
+      var UI = ProductUI;
+      var escapeHtml = UI.escapeHtml;
+
+      var ICON_PRESETS = {
+        android: 'assets/Android.png',
+        ios: 'assets/iOS.png',
+        tiktok: 'assets/TikTok.png'
+      };
+
+      var CATALOG_PLUGINS = [
+        { key: 'sdk_config', name: 'Android SDK参数' },
+        { key: 'adjust_config', name: 'Adjust 归因SDK' },
+        { key: 'ta_config', name: '数数 统计SDK' },
+        { key: 'fb_config', name: 'Facebook SDK' },
+        { key: 'tiktok_config', name: 'TikTok 买量SDK' }
+      ];
+
+      var state = {
+        keyword: '',
+        status: '',
+        page: 1,
+        pageSize: 20,
+        editingId: null,
+        formIcon: '',
+        pluginPlatformId: null,
+        pluginDraft: []
+      };
+
+      var rows = [
+        {
+          id: 'p1', name: 'Android', code: 'android', type: 'APP', remark: '', status: '启用',
+          icon: ICON_PRESETS.android, updatedAt: '2026-01-01 10:00:00', createdAt: '2026-01-01T10:00:00',
+          plugins: [
+            { key: 'sdk_config', enabled: true },
+            { key: 'adjust_config', enabled: true },
+            { key: 'ta_config', enabled: true },
+            { key: 'fb_config', enabled: true },
+            { key: 'tiktok_config', enabled: true }
+          ]
+        },
+        {
+          id: 'p2', name: 'iOS', code: 'ios', type: 'APP', remark: '', status: '启用',
+          icon: ICON_PRESETS.ios, updatedAt: '2026-01-02 10:00:00', createdAt: '2026-01-02T10:00:00',
+          plugins: [
+            { key: 'sdk_config', enabled: true },
+            { key: 'adjust_config', enabled: true },
+            { key: 'ta_config', enabled: true },
+            { key: 'fb_config', enabled: true },
+            { key: 'tiktok_config', enabled: true }
+          ]
+        },
+        {
+          id: 'p3', name: 'TikTok', code: 'tiktok', type: '小游戏', remark: '', status: '启用',
+          icon: ICON_PRESETS.tiktok, updatedAt: '2026-01-03 10:00:00', createdAt: '2026-01-03T10:00:00',
+          plugins: []
+        }
+      ];
+
+      function formatNow() {
+        var d = new Date();
+        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+          pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+      }
+
+      function enabledPluginCount(row) {
+        return (row.plugins || []).filter(function (p) { return p.enabled; }).length;
+      }
+
+      function getFiltered() {
+        var kw = state.keyword.trim().toLowerCase();
+        return rows
+          .filter(function (r) {
+            if (kw && String(r.name).toLowerCase().indexOf(kw) === -1) return false;
+            if (state.status && r.status !== state.status) return false;
+            return true;
+          })
+          .slice()
+          .sort(function (a, b) {
+            return String(b.createdAt).localeCompare(String(a.createdAt));
+          });
+      }
+
+      function renderNameCell(r) {
+        if (r.icon) {
+          return (
+            '<span class="name-cell">' +
+              '<img class="name-cell__icon" src="' + escapeHtml(r.icon) + '" alt="" />' +
+              '<span class="name-cell__text">' + escapeHtml(r.name) + '</span>' +
+            '</span>'
+          );
+        }
+        return (
+          '<span class="name-cell">' +
+            '<span class="name-cell__icon name-cell__icon--placeholder" aria-hidden="true"></span>' +
+            '<span class="name-cell__text">' + escapeHtml(r.name) + '</span>' +
+          '</span>'
+        );
+      }
+
+      function renderTable() {
+        var list = getFiltered();
+        var total = list.length;
+        var totalPages = Math.max(1, Math.ceil(total / state.pageSize) || 1);
+        if (state.page > totalPages) state.page = totalPages;
+        var start = (state.page - 1) * state.pageSize;
+        var pageRows = list.slice(start, start + state.pageSize);
+        var tbody = UI.$('tableBody');
+        var emptyTip = UI.$('emptyTip');
+
+        if (!pageRows.length) {
+          tbody.innerHTML = '';
+          emptyTip.hidden = false;
+        } else {
+          emptyTip.hidden = true;
+          tbody.innerHTML = pageRows.map(function (r) {
+            var remark = r.remark || '';
+            return (
+              '<tr data-id="' + escapeHtml(r.id) + '">' +
+                '<td title="' + escapeHtml(r.name) + '">' + renderNameCell(r) + '</td>' +
+                '<td title="' + escapeHtml(r.code) + '">' + escapeHtml(r.code) + '</td>' +
+                '<td>' + escapeHtml(r.type) + '</td>' +
+                '<td>' + enabledPluginCount(r) + '</td>' +
+                '<td title="' + escapeHtml(remark) + '">' + escapeHtml(remark) + '</td>' +
+                '<td>' + UI.statusTag(r.status) + '</td>' +
+                '<td title="' + escapeHtml(r.updatedAt || '') + '">' + escapeHtml(r.updatedAt || '') + '</td>' +
+                '<td class="col-action">' +
+                  '<div class="action-links">' +
+                    '<button class="link" type="button" data-action="edit" data-id="' + escapeHtml(r.id) + '">编辑</button>' +
+                    '<button class="link" type="button" data-action="plugin" data-id="' + escapeHtml(r.id) + '">插件配置</button>' +
+                  '</div>' +
+                '</td>' +
+              '</tr>'
+            );
+          }).join('');
+        }
+
+        UI.renderPagination({
+          containerId: 'pagination',
+          total: total,
+          page: state.page,
+          pageSize: state.pageSize
+        });
+      }
+
+      function syncIconUploadUI() {
+        var box = UI.$('iconUploadBox');
+        var preview = UI.$('iconPreview');
+        if (state.formIcon) {
+          box.classList.add('has-file');
+          preview.src = state.formIcon;
+          preview.alt = '平台图标预览';
+        } else {
+          box.classList.remove('has-file');
+          preview.removeAttribute('src');
+          preview.alt = '';
+        }
+      }
+
+      function clearFormErrors() {
+        var form = UI.$('formModal');
+        if (!form) return;
+        form.querySelectorAll('.form-item.is-error').forEach(function (el) {
+          el.classList.remove('is-error');
+        });
+      }
+
+      function setFieldError(field, hasError, message) {
+        var item = UI.$('formModal').querySelector('.form-item[data-field="' + field + '"]');
+        if (!item) return;
+        item.classList.toggle('is-error', !!hasError);
+        if (hasError && message) {
+          var err = item.querySelector('.form-item__error');
+          if (err) err.textContent = message;
+        }
+      }
+
+      function isCodeDuplicate(code) {
+        if (!code) return false;
+        return rows.some(function (r) {
+          return r.code.toLowerCase() === code.toLowerCase() && r.id !== state.editingId;
+        });
+      }
+
+      function validateForm() {
+        var codeInput = UI.$('formCode');
+        var nameInput = UI.$('formName');
+        var code = codeInput.value.trim();
+        var name = nameInput.value.trim();
+        var firstInvalid = null;
+
+        if (!code) {
+          setFieldError('code', true, '请输入平台标识');
+          firstInvalid = firstInvalid || codeInput;
+        } else if (isCodeDuplicate(code)) {
+          setFieldError('code', true, '平台标识已存在，请重新输入');
+          firstInvalid = firstInvalid || codeInput;
+        } else {
+          setFieldError('code', false);
+        }
+
+        if (!name) {
+          setFieldError('name', true, '请输入平台名称');
+          firstInvalid = firstInvalid || nameInput;
+        } else {
+          setFieldError('name', false);
+        }
+
+        if (firstInvalid) {
+          if (!firstInvalid.disabled) firstInvalid.focus();
+          return false;
+        }
+        return true;
+      }
+
+      function openForm(row) {
+        clearFormErrors();
+        state.editingId = row ? row.id : null;
+        state.formIcon = row && row.icon ? row.icon : '';
+        UI.$('formModalTitle').textContent = row ? '编辑平台' : '添加平台';
+        UI.setSegValue('typeSeg', row ? row.type : 'APP');
+        UI.setSegValue('statusSeg', row ? row.status : '启用');
+        UI.$('formCode').value = row ? row.code : '';
+        UI.$('formName').value = row ? row.name : '';
+        UI.$('formRemark').value = row ? (row.remark || '') : '';
+        UI.$('iconFileInput').value = '';
+        syncIconUploadUI();
+
+        var typeSeg = UI.$('typeSeg');
+        var codeInput = UI.$('formCode');
+        if (row) {
+          typeSeg.classList.add('is-readonly');
+          codeInput.disabled = true;
+        } else {
+          typeSeg.classList.remove('is-readonly');
+          codeInput.disabled = false;
+        }
+        UI.openModal('formModal');
+        if (!row) codeInput.focus();
+        else UI.$('formName').focus();
+      }
+
+      function closeForm() {
+        UI.closeModal('formModal');
+        state.editingId = null;
+        state.formIcon = '';
+        clearFormErrors();
+      }
+
+      function submitForm() {
+        if (!validateForm()) return;
+
+        var code = UI.$('formCode').value.trim();
+        var name = UI.$('formName').value.trim();
+        var remark = UI.$('formRemark').value.trim();
+        var type = UI.getSegValue('typeSeg') || 'APP';
+        var status = UI.getSegValue('statusSeg') || '启用';
+
+        var now = formatNow();
+        if (state.editingId) {
+          var target = rows.find(function (r) { return r.id === state.editingId; });
+          if (target) {
+            target.name = name;
+            target.remark = remark;
+            target.status = status;
+            target.icon = state.formIcon || '';
+            target.updatedAt = now;
+          }
+          UI.showToast('提交成功');
+        } else {
+          rows.unshift({
+            id: UI.uid('p'),
+            name: name,
+            code: code,
+            type: type,
+            remark: remark,
+            status: status,
+            icon: state.formIcon || '',
+            plugins: [],
+            updatedAt: now,
+            createdAt: new Date().toISOString()
+          });
+          UI.showToast('提交成功');
+        }
+        closeForm();
+        renderTable();
+      }
+
+      function openPluginModal(row) {
+        state.pluginPlatformId = row.id;
+        state.pluginDraft = CATALOG_PLUGINS.map(function (p) {
+          var existing = (row.plugins || []).find(function (x) { return x.key === p.key; });
+          return {
+            key: p.key,
+            name: p.name,
+            enabled: existing ? !!existing.enabled : false
+          };
+        });
+        renderPluginTable();
+        UI.openModal('pluginModal');
+      }
+
+      function renderPluginTable() {
+        UI.$('pluginBody').innerHTML = state.pluginDraft.map(function (p, idx) {
+          return (
+            '<tr data-idx="' + idx + '">' +
+              '<td class="col-switch">' +
+                '<button class="switch' + (p.enabled ? ' is-on' : '') + '" type="button" data-toggle-plugin="' + idx + '" aria-label="开关"></button>' +
+              '</td>' +
+              '<td>' + escapeHtml(p.name) + '</td>' +
+              '<td class="col-key">' + escapeHtml(p.key) + '</td>' +
+            '</tr>'
+          );
+        }).join('');
+      }
+
+      function closePluginModal() {
+        UI.closeModal('pluginModal');
+        state.pluginPlatformId = null;
+        state.pluginDraft = [];
+      }
+
+      function submitPluginModal() {
+        var target = rows.find(function (r) { return r.id === state.pluginPlatformId; });
+        if (!target) return;
+        target.plugins = state.pluginDraft.map(function (p) {
+          return { key: p.key, enabled: !!p.enabled };
+        });
+        target.updatedAt = formatNow();
+        UI.showToast('提交成功');
+        closePluginModal();
+        renderTable();
+      }
+
+      function handleIconFile(file) {
+        if (!file) return;
+        var okType = /image\/(jpeg|png)/.test(file.type) || /\.(jpe?g|png)$/i.test(file.name);
+        if (!okType) {
+          UI.showToast('请上传 jpg 或 png 图片', 'error');
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          UI.showToast('图片大小需小于 2M', 'error');
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          state.formIcon = String(e.target.result || '');
+          syncIconUploadUI();
+        };
+        reader.readAsDataURL(file);
+      }
+
+      UI.bindSingleSelect({
+        wrapId: 'statusWrap',
+        triggerId: 'statusTrigger',
+        panelId: 'statusPanel',
+        labelId: 'statusLabel',
+        clearId: 'statusClear',
+        prefix: '状态：',
+        getValue: function () { return state.status; },
+        onChange: function (value) { state.status = value || ''; }
+      });
+
+      UI.bindSeg('typeSeg');
+      UI.bindSeg('statusSeg');
+
+      UI.bindPagination({
+        containerId: 'pagination',
+        getTotal: function () { return getFiltered().length; },
+        getPage: function () { return state.page; },
+        getPageSize: function () { return state.pageSize; },
+        onPageChange: function (page) {
+          state.page = page;
+          renderTable();
+        },
+        onPageSizeChange: function (size) {
+          state.pageSize = size;
+          state.page = 1;
+          renderTable();
+        }
+      });
+
+      UI.$('searchBtn').addEventListener('click', function () {
+        state.keyword = UI.$('filterName').value || '';
+        state.page = 1;
+        renderTable();
+      });
+      UI.$('filterName').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          state.keyword = UI.$('filterName').value || '';
+          state.page = 1;
+          renderTable();
+        }
+      });
+
+      UI.$('addBtn').addEventListener('click', function () { openForm(null); });
+      UI.$('formCancelBtn').addEventListener('click', closeForm);
+      UI.$('formModalClose').addEventListener('click', closeForm);
+      UI.$('formSubmitBtn').addEventListener('click', submitForm);
+
+      UI.$('iconUploadBox').addEventListener('click', function (e) {
+        if (e.target.closest('#iconRemoveBtn')) return;
+        UI.$('iconFileInput').click();
+      });
+      UI.$('iconUploadBox').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          UI.$('iconFileInput').click();
+        }
+      });
+      UI.$('iconRemoveBtn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        state.formIcon = '';
+        UI.$('iconFileInput').value = '';
+        syncIconUploadUI();
+      });
+      UI.$('iconFileInput').addEventListener('change', function (e) {
+        handleIconFile(e.target.files && e.target.files[0]);
+      });
+
+      UI.$('formCode').addEventListener('input', function () {
+        var code = this.value.trim();
+        if (!code) {
+          setFieldError('code', false);
+          return;
+        }
+        if (isCodeDuplicate(code)) setFieldError('code', true, '平台标识已存在，请重新输入');
+        else setFieldError('code', false);
+      });
+      UI.$('formName').addEventListener('input', function () {
+        if (this.value.trim()) setFieldError('name', false);
+      });
+
+      UI.$('tableBody').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var id = btn.getAttribute('data-id');
+        var action = btn.getAttribute('data-action');
+        var row = rows.find(function (r) { return r.id === id; });
+        if (!row) return;
+        if (action === 'edit') openForm(row);
+        else if (action === 'plugin') openPluginModal(row);
+      });
+
+      UI.$('pluginBody').addEventListener('click', function (e) {
+        var sw = e.target.closest('[data-toggle-plugin]');
+        if (!sw) return;
+        var idx = Number(sw.getAttribute('data-toggle-plugin'));
+        if (!state.pluginDraft[idx]) return;
+        state.pluginDraft[idx].enabled = !state.pluginDraft[idx].enabled;
+        renderPluginTable();
+      });
+      UI.$('pluginCancelBtn').addEventListener('click', closePluginModal);
+      UI.$('pluginModalClose').addEventListener('click', closePluginModal);
+      UI.$('pluginSubmitBtn').addEventListener('click', submitPluginModal);
+
+      UI.$('formModal').addEventListener('click', function (e) {
+        if (e.target === UI.$('formModal')) e.stopPropagation();
+      });
+      UI.$('pluginModal').addEventListener('click', function (e) {
+        if (e.target === UI.$('pluginModal')) e.stopPropagation();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (UI.$('pluginModal').classList.contains('is-open')) {
+          closePluginModal();
+          return;
+        }
+        if (UI.$('formModal').classList.contains('is-open')) closeForm();
+      });
+
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>看板 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <img class="logo" src="assets/logo.png" width="32" height="32" alt="海外中台" />
+        <span class="brand-name">海外中台</span>
+      </div>
+      <nav class="header-nav" aria-label="顶部导航">
+        <a href="#" class="header-nav__item">首页</a>
+        <a href="dashboard.html" class="header-nav__item is-active">看板</a>
+        <a href="platform-config.html" class="header-nav__item">产品</a>
+        <a href="feedback-tickets.html" class="header-nav__item">工具</a>
+        <a href="menu-management.html" class="header-nav__item">管理</a>
+      </nav>
+      <div class="header-right">
+        <button class="header-icon" type="button" title="下载" aria-label="下载">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
+        </button>
+        <button class="header-icon" type="button" title="消息" aria-label="消息">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <a class="header-icon" href="https://m0v1x0i131y.feishu.cn/wiki/P7WcwmPrdigKg6keQbycBtYgn3d" target="_blank" rel="noopener noreferrer" title="帮助中心" aria-label="帮助中心">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </a>
+        <button class="user-chip" type="button" aria-label="用户菜单">
+          <img class="user-avatar" src="assets/avatar.jpg" width="32" height="32" alt="" />
+          <span class="user-name">小风</span>
+          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="body">
+      <aside class="board-sidebar" id="sidebar">
+        <div class="board-search">
+          <div class="board-search__field">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+            <input class="board-search__input" id="treeSearch" type="text" placeholder="请输入" autocomplete="off" />
+          </div>
+          <div class="board-search__add-wrap">
+            <button class="board-search__add" type="button" id="addMenuBtn" aria-label="新建">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <div class="board-add-menu" id="addMenu">
+              <button class="board-add-menu__item" type="button" data-add="board">新建看板</button>
+              <button class="board-add-menu__item" type="button" data-add="folder">新建文件夹</button>
+            </div>
+          </div>
+        </div>
+        <div class="board-tree" id="boardTree"></div>
+        <div class="sidebar-footer">
+          <button class="sidebar-collapse-btn" type="button" id="sidebarToggle" aria-label="折叠侧栏">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h10M4 18h16M18 9l-3 3 3 3"/></svg>
+          </button>
+        </div>
+      </aside>
+
+      <main class="board-main">
+        <div class="board-content" id="boardCard">
+          <div class="board-empty" id="boardEmpty">
+            <div class="board-empty__illus" aria-hidden="true"></div>
+            <div class="board-empty__text">请选择左侧看板查看数据</div>
+          </div>
+
+          <div id="boardView" hidden>
+            <div class="board-header" id="boardHeader">
+              <div class="board-header__left">
+                <h1 class="board-title" id="boardTitle">—</h1>
+                <input class="board-title-edit" id="boardTitleEdit" type="text" maxlength="20" />
+                <button class="board-edit-btn" type="button" id="renameBoardBtn" aria-label="重命名看板">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M13 7l4 4"/></svg>
+                </button>
+                <span class="board-type-tag" id="boardTypeTag" hidden></span>
+              </div>
+              <div class="board-header__right">
+                <span class="board-updated" id="boardUpdated">—</span>
+                <span class="tooltip-wrap board-save-btn" data-tip="保存当前页面筛选、维度、指标配置">
+                  <button class="board-icon-btn" type="button" id="saveBoardBtn" aria-label="保存看板">
+                    <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M21 13v9m18 20H9a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h22.55a1 1 0 0 1 .748.336l7.45 8.38a1 1 0 0 1 .252.664V41a1 1 0 0 1-1 1ZM14 6h14v15a1 1 0 0 1-1 1H15a1 1 0 0 1-1-1V6Z"/></svg>
+                  </button>
+                </span>
+                <button class="board-icon-btn board-share-btn" type="button" id="shareBoardBtn" aria-label="分享看板">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.3 10.8l7.4-4.6M8.3 13.2l7.4 4.6"/></svg>
+                </button>
+                <button class="board-icon-btn board-more-btn" type="button" id="moreBoardBtn" aria-label="更多">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="6" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="18" r="1.2"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="board-filter-bar" id="filterBar">
+              <button class="filter-gear" type="button" id="filterSettingBtn" aria-label="筛选设置">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"/></svg>
+              </button>
+              <div class="filter-item filter-item--dim" id="dimWrap">
+                <button class="select-trigger" type="button" id="dimTrigger">
+                  <span class="select-trigger__text" id="dimLabel">维度：<span class="muted">请选择</span></span>
+                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <button class="select-clear" type="button" id="dimClear" aria-label="清除">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                </button>
+                <div class="multi-panel" id="dimPanel">
+                  <div class="multi-panel__left">
+                    <div class="multi-panel__search">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                      <input type="text" id="dimSearch" placeholder="搜索" autocomplete="off" />
+                    </div>
+                    <div class="multi-panel__toolbar">
+                      <button class="multi-panel__link" type="button" id="dimSelectAll">全选</button>
+                    </div>
+                    <div class="multi-panel__list" id="dimList"></div>
+                  </div>
+                  <div class="multi-panel__right">
+                    <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                      <span id="dimCount">已选择 0 项</span>
+                      <button class="multi-panel__link" type="button" id="dimClearAll">清空</button>
+                    </div>
+                    <div class="multi-panel__list" id="dimSelected"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="dynamicFilters"></div>
+              <div class="filter-actions">
+                <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+                <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
+              </div>
+            </div>
+
+            <div class="board-data">
+              <div class="board-table-toolbar">
+                <span class="tooltip-wrap" data-tip="刷新">
+                  <button class="board-icon-btn" type="button" id="refreshBtn" aria-label="刷新">
+                    <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M38.837 18C36.463 12.136 30.715 8 24 8 15.163 8 8 15.163 8 24s7.163 16 16 16c7.455 0 13.72-5.1 15.496-12M40 8v10H30"/></svg>
+                  </button>
+                </span>
+                <span class="tooltip-wrap" data-tip="全屏">
+                  <button class="board-icon-btn" type="button" id="fullscreenBtn" aria-label="全屏">
+                    <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M42 17V9a1 1 0 0 0-1-1h-8M6 17V9a1 1 0 0 1 1-1h8m27 23v8a1 1 0 0 1-1 1h-8M6 31v8a1 1 0 0 0 1 1h8"/></svg>
+                  </button>
+                </span>
+                <span class="tooltip-wrap" data-tip="指标">
+                  <button class="board-icon-btn" type="button" data-action="metrics" id="metricsBtn" aria-label="指标">
+                    <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" aria-hidden="true"><path d="M7 7H20V20H7z"/><path d="M28 7H41V20H28z"/><path d="M7 28H20V41H7z"/><path d="M28 28H41V41H28z"/></svg>
+                  </button>
+                </span>
+                <span class="tooltip-wrap" data-tip="下载">
+                  <button class="board-icon-btn" type="button" id="exportBtn" aria-label="下载">
+                    <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="m33.072 22.071-9.07 9.071-9.072-9.07M24 5v26m16 4v6H8v-6"/></svg>
+                  </button>
+                </span>
+              </div>
+
+              <div class="table-shell">
+                <div class="table-wrap">
+                  <table class="data-table" id="dataTable">
+                    <colgroup id="tableColgroup"></colgroup>
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                    <tfoot id="tableFoot"></tfoot>
+                  </table>
+                  <div class="empty-tip" id="tableEmpty" hidden>暂无数据</div>
+                </div>
+              </div>
+              <div class="pagination" id="pagination"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="board-ctx" id="folderCtx" role="menu">
+    <button class="board-ctx__item" type="button" data-ctx="rename">重命名</button>
+    <button class="board-ctx__item board-ctx__item--danger" type="button" data-ctx="delete">删除</button>
+  </div>
+
+  <div class="board-ctx" id="boardOpsCtx" role="menu">
+    <button class="board-ctx__item" type="button" data-board-op="edit" hidden>编辑</button>
+    <button class="board-ctx__item" type="button" data-board-op="saveAs" hidden>另存为</button>
+    <button class="board-ctx__item" type="button" data-board-op="delete" hidden>删除</button>
+  </div>
+
+  <!-- 添加看板 -->
+  <div class="modal-mask" id="addBoardModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="addBoardTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="addBoardTitle">添加看板</div>
+        <button class="modal__close" type="button" data-close="addBoardModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="addBoardNameItem">
+          <label class="form-item__label is-required">看板名称</label>
+          <div class="form-item__control form-item__control--count">
+            <input class="input" id="addBoardName" type="text" maxlength="20" placeholder="请输入" autocomplete="off" />
+            <span class="char-count" id="addBoardNameCount">0/20</span>
+            <div class="form-item__error">请输入看板名称</div>
+          </div>
+        </div>
+        <div class="form-item" id="addBoardLocItem">
+          <label class="form-item__label is-required">看板位置</label>
+          <div class="form-item__control" id="addBoardLocWrap">
+            <button class="select-trigger" type="button" id="addBoardLocTrigger">
+              <span class="select-trigger__text" id="addBoardLocLabel">我的看板</span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="addBoardLocPanel"></div>
+            <div class="form-item__error">请选择看板位置</div>
+          </div>
+        </div>
+        <div class="form-item" id="addBoardTypeItem">
+          <label class="form-item__label is-required">看板类型</label>
+          <div class="form-item__control" id="addBoardTypeWrap">
+            <button class="select-trigger" type="button" id="addBoardTypeTrigger">
+              <span class="select-trigger__text" id="addBoardTypeLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="addBoardTypePanel">
+              <div class="single-option" data-value="Adjust">Adjust</div>
+              <div class="single-option" data-value="双端 SDK">双端 SDK</div>
+              <div class="single-option" data-value="APP 新用户">APP 新用户</div>
+              <div class="single-option" data-value="广告聚合">广告聚合</div>
+              <div class="single-option" data-value="IS Cohort">IS Cohort</div>
+              <div class="single-option" data-value="MAX Cohort">MAX Cohort</div>
+              <div class="single-option" data-value="SDK 初始化">SDK 初始化</div>
+              <div class="single-option" data-value="TikTok 开平">TikTok 开平</div>
+            </div>
+            <div class="form-item__error">请选择看板类型</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="addBoardModal">取消</button>
+        <button class="btn btn--primary" type="button" id="addBoardSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新建/重命名文件夹 -->
+  <div class="modal-mask" id="folderModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="folderModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="folderModalTitle">新建文件夹</div>
+        <button class="modal__close" type="button" data-close="folderModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="folderNameItem">
+          <label class="form-item__label is-required">文件夹名称</label>
+          <div class="form-item__control form-item__control--count">
+            <input class="input" id="folderNameInput" type="text" maxlength="20" placeholder="请输入" autocomplete="off" />
+            <span class="char-count" id="folderNameCount">0/20</span>
+            <div class="form-item__error">请输入文件夹名称</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="folderModal">取消</button>
+        <button class="btn btn--primary" type="button" id="folderSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选设置 -->
+  <div class="modal-mask" id="filterModal" aria-hidden="true">
+    <div class="modal modal--form modal--filter-settings" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="filterModalTitle">筛选设置</div>
+        <button class="modal__close" type="button" data-close="filterModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="filter-check-grid" id="filterCheckGrid"></div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="filterModal">取消</button>
+        <button class="btn btn--primary" type="button" id="filterSubmit">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 指标配置 -->
+  <div class="modal-mask" id="metricModal" aria-hidden="true">
+    <div class="modal metric-modal" role="dialog" aria-modal="true" aria-labelledby="metricModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="metricModalTitle">指标配置</div>
+        <button class="modal__close" type="button" data-close="metricModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body" style="padding:16px 24px 8px;display:flex;flex-direction:column;min-height:0">
+        <div class="metric-layout">
+          <div class="metric-cats">
+            <div class="metric-cats__search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+              <input type="text" id="metricSearch" placeholder="搜索" autocomplete="off" />
+            </div>
+            <div id="metricCatList"></div>
+          </div>
+          <div class="metric-options" id="metricOptions"></div>
+          <div class="metric-selected">
+            <div class="metric-selected__head">
+              <span id="metricSelectedCount">已选 0 列</span>
+              <button class="btn btn--text" type="button" id="metricClear">清空</button>
+            </div>
+            <div class="metric-selected__list" id="metricSelectedList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="metricModal">取消</button>
+        <button class="btn btn--primary" type="button" id="metricSubmit">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分享看板 -->
+  <div class="modal-mask" id="shareModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle" style="width:720px">
+      <div class="modal__header">
+        <div class="modal__title" id="shareModalTitle">分享看板</div>
+        <button class="modal__close" type="button" data-close="shareModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="transfer">
+          <div class="transfer__panel">
+            <div class="transfer__head">
+              <span>可选</span>
+              <span id="shareAvailCount">0 / 0</span>
+            </div>
+            <div class="transfer__search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+              <input type="text" id="shareAvailSearch" placeholder="搜索" autocomplete="off" />
+            </div>
+            <div class="transfer__list" id="shareAvailList"></div>
+          </div>
+          <div class="transfer__ops">
+            <button class="transfer__btn" type="button" id="shareMoveRight" aria-label="移入已选" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+            <button class="transfer__btn" type="button" id="shareMoveLeft" aria-label="移回可选" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+          </div>
+          <div class="transfer__panel">
+            <div class="transfer__head">
+              <span>已选</span>
+              <span id="shareSelectedCount">0 / 0</span>
+            </div>
+            <div class="transfer__search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+              <input type="text" id="shareSelectedSearch" placeholder="搜索" autocomplete="off" />
+            </div>
+            <div class="transfer__list" id="shareSelectedList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="shareModal">取消</button>
+        <button class="btn btn--primary" type="button" id="shareSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除确认 -->
+  <div class="modal-mask modal-mask--confirm" id="confirmModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+      <button class="confirm-modal__close" type="button" data-close="confirmModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon" aria-hidden="true">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3v4M6 9h.01"/></svg>
+        </span>
+        <div>
+          <h2 class="confirm-modal__title" id="confirmModalTitle">删除确认</h2>
+          <p class="confirm-modal__body" id="confirmModalBody">确定删除该文件夹吗？删除后不可恢复。</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="confirmModal">取消</button>
+        <button class="btn btn--primary" type="button" id="confirmOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-msg" id="pageMsg" role="status"></div>
+
+  <script src="product-common.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,813 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>插件配置 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <style>
+    .link-cell {
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .link-cell.is-empty { color: var(--color-text-3, #86909C); }
+
+    .param-block { margin-bottom: 20px; }
+    .param-table-wrap {
+      overflow-x: auto;
+      overflow-y: visible;
+    }
+    .param-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+    .param-table th,
+    .param-table td {
+      height: 48px;
+      padding: 0 8px;
+      font-size: 14px;
+      text-align: left;
+      border-right: 1px solid var(--color-border-2, #E5E6EB);
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    .param-table th:first-child,
+    .param-table td:first-child {
+      border-left: 1px solid var(--color-border-2, #E5E6EB);
+    }
+    .param-table thead th {
+      border-top: 1px solid var(--color-border-2, #E5E6EB);
+    }
+    .param-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--color-fill-1, #F7F8FA);
+      font-weight: 600;
+      color: var(--color-text-2, #4E5969);
+      white-space: nowrap;
+    }
+    .param-table th .req {
+      color: var(--color-danger-6, #F53F3F);
+      margin-right: 2px;
+    }
+    .param-table .input {
+      height: 32px;
+      width: 100%;
+      padding: 0 8px;
+    }
+    .param-table .col-switch {
+      width: 72px;
+      text-align: center;
+    }
+    .param-table .col-switch .switch { vertical-align: middle; }
+    .param-table .col-op { width: 72px; }
+    .param-table .link--danger { color: var(--color-danger-6, #F53F3F); }
+    .param-table .link--danger:hover { opacity: 0.85; }
+    .param-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 12px;
+      color: var(--color-primary);
+      font-size: 14px;
+      line-height: 22px;
+    }
+    .param-add:hover { opacity: 0.85; }
+    .param-add svg { width: 14px; height: 14px; }
+
+    .modal--large { width: 960px; }
+  </style>
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-bar">
+          <div class="filter-item">
+            <input class="input" id="filterName" type="text" placeholder="插件名称" autocomplete="off" />
+          </div>
+          <div class="filter-item">
+            <input class="input" id="filterJsonKey" type="text" placeholder="JSON Key" autocomplete="off" />
+          </div>
+          <div class="filter-item" id="platformWrap">
+            <button class="select-trigger" type="button" id="platformTrigger">
+              <span class="select-trigger__text" id="platformLabel">平台：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="platformClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </span>
+            </button>
+            <div class="single-panel" id="platformPanel">
+              <div class="single-option is-active" data-value="">全部</div>
+              <div class="single-option" data-value="通用">通用</div>
+              <div class="single-option" data-value="Android">Android</div>
+              <div class="single-option" data-value="iOS">iOS</div>
+            </div>
+          </div>
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="statusClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </span>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <div class="single-option is-active" data-value="">全部</div>
+              <div class="single-option" data-value="启用">启用</div>
+              <div class="single-option" data-value="禁用">禁用</div>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+            <button class="btn btn--success" type="button" id="addBtn">添加</button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="dataTable">
+              <colgroup>
+                <col style="width:10%" />
+                <col style="width:14%" />
+                <col style="width:16%" />
+                <col style="width:22%" />
+                <col style="width:8%" />
+                <col style="width:16%" />
+                <col style="width:14%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>平台</th>
+                  <th>JSON Key</th>
+                  <th>插件名称</th>
+                  <th>集成链接</th>
+                  <th>状态</th>
+                  <th>更新时间</th>
+                  <th class="col-action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status"></div>
+
+  <div class="modal-mask" id="formModal" aria-hidden="true">
+    <div class="modal modal--form modal--large" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="formModalTitle">添加插件配置</div>
+        <button class="modal__close" type="button" id="formModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">平台</div>
+          <div class="form-item__control">
+            <div class="seg" id="platformSeg">
+              <button class="seg__item is-active" type="button" data-value="通用">通用</button>
+              <button class="seg__item" type="button" data-value="Android">Android</button>
+              <button class="seg__item" type="button" data-value="iOS">iOS</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-item" data-field="jsonKey">
+          <div class="form-item__label is-required">JSON Key</div>
+          <div class="form-item__control">
+            <input class="input" id="formJsonKey" type="text" placeholder="请输入JSON Key" autocomplete="off" />
+            <div class="form-item__error">请输入JSON Key</div>
+          </div>
+        </div>
+        <div class="form-item" data-field="name">
+          <div class="form-item__label is-required">插件名称</div>
+          <div class="form-item__control">
+            <input class="input" id="formName" type="text" placeholder="请输入插件名称" autocomplete="off" />
+            <div class="form-item__error">请输入插件名称</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">集成链接</div>
+          <div class="form-item__control">
+            <input class="input" id="formLink" type="text" placeholder="请输入集成链接" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="statusSeg">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="param-block">
+          <div class="param-table-wrap">
+            <table class="param-table">
+              <colgroup>
+                <col style="width:17.5%" />
+                <col style="width:17.5%" />
+                <col style="width:17.5%" />
+                <col style="width:17.5%" />
+                <col style="width:10%" />
+                <col style="width:10%" />
+                <col style="width:10%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th><span class="req">*</span>参数Key</th>
+                  <th><span class="req">*</span>参数名</th>
+                  <th>默认值</th>
+                  <th>描述</th>
+                  <th class="col-switch">必填项</th>
+                  <th class="col-switch">下发SDK</th>
+                  <th class="col-op">操作</th>
+                </tr>
+              </thead>
+              <tbody id="paramBody"></tbody>
+            </table>
+          </div>
+          <button class="param-add" type="button" id="addParamBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            添加参数
+          </button>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="formCancelBtn">取消</button>
+        <button class="btn btn--primary" type="button" id="formSubmitBtn">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="col-resize.js"></script>
+  <script src="product-common.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      ProductShell.mount('plugin-config');
+
+      var UI = ProductUI;
+      var escapeHtml = UI.escapeHtml;
+
+      var state = {
+        keyword: '',
+        jsonKey: '',
+        platform: '',
+        status: '',
+        page: 1,
+        pageSize: 20,
+        editingId: null,
+        isEdit: false,
+        params: []
+      };
+
+      var rows = [
+        {
+          id: 'pl1', platform: '通用', jsonKey: 'tiktok_config', name: 'TikTok IAA 事件回传',
+          link: 'https://bytedance.larkoffice.com/wiki/U3U2wans4iaE4TkKorxc1V9mnOf',
+          status: '启用', updatedAt: '2026-01-03 10:00:00', createdAt: '2026-01-03T10:00:00',
+          params: [
+            { id: 'pa1', key: 'app_id', name: 'App ID', defaultValue: '', desc: '', required: false, sdk: true, isOld: true },
+            { id: 'pa2', key: 'tiktok_app_id', name: 'TikTok App ID', defaultValue: '', desc: '', required: false, sdk: true, isOld: true },
+            { id: 'pa3', key: 'app_secret', name: 'App Secret', defaultValue: '', desc: '', required: false, sdk: true, isOld: true }
+          ]
+        },
+        {
+          id: 'pl2', platform: '通用', jsonKey: 'fb_config', name: 'Facebook 配置',
+          link: 'https://developers.facebook.com/docs/',
+          status: '启用', updatedAt: '2026-01-02 10:00:00', createdAt: '2026-01-02T10:00:00',
+          params: [
+            { id: 'pa4', key: 'facebook_id', name: 'App ID', defaultValue: 'fb', desc: 'fb拼接应用编号', required: true, sdk: true, isOld: true },
+            { id: 'pa5', key: 'facebook_client_token', name: 'Client Token', defaultValue: '', desc: '', required: true, sdk: true, isOld: true }
+          ]
+        },
+        {
+          id: 'pl3', platform: '通用', jsonKey: 'adjust_config', name: 'Adjust 配置',
+          link: 'https://dev.adjust.com/zh/sdk',
+          status: '启用', updatedAt: '2026-01-02 09:00:00', createdAt: '2026-01-02T09:00:00',
+          params: [
+            { id: 'pa6', key: 'app_token', name: '应用Token', defaultValue: '', desc: '', required: true, sdk: true, isOld: true },
+            { id: 'pa6b', key: 'sdk_iap_revenue_token', name: '内购Token', defaultValue: '', desc: '', required: true, sdk: true, isOld: true }
+          ]
+        },
+        {
+          id: 'pl4', platform: '通用', jsonKey: 'ta_config', name: '数数配置',
+          link: 'https://docs-v2.thinkingdata.cn/?version=v6.0&lan=zh-CN&code=client_sdk_menu&anchorId=',
+          status: '启用', updatedAt: '2026-01-01 18:00:00', createdAt: '2026-01-01T18:00:00',
+          params: [
+            { id: 'pa7', key: 'project_id', name: '项目ID', defaultValue: '', desc: '', required: true, sdk: false, isOld: true },
+            { id: 'pa8', key: 'app_id', name: 'APPID', defaultValue: '', desc: '', required: true, sdk: true, isOld: true },
+            { id: 'pa8b', key: 'server_url', name: '上报地址', defaultValue: 'https://ta-data.wondergame.net', desc: '', required: true, sdk: true, isOld: true }
+          ]
+        },
+        {
+          id: 'pl5', platform: 'iOS', jsonKey: 'sdk_config', name: 'iOS SDK配置',
+          link: '', status: '启用', updatedAt: '2026-01-01 12:00:00', createdAt: '2026-01-01T12:00:00',
+          params: [
+            { id: 'pa9', key: 'AppstoreId', name: 'Store ID', defaultValue: '', desc: '', required: true, sdk: true, isOld: true }
+          ]
+        },
+        {
+          id: 'pl6', platform: 'Android', jsonKey: 'sdk_config', name: 'Android SDK配置',
+          link: '', status: '启用', updatedAt: '2026-01-01 10:00:00', createdAt: '2026-01-01T10:00:00',
+          params: [
+            { id: 'pa10', key: 'signing_sha1', name: '应用签名证书', defaultValue: '', desc: '', required: true, sdk: true, isOld: true },
+            { id: 'pa11', key: 'upload_sha1', name: '上传密钥证书', defaultValue: '', desc: '', required: true, sdk: true, isOld: true },
+            { id: 'pa12', key: 'web_client_id', name: 'Web客户端ID', defaultValue: '', desc: 'GP账号授权登录', required: false, sdk: true, isOld: true }
+          ]
+        }
+      ];
+
+      function formatNow() {
+        var d = new Date();
+        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+          pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+      }
+
+      function getFiltered() {
+        var kw = state.keyword.trim().toLowerCase();
+        var jk = state.jsonKey.trim().toLowerCase();
+        return rows
+          .filter(function (r) {
+            if (kw && String(r.name).toLowerCase().indexOf(kw) === -1) return false;
+            if (jk && String(r.jsonKey).toLowerCase().indexOf(jk) === -1) return false;
+            if (state.platform && r.platform !== state.platform) return false;
+            if (state.status && r.status !== state.status) return false;
+            return true;
+          })
+          .slice()
+          .sort(function (a, b) {
+            return String(b.createdAt).localeCompare(String(a.createdAt));
+          });
+      }
+
+      function renderLink(link) {
+        if (!link) return '<span class="link-cell is-empty">-</span>';
+        return '<a class="link link-cell" href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer" title="' + escapeHtml(link) + '">' + escapeHtml(link) + '</a>';
+      }
+
+      function renderTable() {
+        var list = getFiltered();
+        var total = list.length;
+        var totalPages = Math.max(1, Math.ceil(total / state.pageSize) || 1);
+        if (state.page > totalPages) state.page = totalPages;
+        var start = (state.page - 1) * state.pageSize;
+        var pageRows = list.slice(start, start + state.pageSize);
+        var tbody = UI.$('tableBody');
+        var emptyTip = UI.$('emptyTip');
+
+        if (!pageRows.length) {
+          tbody.innerHTML = '';
+          emptyTip.hidden = false;
+        } else {
+          emptyTip.hidden = true;
+          tbody.innerHTML = pageRows.map(function (r) {
+            return (
+              '<tr data-id="' + escapeHtml(r.id) + '">' +
+                '<td>' + escapeHtml(r.platform) + '</td>' +
+                '<td title="' + escapeHtml(r.jsonKey) + '">' + escapeHtml(r.jsonKey) + '</td>' +
+                '<td title="' + escapeHtml(r.name) + '">' + escapeHtml(r.name) + '</td>' +
+                '<td>' + renderLink(r.link) + '</td>' +
+                '<td>' + UI.statusTag(r.status) + '</td>' +
+                '<td title="' + escapeHtml(r.updatedAt || '') + '">' + escapeHtml(r.updatedAt || '') + '</td>' +
+                '<td class="col-action">' +
+                  '<div class="action-links">' +
+                    '<button class="link" type="button" data-action="edit" data-id="' + escapeHtml(r.id) + '">编辑</button>' +
+                  '</div>' +
+                '</td>' +
+              '</tr>'
+            );
+          }).join('');
+        }
+
+        UI.renderPagination({
+          containerId: 'pagination',
+          total: total,
+          page: state.page,
+          pageSize: state.pageSize
+        });
+      }
+
+      function emptyParam() {
+        return {
+          id: UI.uid('pa'),
+          key: '',
+          name: '',
+          defaultValue: '',
+          desc: '',
+          required: true,
+          sdk: true,
+          isOld: false
+        };
+      }
+
+      function renderParams() {
+        var body = UI.$('paramBody');
+        if (!state.params.length) {
+          body.innerHTML = '<tr><td colspan="7" style="color:var(--color-text-3);text-align:center">暂无参数，请点击「添加参数」</td></tr>';
+          return;
+        }
+        body.innerHTML = state.params.map(function (p, idx) {
+          var keyDisabled = state.isEdit && p.isOld ? ' disabled' : '';
+          return (
+            '<tr data-idx="' + idx + '">' +
+              '<td><input class="input" type="text" data-field="key" data-idx="' + idx + '" value="' + escapeHtml(p.key) + '" placeholder="请输入参数Key"' + keyDisabled + ' /></td>' +
+              '<td><input class="input" type="text" data-field="name" data-idx="' + idx + '" value="' + escapeHtml(p.name) + '" placeholder="请输入参数名" /></td>' +
+              '<td><input class="input" type="text" data-field="defaultValue" data-idx="' + idx + '" value="' + escapeHtml(p.defaultValue || '') + '" placeholder="请输入默认值" /></td>' +
+              '<td><input class="input" type="text" data-field="desc" data-idx="' + idx + '" value="' + escapeHtml(p.desc || '') + '" placeholder="请输入描述" /></td>' +
+              '<td class="col-switch"><button class="switch' + (p.required ? ' is-on' : '') + '" type="button" data-switch="required" data-idx="' + idx + '" aria-label="必填项"></button></td>' +
+              '<td class="col-switch"><button class="switch' + (p.sdk ? ' is-on' : '') + '" type="button" data-switch="sdk" data-idx="' + idx + '" aria-label="下发SDK"></button></td>' +
+              '<td class="col-op"><button class="link link--danger" type="button" data-param-action="delete" data-idx="' + idx + '">删除</button></td>' +
+            '</tr>'
+          );
+        }).join('');
+      }
+
+      function clearFormErrors() {
+        var form = UI.$('formModal');
+        form.querySelectorAll('.form-item.is-error').forEach(function (el) {
+          el.classList.remove('is-error');
+        });
+        UI.$('paramBody').querySelectorAll('.input.is-error').forEach(function (el) {
+          el.classList.remove('is-error');
+        });
+      }
+
+      function setFieldError(field, hasError, message) {
+        var item = UI.$('formModal').querySelector('.form-item[data-field="' + field + '"]');
+        if (!item) return;
+        item.classList.toggle('is-error', !!hasError);
+        if (hasError && message) {
+          var err = item.querySelector('.form-item__error');
+          if (err) err.textContent = message;
+        }
+      }
+
+      function collectParamsFromDom() {
+        state.params.forEach(function (p, idx) {
+          ['key', 'name', 'defaultValue', 'desc'].forEach(function (field) {
+            var input = UI.$('paramBody').querySelector('input[data-field="' + field + '"][data-idx="' + idx + '"]');
+            if (!input) return;
+            if (field === 'key' && input.disabled) return;
+            p[field] = input.value;
+          });
+        });
+      }
+
+      function openForm(row) {
+        clearFormErrors();
+        state.editingId = row ? row.id : null;
+        state.isEdit = !!row;
+        UI.$('formModalTitle').textContent = row ? '编辑插件配置' : '添加插件配置';
+        UI.setSegValue('platformSeg', row ? row.platform : '通用');
+        UI.setSegValue('statusSeg', row ? row.status : '启用');
+        UI.$('formJsonKey').value = row ? row.jsonKey : '';
+        UI.$('formName').value = row ? row.name : '';
+        UI.$('formLink').value = row ? (row.link || '') : '';
+
+        var platformSeg = UI.$('platformSeg');
+        var jsonInput = UI.$('formJsonKey');
+        if (row) {
+          platformSeg.classList.add('is-readonly');
+          jsonInput.disabled = true;
+          state.params = (row.params || []).map(function (p) {
+            return {
+              id: p.id,
+              key: p.key,
+              name: p.name,
+              defaultValue: p.defaultValue || '',
+              desc: p.desc || '',
+              required: !!p.required,
+              sdk: p.sdk !== false,
+              isOld: true
+            };
+          });
+        } else {
+          platformSeg.classList.remove('is-readonly');
+          jsonInput.disabled = false;
+          state.params = [emptyParam()];
+        }
+
+        renderParams();
+        UI.openModal('formModal');
+        if (!row) jsonInput.focus();
+        else UI.$('formName').focus();
+      }
+
+      function closeForm() {
+        UI.closeModal('formModal');
+        state.editingId = null;
+        state.isEdit = false;
+        state.params = [];
+        clearFormErrors();
+      }
+
+      function validateParams() {
+        collectParamsFromDom();
+        var incomplete = false;
+        var keyMap = {};
+        var dupKey = false;
+
+        state.params.forEach(function (p, idx) {
+          var key = String(p.key || '').trim();
+          var name = String(p.name || '').trim();
+          var keyInput = UI.$('paramBody').querySelector('input[data-field="key"][data-idx="' + idx + '"]');
+          var nameInput = UI.$('paramBody').querySelector('input[data-field="name"][data-idx="' + idx + '"]');
+
+          if (!key || !name) {
+            incomplete = true;
+            if (keyInput && !key) keyInput.classList.add('is-error');
+            if (nameInput && !name) nameInput.classList.add('is-error');
+          }
+
+          if (key) {
+            var lower = key.toLowerCase();
+            if (keyMap[lower] != null) {
+              dupKey = true;
+              if (keyInput) keyInput.classList.add('is-error');
+              var other = UI.$('paramBody').querySelector('input[data-field="key"][data-idx="' + keyMap[lower] + '"]');
+              if (other) other.classList.add('is-error');
+            } else {
+              keyMap[lower] = idx;
+            }
+          }
+        });
+
+        if (incomplete) {
+          UI.showToast('请完整填写参数配置的必填项。', 'error');
+          return false;
+        }
+        if (dupKey) {
+          UI.showToast('参数Key不能重复，请重新输入。', 'error');
+          return false;
+        }
+        return true;
+      }
+
+      function validateForm() {
+        var jsonInput = UI.$('formJsonKey');
+        var nameInput = UI.$('formName');
+        var jsonKey = jsonInput.value.trim();
+        var name = nameInput.value.trim();
+        var platform = UI.getSegValue('platformSeg') || '通用';
+        var firstInvalid = null;
+
+        if (!jsonKey) {
+          setFieldError('jsonKey', true, '请输入JSON Key');
+          firstInvalid = firstInvalid || jsonInput;
+        } else {
+          var dupKey = rows.some(function (r) {
+            return r.platform === platform &&
+              r.jsonKey.toLowerCase() === jsonKey.toLowerCase() &&
+              r.id !== state.editingId;
+          });
+          if (dupKey) {
+            setFieldError('jsonKey', true, 'JSON Key已存在，请重新输入');
+            firstInvalid = firstInvalid || jsonInput;
+          } else {
+            setFieldError('jsonKey', false);
+          }
+        }
+
+        if (!name) {
+          setFieldError('name', true, '请输入插件名称');
+          firstInvalid = firstInvalid || nameInput;
+        } else {
+          var dupName = rows.some(function (r) {
+            return r.platform === platform &&
+              r.name.toLowerCase() === name.toLowerCase() &&
+              r.id !== state.editingId;
+          });
+          if (dupName) {
+            setFieldError('name', true, '插件名称已存在，请重新输入');
+            firstInvalid = firstInvalid || nameInput;
+          } else {
+            setFieldError('name', false);
+          }
+        }
+
+        if (firstInvalid) {
+          if (!firstInvalid.disabled) firstInvalid.focus();
+          return false;
+        }
+        return true;
+      }
+
+      function submitForm() {
+        clearFormErrors();
+        if (!validateForm()) return;
+        if (!validateParams()) return;
+
+        var jsonKey = UI.$('formJsonKey').value.trim();
+        var name = UI.$('formName').value.trim();
+        var link = UI.$('formLink').value.trim();
+        var platform = UI.getSegValue('platformSeg') || '通用';
+        var status = UI.getSegValue('statusSeg') || '启用';
+        var now = formatNow();
+
+        var paramsPayload = state.params.map(function (p) {
+          return {
+            id: p.id || UI.uid('pa'),
+            key: String(p.key || '').trim(),
+            name: String(p.name || '').trim(),
+            defaultValue: String(p.defaultValue || '').trim(),
+            desc: String(p.desc || '').trim(),
+            required: !!p.required,
+            sdk: !!p.sdk,
+            isOld: true
+          };
+        });
+
+        if (state.editingId) {
+          var target = rows.find(function (r) { return r.id === state.editingId; });
+          if (target) {
+            target.name = name;
+            target.link = link;
+            target.status = status;
+            target.params = paramsPayload;
+            target.updatedAt = now;
+          }
+          UI.showToast('提交成功');
+        } else {
+          rows.unshift({
+            id: UI.uid('pl'),
+            name: name,
+            jsonKey: jsonKey,
+            platform: platform,
+            link: link,
+            status: status,
+            updatedAt: now,
+            createdAt: new Date().toISOString(),
+            params: paramsPayload
+          });
+          UI.showToast('提交成功');
+        }
+        closeForm();
+        renderTable();
+      }
+
+      function applyFilter() {
+        state.keyword = UI.$('filterName').value || '';
+        state.jsonKey = UI.$('filterJsonKey').value || '';
+        state.page = 1;
+        renderTable();
+      }
+
+      var platformSelect = UI.bindSingleSelect({
+        wrapId: 'platformWrap',
+        triggerId: 'platformTrigger',
+        panelId: 'platformPanel',
+        labelId: 'platformLabel',
+        clearId: 'platformClear',
+        prefix: '平台：',
+        getValue: function () { return state.platform; },
+        onChange: function (value) { state.platform = value || ''; }
+      });
+
+      var statusSelect = UI.bindSingleSelect({
+        wrapId: 'statusWrap',
+        triggerId: 'statusTrigger',
+        panelId: 'statusPanel',
+        labelId: 'statusLabel',
+        clearId: 'statusClear',
+        prefix: '状态：',
+        getValue: function () { return state.status; },
+        onChange: function (value) { state.status = value || ''; }
+      });
+
+      UI.bindSeg('platformSeg');
+      UI.bindSeg('statusSeg');
+
+      UI.bindPagination({
+        containerId: 'pagination',
+        getTotal: function () { return getFiltered().length; },
+        getPage: function () { return state.page; },
+        getPageSize: function () { return state.pageSize; },
+        onPageChange: function (page) {
+          state.page = page;
+          renderTable();
+        },
+        onPageSizeChange: function (size) {
+          state.pageSize = size;
+          state.page = 1;
+          renderTable();
+        }
+      });
+
+      UI.$('searchBtn').addEventListener('click', applyFilter);
+      UI.$('filterName').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') applyFilter();
+      });
+      UI.$('filterJsonKey').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') applyFilter();
+      });
+
+      UI.$('addBtn').addEventListener('click', function () { openForm(null); });
+      UI.$('formCancelBtn').addEventListener('click', closeForm);
+      UI.$('formModalClose').addEventListener('click', closeForm);
+      UI.$('formSubmitBtn').addEventListener('click', submitForm);
+
+      UI.$('formJsonKey').addEventListener('input', function () {
+        var jsonKey = this.value.trim();
+        var platform = UI.getSegValue('platformSeg') || '通用';
+        if (!jsonKey) {
+          setFieldError('jsonKey', false);
+          return;
+        }
+        var dup = rows.some(function (r) {
+          return r.platform === platform &&
+            r.jsonKey.toLowerCase() === jsonKey.toLowerCase() &&
+            r.id !== state.editingId;
+        });
+        if (dup) setFieldError('jsonKey', true, 'JSON Key已存在，请重新输入');
+        else setFieldError('jsonKey', false);
+      });
+      UI.$('formName').addEventListener('input', function () {
+        var name = this.value.trim();
+        var platform = UI.getSegValue('platformSeg') || '通用';
+        if (!name) {
+          setFieldError('name', false);
+          return;
+        }
+        var dup = rows.some(function (r) {
+          return r.platform === platform &&
+            r.name.toLowerCase() === name.toLowerCase() &&
+            r.id !== state.editingId;
+        });
+        if (dup) setFieldError('name', true, '插件名称已存在，请重新输入');
+        else setFieldError('name', false);
+      });
+
+      UI.$('addParamBtn').addEventListener('click', function () {
+        collectParamsFromDom();
+        state.params.push(emptyParam());
+        renderParams();
+      });
+
+      UI.$('paramBody').addEventListener('click', function (e) {
+        var sw = e.target.closest('[data-switch]');
+        if (sw) {
+          var sIdx = Number(sw.getAttribute('data-idx'));
+          var field = sw.getAttribute('data-switch');
+          if (!state.params[sIdx]) return;
+          state.params[sIdx][field] = !state.params[sIdx][field];
+          sw.classList.toggle('is-on', !!state.params[sIdx][field]);
+          return;
+        }
+        var btn = e.target.closest('[data-param-action]');
+        if (!btn) return;
+        collectParamsFromDom();
+        var idx = Number(btn.getAttribute('data-idx'));
+        if (btn.getAttribute('data-param-action') === 'delete') {
+          state.params.splice(idx, 1);
+          renderParams();
+        }
+      });
+
+      UI.$('paramBody').addEventListener('input', function (e) {
+        var input = e.target.closest('.input');
+        if (input) input.classList.remove('is-error');
+      });
+
+      UI.$('tableBody').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action="edit"]');
+        if (!btn) return;
+        var row = rows.find(function (r) { return r.id === btn.getAttribute('data-id'); });
+        if (row) openForm(row);
+      });
+
+      UI.$('formModal').addEventListener('click', function (e) {
+        if (e.target === UI.$('formModal')) e.stopPropagation();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && UI.$('formModal').classList.contains('is-open')) closeForm();
+      });
+
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

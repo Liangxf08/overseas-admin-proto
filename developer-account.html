@@ -1,0 +1,1132 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>开发者账号 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <style>
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1);
+      white-space: nowrap;
+    }
+    .status-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot--uploaded::before { background: var(--color-success-6); }
+    .status-dot--empty::before { background: var(--color-danger-6); }
+
+    .upload-file {
+      width: 100%;
+    }
+    .upload-file__btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1);
+      background: var(--color-white);
+      border: 1px solid var(--color-border-2);
+      border-radius: var(--border-radius-medium);
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+    .upload-file__btn:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+    .upload-file__btn iconify-icon {
+      font-size: 14px;
+      color: inherit;
+    }
+    .upload-file__card {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 32px;
+      padding: 0 12px;
+      background: var(--color-fill-1);
+      border: none;
+      border-radius: var(--border-radius-medium);
+      box-sizing: border-box;
+    }
+    .upload-file.is-uploaded .upload-file__btn {
+      display: none;
+    }
+    .upload-file.is-uploaded .upload-file__card {
+      display: flex;
+    }
+    .upload-file__clip {
+      width: 14px;
+      height: 14px;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .upload-file__name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-link-6);
+      cursor: pointer;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+    }
+    .upload-file__name:hover { opacity: 0.85; }
+    .upload-file__remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-left: auto;
+      padding: 0;
+      color: var(--color-danger-6);
+      background: transparent;
+      border: none;
+      border-radius: var(--border-radius-small);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .upload-file__remove:hover { background: var(--color-danger-1); }
+    .upload-file__remove iconify-icon {
+      font-size: 14px;
+      color: inherit;
+    }
+
+    #previewModalMask { z-index: 1060; }
+    .modal--preview { width: 640px; }
+    .code-block {
+      margin: 0;
+      padding: 16px;
+      max-height: min(480px, calc(100vh - 240px));
+      overflow: auto;
+      background: var(--color-fill-1);
+      border: 1px solid var(--color-border-2);
+      border-radius: var(--border-radius-medium);
+      font-family: var(--font-family-code);
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1);
+      white-space: pre;
+      word-break: normal;
+      tab-size: 2;
+    }
+    .code-block code {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      background: none;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-msg" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="page-tabs" id="pageTabs"></div>
+
+        <div class="filter-bar">
+          <div class="filter-item">
+            <input class="input" id="filterAccount" type="text" placeholder="开发者账号" />
+          </div>
+          <div class="filter-item">
+            <input class="input" id="filterName" type="text" placeholder="开发者名称" />
+          </div>
+          <div class="filter-item" id="filterStatusWrap">
+            <button class="select-trigger" type="button" id="filterStatusTrigger">
+              <span class="select-trigger__text" id="filterStatusLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="filterStatusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="filterStatusPanel">
+              <div class="single-option" data-value="">全部</div>
+              <div class="single-option" data-value="启用">启用</div>
+              <div class="single-option" data-value="禁用">禁用</div>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn--primary" type="button" id="btnQuery">查询</button>
+            <button class="btn btn--success" type="button" id="btnAdd">添加</button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="dataTable">
+              <colgroup id="tableCols"></colgroup>
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+          </div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Android 添加/编辑 -->
+  <div class="modal-mask" id="androidModalMask" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="androidModalTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="androidModalTitle">添加开发者</h2>
+        <button class="modal__close" type="button" data-close="androidModalMask" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" data-field="androidAccount">
+          <label class="form-item__label is-required">开发者账号</label>
+          <div class="form-item__control">
+            <input class="input" id="androidAccount" type="text" placeholder="请输入开发者账号" autocomplete="off" />
+            <div class="form-item__error">请输入开发者账号</div>
+          </div>
+        </div>
+        <div class="form-item" data-field="androidName">
+          <label class="form-item__label is-required">开发者名称</label>
+          <div class="form-item__control">
+            <input class="input" id="androidName" type="text" placeholder="请输入开发者名称" autocomplete="off" />
+            <div class="form-item__error">请输入开发者名称</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">GP服务凭证</label>
+          <div class="form-item__control">
+            <div class="upload-file" id="androidUploadWrap">
+              <button class="upload-file__btn" type="button" id="androidUploadBtn">
+                <iconify-icon icon="icon-park-outline:upload" aria-hidden="true"></iconify-icon>
+                <span>点击上传</span>
+              </button>
+              <input type="file" id="androidFileInput" accept=".json" hidden />
+              <div class="upload-file__card" id="androidFileCard">
+                <svg class="upload-file__clip" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M29.037 15.236s-9.174 9.267-11.48 11.594c-2.305 2.327-1.646 4.987-.329 6.316 1.317 1.33 3.994 1.953 6.258-.332L37.32 18.851c3.623-3.657 2.092-8.492 0-10.639-2.093-2.147-6.916-3.657-10.54 0L11.3 23.838c-3.623 3.657-3.953 10.638.329 14.96 4.282 4.322 11.115 4.105 14.821.333 3.706-3.773 8.74-8.822 11.224-11.33"/></svg>
+                <button class="upload-file__name" type="button" id="androidFileName"></button>
+                <button class="upload-file__remove" type="button" id="androidFileDelete" aria-label="删除">
+                  <iconify-icon icon="icon-park-outline:delete" aria-hidden="true"></iconify-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">备注</label>
+          <div class="form-item__control">
+            <textarea class="textarea" id="androidRemark" placeholder="请输入备注"></textarea>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">状态</label>
+          <div class="form-item__control">
+            <div class="seg" id="androidStatusSeg">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="androidModalMask">取消</button>
+        <button class="btn btn--primary" type="button" id="btnSubmitAndroid">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS 添加/编辑 -->
+  <div class="modal-mask" id="iosModalMask" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="iosModalTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="iosModalTitle">添加开发者</h2>
+        <button class="modal__close" type="button" data-close="iosModalMask" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" data-field="iosAccount">
+          <label class="form-item__label is-required">开发者账号</label>
+          <div class="form-item__control">
+            <input class="input" id="iosAccount" type="text" placeholder="请输入开发者账号" autocomplete="off" />
+            <div class="form-item__error">请输入开发者账号</div>
+          </div>
+        </div>
+        <div class="form-item" data-field="iosName">
+          <label class="form-item__label is-required">开发者名称</label>
+          <div class="form-item__control">
+            <input class="input" id="iosName" type="text" placeholder="请输入开发者名称" autocomplete="off" />
+            <div class="form-item__error">请输入开发者名称</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">Issuer ID</label>
+          <div class="form-item__control">
+            <input class="input" id="iosIssuerId" type="text" placeholder="请输入 Issuer ID" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">Shared Secret</label>
+          <div class="form-item__control">
+            <input class="input" id="iosSharedSecret" type="text" placeholder="请输入 Shared Secret" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">AuthKey</label>
+          <div class="form-item__control">
+            <div class="upload-file" id="iosAuthUploadWrap">
+              <button class="upload-file__btn" type="button" id="iosAuthUploadBtn">
+                <iconify-icon icon="icon-park-outline:upload" aria-hidden="true"></iconify-icon>
+                <span>点击上传</span>
+              </button>
+              <input type="file" id="iosAuthFileInput" accept=".json,.p8,.pem,.key" hidden />
+              <div class="upload-file__card" id="iosAuthFileCard">
+                <svg class="upload-file__clip" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M29.037 15.236s-9.174 9.267-11.48 11.594c-2.305 2.327-1.646 4.987-.329 6.316 1.317 1.33 3.994 1.953 6.258-.332L37.32 18.851c3.623-3.657 2.092-8.492 0-10.639-2.093-2.147-6.916-3.657-10.54 0L11.3 23.838c-3.623 3.657-3.953 10.638.329 14.96 4.282 4.322 11.115 4.105 14.821.333 3.706-3.773 8.74-8.822 11.224-11.33"/></svg>
+                <button class="upload-file__name" type="button" id="iosAuthFileName"></button>
+                <button class="upload-file__remove" type="button" id="iosAuthFileDelete" aria-label="删除">
+                  <iconify-icon icon="icon-park-outline:delete" aria-hidden="true"></iconify-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">SubscriptionKey</label>
+          <div class="form-item__control">
+            <div class="upload-file" id="iosSubUploadWrap">
+              <button class="upload-file__btn" type="button" id="iosSubUploadBtn">
+                <iconify-icon icon="icon-park-outline:upload" aria-hidden="true"></iconify-icon>
+                <span>点击上传</span>
+              </button>
+              <input type="file" id="iosSubFileInput" accept=".json,.p8,.pem,.key" hidden />
+              <div class="upload-file__card" id="iosSubFileCard">
+                <svg class="upload-file__clip" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter" aria-hidden="true"><path d="M29.037 15.236s-9.174 9.267-11.48 11.594c-2.305 2.327-1.646 4.987-.329 6.316 1.317 1.33 3.994 1.953 6.258-.332L37.32 18.851c3.623-3.657 2.092-8.492 0-10.639-2.093-2.147-6.916-3.657-10.54 0L11.3 23.838c-3.623 3.657-3.953 10.638.329 14.96 4.282 4.322 11.115 4.105 14.821.333 3.706-3.773 8.74-8.822 11.224-11.33"/></svg>
+                <button class="upload-file__name" type="button" id="iosSubFileName"></button>
+                <button class="upload-file__remove" type="button" id="iosSubFileDelete" aria-label="删除">
+                  <iconify-icon icon="icon-park-outline:delete" aria-hidden="true"></iconify-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">备注</label>
+          <div class="form-item__control">
+            <textarea class="textarea" id="iosRemark" placeholder="请输入备注"></textarea>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">状态</label>
+          <div class="form-item__control">
+            <div class="seg" id="iosStatusSeg">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="iosModalMask">取消</button>
+        <button class="btn btn--primary" type="button" id="btnSubmitIos">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 凭证预览（二级弹窗） -->
+  <div class="modal-mask" id="previewModalMask" aria-hidden="true">
+    <div class="modal modal--preview" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="previewModalTitle">凭证预览</h2>
+        <button class="modal__close" type="button" data-close="previewModalMask" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <pre class="code-block" id="previewContent"><code></code></pre>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--primary" type="button" id="previewDownloadBtn">下载</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="col-resize.js"></script>
+  <script src="product-common.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script>
+(function () {
+  'use strict';
+
+  ProductShell.mount('developer-account');
+
+  var UI = ProductUI;
+
+  var APP_PLATFORMS = [
+    { key: 'Android', label: 'Android', enabled: true },
+    { key: 'iOS', label: 'iOS', enabled: true }
+  ];
+
+  var state = {
+    platform: 'Android',
+    query: { account: '', name: '', status: '' },
+    page: 1,
+    pageSize: 20,
+    editingId: null,
+    androidDraft: { fileName: '', content: '' },
+    iosDraft: {
+      authFileName: '',
+      authContent: '',
+      subFileName: '',
+      subContent: ''
+    },
+    preview: { fileName: '', content: '' },
+    androidList: [],
+    iosList: []
+  };
+
+  function fakeGpContent(account) {
+    return JSON.stringify({
+      type: 'service_account',
+      project_id: 'demo-gp-' + account,
+      private_key_id: 'pk_' + Math.random().toString(36).slice(2, 10),
+      client_email: account + '@demo.gserviceaccount.com',
+      note: 'fake credential for prototype'
+    }, null, 2);
+  }
+
+  function fakeKeyContent(kind, account) {
+    return JSON.stringify({
+      type: kind,
+      key_id: 'KID_' + Math.random().toString(36).slice(2, 10).toUpperCase(),
+      account: account,
+      note: 'fake credential for prototype'
+    }, null, 2);
+  }
+
+  function formatNow() {
+    var d = new Date();
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+      pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+
+  function uploadStatusDot(uploaded) {
+    return uploaded
+      ? '<span class="status-dot status-dot--uploaded">已上传</span>'
+      : '<span class="status-dot status-dot--empty">未上传</span>';
+  }
+
+  function seedData() {
+    state.androidList = [
+      {
+        id: 'a1',
+        account: 'gp.dev.a@example.com',
+        name: '用户A Studio',
+        fileName: 'gp-service-a.json',
+        fileContent: fakeGpContent('userA'),
+        remark: '主投放账号',
+        status: '启用',
+        updatedAt: '2026-03-12 14:28:06'
+      },
+      {
+        id: 'a2',
+        account: 'gp.dev.b@example.com',
+        name: '用户B Games',
+        fileName: '',
+        fileContent: '',
+        remark: '待上传凭证',
+        status: '禁用',
+        updatedAt: '2026-02-20 09:15:33'
+      },
+      {
+        id: 'a3',
+        account: 'gp.dev.c@example.com',
+        name: '用户C Media',
+        fileName: 'gp-service-c.zip',
+        fileContent: fakeGpContent('userC'),
+        remark: '',
+        status: '禁用',
+        updatedAt: '2026-01-18 16:42:11'
+      },
+      {
+        id: 'a4',
+        account: 'gp.dev.d@example.com',
+        name: '用户D Ads',
+        fileName: 'gp-service-d.json',
+        fileContent: fakeGpContent('userD'),
+        remark: '备用账号',
+        status: '启用',
+        updatedAt: '2026-04-01 11:05:49'
+      }
+    ];
+
+    state.iosList = [
+      {
+        id: 'i1',
+        account: 'ios.dev.a@icloud.com',
+        name: '用户A Apple',
+        sharedSecret: 'ss_ABCDEF1234567890XYZ',
+        issuerId: '69a6de80-xxxx-xxxx-xxxx-aaaaaaaaaaaa',
+        authFileName: 'AuthKey_A1B2C3.json',
+        authContent: fakeKeyContent('AuthKey', 'userA'),
+        subFileName: 'SubscriptionKey_A1.json',
+        subContent: fakeKeyContent('SubscriptionKey', 'userA'),
+        remark: '正式环境',
+        status: '启用',
+        updatedAt: '2026-03-15 10:22:18'
+      },
+      {
+        id: 'i2',
+        account: 'ios.dev.b@icloud.com',
+        name: '用户B Apple',
+        sharedSecret: 'ss_BBBB111122223333CCCC',
+        issuerId: '69a6de80-xxxx-xxxx-xxxx-bbbbbbbbbbbb',
+        authFileName: 'AuthKey_B9C8D7.json',
+        authContent: fakeKeyContent('AuthKey', 'userB'),
+        subFileName: '',
+        subContent: '',
+        remark: '缺少 SubscriptionKey',
+        status: '启用',
+        updatedAt: '2026-02-08 13:40:55'
+      },
+      {
+        id: 'i3',
+        account: 'ios.dev.c@icloud.com',
+        name: '用户C Apple',
+        sharedSecret: 'ss_CCCC999988887777DDDD',
+        issuerId: '',
+        authFileName: '',
+        authContent: '',
+        subFileName: '',
+        subContent: '',
+        remark: '草稿账号',
+        status: '禁用',
+        updatedAt: '2026-01-25 08:06:27'
+      },
+      {
+        id: 'i4',
+        account: 'ios.dev.d@icloud.com',
+        name: '用户D Apple',
+        sharedSecret: 'ss_DDDD555566667777EEEE',
+        issuerId: '69a6de80-xxxx-xxxx-xxxx-dddddddddddd',
+        authFileName: 'AuthKey_D4E5F6.json',
+        authContent: fakeKeyContent('AuthKey', 'userD'),
+        subFileName: 'SubscriptionKey_D4.json',
+        subContent: fakeKeyContent('SubscriptionKey', 'userD'),
+        remark: '',
+        status: '启用',
+        updatedAt: '2026-04-03 17:58:02'
+      }
+    ];
+  }
+
+  function currentList() {
+    return state.platform === 'Android' ? state.androidList : state.iosList;
+  }
+
+  function getFiltered() {
+    var q = state.query;
+    return currentList().filter(function (row) {
+      if (q.account && row.account.toLowerCase().indexOf(q.account.toLowerCase()) === -1) return false;
+      if (q.name && row.name.indexOf(q.name) === -1) return false;
+      if (q.status && row.status !== q.status) return false;
+      return true;
+    });
+  }
+
+  function renderTabs() {
+    var tabs = UI.$('pageTabs');
+    tabs.innerHTML = APP_PLATFORMS.filter(function (p) { return p.enabled; }).map(function (p) {
+      return '<button class="page-tabs__item' + (p.key === state.platform ? ' is-active' : '') + '" type="button" data-platform="' + p.key + '">' + UI.escapeHtml(p.label) + '</button>';
+    }).join('');
+  }
+
+  function renderTableHead() {
+    var cols = UI.$('tableCols');
+    var head = UI.$('tableHead');
+    cols.innerHTML =
+      '<col style="width:18%" />' +
+      '<col style="width:14%" />' +
+      '<col style="width:14%" />' +
+      '<col style="width:12%" />' +
+      '<col style="width:10%" />' +
+      '<col style="width:16%" />' +
+      '<col style="width:16%" />';
+    head.innerHTML =
+      '<tr>' +
+        '<th>开发者账号</th>' +
+        '<th>开发者名称</th>' +
+        '<th>备注</th>' +
+        '<th>凭证文件</th>' +
+        '<th>状态</th>' +
+        '<th>更新时间</th>' +
+        '<th class="col-action">操作</th>' +
+      '</tr>';
+  }
+
+  function isCredentialUploaded(row) {
+    if (state.platform === 'Android') return !!row.fileName;
+    return !!(row.authFileName || row.subFileName);
+  }
+
+  function renderTable() {
+    renderTableHead();
+    var filtered = getFiltered();
+    var total = filtered.length;
+    var start = (state.page - 1) * state.pageSize;
+    var pageRows = filtered.slice(start, start + state.pageSize);
+    var tbody = UI.$('tableBody');
+    var empty = UI.$('emptyTip');
+
+    if (!pageRows.length) {
+      tbody.innerHTML = '';
+      empty.hidden = false;
+    } else {
+      empty.hidden = true;
+      tbody.innerHTML = pageRows.map(function (row) {
+        var uploaded = isCredentialUploaded(row);
+        return (
+          '<tr data-id="' + UI.escapeHtml(row.id) + '">' +
+            '<td title="' + UI.escapeHtml(row.account) + '">' + UI.escapeHtml(row.account) + '</td>' +
+            '<td>' + UI.escapeHtml(row.name) + '</td>' +
+            '<td title="' + UI.escapeHtml(row.remark || '') + '">' + UI.escapeHtml(row.remark || '—') + '</td>' +
+            '<td>' + uploadStatusDot(uploaded) + '</td>' +
+            '<td>' + UI.statusTag(row.status) + '</td>' +
+            '<td title="' + UI.escapeHtml(row.updatedAt || '') + '">' + UI.escapeHtml(row.updatedAt || '—') + '</td>' +
+            '<td class="col-action"><div class="action-links">' +
+              '<button class="link" type="button" data-act="edit">编辑</button>' +
+              '<button class="link' + (uploaded ? '' : ' is-disabled') + '" type="button" data-act="download"' + (uploaded ? '' : ' disabled') + '>下载凭证</button>' +
+            '</div></td>' +
+          '</tr>'
+        );
+      }).join('');
+    }
+
+    UI.renderPagination({
+      containerId: 'pagination',
+      total: total,
+      page: state.page,
+      pageSize: state.pageSize
+    });
+  }
+
+  function syncUploadWrap(wrapId, fileName) {
+    var wrap = UI.$(wrapId);
+    if (!wrap) return;
+    wrap.classList.toggle('is-uploaded', !!fileName);
+    var nameEl = wrap.querySelector('.upload-file__name');
+    if (nameEl) nameEl.textContent = fileName || '';
+  }
+
+  function syncAndroidFileUI() {
+    syncUploadWrap('androidUploadWrap', state.androidDraft.fileName);
+  }
+
+  function syncIosFileUI() {
+    syncUploadWrap('iosAuthUploadWrap', state.iosDraft.authFileName);
+    syncUploadWrap('iosSubUploadWrap', state.iosDraft.subFileName);
+  }
+
+  function clearFormErrors(modalId) {
+    var form = UI.$(modalId);
+    if (!form) return;
+    form.querySelectorAll('.form-item.is-error').forEach(function (el) {
+      el.classList.remove('is-error');
+    });
+  }
+
+  function setFieldError(modalId, field, hasError, message) {
+    var form = UI.$(modalId);
+    if (!form) return;
+    var item = form.querySelector('.form-item[data-field="' + field + '"]');
+    if (!item) return;
+    item.classList.toggle('is-error', !!hasError);
+    if (hasError && message) {
+      var err = item.querySelector('.form-item__error');
+      if (err) err.textContent = message;
+    }
+  }
+
+  function resetAndroidForm() {
+    clearFormErrors('androidModalMask');
+    UI.$('androidAccount').value = '';
+    UI.$('androidAccount').disabled = false;
+    UI.$('androidName').value = '';
+    UI.$('androidRemark').value = '';
+    UI.setSegValue('androidStatusSeg', '启用');
+    state.androidDraft = { fileName: '', content: '' };
+    syncAndroidFileUI();
+  }
+
+  function resetIosForm() {
+    clearFormErrors('iosModalMask');
+    UI.$('iosAccount').value = '';
+    UI.$('iosAccount').disabled = false;
+    UI.$('iosName').value = '';
+    UI.$('iosSharedSecret').value = '';
+    UI.$('iosIssuerId').value = '';
+    UI.$('iosRemark').value = '';
+    UI.setSegValue('iosStatusSeg', '启用');
+    state.iosDraft = { authFileName: '', authContent: '', subFileName: '', subContent: '' };
+    syncIosFileUI();
+  }
+
+  function openAdd() {
+    state.editingId = null;
+    if (state.platform === 'Android') {
+      UI.$('androidModalTitle').textContent = '添加开发者';
+      resetAndroidForm();
+      UI.openModal('androidModalMask');
+    } else {
+      UI.$('iosModalTitle').textContent = '添加开发者';
+      resetIosForm();
+      UI.openModal('iosModalMask');
+    }
+  }
+
+  function openEdit(row) {
+    state.editingId = row.id;
+    if (state.platform === 'Android') {
+      UI.$('androidModalTitle').textContent = '编辑开发者';
+      resetAndroidForm();
+      UI.$('androidAccount').value = row.account;
+      UI.$('androidAccount').disabled = true;
+      UI.$('androidName').value = row.name;
+      UI.$('androidRemark').value = row.remark || '';
+      UI.setSegValue('androidStatusSeg', row.status);
+      state.androidDraft = {
+        fileName: row.fileName || '',
+        content: row.fileContent || ''
+      };
+      syncAndroidFileUI();
+      UI.openModal('androidModalMask');
+    } else {
+      UI.$('iosModalTitle').textContent = '编辑开发者';
+      resetIosForm();
+      UI.$('iosAccount').value = row.account;
+      UI.$('iosAccount').disabled = true;
+      UI.$('iosName').value = row.name;
+      UI.$('iosSharedSecret').value = row.sharedSecret || '';
+      UI.$('iosIssuerId').value = row.issuerId || '';
+      UI.$('iosRemark').value = row.remark || '';
+      UI.setSegValue('iosStatusSeg', row.status);
+      state.iosDraft = {
+        authFileName: row.authFileName || '',
+        authContent: row.authContent || '',
+        subFileName: row.subFileName || '',
+        subContent: row.subContent || ''
+      };
+      syncIosFileUI();
+      UI.openModal('iosModalMask');
+    }
+  }
+
+  function formatJsonContent(content) {
+    var raw = String(content || '');
+    if (!raw) return '(空文件)';
+    try {
+      return JSON.stringify(JSON.parse(raw), null, 2);
+    } catch (e) {
+      return raw;
+    }
+  }
+
+  function openPreview(title, content) {
+    var fileName = title || 'credential.json';
+    var formatted = formatJsonContent(content);
+    state.preview = { fileName: fileName, content: formatted };
+    UI.$('previewModalTitle').textContent = fileName;
+    var pre = UI.$('previewContent');
+    var code = pre.querySelector('code') || pre;
+    code.textContent = formatted;
+    UI.openModal('previewModalMask');
+  }
+
+  function downloadPreviewFile() {
+    var fileName = state.preview.fileName || 'credential.json';
+    var content = state.preview.content || '';
+    if (!content || content === '(空文件)') {
+      UI.showToast('暂无可下载内容', 'error');
+      return;
+    }
+    UI.downloadText(fileName, content, 'application/json;charset=utf-8');
+    UI.showToast('凭证下载成功', 'success');
+  }
+
+  function validateAndroidForm() {
+    var accountInput = UI.$('androidAccount');
+    var nameInput = UI.$('androidName');
+    var account = accountInput.value.trim();
+    var name = nameInput.value.trim();
+    var firstInvalid = null;
+
+    if (!account) {
+      setFieldError('androidModalMask', 'androidAccount', true, '请输入开发者账号');
+      firstInvalid = firstInvalid || accountInput;
+    } else {
+      var dup = state.androidList.some(function (r) {
+        return r.account.toLowerCase() === account.toLowerCase() && r.id !== state.editingId;
+      });
+      if (dup) {
+        setFieldError('androidModalMask', 'androidAccount', true, '开发者账号已存在');
+        firstInvalid = firstInvalid || accountInput;
+      } else {
+        setFieldError('androidModalMask', 'androidAccount', false);
+      }
+    }
+
+    if (!name) {
+      setFieldError('androidModalMask', 'androidName', true, '请输入开发者名称');
+      firstInvalid = firstInvalid || nameInput;
+    } else {
+      setFieldError('androidModalMask', 'androidName', false);
+    }
+
+    if (firstInvalid) {
+      if (!firstInvalid.disabled) firstInvalid.focus();
+      return false;
+    }
+    return true;
+  }
+
+  function validateIosForm() {
+    var accountInput = UI.$('iosAccount');
+    var nameInput = UI.$('iosName');
+    var account = accountInput.value.trim();
+    var name = nameInput.value.trim();
+    var firstInvalid = null;
+
+    if (!account) {
+      setFieldError('iosModalMask', 'iosAccount', true, '请输入开发者账号');
+      firstInvalid = firstInvalid || accountInput;
+    } else {
+      var dup = state.iosList.some(function (r) {
+        return r.account.toLowerCase() === account.toLowerCase() && r.id !== state.editingId;
+      });
+      if (dup) {
+        setFieldError('iosModalMask', 'iosAccount', true, '开发者账号已存在');
+        firstInvalid = firstInvalid || accountInput;
+      } else {
+        setFieldError('iosModalMask', 'iosAccount', false);
+      }
+    }
+
+    if (!name) {
+      setFieldError('iosModalMask', 'iosName', true, '请输入开发者名称');
+      firstInvalid = firstInvalid || nameInput;
+    } else {
+      setFieldError('iosModalMask', 'iosName', false);
+    }
+
+    if (firstInvalid) {
+      if (!firstInvalid.disabled) firstInvalid.focus();
+      return false;
+    }
+    return true;
+  }
+
+  function submitAndroid() {
+    if (!validateAndroidForm()) return;
+    var account = UI.$('androidAccount').value.trim();
+    var name = UI.$('androidName').value.trim();
+    var payload = {
+      account: account,
+      name: name,
+      fileName: state.androidDraft.fileName,
+      fileContent: state.androidDraft.content || (state.androidDraft.fileName ? fakeGpContent(account) : ''),
+      remark: UI.$('androidRemark').value.trim(),
+      status: UI.getSegValue('androidStatusSeg') || '启用',
+      updatedAt: formatNow()
+    };
+    if (state.editingId) {
+      var idx = state.androidList.findIndex(function (r) { return r.id === state.editingId; });
+      if (idx >= 0) {
+        payload.id = state.editingId;
+        state.androidList[idx] = Object.assign({}, state.androidList[idx], payload);
+      }
+      UI.showToast('保存成功', 'success');
+    } else {
+      payload.id = UI.uid('android');
+      state.androidList.unshift(payload);
+      UI.showToast('添加成功', 'success');
+    }
+    UI.closeModal('androidModalMask');
+    renderTable();
+  }
+
+  function submitIos() {
+    if (!validateIosForm()) return;
+    var account = UI.$('iosAccount').value.trim();
+    var name = UI.$('iosName').value.trim();
+    var payload = {
+      account: account,
+      name: name,
+      sharedSecret: UI.$('iosSharedSecret').value.trim(),
+      issuerId: UI.$('iosIssuerId').value.trim(),
+      authFileName: state.iosDraft.authFileName,
+      authContent: state.iosDraft.authContent || (state.iosDraft.authFileName ? fakeKeyContent('AuthKey', account) : ''),
+      subFileName: state.iosDraft.subFileName,
+      subContent: state.iosDraft.subContent || (state.iosDraft.subFileName ? fakeKeyContent('SubscriptionKey', account) : ''),
+      remark: UI.$('iosRemark').value.trim(),
+      status: UI.getSegValue('iosStatusSeg') || '启用',
+      updatedAt: formatNow()
+    };
+    if (state.editingId) {
+      var idx = state.iosList.findIndex(function (r) { return r.id === state.editingId; });
+      if (idx >= 0) {
+        payload.id = state.editingId;
+        state.iosList[idx] = Object.assign({}, state.iosList[idx], payload);
+      }
+      UI.showToast('保存成功', 'success');
+    } else {
+      payload.id = UI.uid('ios');
+      state.iosList.unshift(payload);
+      UI.showToast('添加成功', 'success');
+    }
+    UI.closeModal('iosModalMask');
+    renderTable();
+  }
+
+  function downloadCredential(row) {
+    if (state.platform === 'Android') {
+      if (!row.fileName) return;
+      var content = row.fileContent || fakeGpContent(row.account);
+      var filename = (row.account || 'android') + '-gp-credential.json';
+      UI.downloadText(filename, content, 'application/json;charset=utf-8');
+      UI.showToast('凭证下载成功', 'success');
+      return;
+    }
+    if (!isCredentialUploaded(row)) return;
+    var pack = {
+      account: row.account,
+      sharedSecret: row.sharedSecret,
+      issuerId: row.issuerId,
+      authKey: row.authFileName || null,
+      subscriptionKey: row.subFileName || null,
+      authContent: row.authContent || null,
+      subscriptionContent: row.subContent || null
+    };
+    var fname = (row.account || 'ios') + '-credentials.json';
+    UI.downloadText(fname, JSON.stringify(pack, null, 2), 'application/json;charset=utf-8');
+    UI.showToast('凭证下载成功', 'success');
+  }
+
+  function bindFileField(cfg) {
+    UI.$(cfg.btnId).addEventListener('click', function () {
+      UI.$(cfg.inputId).click();
+    });
+    UI.$(cfg.inputId).addEventListener('change', function () {
+      var file = UI.$(cfg.inputId).files && UI.$(cfg.inputId).files[0];
+      if (!file) return;
+      cfg.onUpload(file.name);
+      UI.$(cfg.inputId).value = '';
+      UI.showToast('上传成功', 'success');
+    });
+    UI.$(cfg.deleteId).addEventListener('click', function () {
+      cfg.onDelete();
+      UI.showToast('已删除文件', 'success');
+    });
+    UI.$(cfg.nameId).addEventListener('click', function () {
+      cfg.onPreview();
+    });
+  }
+
+  function bindEvents() {
+    UI.bindSingleSelect({
+      wrapId: 'filterStatusWrap',
+      triggerId: 'filterStatusTrigger',
+      panelId: 'filterStatusPanel',
+      labelId: 'filterStatusLabel',
+      clearId: 'filterStatusClear',
+      prefix: '状态：',
+      getValue: function () { return state.query.status; },
+      formatValue: function (v) { return v || '全部'; },
+      onChange: function (v) { state.query.status = v; }
+    });
+
+    UI.bindSeg('androidStatusSeg');
+    UI.bindSeg('iosStatusSeg');
+
+    UI.bindPagination({
+      containerId: 'pagination',
+      getTotal: function () { return getFiltered().length; },
+      getPage: function () { return state.page; },
+      getPageSize: function () { return state.pageSize; },
+      onPageChange: function (p) { state.page = p; renderTable(); },
+      onPageSizeChange: function (s) { state.pageSize = s; state.page = 1; renderTable(); }
+    });
+
+    UI.$('pageTabs').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-platform]');
+      if (!btn) return;
+      var platform = btn.getAttribute('data-platform');
+      if (platform === state.platform) return;
+      state.platform = platform;
+      state.page = 1;
+      renderTabs();
+      renderTable();
+    });
+
+    UI.$('btnQuery').addEventListener('click', function () {
+      state.query.account = UI.$('filterAccount').value.trim();
+      state.query.name = UI.$('filterName').value.trim();
+      state.page = 1;
+      renderTable();
+    });
+    UI.$('btnAdd').addEventListener('click', openAdd);
+    UI.$('btnSubmitAndroid').addEventListener('click', submitAndroid);
+    UI.$('btnSubmitIos').addEventListener('click', submitIos);
+    UI.$('previewDownloadBtn').addEventListener('click', downloadPreviewFile);
+
+    UI.$('androidAccount').addEventListener('input', function () {
+      var account = this.value.trim();
+      if (!account) {
+        setFieldError('androidModalMask', 'androidAccount', false);
+        return;
+      }
+      var dup = state.androidList.some(function (r) {
+        return r.account.toLowerCase() === account.toLowerCase() && r.id !== state.editingId;
+      });
+      if (dup) setFieldError('androidModalMask', 'androidAccount', true, '开发者账号已存在');
+      else setFieldError('androidModalMask', 'androidAccount', false);
+    });
+    UI.$('androidName').addEventListener('input', function () {
+      if (this.value.trim()) setFieldError('androidModalMask', 'androidName', false);
+    });
+    UI.$('iosAccount').addEventListener('input', function () {
+      var account = this.value.trim();
+      if (!account) {
+        setFieldError('iosModalMask', 'iosAccount', false);
+        return;
+      }
+      var dup = state.iosList.some(function (r) {
+        return r.account.toLowerCase() === account.toLowerCase() && r.id !== state.editingId;
+      });
+      if (dup) setFieldError('iosModalMask', 'iosAccount', true, '开发者账号已存在');
+      else setFieldError('iosModalMask', 'iosAccount', false);
+    });
+    UI.$('iosName').addEventListener('input', function () {
+      if (this.value.trim()) setFieldError('iosModalMask', 'iosName', false);
+    });
+
+    bindFileField({
+      btnId: 'androidUploadBtn',
+      inputId: 'androidFileInput',
+      nameId: 'androidFileName',
+      deleteId: 'androidFileDelete',
+      onUpload: function (name) {
+        state.androidDraft.fileName = name;
+        state.androidDraft.content = fakeGpContent(UI.$('androidAccount').value.trim() || 'demo');
+        syncAndroidFileUI();
+      },
+      onDelete: function () {
+        state.androidDraft = { fileName: '', content: '' };
+        syncAndroidFileUI();
+      },
+      onPreview: function () {
+        if (!state.androidDraft.fileName) return;
+        openPreview(state.androidDraft.fileName, state.androidDraft.content || fakeGpContent('demo'));
+      }
+    });
+
+    bindFileField({
+      btnId: 'iosAuthUploadBtn',
+      inputId: 'iosAuthFileInput',
+      nameId: 'iosAuthFileName',
+      deleteId: 'iosAuthFileDelete',
+      onUpload: function (name) {
+        state.iosDraft.authFileName = name;
+        state.iosDraft.authContent = fakeKeyContent('AuthKey', UI.$('iosAccount').value.trim() || 'demo');
+        syncIosFileUI();
+      },
+      onDelete: function () {
+        state.iosDraft.authFileName = '';
+        state.iosDraft.authContent = '';
+        syncIosFileUI();
+      },
+      onPreview: function () {
+        if (!state.iosDraft.authFileName) return;
+        openPreview(state.iosDraft.authFileName, state.iosDraft.authContent);
+      }
+    });
+
+    bindFileField({
+      btnId: 'iosSubUploadBtn',
+      inputId: 'iosSubFileInput',
+      nameId: 'iosSubFileName',
+      deleteId: 'iosSubFileDelete',
+      onUpload: function (name) {
+        state.iosDraft.subFileName = name;
+        state.iosDraft.subContent = fakeKeyContent('SubscriptionKey', UI.$('iosAccount').value.trim() || 'demo');
+        syncIosFileUI();
+      },
+      onDelete: function () {
+        state.iosDraft.subFileName = '';
+        state.iosDraft.subContent = '';
+        syncIosFileUI();
+      },
+      onPreview: function () {
+        if (!state.iosDraft.subFileName) return;
+        openPreview(state.iosDraft.subFileName, state.iosDraft.subContent);
+      }
+    });
+
+    UI.$('tableBody').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-act]');
+      if (!btn || btn.disabled || btn.classList.contains('is-disabled')) return;
+      var tr = btn.closest('tr');
+      var id = tr && tr.getAttribute('data-id');
+      var row = currentList().find(function (r) { return r.id === id; });
+      if (!row) return;
+      var act = btn.getAttribute('data-act');
+      if (act === 'edit') openEdit(row);
+      else if (act === 'download') downloadCredential(row);
+    });
+
+    document.querySelectorAll('[data-close]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        UI.closeModal(btn.getAttribute('data-close'));
+      });
+    });
+
+    document.querySelectorAll('.modal-mask').forEach(function (mask) {
+      mask.addEventListener('click', function (e) {
+        if (e.target === mask) e.stopPropagation();
+      });
+    });
+  }
+
+  seedData();
+  renderTabs();
+  bindEvents();
+  renderTable();
+})();
+  </script>
+</body>
+</html>

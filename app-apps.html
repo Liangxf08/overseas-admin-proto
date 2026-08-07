@@ -1,0 +1,1735 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APP应用 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <style>
+    .cell-platform {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+    }
+    .array-field { margin-bottom: 20px; }
+    .array-field__title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-1, #1D2129);
+      margin-bottom: 8px;
+    }
+    .array-row {
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+      padding: 12px;
+      margin-bottom: 8px;
+      background: var(--color-fill-1, #F7F8FA);
+    }
+    .array-row__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--color-text-2, #4E5969);
+    }
+    .array-row .form-item { margin-bottom: 12px; }
+    .array-row .form-item:last-child { margin-bottom: 0; }
+    .plugin-section {
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+    }
+    .plugin-section:last-child { border-bottom: none; }
+    .plugin-section__title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-1, #1D2129);
+      margin-bottom: 16px;
+    }
+    .param-table .input,
+    .param-table select.input {
+      width: 100%;
+    }
+    .sync-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+    .drawer__body .form-item:last-child { margin-bottom: 20px; }
+    .readonly-text {
+      height: 32px;
+      line-height: 32px;
+      color: var(--color-text-1, #1D2129);
+      padding: 0 12px;
+      background: var(--color-fill-1, #F7F8FA);
+      border: 1px solid var(--color-border-2, #E5E6EB);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-bar">
+          <div class="filter-item filter-item--wide">
+            <input class="input" id="filterKeyword" type="text" placeholder="产品名称/ID" autocomplete="off" />
+          </div>
+          <div class="filter-item filter-item--wide">
+            <input class="input" id="filterPackage" type="text" placeholder="包名" autocomplete="off" />
+          </div>
+
+          <div class="filter-item" id="platformWrap">
+            <button class="select-trigger" type="button" id="platformTrigger">
+              <span class="select-trigger__text" id="platformLabel">平台：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="multi-panel" id="platformPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input id="platformSearch" type="text" placeholder="搜索" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="platformSelectAll">全选</button>
+                  <button class="multi-panel__link" type="button" id="platformClear" style="margin-left:12px">清空</button>
+                </div>
+                <div class="multi-panel__list" id="platformList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="platformCount">已选择 0 项</span>
+                </div>
+                <div class="multi-panel__list" id="platformSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="groupWrap">
+            <button class="select-trigger" type="button" id="groupTrigger">
+              <span class="select-trigger__text" id="groupLabel">产品组：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="multi-panel" id="groupPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input id="groupSearch" type="text" placeholder="搜索" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="groupSelectAll">全选</button>
+                  <button class="multi-panel__link" type="button" id="groupClear" style="margin-left:12px">清空</button>
+                </div>
+                <div class="multi-panel__list" id="groupList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="groupCount">已选择 0 项</span>
+                </div>
+                <div class="multi-panel__list" id="groupSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="typeWrap">
+            <button class="select-trigger" type="button" id="typeTrigger">
+              <span class="select-trigger__text" id="typeLabel">产品类型：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="multi-panel" id="typePanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input id="typeSearch" type="text" placeholder="搜索" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="typeSelectAll">全选</button>
+                  <button class="multi-panel__link" type="button" id="typeClear" style="margin-left:12px">清空</button>
+                </div>
+                <div class="multi-panel__list" id="typeList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="typeCount">已选择 0 项</span>
+                </div>
+                <div class="multi-panel__list" id="typeSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="seriesWrap">
+            <button class="select-trigger" type="button" id="seriesTrigger">
+              <span class="select-trigger__text" id="seriesLabel">产品系列：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="multi-panel" id="seriesPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input id="seriesSearch" type="text" placeholder="搜索" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="seriesSelectAll">全选</button>
+                  <button class="multi-panel__link" type="button" id="seriesClear" style="margin-left:12px">清空</button>
+                </div>
+                <div class="multi-panel__list" id="seriesList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="seriesCount">已选择 0 项</span>
+                </div>
+                <div class="multi-panel__list" id="seriesSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="ownerWrap">
+            <button class="select-trigger" type="button" id="ownerTrigger">
+              <span class="select-trigger__text" id="ownerLabel">负责人：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="multi-panel" id="ownerPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input id="ownerSearch" type="text" placeholder="搜索" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="ownerSelectAll">全选</button>
+                  <button class="multi-panel__link" type="button" id="ownerClear" style="margin-left:12px">清空</button>
+                </div>
+                <div class="multi-panel__list" id="ownerList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="ownerCount">已选择 0 项</span>
+                </div>
+                <div class="multi-panel__list" id="ownerSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="configStatusWrap">
+            <button class="select-trigger" type="button" id="configStatusTrigger">
+              <span class="select-trigger__text" id="configStatusLabel">配置状态：全部</span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="configStatusPanel">
+              <div class="single-option is-active" data-value="全部">全部</div>
+              <div class="single-option" data-value="已配置">已配置</div>
+              <div class="single-option" data-value="未配置">未配置</div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：全部</span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <div class="single-option is-active" data-value="全部">全部</div>
+              <div class="single-option" data-value="启用">启用</div>
+              <div class="single-option" data-value="禁用">禁用</div>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+            <button class="btn btn--default" type="button" id="addBtn">添加</button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="dataTable">
+              <colgroup>
+                <col style="width:12%" />
+                <col style="width:10%" />
+                <col style="width:12%" />
+                <col style="width:7%" />
+                <col style="width:8%" />
+                <col style="width:7%" />
+                <col style="width:8%" />
+                <col style="width:6%" />
+                <col style="width:7%" />
+                <col style="width:6%" />
+                <col style="width:17%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>产品名称</th>
+                  <th>产品ID</th>
+                  <th>包名</th>
+                  <th>平台</th>
+                  <th>产品组</th>
+                  <th>产品类型</th>
+                  <th>产品系列</th>
+                  <th>负责人</th>
+                  <th>配置状态</th>
+                  <th>状态</th>
+                  <th class="col-action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status"></div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal-mask" id="formModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="formModalTitle">添加产品</div>
+        <button class="modal__close" type="button" id="formModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">平台</div>
+          <div class="form-item__control">
+            <div class="seg" id="platformSeg">
+              <button class="seg__item is-active" type="button" data-value="Android">Android</button>
+              <button class="seg__item" type="button" data-value="iOS">iOS</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label is-required">产品名称</div>
+          <div class="form-item__control">
+            <input class="input" id="formName" type="text" placeholder="请输入产品名称" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label is-required">产品组</div>
+          <div class="form-item__control" id="formGroupWrap">
+            <button class="select-trigger" type="button" id="formGroupTrigger">
+              <span class="select-trigger__text" id="formGroupLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formGroupClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel" id="formGroupPanel"></div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label is-required">产品类型</div>
+          <div class="form-item__control" id="formTypeWrap">
+            <button class="select-trigger" type="button" id="formTypeTrigger">
+              <span class="select-trigger__text" id="formTypeLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formTypeClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel" id="formTypePanel"></div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">产品系列</div>
+          <div class="form-item__control" id="formSeriesWrap">
+            <button class="select-trigger" type="button" id="formSeriesTrigger">
+              <span class="select-trigger__text" id="formSeriesLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formSeriesClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel" id="formSeriesPanel"></div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label is-required">负责人</div>
+          <div class="form-item__control" id="formOwnerWrap">
+            <button class="select-trigger" type="button" id="formOwnerTrigger">
+              <span class="select-trigger__text" id="formOwnerLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formOwnerClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel" id="formOwnerPanel"></div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label is-required">包名</div>
+          <div class="form-item__control">
+            <input class="input" id="formPackage" type="text" placeholder="请输入包名" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item" id="storeIdItem" hidden>
+          <div class="form-item__label">StoreID</div>
+          <div class="form-item__control">
+            <input class="input" id="formStoreId" type="text" placeholder="请输入 StoreID" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="statusSeg">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="formCancelBtn">取消</button>
+        <button class="btn btn--primary" type="button" id="formSubmitBtn">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download JSON Modal -->
+  <div class="modal-mask" id="jsonModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="jsonModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="jsonModalTitle">下载JSON</div>
+        <button class="modal__close" type="button" id="jsonModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label">平台</div>
+          <div class="form-item__control"><div class="readonly-text" id="jsonPlatform"></div></div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">产品名称</div>
+          <div class="form-item__control"><div class="readonly-text" id="jsonAppName"></div></div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label is-required">SDK版本号</div>
+          <div class="form-item__control">
+            <input class="input" id="jsonSdkVersion" type="text" placeholder="请输入SDK版本号" autocomplete="off" />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label is-required">APP版本号</div>
+          <div class="form-item__control">
+            <input class="input" id="jsonAppVersion" type="text" placeholder="请输入APP版本号" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="jsonCancelBtn">取消</button>
+        <button class="btn btn--primary" type="button" id="jsonSubmitBtn">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Config Drawer -->
+  <div class="drawer-mask" id="configDrawerMask" aria-hidden="true"></div>
+  <aside class="drawer" id="configDrawer" aria-hidden="true">
+    <div class="drawer__header">
+      <div class="drawer__title" id="configDrawerTitle">配置</div>
+      <button class="modal__close" type="button" id="configDrawerClose" aria-label="关闭">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer__body">
+      <div class="drawer-tabs" id="configTabs">
+        <button class="drawer-tabs__item is-active" type="button" data-tab="startup">启动配置</button>
+        <button class="drawer-tabs__item" type="button" data-tab="plugin">插件配置</button>
+        <button class="drawer-tabs__item" type="button" data-tab="ad">广告配置</button>
+        <button class="drawer-tabs__item" type="button" data-tab="iap">内购配置</button>
+      </div>
+      <div class="config-block is-active" id="tabStartup"></div>
+      <div class="config-block" id="tabPlugin"></div>
+      <div class="config-block" id="tabAd"></div>
+      <div class="config-block" id="tabIap"></div>
+    </div>
+    <div class="drawer__footer">
+      <button class="btn btn--default" type="button" id="configCancelBtn">取消</button>
+      <button class="btn btn--primary" type="button" id="configSubmitBtn">提交</button>
+    </div>
+  </aside>
+
+  <script src="col-resize.js"></script>
+  <script src="product-common.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      ProductShell.mount('app-apps');
+
+      var UI = ProductUI;
+      var escapeHtml = UI.escapeHtml;
+      var COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+      var LS_JSON_KEY = 'hwzt_json_files';
+
+      var PLATFORMS = ['Android', 'iOS'];
+      var GROUPS = ['益智解谜', '超休闲', '中重度', '三消', '合成'];
+      var TYPES = ['休闲', '超休闲', '中重度', '模拟经营', '解谜'];
+      var SERIES = ['Jam系列', 'Sort系列', 'Match系列', 'ASMR系列', 'Word系列'];
+      var OWNERS = Array.from({ length: 6 }, function (_, i) { return '用户' + String.fromCharCode(65 + i); });
+
+      var STARTUP_FIELDS = [
+        { key: 'config_version', name: '配置版本', type: '数字输入', defaultValue: '200', min: 1, max: 999 },
+        { key: 'channel', name: '渠道标识', type: '文本输入', defaultValue: '', placeholder: '请输入渠道' },
+        { key: 'debug_mode', name: '调试模式', type: '开关', defaultValue: false },
+        {
+          key: 'log_level', name: '日志级别', type: '下拉选择', defaultValue: 'info',
+          options: [
+            { value: 'debug', label: 'Debug' },
+            { value: 'info', label: 'Info' },
+            { value: 'warn', label: 'Warn' },
+            { value: 'error', label: 'Error' }
+          ]
+        },
+        {
+          key: 'servers', name: '服务器列表', type: 'Array', maxRows: 3,
+          children: [
+            { key: 'host', name: '主机', type: '文本输入' },
+            { key: 'port', name: '端口', type: '数字输入' },
+            { key: 'ssl', name: 'SSL', type: '开关' }
+          ]
+        },
+        {
+          key: 'feature_flags', name: '功能开关组', type: 'Array', maxRows: 1,
+          children: [
+            { key: 'flag_key', name: '开关Key', type: '文本输入' },
+            { key: 'enabled', name: '是否开启', type: '开关' }
+          ]
+        },
+        {
+          key: 'extra_params', name: '扩展参数', type: 'Array', maxRows: null,
+          children: [
+            { key: 'param_key', name: '参数Key', type: '文本输入' },
+            { key: 'param_value', name: '参数值', type: '文本输入' }
+          ]
+        }
+      ];
+
+      var PLUGINS = [
+        {
+          jsonKey: 'sdk_config', name: 'SDK基础', platforms: ['通用', 'Android', 'iOS'],
+          params: [
+            { key: 'config_version', name: '配置版本' },
+            { key: 'app_sign_key', name: 'App Sign Key' },
+            { key: 'upload_key', name: 'Upload Key' },
+            { key: 'urlOfPrivacy', name: '隐私政策URL' },
+            { key: 'urlOfTerms', name: '用户协议URL' }
+          ]
+        },
+        {
+          jsonKey: 'adjust_config', name: 'Adjust', platforms: ['通用', 'Android', 'iOS'],
+          params: [
+            { key: 'app_token', name: 'App Token' },
+            { key: 'sdk_iap_revenue_token', name: 'IAP Revenue Token' }
+          ]
+        },
+        {
+          jsonKey: 'ta_config', name: 'ThinkingData', platforms: ['通用', 'Android', 'iOS'],
+          params: [
+            { key: 'server_url', name: 'Server URL' },
+            { key: 'app_id', name: 'App ID' }
+          ]
+        },
+        {
+          jsonKey: 'fb_config', name: 'Facebook', platforms: ['通用', 'Android', 'iOS'],
+          params: [
+            { key: 'facebook_AppId', name: 'Facebook AppId' },
+            { key: 'facebook_client_token', name: 'Client Token' }
+          ]
+        },
+        {
+          jsonKey: 'tiktok_config', name: 'TikTok', platforms: ['通用', 'Android', 'iOS'],
+          params: [
+            { key: 'app_id', name: 'App ID' },
+            { key: 'tiktok_app_id', name: 'TikTok App ID' }
+          ]
+        }
+      ];
+
+      var DEV_ACCOUNTS = {
+        Android: ['gp_pub_a', 'gp_pub_b', 'gp_pub_c'],
+        iOS: ['apple_dev_a', 'apple_dev_b', 'apple_dev_c']
+      };
+
+      var AD_TYPES = ['Banner', 'Interstitial', 'Native', 'Rewarded', 'Splash'];
+      var AD_NETWORKS = ['MAX', 'IS', 'ADMOB'];
+      var PRODUCT_KINDS = ['consumable', 'nonConsumable', 'subscribe'];
+
+      function emptyAdConfig() {
+        return {
+          defaultSdk: 'MAX',
+          isAppKey: '',
+          maxSdkKey: '',
+          maxReviewKey: '',
+          maxPackage: '',
+          admobAppId: '',
+          units: [{ network: 'MAX', adType: 'Banner', unitId: '', unitName: '', floor: '0' }]
+        };
+      }
+
+      function emptyIapConfig() {
+        return {
+          developerAccount: '',
+          licenseKey: '',
+          sharedSecret: '',
+          products: [{ kind: 'consumable', productId: '', productName: '', dollarPrice: '' }]
+        };
+      }
+
+      function defaultStartupValues() {
+        var values = {};
+        STARTUP_FIELDS.forEach(function (f) {
+          if (f.type === 'Array') {
+            values[f.key] = [emptyArrayRow(f)];
+          } else if (f.type === '开关') {
+            values[f.key] = !!f.defaultValue;
+          } else {
+            values[f.key] = f.defaultValue != null ? String(f.defaultValue) : '';
+          }
+        });
+        return values;
+      }
+
+      function emptyArrayRow(field) {
+        var row = {};
+        (field.children || []).forEach(function (c) {
+          row[c.key] = c.type === '开关' ? false : '';
+        });
+        return row;
+      }
+
+      function defaultPluginValues(platform) {
+        var values = {};
+        getPluginsForPlatform(platform).forEach(function (p) {
+          values[p.jsonKey] = {};
+          p.params.forEach(function (param) {
+            values[p.jsonKey][param.key] = '';
+          });
+        });
+        return values;
+      }
+
+      function getPluginsForPlatform(platform) {
+        return PLUGINS.filter(function (p) {
+          return p.platforms.indexOf('通用') !== -1 || p.platforms.indexOf(platform) !== -1;
+        });
+      }
+
+      function clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      var rows = [
+        {
+          id: 'yw0yqjwcunjjc2e9', name: 'Screw Pin Jam Puzzle', packageName: 'com.traffic.jam.hop.on.ios',
+          platform: 'iOS', group: '益智解谜', type: '解谜', series: 'Jam系列', owner: '用户A',
+          configStatus: '已配置', status: '启用', storeId: '6502597181', createdAt: '2026-07-30T10:00:00',
+          config: null
+        },
+        {
+          id: 'and_tile_sort_01', name: 'Tile Sort 3D', packageName: 'com.tilesort.puzzle.and',
+          platform: 'Android', group: '益智解谜', type: '休闲', series: 'Sort系列', owner: '用户B',
+          configStatus: '已配置', status: '启用', storeId: '', createdAt: '2026-07-29T11:20:00',
+          config: null
+        },
+        {
+          id: 'ios_hotpot_02', name: 'Hotpot Match 3D', packageName: 'com.hotpot.match3d.ios',
+          platform: 'iOS', group: '三消', type: '超休闲', series: 'Match系列', owner: '用户C',
+          configStatus: '未配置', status: '启用', storeId: '1488223344', createdAt: '2026-07-28T09:15:00',
+          config: null
+        },
+        {
+          id: 'and_pixel_03', name: 'Pixel Bounce Jam', packageName: 'com.pixel.bounce.jam',
+          platform: 'Android', group: '超休闲', type: '超休闲', series: 'Jam系列', owner: '用户D',
+          configStatus: '已配置', status: '禁用', storeId: '', createdAt: '2026-07-26T16:40:00',
+          config: null
+        },
+        {
+          id: 'ios_word_04', name: 'Jigword Word Search', packageName: 'com.jigword.search.ios',
+          platform: 'iOS', group: '益智解谜', type: '解谜', series: 'Word系列', owner: '用户E',
+          configStatus: '未配置', status: '启用', storeId: '1599001122', createdAt: '2026-07-24T08:30:00',
+          config: null
+        },
+        {
+          id: 'and_asmr_05', name: 'Perfect Care ASMR', packageName: 'com.perfect.care.asmr',
+          platform: 'Android', group: '中重度', type: '模拟经营', series: 'ASMR系列', owner: '用户F',
+          configStatus: '已配置', status: '启用', storeId: '', createdAt: '2026-07-20T14:05:00',
+          config: null
+        },
+        {
+          id: 'and_haggle_06', name: 'Haggle Sleuth', packageName: 'com.haggle.sleuth.and',
+          platform: 'Android', group: '合成', type: '中重度', series: 'Sort系列', owner: '用户A',
+          configStatus: '未配置', status: '禁用', storeId: '', createdAt: '2026-07-18T12:00:00',
+          config: null
+        }
+      ];
+
+      rows.forEach(function (r) {
+        if (r.configStatus === '已配置' && !r.config) {
+          r.config = {
+            startup: defaultStartupValues(),
+            plugins: defaultPluginValues(r.platform),
+            ad: emptyAdConfig(),
+            iap: emptyIapConfig()
+          };
+          r.config.ad.isAppKey = '1c7ff2d1d';
+          r.config.ad.maxSdkKey = 'TThzkkct9KCI5q413MC9i71WqF5iUIow';
+          r.config.ad.maxPackage = r.packageName;
+          r.config.ad.admobAppId = 'ca-app-pub-4261668969289292~1670120290';
+          r.config.plugins.sdk_config.config_version = '200';
+          r.config.plugins.sdk_config.app_sign_key = '85:D2:05:6E:FA:D5:0D:97:52:50:5B:4F:AC:FD:0D:30';
+          r.config.plugins.adjust_config.app_token = 'c1izgym8fksg';
+          r.config.iap.developerAccount = DEV_ACCOUNTS[r.platform][0];
+          if (r.platform === 'Android') r.config.iap.licenseKey = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A';
+          else r.config.iap.sharedSecret = 'a1b2c3d4e5f6g7h8i9j0';
+          r.config.iap.products = [
+            { kind: 'consumable', productId: 'small_pack', productName: '小礼包', dollarPrice: '2.99' },
+            { kind: 'consumable', productId: 'big_pack', productName: '大礼包', dollarPrice: '9.99' }
+          ];
+        }
+      });
+
+      var state = {
+        keyword: '',
+        packageKw: '',
+        platforms: [],
+        groups: [],
+        types: [],
+        series: [],
+        owners: [],
+        configStatus: '全部',
+        status: '全部',
+        page: 1,
+        pageSize: 20,
+        editingId: null,
+        formGroup: '',
+        formType: '',
+        formSeries: '',
+        formOwner: '',
+        configAppId: null,
+        draft: null,
+        jsonAppId: null
+      };
+
+      function platformIcon(platform) {
+        var cls = platform === 'iOS' ? 'platform-icon--ios' : 'platform-icon--android';
+        var letter = platform === 'iOS' ? 'i' : 'A';
+        return '<span class="platform-icon ' + cls + '" aria-hidden="true">' + letter + '</span>';
+      }
+
+      function configStatusTag(status) {
+        var cls = status === '已配置' ? 'tag--info' : 'tag--warning';
+        return '<span class="tag ' + cls + '">' + escapeHtml(status) + '</span>';
+      }
+
+      function getFiltered() {
+        var kw = state.keyword.trim().toLowerCase();
+        var pkg = state.packageKw.trim().toLowerCase();
+        return rows
+          .filter(function (r) {
+            if (kw && String(r.name).toLowerCase().indexOf(kw) === -1 && String(r.id).toLowerCase().indexOf(kw) === -1) return false;
+            if (pkg && String(r.packageName).toLowerCase().indexOf(pkg) === -1) return false;
+            if (state.platforms.length && state.platforms.indexOf(r.platform) === -1) return false;
+            if (state.groups.length && state.groups.indexOf(r.group) === -1) return false;
+            if (state.types.length && state.types.indexOf(r.type) === -1) return false;
+            if (state.series.length && state.series.indexOf(r.series) === -1) return false;
+            if (state.owners.length && state.owners.indexOf(r.owner) === -1) return false;
+            if (state.configStatus !== '全部' && r.configStatus !== state.configStatus) return false;
+            if (state.status !== '全部' && r.status !== state.status) return false;
+            return true;
+          })
+          .slice()
+          .sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });
+      }
+
+      function renderTable() {
+        var list = getFiltered();
+        var total = list.length;
+        var totalPages = Math.max(1, Math.ceil(total / state.pageSize) || 1);
+        if (state.page > totalPages) state.page = totalPages;
+        var start = (state.page - 1) * state.pageSize;
+        var pageRows = list.slice(start, start + state.pageSize);
+        var tbody = UI.$('tableBody');
+        var emptyTip = UI.$('emptyTip');
+
+        if (!pageRows.length) {
+          tbody.innerHTML = '';
+          emptyTip.hidden = false;
+        } else {
+          emptyTip.hidden = true;
+          tbody.innerHTML = pageRows.map(function (r) {
+            var toggleLabel = r.status === '启用' ? '禁用' : '启用';
+            return (
+              '<tr data-id="' + escapeHtml(r.id) + '">' +
+                '<td title="' + escapeHtml(r.name) + '">' + escapeHtml(r.name) + '</td>' +
+                '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(r.id) + '">' + escapeHtml(r.id) + '</span>' +
+                  '<button class="copy-btn" type="button" data-copy="' + escapeHtml(r.id) + '" aria-label="复制">' + COPY_ICON + '</button></span></td>' +
+                '<td><span class="cell-id"><span class="cell-id__text" title="' + escapeHtml(r.packageName) + '">' + escapeHtml(r.packageName) + '</span>' +
+                  '<button class="copy-btn" type="button" data-copy="' + escapeHtml(r.packageName) + '" aria-label="复制">' + COPY_ICON + '</button></span></td>' +
+                '<td><span class="cell-platform">' + platformIcon(r.platform) + escapeHtml(r.platform) + '</span></td>' +
+                '<td>' + escapeHtml(r.group) + '</td>' +
+                '<td>' + escapeHtml(r.type) + '</td>' +
+                '<td>' + escapeHtml(r.series || '-') + '</td>' +
+                '<td>' + escapeHtml(r.owner) + '</td>' +
+                '<td>' + configStatusTag(r.configStatus) + '</td>' +
+                '<td>' + UI.statusTag(r.status) + '</td>' +
+                '<td class="col-action"><div class="action-links">' +
+                  '<button class="link" type="button" data-action="edit" data-id="' + escapeHtml(r.id) + '">编辑</button>' +
+                  '<button class="link" type="button" data-action="config" data-id="' + escapeHtml(r.id) + '">配置</button>' +
+                  '<button class="link" type="button" data-action="json" data-id="' + escapeHtml(r.id) + '">下载JSON</button>' +
+                  '<button class="link" type="button" data-action="toggle" data-id="' + escapeHtml(r.id) + '">' + toggleLabel + '</button>' +
+                '</div></td>' +
+              '</tr>'
+            );
+          }).join('');
+        }
+
+        UI.renderPagination({
+          containerId: 'pagination',
+          total: total,
+          page: state.page,
+          pageSize: state.pageSize
+        });
+      }
+
+      function fillSinglePanel(panelId, options) {
+        UI.$(panelId).innerHTML = options.map(function (opt) {
+          return '<div class="single-option" data-value="' + escapeHtml(opt) + '">' + escapeHtml(opt) + '</div>';
+        }).join('');
+      }
+
+      function syncStoreIdVisibility() {
+        var platform = UI.getSegValue('platformSeg') || 'Android';
+        UI.$('storeIdItem').hidden = platform !== 'iOS';
+      }
+
+      function openForm(row) {
+        state.editingId = row ? row.id : null;
+        UI.$('formModalTitle').textContent = row ? '编辑产品' : '添加产品';
+        UI.setSegValue('platformSeg', row ? row.platform : 'Android');
+        UI.setSegValue('statusSeg', row ? row.status : '启用');
+        UI.$('formName').value = row ? row.name : '';
+        UI.$('formPackage').value = row ? row.packageName : '';
+        UI.$('formStoreId').value = row ? (row.storeId || '') : '';
+        state.formGroup = row ? row.group : '';
+        state.formType = row ? row.type : '';
+        state.formSeries = row ? (row.series || '') : '';
+        state.formOwner = row ? row.owner : '';
+        formSelects.group.syncLabel(state.formGroup);
+        formSelects.type.syncLabel(state.formType);
+        formSelects.series.syncLabel(state.formSeries);
+        formSelects.owner.syncLabel(state.formOwner);
+
+        var platformSeg = UI.$('platformSeg');
+        var pkgInput = UI.$('formPackage');
+        if (row) {
+          platformSeg.classList.add('is-readonly');
+          pkgInput.disabled = true;
+        } else {
+          platformSeg.classList.remove('is-readonly');
+          pkgInput.disabled = false;
+        }
+        ['formName', 'formPackage', 'formGroupTrigger', 'formTypeTrigger', 'formOwnerTrigger'].forEach(function (id) {
+          var el = UI.$(id);
+          if (el) el.classList.remove('is-error');
+        });
+        syncStoreIdVisibility();
+        UI.openModal('formModal');
+      }
+
+      function closeForm() {
+        UI.closeModal('formModal');
+        state.editingId = null;
+      }
+
+      function submitForm() {
+        var name = UI.$('formName').value.trim();
+        var packageName = UI.$('formPackage').value.trim();
+        var platform = UI.getSegValue('platformSeg') || 'Android';
+        var status = UI.getSegValue('statusSeg') || '启用';
+        var storeId = UI.$('formStoreId').value.trim();
+
+        ['formName', 'formPackage', 'formGroupTrigger', 'formTypeTrigger', 'formOwnerTrigger'].forEach(function (id) {
+          var el = UI.$(id);
+          if (el) el.classList.remove('is-error');
+        });
+
+        if (!name) {
+          UI.$('formName').classList.add('is-error');
+          UI.showToast('请输入产品名称', 'error');
+          return;
+        }
+        if (!state.formGroup) {
+          UI.$('formGroupTrigger').classList.add('is-error');
+          UI.showToast('请选择产品组', 'error');
+          return;
+        }
+        if (!state.formType) {
+          UI.$('formTypeTrigger').classList.add('is-error');
+          UI.showToast('请选择产品类型', 'error');
+          return;
+        }
+        if (!state.formOwner) {
+          UI.$('formOwnerTrigger').classList.add('is-error');
+          UI.showToast('请选择负责人', 'error');
+          return;
+        }
+        if (!packageName) {
+          UI.$('formPackage').classList.add('is-error');
+          UI.showToast('请输入包名', 'error');
+          return;
+        }
+        var dup = rows.some(function (r) {
+          return r.packageName.toLowerCase() === packageName.toLowerCase() && r.id !== state.editingId;
+        });
+        if (dup) {
+          UI.$('formPackage').classList.add('is-error');
+          UI.showToast('包名已存在，请重新输入', 'error');
+          return;
+        }
+
+        if (state.editingId) {
+          var target = rows.find(function (r) { return r.id === state.editingId; });
+          if (target) {
+            target.name = name;
+            target.group = state.formGroup;
+            target.type = state.formType;
+            target.series = state.formSeries;
+            target.owner = state.formOwner;
+            target.status = status;
+            if (target.platform === 'iOS') target.storeId = storeId;
+          }
+          UI.showToast('保存成功');
+        } else {
+          rows.push({
+            id: UI.uid('app'),
+            name: name,
+            packageName: packageName,
+            platform: platform,
+            group: state.formGroup,
+            type: state.formType,
+            series: state.formSeries,
+            owner: state.formOwner,
+            configStatus: '未配置',
+            status: status,
+            storeId: platform === 'iOS' ? storeId : '',
+            createdAt: new Date().toISOString(),
+            config: null
+          });
+          UI.showToast('添加成功');
+        }
+        closeForm();
+        renderTable();
+      }
+
+      /* ========== Config Drawer ========== */
+      function openConfig(app) {
+        state.configAppId = app.id;
+        UI.$('configDrawerTitle').textContent = '配置 · ' + app.name;
+        state.draft = {
+          startup: defaultStartupValues(),
+          plugins: defaultPluginValues(app.platform),
+          ad: emptyAdConfig(),
+          iap: emptyIapConfig()
+        };
+        if (app.config) {
+          state.draft.ad = clone(app.config.ad || emptyAdConfig());
+          state.draft.iap = clone(app.config.iap || emptyIapConfig());
+          Object.keys(state.draft.startup).forEach(function (k) {
+            if (app.config.startup && app.config.startup[k] !== undefined) {
+              state.draft.startup[k] = clone(app.config.startup[k]);
+            }
+          });
+          Object.keys(state.draft.plugins).forEach(function (jk) {
+            if (app.config.plugins && app.config.plugins[jk]) {
+              Object.keys(state.draft.plugins[jk]).forEach(function (pk) {
+                if (app.config.plugins[jk][pk] !== undefined) {
+                  state.draft.plugins[jk][pk] = app.config.plugins[jk][pk];
+                }
+              });
+            }
+          });
+        }
+        switchTab('startup');
+        renderStartupTab();
+        renderPluginTab(app.platform);
+        renderAdTab();
+        renderIapTab(app.platform);
+        UI.openDrawer('configDrawerMask', 'configDrawer');
+      }
+
+      function closeConfig() {
+        UI.closeDrawer('configDrawerMask', 'configDrawer');
+        state.configAppId = null;
+        state.draft = null;
+      }
+
+      function switchTab(tab) {
+        document.querySelectorAll('#configTabs .drawer-tabs__item').forEach(function (el) {
+          el.classList.toggle('is-active', el.getAttribute('data-tab') === tab);
+        });
+        ['startup', 'plugin', 'ad', 'iap'].forEach(function (key) {
+          var map = { startup: 'tabStartup', plugin: 'tabPlugin', ad: 'tabAd', iap: 'tabIap' };
+          UI.$(map[key]).classList.toggle('is-active', key === tab);
+        });
+        requestAnimationFrame(function () {
+          if (window.ColResize) ColResize.initAll(UI.$('configDrawer'));
+        });
+      }
+
+      function renderFieldControl(field, value, dataAttr) {
+        var attr = dataAttr || '';
+        if (field.type === '数字输入') {
+          return '<input class="input" type="number" ' + attr + ' value="' + escapeHtml(value == null ? '' : value) + '" placeholder="请输入" />';
+        }
+        if (field.type === '文本输入') {
+          return '<input class="input" type="text" ' + attr + ' value="' + escapeHtml(value == null ? '' : value) + '" placeholder="' + escapeHtml(field.placeholder || '请输入') + '" />';
+        }
+        if (field.type === '开关') {
+          return '<button class="switch' + (value ? ' is-on' : '') + '" type="button" ' + attr + ' aria-label="开关"></button>';
+        }
+        if (field.type === '下拉选择') {
+          var opts = (field.options || []).map(function (o) {
+            var selected = String(o.value) === String(value) ? ' selected' : '';
+            return '<option value="' + escapeHtml(o.value) + '"' + selected + '>' + escapeHtml(o.label) + '</option>';
+          }).join('');
+          return '<select class="input" ' + attr + '>' + opts + '</select>';
+        }
+        return '';
+      }
+
+      function renderStartupTab() {
+        var html = '';
+        STARTUP_FIELDS.forEach(function (field) {
+          if (field.type === 'Array') {
+            html += renderArrayField(field, state.draft.startup[field.key] || []);
+          } else {
+            html +=
+              '<div class="form-item">' +
+                '<div class="form-item__label">' + escapeHtml(field.name) + '</div>' +
+                '<div class="form-item__control">' +
+                  renderFieldControl(field, state.draft.startup[field.key], 'data-startup-key="' + escapeHtml(field.key) + '"') +
+                '</div>' +
+              '</div>';
+          }
+        });
+        UI.$('tabStartup').innerHTML = html;
+      }
+
+      function renderArrayField(field, rowsData) {
+        var maxRows = field.maxRows;
+        var showAdd = maxRows == null || maxRows === '' || Number(maxRows) > 1;
+        if (maxRows === 1) showAdd = false;
+        var countLabel = '';
+        if (maxRows != null && maxRows !== '' && Number(maxRows) > 1) {
+          countLabel = '（' + rowsData.length + '/' + maxRows + '）';
+        }
+        var addDisabled = maxRows != null && maxRows !== '' && rowsData.length >= Number(maxRows);
+        var html =
+          '<div class="array-field" data-array-key="' + escapeHtml(field.key) + '">' +
+            '<div class="param-toolbar">' +
+              '<div class="param-toolbar__title">' + escapeHtml(field.name) + countLabel + '</div>' +
+              (showAdd
+                ? '<button class="btn btn--text btn--sm" type="button" data-array-add="' + escapeHtml(field.key) + '"' + (addDisabled ? ' disabled' : '') + '>添加</button>'
+                : '') +
+            '</div>';
+
+        rowsData.forEach(function (row, idx) {
+          var canDelete = !(maxRows === 1) && idx > 0;
+          if (maxRows === 1) canDelete = false;
+          html +=
+            '<div class="array-row" data-array-index="' + idx + '">' +
+              '<div class="array-row__head">' +
+                '<span>第 ' + (idx + 1) + ' 行</span>' +
+                '<button class="link" type="button" data-array-del="' + escapeHtml(field.key) + '" data-index="' + idx + '"' + (canDelete ? '' : ' disabled') + '>删除</button>' +
+              '</div>';
+          (field.children || []).forEach(function (child) {
+            html +=
+              '<div class="form-item">' +
+                '<div class="form-item__label">' + escapeHtml(child.name) + '</div>' +
+                '<div class="form-item__control">' +
+                  renderFieldControl(child, row[child.key], 'data-array-field="' + escapeHtml(field.key) + '" data-index="' + idx + '" data-child="' + escapeHtml(child.key) + '"') +
+                '</div>' +
+              '</div>';
+          });
+          html += '</div>';
+        });
+        html += '</div>';
+        return html;
+      }
+
+      function collectStartupFromDom() {
+        var values = state.draft.startup;
+        STARTUP_FIELDS.forEach(function (field) {
+          if (field.type === 'Array') return;
+          var el = document.querySelector('[data-startup-key="' + field.key + '"]');
+          if (!el) return;
+          if (field.type === '开关') values[field.key] = el.classList.contains('is-on');
+          else values[field.key] = el.value;
+        });
+        STARTUP_FIELDS.filter(function (f) { return f.type === 'Array'; }).forEach(function (field) {
+          var rowsData = values[field.key] || [];
+          rowsData.forEach(function (row, idx) {
+            (field.children || []).forEach(function (child) {
+              var el = document.querySelector('[data-array-field="' + field.key + '"][data-index="' + idx + '"][data-child="' + child.key + '"]');
+              if (!el) return;
+              if (child.type === '开关') row[child.key] = el.classList.contains('is-on');
+              else row[child.key] = el.value;
+            });
+          });
+        });
+      }
+
+      function renderPluginTab(platform) {
+        var plugins = getPluginsForPlatform(platform);
+        var html = plugins.map(function (p) {
+          var section =
+            '<div class="plugin-section" data-plugin="' + escapeHtml(p.jsonKey) + '">' +
+              '<div class="plugin-section__title">' + escapeHtml(p.jsonKey) + '<span style="margin-left:8px;font-weight:400;color:var(--color-text-3)">（' + escapeHtml(p.name) + '）</span></div>';
+          p.params.forEach(function (param) {
+            var val = (state.draft.plugins[p.jsonKey] && state.draft.plugins[p.jsonKey][param.key]) || '';
+            section +=
+              '<div class="form-item">' +
+                '<div class="form-item__label">' + escapeHtml(param.name) + '</div>' +
+                '<div class="form-item__control">' +
+                  '<input class="input" type="text" data-plugin-key="' + escapeHtml(p.jsonKey) + '" data-param-key="' + escapeHtml(param.key) + '" value="' + escapeHtml(val) + '" placeholder="请输入" />' +
+                '</div>' +
+              '</div>';
+          });
+          section += '</div>';
+          return section;
+        }).join('');
+        UI.$('tabPlugin').innerHTML = html || '<div class="empty-tip" style="position:static;inset:auto">暂无启用插件</div>';
+      }
+
+      function collectPluginsFromDom() {
+        document.querySelectorAll('[data-plugin-key]').forEach(function (el) {
+          var jk = el.getAttribute('data-plugin-key');
+          var pk = el.getAttribute('data-param-key');
+          if (!state.draft.plugins[jk]) state.draft.plugins[jk] = {};
+          state.draft.plugins[jk][pk] = el.value;
+        });
+      }
+
+      function renderAdTab() {
+        var ad = state.draft.ad;
+        var html =
+          '<div class="form-item">' +
+            '<div class="form-item__label">本地默认聚合</div>' +
+            '<div class="form-item__control">' +
+              '<div class="seg" id="adDefaultSeg">' +
+                AD_NETWORKS.map(function (n) {
+                  return '<button class="seg__item' + (ad.defaultSdk === n ? ' is-active' : '') + '" type="button" data-value="' + n + '">' + n + '</button>';
+                }).join('') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-item"><div class="form-item__label">IS AppKey</div><div class="form-item__control"><input class="input" id="adIsKey" type="text" value="' + escapeHtml(ad.isAppKey) + '" placeholder="请输入" /></div></div>' +
+          '<div class="form-item"><div class="form-item__label">MAX SDK Key</div><div class="form-item__control"><input class="input" id="adMaxKey" type="text" value="' + escapeHtml(ad.maxSdkKey) + '" placeholder="请输入" /></div></div>' +
+          '<div class="form-item"><div class="form-item__label">MAX Ad Review Key</div><div class="form-item__control"><input class="input" id="adMaxReview" type="text" value="' + escapeHtml(ad.maxReviewKey) + '" placeholder="请输入" /></div></div>' +
+          '<div class="form-item"><div class="form-item__label">MAX 包名</div><div class="form-item__control"><input class="input" id="adMaxPkg" type="text" value="' + escapeHtml(ad.maxPackage) + '" placeholder="请输入" /></div></div>' +
+          '<div class="form-item"><div class="form-item__label">Admob 应用ID</div><div class="form-item__control"><input class="input" id="adAdmobId" type="text" value="' + escapeHtml(ad.admobAppId) + '" placeholder="请输入" /></div></div>' +
+          '<div class="param-toolbar"><div class="param-toolbar__title">聚合广告位ID</div><div class="sync-row"><button class="btn btn--default btn--sm" type="button" id="adSyncBtn">同步</button></div></div>' +
+          '<div class="param-table-wrap"><table class="param-table"><thead><tr>' +
+            '<th style="width:14%">广告聚合</th><th style="width:16%">广告类型</th><th style="width:20%">广告位ID</th><th style="width:18%">广告位名称</th><th style="width:12%">底价</th><th class="col-op">操作</th>' +
+          '</tr></thead><tbody id="adUnitBody"></tbody></table></div>';
+        UI.$('tabAd').innerHTML = html;
+        renderAdUnits();
+        UI.bindSeg('adDefaultSeg', function (v) { state.draft.ad.defaultSdk = v; });
+        UI.$('adSyncBtn').addEventListener('click', syncAdUnits);
+      }
+
+      function renderAdUnits() {
+        var units = state.draft.ad.units;
+        var clearDisabled = units.length <= 1;
+        UI.$('adUnitBody').innerHTML = units.map(function (u, idx) {
+          var delDisabled = idx === 0;
+          return (
+            '<tr data-idx="' + idx + '">' +
+              '<td><select class="input" data-ad-field="network" data-idx="' + idx + '">' +
+                AD_NETWORKS.map(function (n) {
+                  return '<option value="' + n + '"' + (u.network === n ? ' selected' : '') + '>' + n + '</option>';
+                }).join('') +
+              '</select></td>' +
+              '<td><select class="input" data-ad-field="adType" data-idx="' + idx + '">' +
+                AD_TYPES.map(function (n) {
+                  return '<option value="' + n + '"' + (u.adType === n ? ' selected' : '') + '>' + n + '</option>';
+                }).join('') +
+              '</select></td>' +
+              '<td><input class="input" data-ad-field="unitId" data-idx="' + idx + '" value="' + escapeHtml(u.unitId) + '" placeholder="广告位ID" /></td>' +
+              '<td><input class="input" data-ad-field="unitName" data-idx="' + idx + '" value="' + escapeHtml(u.unitName) + '" placeholder="广告位名称" /></td>' +
+              '<td><input class="input" type="number" data-ad-field="floor" data-idx="' + idx + '" value="' + escapeHtml(u.floor) + '" placeholder="0" /></td>' +
+              '<td class="col-op"><div class="action-links">' +
+                '<button class="link" type="button" data-ad-del="' + idx + '"' + (delDisabled ? ' disabled' : '') + '>删除</button>' +
+                '<button class="link" type="button" data-ad-add>添加</button>' +
+                '<button class="link" type="button" data-ad-clear' + (clearDisabled ? ' disabled' : '') + '>清空</button>' +
+              '</div></td>' +
+            '</tr>'
+          );
+        }).join('');
+      }
+
+      function collectAdFromDom() {
+        var ad = state.draft.ad;
+        ad.defaultSdk = UI.getSegValue('adDefaultSeg') || ad.defaultSdk;
+        ad.isAppKey = (UI.$('adIsKey') && UI.$('adIsKey').value) || '';
+        ad.maxSdkKey = (UI.$('adMaxKey') && UI.$('adMaxKey').value) || '';
+        ad.maxReviewKey = (UI.$('adMaxReview') && UI.$('adMaxReview').value) || '';
+        ad.maxPackage = (UI.$('adMaxPkg') && UI.$('adMaxPkg').value) || '';
+        ad.admobAppId = (UI.$('adAdmobId') && UI.$('adAdmobId').value) || '';
+        document.querySelectorAll('#adUnitBody tr').forEach(function (tr) {
+          var idx = Number(tr.getAttribute('data-idx'));
+          if (!ad.units[idx]) return;
+          tr.querySelectorAll('[data-ad-field]').forEach(function (el) {
+            ad.units[idx][el.getAttribute('data-ad-field')] = el.value;
+          });
+        });
+      }
+
+      function syncAdUnits() {
+        collectAdFromDom();
+        state.draft.ad.units = [
+          { network: 'MAX', adType: 'Banner', unitId: 'ec53f0d044866ff1', unitName: 'BN_D_0', floor: '0' },
+          { network: 'IS', adType: 'Interstitial', unitId: 'e3d8foamyn84eq5o', unitName: 'IS_INT_1', floor: '0' },
+          { network: 'ADMOB', adType: 'Rewarded', unitId: 'ca-app-pub-xxx/reward', unitName: 'RW_AD_1', floor: '0' },
+          { network: 'MAX', adType: 'Native', unitId: 'max_native_001', unitName: 'NT_D_0', floor: '0.1' }
+        ];
+        renderAdUnits();
+        UI.showToast('同步成功');
+      }
+
+      function renderIapTab(platform) {
+        var iap = state.draft.iap;
+        var accounts = DEV_ACCOUNTS[platform] || [];
+        var keyLabel = platform === 'iOS' ? 'SharedSecret' : 'LicenseKey';
+        var keyId = platform === 'iOS' ? 'iapSharedSecret' : 'iapLicenseKey';
+        var keyVal = platform === 'iOS' ? iap.sharedSecret : iap.licenseKey;
+        var html =
+          '<div class="form-item">' +
+            '<div class="form-item__label">开发者账号</div>' +
+            '<div class="form-item__control">' +
+              '<select class="input" id="iapDevAccount">' +
+                '<option value="">请选择</option>' +
+                accounts.map(function (a) {
+                  return '<option value="' + escapeHtml(a) + '"' + (iap.developerAccount === a ? ' selected' : '') + '>' + escapeHtml(a) + '</option>';
+                }).join('') +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="form-item"><div class="form-item__label">' + keyLabel + '</div><div class="form-item__control"><input class="input" id="' + keyId + '" type="text" value="' + escapeHtml(keyVal || '') + '" placeholder="请输入" /></div></div>' +
+          '<div class="param-toolbar"><div class="param-toolbar__title">商品列表</div><div class="sync-row"><button class="btn btn--default btn--sm" type="button" id="iapSyncBtn">同步</button></div></div>' +
+          '<div class="param-table-wrap"><table class="param-table"><thead><tr>' +
+            '<th style="width:18%">商品类型</th><th style="width:22%">商品ID</th><th style="width:22%">商品名称</th><th style="width:14%">美元定价</th><th class="col-op">操作</th>' +
+          '</tr></thead><tbody id="iapProductBody"></tbody></table></div>';
+        UI.$('tabIap').innerHTML = html;
+        renderIapProducts();
+        UI.$('iapSyncBtn').addEventListener('click', syncIapProducts);
+      }
+
+      function renderIapProducts() {
+        var products = state.draft.iap.products;
+        var clearDisabled = products.length <= 1;
+        UI.$('iapProductBody').innerHTML = products.map(function (p, idx) {
+          var delDisabled = idx === 0;
+          return (
+            '<tr data-idx="' + idx + '">' +
+              '<td><select class="input" data-iap-field="kind" data-idx="' + idx + '">' +
+                PRODUCT_KINDS.map(function (k) {
+                  return '<option value="' + k + '"' + (p.kind === k ? ' selected' : '') + '>' + k + '</option>';
+                }).join('') +
+              '</select></td>' +
+              '<td><input class="input" data-iap-field="productId" data-idx="' + idx + '" value="' + escapeHtml(p.productId) + '" placeholder="商品ID" /></td>' +
+              '<td><input class="input" data-iap-field="productName" data-idx="' + idx + '" value="' + escapeHtml(p.productName) + '" placeholder="商品名称" /></td>' +
+              '<td><input class="input" data-iap-field="dollarPrice" data-idx="' + idx + '" value="' + escapeHtml(p.dollarPrice) + '" placeholder="0.00" /></td>' +
+              '<td class="col-op"><div class="action-links">' +
+                '<button class="link" type="button" data-iap-del="' + idx + '"' + (delDisabled ? ' disabled' : '') + '>删除</button>' +
+                '<button class="link" type="button" data-iap-add>添加</button>' +
+                '<button class="link" type="button" data-iap-clear' + (clearDisabled ? ' disabled' : '') + '>清空</button>' +
+              '</div></td>' +
+            '</tr>'
+          );
+        }).join('');
+      }
+
+      function collectIapFromDom(platform) {
+        var iap = state.draft.iap;
+        var accountEl = UI.$('iapDevAccount');
+        if (accountEl) iap.developerAccount = accountEl.value;
+        if (platform === 'iOS') {
+          var ss = UI.$('iapSharedSecret');
+          if (ss) iap.sharedSecret = ss.value;
+        } else {
+          var lk = UI.$('iapLicenseKey');
+          if (lk) iap.licenseKey = lk.value;
+        }
+        document.querySelectorAll('#iapProductBody tr').forEach(function (tr) {
+          var idx = Number(tr.getAttribute('data-idx'));
+          if (!iap.products[idx]) return;
+          tr.querySelectorAll('[data-iap-field]').forEach(function (el) {
+            iap.products[idx][el.getAttribute('data-iap-field')] = el.value;
+          });
+        });
+      }
+
+      function syncIapProducts() {
+        var app = rows.find(function (r) { return r.id === state.configAppId; });
+        collectIapFromDom(app ? app.platform : 'Android');
+        state.draft.iap.products = [
+          { kind: 'consumable', productId: 'small_st_jam', productName: 'Small Pack', dollarPrice: '2.99' },
+          { kind: 'consumable', productId: 'brilliant_st_jam', productName: 'Brilliant Pack', dollarPrice: '99.99' },
+          { kind: 'nonConsumable', productId: 'remove_ads', productName: 'Remove Ads', dollarPrice: '4.99' },
+          { kind: 'subscribe', productId: 'vip_month', productName: 'VIP Monthly', dollarPrice: '6.99' }
+        ];
+        renderIapProducts();
+        UI.showToast('同步成功');
+      }
+
+      function collectDraft() {
+        var app = rows.find(function (r) { return r.id === state.configAppId; });
+        collectStartupFromDom();
+        collectPluginsFromDom();
+        collectAdFromDom();
+        collectIapFromDom(app ? app.platform : 'Android');
+      }
+
+      function submitConfig() {
+        collectDraft();
+        var app = rows.find(function (r) { return r.id === state.configAppId; });
+        if (!app) return;
+        app.config = clone(state.draft);
+        app.configStatus = '已配置';
+        UI.showToast('配置成功');
+        closeConfig();
+        renderTable();
+      }
+
+      /* ========== Download JSON ========== */
+      function openJsonModal(app) {
+        state.jsonAppId = app.id;
+        UI.$('jsonPlatform').textContent = app.platform;
+        UI.$('jsonAppName').textContent = app.name;
+        UI.$('jsonSdkVersion').value = '';
+        UI.$('jsonAppVersion').value = '';
+        UI.$('jsonSdkVersion').classList.remove('is-error');
+        UI.$('jsonAppVersion').classList.remove('is-error');
+        UI.openModal('jsonModal');
+      }
+
+      function closeJsonModal() {
+        UI.closeModal('jsonModal');
+        state.jsonAppId = null;
+      }
+
+      function buildJsonPayload(app, sdkVersion, appVersion) {
+        var cfg = app.config || {
+          startup: defaultStartupValues(),
+          plugins: defaultPluginValues(app.platform),
+          ad: emptyAdConfig(),
+          iap: emptyIapConfig()
+        };
+        var ad = cfg.ad || emptyAdConfig();
+        var bannerIds = [];
+        var interIds = [];
+        var nativeIds = [];
+        var rewardIds = [];
+        var splashIds = [];
+        (ad.units || []).forEach(function (u) {
+          if (!u.unitId) return;
+          var item = {
+            ad_type: u.network,
+            ad_pos: u.unitId,
+            ad_name: u.unitName,
+            ad_bid_floor_price: String(u.floor == null || u.floor === '' ? '0' : u.floor)
+          };
+          if (u.adType === 'Banner') bannerIds.push(item);
+          else if (u.adType === 'Interstitial') interIds.push(item);
+          else if (u.adType === 'Native') nativeIds.push(item);
+          else if (u.adType === 'Rewarded') rewardIds.push(item);
+          else if (u.adType === 'Splash') splashIds.push(item);
+        });
+
+        var iap = cfg.iap || emptyIapConfig();
+        var consumableIds = [];
+        var nonConsumableIds = [];
+        var subscribeIds = [];
+        (iap.products || []).forEach(function (p) {
+          if (!p.productId) return;
+          var item = { productId: p.productId, dollar_price: String(p.dollarPrice || '') };
+          if (p.kind === 'nonConsumable') nonConsumableIds.push(item);
+          else if (p.kind === 'subscribe') subscribeIds.push(item);
+          else consumableIds.push(item);
+        });
+
+        var sdk_config = Object.assign({}, (cfg.plugins && cfg.plugins.sdk_config) || {}, {
+          config_version: (cfg.startup && cfg.startup.config_version) || ((cfg.plugins && cfg.plugins.sdk_config && cfg.plugins.sdk_config.config_version) || '')
+        });
+
+        return {
+          sdk_app_id: app.id,
+          app_name: app.name,
+          package_name: app.packageName,
+          platform: app.platform,
+          sdk_version: sdkVersion,
+          app_version: appVersion,
+          sdk_config: sdk_config,
+          adjust_config: (cfg.plugins && cfg.plugins.adjust_config) || {},
+          ta_config: (cfg.plugins && cfg.plugins.ta_config) || {},
+          fb_config: (cfg.plugins && cfg.plugins.fb_config) || {},
+          tiktok_config: (cfg.plugins && cfg.plugins.tiktok_config) || {},
+          ad_config: {
+            default_sdk_type: ad.defaultSdk,
+            is_appKey: ad.isAppKey,
+            max_appKey: ad.maxSdkKey,
+            max_review_api_key: ad.maxReviewKey,
+            max_package: ad.maxPackage,
+            admob_application_id: ad.admobAppId,
+            bannerIds: bannerIds,
+            interIds: interIds,
+            nativeIds: nativeIds,
+            rewardIds: rewardIds,
+            splashIds: splashIds
+          },
+          iap_config: {
+            developer_account: iap.developerAccount,
+            license_key: iap.licenseKey || '',
+            shared_secret: iap.sharedSecret || '',
+            consumableIds: consumableIds,
+            nonConsumableIds: nonConsumableIds,
+            subscribeIds: subscribeIds
+          },
+          startup_config: cfg.startup || {}
+        };
+      }
+
+      function submitJsonDownload() {
+        var sdkVersion = UI.$('jsonSdkVersion').value.trim();
+        var appVersion = UI.$('jsonAppVersion').value.trim();
+        UI.$('jsonSdkVersion').classList.remove('is-error');
+        UI.$('jsonAppVersion').classList.remove('is-error');
+        if (!sdkVersion) {
+          UI.$('jsonSdkVersion').classList.add('is-error');
+          UI.showToast('请输入SDK版本号', 'error');
+          return;
+        }
+        if (!appVersion) {
+          UI.$('jsonAppVersion').classList.add('is-error');
+          UI.showToast('请输入APP版本号', 'error');
+          return;
+        }
+        var app = rows.find(function (r) { return r.id === state.jsonAppId; });
+        if (!app) return;
+        var payload = buildJsonPayload(app, sdkVersion, appVersion);
+        var plain = clone(payload);
+        var text = JSON.stringify(payload, null, 2);
+        var filename = app.packageName + '_' + sdkVersion + '_' + appVersion + '.json';
+        UI.downloadText(filename, text);
+
+        var record = {
+          id: UI.uid('json'),
+          productId: app.id,
+          productName: app.name,
+          packageName: app.packageName,
+          platform: app.platform,
+          sdkVersion: sdkVersion,
+          appVersion: appVersion,
+          status: '启用',
+          createdAt: new Date().toISOString(),
+          json: plain
+        };
+        var stored = [];
+        try {
+          stored = JSON.parse(localStorage.getItem(LS_JSON_KEY) || '[]');
+          if (!Array.isArray(stored)) stored = [];
+        } catch (e) { stored = []; }
+        stored.unshift(record);
+        localStorage.setItem(LS_JSON_KEY, JSON.stringify(stored));
+        UI.showToast('下载成功');
+        closeJsonModal();
+      }
+
+      /* ========== Bindings ========== */
+      function bindMulti(cfg) {
+        return UI.bindMultiSelect({
+          wrapId: cfg.wrapId,
+          triggerId: cfg.triggerId,
+          panelId: cfg.panelId,
+          labelId: cfg.labelId,
+          listId: cfg.listId,
+          selectedId: cfg.selectedId,
+          searchId: cfg.searchId,
+          countId: cfg.countId,
+          selectAllId: cfg.selectAllId,
+          clearId: cfg.clearId,
+          prefix: cfg.prefix,
+          getOptions: cfg.getOptions,
+          getSelected: cfg.getSelected,
+          setSelected: cfg.setSelected
+        });
+      }
+
+      bindMulti({
+        wrapId: 'platformWrap', triggerId: 'platformTrigger', panelId: 'platformPanel',
+        labelId: 'platformLabel', listId: 'platformList', selectedId: 'platformSelected',
+        searchId: 'platformSearch', countId: 'platformCount', selectAllId: 'platformSelectAll', clearId: 'platformClear',
+        prefix: '平台：', getOptions: function () { return PLATFORMS; },
+        getSelected: function () { return state.platforms; },
+        setSelected: function (arr) { state.platforms = arr; }
+      });
+      bindMulti({
+        wrapId: 'groupWrap', triggerId: 'groupTrigger', panelId: 'groupPanel',
+        labelId: 'groupLabel', listId: 'groupList', selectedId: 'groupSelected',
+        searchId: 'groupSearch', countId: 'groupCount', selectAllId: 'groupSelectAll', clearId: 'groupClear',
+        prefix: '产品组：', getOptions: function () { return GROUPS; },
+        getSelected: function () { return state.groups; },
+        setSelected: function (arr) { state.groups = arr; }
+      });
+      bindMulti({
+        wrapId: 'typeWrap', triggerId: 'typeTrigger', panelId: 'typePanel',
+        labelId: 'typeLabel', listId: 'typeList', selectedId: 'typeSelected',
+        searchId: 'typeSearch', countId: 'typeCount', selectAllId: 'typeSelectAll', clearId: 'typeClear',
+        prefix: '产品类型：', getOptions: function () { return TYPES; },
+        getSelected: function () { return state.types; },
+        setSelected: function (arr) { state.types = arr; }
+      });
+      bindMulti({
+        wrapId: 'seriesWrap', triggerId: 'seriesTrigger', panelId: 'seriesPanel',
+        labelId: 'seriesLabel', listId: 'seriesList', selectedId: 'seriesSelected',
+        searchId: 'seriesSearch', countId: 'seriesCount', selectAllId: 'seriesSelectAll', clearId: 'seriesClear',
+        prefix: '产品系列：', getOptions: function () { return SERIES; },
+        getSelected: function () { return state.series; },
+        setSelected: function (arr) { state.series = arr; }
+      });
+      bindMulti({
+        wrapId: 'ownerWrap', triggerId: 'ownerTrigger', panelId: 'ownerPanel',
+        labelId: 'ownerLabel', listId: 'ownerList', selectedId: 'ownerSelected',
+        searchId: 'ownerSearch', countId: 'ownerCount', selectAllId: 'ownerSelectAll', clearId: 'ownerClear',
+        prefix: '负责人：', getOptions: function () { return OWNERS; },
+        getSelected: function () { return state.owners; },
+        setSelected: function (arr) { state.owners = arr; }
+      });
+
+      function bindFilterSingle(cfg) {
+        var api = UI.bindSingleSelect({
+          wrapId: cfg.wrapId,
+          triggerId: cfg.triggerId,
+          panelId: cfg.panelId,
+          labelId: cfg.labelId,
+          prefix: cfg.prefix,
+          getValue: function () { return cfg.getValue(); },
+          onChange: function (v) { cfg.onChange(v || '全部'); },
+          formatValue: function (v) { return v || '全部'; }
+        });
+        api.syncLabel(cfg.getValue());
+        return api;
+      }
+
+      bindFilterSingle({
+        wrapId: 'configStatusWrap', triggerId: 'configStatusTrigger', panelId: 'configStatusPanel', labelId: 'configStatusLabel',
+        prefix: '配置状态：',
+        getValue: function () { return state.configStatus; },
+        onChange: function (v) { state.configStatus = v; }
+      });
+      bindFilterSingle({
+        wrapId: 'statusWrap', triggerId: 'statusTrigger', panelId: 'statusPanel', labelId: 'statusLabel',
+        prefix: '状态：',
+        getValue: function () { return state.status; },
+        onChange: function (v) { state.status = v; }
+      });
+
+      fillSinglePanel('formGroupPanel', GROUPS);
+      fillSinglePanel('formTypePanel', TYPES);
+      fillSinglePanel('formSeriesPanel', SERIES);
+      fillSinglePanel('formOwnerPanel', OWNERS);
+
+      var formSelects = {
+        group: UI.bindSingleSelect({
+          wrapId: 'formGroupWrap', triggerId: 'formGroupTrigger', panelId: 'formGroupPanel', labelId: 'formGroupLabel', clearId: 'formGroupClear',
+          getValue: function () { return state.formGroup; },
+          onChange: function (v) { state.formGroup = v; UI.$('formGroupTrigger').classList.remove('is-error'); }
+        }),
+        type: UI.bindSingleSelect({
+          wrapId: 'formTypeWrap', triggerId: 'formTypeTrigger', panelId: 'formTypePanel', labelId: 'formTypeLabel', clearId: 'formTypeClear',
+          getValue: function () { return state.formType; },
+          onChange: function (v) { state.formType = v; UI.$('formTypeTrigger').classList.remove('is-error'); }
+        }),
+        series: UI.bindSingleSelect({
+          wrapId: 'formSeriesWrap', triggerId: 'formSeriesTrigger', panelId: 'formSeriesPanel', labelId: 'formSeriesLabel', clearId: 'formSeriesClear',
+          getValue: function () { return state.formSeries; },
+          onChange: function (v) { state.formSeries = v; }
+        }),
+        owner: UI.bindSingleSelect({
+          wrapId: 'formOwnerWrap', triggerId: 'formOwnerTrigger', panelId: 'formOwnerPanel', labelId: 'formOwnerLabel', clearId: 'formOwnerClear',
+          getValue: function () { return state.formOwner; },
+          onChange: function (v) { state.formOwner = v; UI.$('formOwnerTrigger').classList.remove('is-error'); }
+        })
+      };
+
+      UI.bindSeg('platformSeg', function () { syncStoreIdVisibility(); });
+      UI.bindSeg('statusSeg');
+
+      UI.bindPagination({
+        containerId: 'pagination',
+        getTotal: function () { return getFiltered().length; },
+        getPage: function () { return state.page; },
+        getPageSize: function () { return state.pageSize; },
+        onPageChange: function (page) { state.page = page; renderTable(); },
+        onPageSizeChange: function (size) { state.pageSize = size; state.page = 1; renderTable(); }
+      });
+
+      function doSearch() {
+        state.keyword = UI.$('filterKeyword').value || '';
+        state.packageKw = UI.$('filterPackage').value || '';
+        state.page = 1;
+        renderTable();
+      }
+
+      UI.$('searchBtn').addEventListener('click', doSearch);
+      UI.$('filterKeyword').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
+      UI.$('filterPackage').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSearch(); });
+      UI.$('addBtn').addEventListener('click', function () { openForm(null); });
+      UI.$('formCancelBtn').addEventListener('click', closeForm);
+      UI.$('formModalClose').addEventListener('click', closeForm);
+      UI.$('formSubmitBtn').addEventListener('click', submitForm);
+      UI.$('jsonCancelBtn').addEventListener('click', closeJsonModal);
+      UI.$('jsonModalClose').addEventListener('click', closeJsonModal);
+      UI.$('jsonSubmitBtn').addEventListener('click', submitJsonDownload);
+      UI.$('configCancelBtn').addEventListener('click', closeConfig);
+      UI.$('configDrawerClose').addEventListener('click', closeConfig);
+      UI.$('configSubmitBtn').addEventListener('click', submitConfig);
+      UI.$('configDrawerMask').addEventListener('click', closeConfig);
+
+      UI.$('configTabs').addEventListener('click', function (e) {
+        var item = e.target.closest('[data-tab]');
+        if (!item) return;
+        var app = rows.find(function (r) { return r.id === state.configAppId; });
+        collectDraft();
+        switchTab(item.getAttribute('data-tab'));
+        if (item.getAttribute('data-tab') === 'startup') renderStartupTab();
+        if (item.getAttribute('data-tab') === 'plugin' && app) renderPluginTab(app.platform);
+        if (item.getAttribute('data-tab') === 'ad') renderAdTab();
+        if (item.getAttribute('data-tab') === 'iap' && app) renderIapTab(app.platform);
+      });
+
+      UI.$('tabStartup').addEventListener('click', function (e) {
+        var sw = e.target.closest('.switch');
+        if (sw) {
+          sw.classList.toggle('is-on');
+          return;
+        }
+        var addBtn = e.target.closest('[data-array-add]');
+        if (addBtn && !addBtn.disabled) {
+          collectStartupFromDom();
+          var key = addBtn.getAttribute('data-array-add');
+          var field = STARTUP_FIELDS.find(function (f) { return f.key === key; });
+          if (!field) return;
+          var list = state.draft.startup[key] || [];
+          if (field.maxRows != null && field.maxRows !== '' && list.length >= Number(field.maxRows)) return;
+          list.push(emptyArrayRow(field));
+          state.draft.startup[key] = list;
+          renderStartupTab();
+          return;
+        }
+        var delBtn = e.target.closest('[data-array-del]');
+        if (delBtn && !delBtn.disabled) {
+          collectStartupFromDom();
+          var dkey = delBtn.getAttribute('data-array-del');
+          var didx = Number(delBtn.getAttribute('data-index'));
+          var dlist = state.draft.startup[dkey] || [];
+          if (didx > 0) dlist.splice(didx, 1);
+          state.draft.startup[dkey] = dlist;
+          renderStartupTab();
+        }
+      });
+
+      UI.$('tabAd').addEventListener('click', function (e) {
+        if (e.target.closest('[data-ad-add]')) {
+          collectAdFromDom();
+          state.draft.ad.units.push({ network: 'MAX', adType: 'Banner', unitId: '', unitName: '', floor: '0' });
+          renderAdUnits();
+          return;
+        }
+        var del = e.target.closest('[data-ad-del]');
+        if (del && !del.disabled) {
+          collectAdFromDom();
+          var idx = Number(del.getAttribute('data-ad-del'));
+          if (idx > 0) state.draft.ad.units.splice(idx, 1);
+          renderAdUnits();
+          return;
+        }
+        if (e.target.closest('[data-ad-clear]') && !e.target.closest('[data-ad-clear]').disabled) {
+          collectAdFromDom();
+          state.draft.ad.units = [{ network: 'MAX', adType: 'Banner', unitId: '', unitName: '', floor: '0' }];
+          renderAdUnits();
+        }
+      });
+
+      UI.$('tabIap').addEventListener('click', function (e) {
+        if (e.target.closest('[data-iap-add]')) {
+          var app = rows.find(function (r) { return r.id === state.configAppId; });
+          collectIapFromDom(app ? app.platform : 'Android');
+          state.draft.iap.products.push({ kind: 'consumable', productId: '', productName: '', dollarPrice: '' });
+          renderIapProducts();
+          return;
+        }
+        var del = e.target.closest('[data-iap-del]');
+        if (del && !del.disabled) {
+          var app2 = rows.find(function (r) { return r.id === state.configAppId; });
+          collectIapFromDom(app2 ? app2.platform : 'Android');
+          var idx = Number(del.getAttribute('data-iap-del'));
+          if (idx > 0) state.draft.iap.products.splice(idx, 1);
+          renderIapProducts();
+          return;
+        }
+        if (e.target.closest('[data-iap-clear]') && !e.target.closest('[data-iap-clear]').disabled) {
+          var app3 = rows.find(function (r) { return r.id === state.configAppId; });
+          collectIapFromDom(app3 ? app3.platform : 'Android');
+          state.draft.iap.products = [{ kind: 'consumable', productId: '', productName: '', dollarPrice: '' }];
+          renderIapProducts();
+        }
+      });
+
+      UI.$('tableBody').addEventListener('click', function (e) {
+        var copyBtn = e.target.closest('[data-copy]');
+        if (copyBtn) {
+          UI.copyText(copyBtn.getAttribute('data-copy'));
+          return;
+        }
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var id = btn.getAttribute('data-id');
+        var action = btn.getAttribute('data-action');
+        var row = rows.find(function (r) { return r.id === id; });
+        if (!row) return;
+        if (action === 'edit') openForm(row);
+        else if (action === 'config') openConfig(row);
+        else if (action === 'json') openJsonModal(row);
+        else if (action === 'toggle') {
+          row.status = row.status === '启用' ? '禁用' : '启用';
+          UI.showToast(row.status === '启用' ? '已启用' : '已禁用');
+          renderTable();
+        }
+      });
+
+      UI.$('formModal').addEventListener('click', function (e) {
+        if (e.target === UI.$('formModal')) e.stopPropagation();
+      });
+      UI.$('jsonModal').addEventListener('click', function (e) {
+        if (e.target === UI.$('jsonModal')) e.stopPropagation();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (UI.$('formModal').classList.contains('is-open')) closeForm();
+        else if (UI.$('jsonModal').classList.contains('is-open')) closeJsonModal();
+        else if (UI.$('configDrawer').classList.contains('is-open')) closeConfig();
+      });
+
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON文件 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <style>
+    .cell-platform {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+    }
+    .modal--json .modal__body {
+      padding: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-bar">
+          <div class="filter-item filter-item--wide">
+            <input class="input" id="filterKeyword" type="text" placeholder="产品名称/ID" autocomplete="off" />
+          </div>
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：全部</span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <div class="single-option is-active" data-value="全部">全部</div>
+              <div class="single-option" data-value="启用">启用</div>
+              <div class="single-option" data-value="禁用">禁用</div>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="dataTable">
+              <colgroup>
+                <col style="width:16%" />
+                <col style="width:14%" />
+                <col style="width:16%" />
+                <col style="width:8%" />
+                <col style="width:10%" />
+                <col style="width:10%" />
+                <col style="width:8%" />
+                <col style="width:18%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>产品名称</th>
+                  <th>产品ID</th>
+                  <th>包名</th>
+                  <th>平台</th>
+                  <th>SDK版本号</th>
+                  <th>APP版本号</th>
+                  <th>状态</th>
+                  <th class="col-action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status"></div>
+
+  <div class="modal-mask" id="viewModal" aria-hidden="true">
+    <div class="modal modal--large modal--json" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="viewModalTitle">查看JSON</div>
+        <button class="modal__close" type="button" id="viewModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <pre class="json-view" id="jsonView"></pre>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="viewCloseBtn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="col-resize.js"></script>
+  <script src="product-common.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      ProductShell.mount('json-files');
+
+      var UI = ProductUI;
+      var escapeHtml = UI.escapeHtml;
+      var LS_JSON_KEY = 'hwzt_json_files';
+
+      function platformIcon(platform) {
+        var cls = platform === 'iOS' ? 'platform-icon--ios' : 'platform-icon--android';
+        var letter = platform === 'iOS' ? 'i' : 'A';
+        return '<span class="platform-icon ' + cls + '" aria-hidden="true">' + letter + '</span>';
+      }
+
+      function mockJson(base) {
+        return {
+          sdk_app_id: base.productId,
+          app_name: base.productName,
+          package_name: base.packageName,
+          platform: base.platform,
+          sdk_version: base.sdkVersion,
+          app_version: base.appVersion,
+          sdk_config: {
+            config_version: '200',
+            app_sign_key: '85:D2:05:6E:FA:D5:0D:97:52:50:5B:4F:AC:FD:0D:30:57:DF:6A:70',
+            upload_key: 'AB:CD:EF:12:34:56:78:90:AA:BB:CC:DD:EE:FF:00:11',
+            urlOfPrivacy: 'https://example.com/privacy',
+            urlOfTerms: 'https://example.com/terms'
+          },
+          adjust_config: {
+            app_token: 'c1izgym8fksg',
+            sdk_iap_revenue_token: 'jeuzvn'
+          },
+          ta_config: {
+            server_url: 'http://39.108.62.198',
+            app_id: '8cc8202fde8641d48be3cd4debcd395b'
+          },
+          fb_config: {
+            facebook_AppId: '601199918179217',
+            facebook_client_token: '05404e89f51cab0f922a86fd8fd61c5b'
+          },
+          tiktok_config: {
+            app_id: '6502597181',
+            tiktok_app_id: '7425510328798167048'
+          },
+          ad_config: {
+            default_sdk_type: 'MAX',
+            is_appKey: '1c7ff2d1d',
+            max_appKey: 'TThzkkct9KCI5q413MC9i71WqF5iUIow',
+            max_review_api_key: 'bca71b86976cdc171260d01f3d3b6d9b',
+            admob_application_id: 'ca-app-pub-4261668969289292~1670120290',
+            bannerIds: [
+              { ad_type: 'MAX', ad_pos: 'ec53f0d044866ff1', ad_name: 'BN_D_0', ad_bid_floor_price: '0' }
+            ],
+            interIds: [],
+            nativeIds: [],
+            rewardIds: [],
+            splashIds: []
+          },
+          iap_config: {
+            consumableIds: [
+              { productId: 'small_st_jam', dollar_price: '2.99' },
+              { productId: 'brilliant_st_jam', dollar_price: '99.99' }
+            ],
+            nonConsumableIds: [],
+            subscribeIds: []
+          }
+        };
+      }
+
+      var MOCK_ROWS = [
+        {
+          id: 'mock_json_1',
+          productId: 'yw0yqjwcunjjc2e9',
+          productName: 'Screw Pin Jam Puzzle',
+          packageName: 'com.traffic.jam.hop.on.ios',
+          platform: 'iOS',
+          sdkVersion: '3.2.1',
+          appVersion: '1.4.0',
+          status: '启用',
+          createdAt: '2026-07-28T10:00:00'
+        },
+        {
+          id: 'mock_json_2',
+          productId: 'and_tile_sort_01',
+          productName: 'Tile Sort 3D',
+          packageName: 'com.tilesort.puzzle.and',
+          platform: 'Android',
+          sdkVersion: '3.1.8',
+          appVersion: '2.0.3',
+          status: '启用',
+          createdAt: '2026-07-25T14:20:00'
+        },
+        {
+          id: 'mock_json_3',
+          productId: 'and_pixel_03',
+          productName: 'Pixel Bounce Jam',
+          packageName: 'com.pixel.bounce.jam',
+          platform: 'Android',
+          sdkVersion: '3.0.5',
+          appVersion: '1.1.2',
+          status: '禁用',
+          createdAt: '2026-07-20T09:15:00'
+        },
+        {
+          id: 'mock_json_4',
+          productId: 'ios_word_04',
+          productName: 'Jigword Word Search',
+          packageName: 'com.jigword.search.ios',
+          platform: 'iOS',
+          sdkVersion: '2.9.0',
+          appVersion: '3.0.1',
+          status: '启用',
+          createdAt: '2026-07-15T16:40:00'
+        }
+      ];
+
+      MOCK_ROWS.forEach(function (row) {
+        row.json = mockJson(row);
+      });
+
+      var state = {
+        keyword: '',
+        status: '全部',
+        page: 1,
+        pageSize: 20
+      };
+
+      function loadStored() {
+        try {
+          var raw = JSON.parse(localStorage.getItem(LS_JSON_KEY) || '[]');
+          return Array.isArray(raw) ? raw : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function getAllRows() {
+        var stored = loadStored();
+        var map = {};
+        var merged = [];
+        stored.forEach(function (r) {
+          if (!r || !r.id) return;
+          map[r.id] = true;
+          if (!r.json) r.json = mockJson(r);
+          merged.push(r);
+        });
+        MOCK_ROWS.forEach(function (r) {
+          if (!map[r.id]) merged.push(r);
+        });
+        return merged.sort(function (a, b) {
+          return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+        });
+      }
+
+      function getFiltered() {
+        var kw = state.keyword.trim().toLowerCase();
+        return getAllRows().filter(function (r) {
+          if (kw) {
+            var hitName = String(r.productName || '').toLowerCase().indexOf(kw) !== -1;
+            var hitId = String(r.productId || '').toLowerCase().indexOf(kw) !== -1;
+            if (!hitName && !hitId) return false;
+          }
+          if (state.status !== '全部' && r.status !== state.status) return false;
+          return true;
+        });
+      }
+
+      function findRow(id) {
+        return getAllRows().find(function (r) { return r.id === id; });
+      }
+
+      function persistStatus(id, status) {
+        var stored = loadStored();
+        var idx = stored.findIndex(function (r) { return r.id === id; });
+        if (idx !== -1) {
+          stored[idx].status = status;
+          localStorage.setItem(LS_JSON_KEY, JSON.stringify(stored));
+          return;
+        }
+        var mock = MOCK_ROWS.find(function (r) { return r.id === id; });
+        if (mock) mock.status = status;
+      }
+
+      function renderTable() {
+        var list = getFiltered();
+        var total = list.length;
+        var totalPages = Math.max(1, Math.ceil(total / state.pageSize) || 1);
+        if (state.page > totalPages) state.page = totalPages;
+        var start = (state.page - 1) * state.pageSize;
+        var pageRows = list.slice(start, start + state.pageSize);
+        var tbody = UI.$('tableBody');
+        var emptyTip = UI.$('emptyTip');
+
+        if (!pageRows.length) {
+          tbody.innerHTML = '';
+          emptyTip.hidden = false;
+        } else {
+          emptyTip.hidden = true;
+          tbody.innerHTML = pageRows.map(function (r) {
+            var toggleLabel = r.status === '启用' ? '禁用' : '启用';
+            return (
+              '<tr data-id="' + escapeHtml(r.id) + '">' +
+                '<td title="' + escapeHtml(r.productName) + '">' + escapeHtml(r.productName) + '</td>' +
+                '<td title="' + escapeHtml(r.productId) + '">' + escapeHtml(r.productId) + '</td>' +
+                '<td title="' + escapeHtml(r.packageName) + '">' + escapeHtml(r.packageName) + '</td>' +
+                '<td><span class="cell-platform">' + platformIcon(r.platform) + escapeHtml(r.platform) + '</span></td>' +
+                '<td>' + escapeHtml(r.sdkVersion) + '</td>' +
+                '<td>' + escapeHtml(r.appVersion) + '</td>' +
+                '<td>' + UI.statusTag(r.status) + '</td>' +
+                '<td class="col-action"><div class="action-links">' +
+                  '<button class="link" type="button" data-action="view" data-id="' + escapeHtml(r.id) + '">查看</button>' +
+                  '<button class="link" type="button" data-action="download" data-id="' + escapeHtml(r.id) + '">下载JSON</button>' +
+                  '<button class="link" type="button" data-action="toggle" data-id="' + escapeHtml(r.id) + '">' + toggleLabel + '</button>' +
+                '</div></td>' +
+              '</tr>'
+            );
+          }).join('');
+        }
+
+        UI.renderPagination({
+          containerId: 'pagination',
+          total: total,
+          page: state.page,
+          pageSize: state.pageSize
+        });
+      }
+
+      function openView(row) {
+        var data = row.json || mockJson(row);
+        UI.$('jsonView').textContent = JSON.stringify(data, null, 2);
+        UI.$('viewModalTitle').textContent = '查看JSON · ' + (row.productName || '');
+        UI.openModal('viewModal');
+      }
+
+      function closeView() {
+        UI.closeModal('viewModal');
+      }
+
+      function downloadRow(row) {
+        var data = row.json || mockJson(row);
+        var filename = (row.packageName || 'app') + '_' + (row.sdkVersion || 'sdk') + '_' + (row.appVersion || 'app') + '.json';
+        UI.downloadText(filename, JSON.stringify(data, null, 2));
+        UI.showToast('下载成功');
+      }
+
+      UI.bindSingleSelect({
+        wrapId: 'statusWrap',
+        triggerId: 'statusTrigger',
+        panelId: 'statusPanel',
+        labelId: 'statusLabel',
+        prefix: '状态：',
+        getValue: function () { return state.status; },
+        onChange: function (v) { state.status = v || '全部'; },
+        formatValue: function (v) { return v || '全部'; }
+      });
+      // ensure default label
+      UI.$('statusLabel').textContent = '状态：全部';
+
+      UI.bindPagination({
+        containerId: 'pagination',
+        getTotal: function () { return getFiltered().length; },
+        getPage: function () { return state.page; },
+        getPageSize: function () { return state.pageSize; },
+        onPageChange: function (page) {
+          state.page = page;
+          renderTable();
+        },
+        onPageSizeChange: function (size) {
+          state.pageSize = size;
+          state.page = 1;
+          renderTable();
+        }
+      });
+
+      function doSearch() {
+        state.keyword = UI.$('filterKeyword').value || '';
+        state.page = 1;
+        renderTable();
+      }
+
+      UI.$('searchBtn').addEventListener('click', doSearch);
+      UI.$('filterKeyword').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') doSearch();
+      });
+
+      UI.$('tableBody').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var id = btn.getAttribute('data-id');
+        var action = btn.getAttribute('data-action');
+        var row = findRow(id);
+        if (!row) return;
+        if (action === 'view') openView(row);
+        else if (action === 'download') downloadRow(row);
+        else if (action === 'toggle') {
+          row.status = row.status === '启用' ? '禁用' : '启用';
+          persistStatus(row.id, row.status);
+          UI.showToast(row.status === '启用' ? '已启用' : '已禁用');
+          renderTable();
+        }
+      });
+
+      UI.$('viewModalClose').addEventListener('click', closeView);
+      UI.$('viewCloseBtn').addEventListener('click', closeView);
+      UI.$('viewModal').addEventListener('click', function (e) {
+        if (e.target === UI.$('viewModal')) e.stopPropagation();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && UI.$('viewModal').classList.contains('is-open')) closeView();
+      });
+
+      renderTable();
+    })();
+  </script>
+</body>
+</html>
