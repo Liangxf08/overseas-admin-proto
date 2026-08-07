@@ -201,9 +201,9 @@
     }
     .array-row .form-item { margin-bottom: 12px; }
     .array-row .form-item:last-child { margin-bottom: 0; }
-    /* 产品配置弹窗 · 仅本弹窗 1200 */
+    /* 产品配置弹窗 · Xlarge 1200 */
     .modal--config {
-      width: 1200px;
+      width: var(--modal-width-xlarge, 1200px);
       max-width: calc(100vw - 32px);
       height: calc(100vh - 80px);
       max-height: calc(100vh - 80px);
@@ -843,9 +843,9 @@
     </div>
   </div>
 
-  <!-- 产品配置弹窗 · 宽 1020（非全局 800） -->
+  <!-- 产品配置弹窗 · Xlarge 1200 -->
   <div class="modal-mask" id="configModal" aria-hidden="true">
-    <div class="modal modal--form modal--config" role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
+    <div class="modal modal--form modal--xlarge modal--config" role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
       <div class="modal__header">
         <div class="modal__title" id="configModalTitle">产品配置</div>
         <button class="modal__close" type="button" id="configModalClose" aria-label="关闭">

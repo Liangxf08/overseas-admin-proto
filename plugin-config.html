@@ -85,8 +85,6 @@
     }
     .param-add:hover { opacity: 0.85; }
     .param-add svg { width: 14px; height: 14px; }
-
-    .modal--large { width: 960px; }
   </style>
 </head>
 <body>
@@ -176,7 +174,7 @@
   <div class="modal-mask" id="formModal" aria-hidden="true">
     <div class="modal modal--form modal--large" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
       <div class="modal__header">
-        <div class="modal__title" id="formModalTitle">添加插件配置</div>
+        <div class="modal__title" id="formModalTitle">添加插件</div>
         <button class="modal__close" type="button" id="formModalClose" aria-label="关闭">
           <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
         </button>
@@ -483,7 +481,7 @@
         clearFormErrors();
         state.editingId = row ? row.id : null;
         state.isEdit = !!row;
-        UI.$('formModalTitle').textContent = row ? '编辑插件配置' : '添加插件配置';
+        UI.$('formModalTitle').textContent = row ? '编辑插件' : '添加插件';
         UI.setSegValue('platformSeg', row ? row.platform : '通用');
         UI.setSegValue('statusSeg', row ? row.status : '启用');
         UI.$('formJsonKey').value = row ? row.jsonKey : '';

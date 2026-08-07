@@ -281,10 +281,10 @@
                     <th class="col-uuid">UUID</th>
                     <th class="col-device">设备ID</th>
                     <th class="col-time">
-                      <button class="th-sort" type="button" data-key="createdTs">创建时间<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button>
+                      <span class="th-sort" data-key="createdTs">创建时间<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span>
                     </th>
                     <th class="col-time">
-                      <button class="th-sort" type="button" data-key="updatedTs">更新时间<span class="th-sort__icons"><svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg><svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></span></button>
+                      <span class="th-sort" data-key="updatedTs">更新时间<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span>
                     </th>
                     <th class="col-action">操作</th>
                   </tr>
@@ -534,7 +534,7 @@
       let selectedSdkVersions = [];
       let platformValue = '全部';
       let statusValue = '全部';
-      let sortState = { key: '', dir: '' };
+      let sortState = { specs: [], key: '', dir: '' };
       let currentPage = 1;
       let pageSize = 10;
       let drawerTicketId = null;
@@ -691,13 +691,17 @@
       }
 
       function applySort(rows) {
-        const key = sortState.key || 'createdTs';
-        const dir = sortState.dir === 'asc' ? 1 : -1;
-        return rows.slice().sort(function (a, b) {
+        const specs = UI.resolveSortSpecs(sortState);
+        if (!specs.length) {
+          return rows.slice().sort(function (a, b) {
+            return (b.createdTs || 0) - (a.createdTs || 0);
+          });
+        }
+        return UI.sortRowsBySpecs(rows, specs, function (a, b, key) {
           const av = a[key] || 0;
           const bv = b[key] || 0;
-          if (av === bv) return (a.createdTs || 0) > (b.createdTs || 0) ? -1 : 1;
-          return av > bv ? dir : -dir;
+          if (av === bv) return 0;
+          return av > bv ? 1 : -1;
         });
       }
 

@@ -151,8 +151,8 @@
                     <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M42 17V9a1 1 0 0 0-1-1h-8M6 17V9a1 1 0 0 1 1-1h8m27 23v8a1 1 0 0 1-1 1h-8M6 31v8a1 1 0 0 0 1 1h8"/></svg>
                   </button>
                 </span>
-                <span class="tooltip-wrap" data-tip="指标">
-                  <button class="board-icon-btn" type="button" data-action="metrics" id="metricsBtn" aria-label="指标">
+                <span class="tooltip-wrap" data-tip="自定义列">
+                  <button class="board-icon-btn" type="button" data-action="metrics" id="metricsBtn" aria-label="自定义列">
                     <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" aria-hidden="true"><path d="M7 7H20V20H7z"/><path d="M28 7H41V20H28z"/><path d="M7 28H20V41H7z"/><path d="M28 28H41V41H28z"/></svg>
                   </button>
                 </span>
@@ -295,25 +295,27 @@
     </div>
   </div>
 
-  <!-- 指标配置 -->
+  <!-- 自定义列 -->
   <div class="modal-mask" id="metricModal" aria-hidden="true">
     <div class="modal metric-modal" role="dialog" aria-modal="true" aria-labelledby="metricModalTitle">
       <div class="modal__header">
-        <div class="modal__title" id="metricModalTitle">指标配置</div>
+        <div class="modal__title" id="metricModalTitle">自定义列</div>
         <button class="modal__close" type="button" data-close="metricModal" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
-      <div class="modal__body" style="padding:16px 24px 8px;display:flex;flex-direction:column;min-height:0">
+      <div class="modal__body metric-modal__body">
         <div class="metric-layout">
-          <div class="metric-cats">
-            <div class="metric-cats__search">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          <div class="metric-main">
+            <div class="metric-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
               <input type="text" id="metricSearch" placeholder="搜索" autocomplete="off" />
             </div>
-            <div id="metricCatList"></div>
+            <div class="metric-picker">
+              <nav class="metric-cats" id="metricCatList" aria-label="指标分组"></nav>
+              <div class="metric-options" id="metricOptions"></div>
+            </div>
           </div>
-          <div class="metric-options" id="metricOptions"></div>
           <div class="metric-selected">
             <div class="metric-selected__head">
               <span id="metricSelectedCount">已选 0 列</span>
@@ -332,7 +334,7 @@
 
   <!-- 分享看板 -->
   <div class="modal-mask" id="shareModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle" style="width:720px">
+    <div class="modal modal--share" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
       <div class="modal__header">
         <div class="modal__title" id="shareModalTitle">分享看板</div>
         <button class="modal__close" type="button" data-close="shareModal" aria-label="关闭">
@@ -343,7 +345,10 @@
         <div class="transfer">
           <div class="transfer__panel">
             <div class="transfer__head">
-              <span>可选</span>
+              <label class="transfer__head-label">
+                <input class="transfer__check" type="checkbox" id="shareAvailCheckAll" aria-label="全选可选" />
+                <span>可选</span>
+              </label>
               <span id="shareAvailCount">0 / 0</span>
             </div>
             <div class="transfer__search">
@@ -362,7 +367,10 @@
           </div>
           <div class="transfer__panel">
             <div class="transfer__head">
-              <span>已选</span>
+              <label class="transfer__head-label">
+                <input class="transfer__check" type="checkbox" id="shareSelectedCheckAll" aria-label="全选已选" />
+                <span>已选</span>
+              </label>
               <span id="shareSelectedCount">0 / 0</span>
             </div>
             <div class="transfer__search">

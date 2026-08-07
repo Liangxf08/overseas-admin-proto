@@ -364,7 +364,8 @@
    * ============================================================ */
   --modal-width-small: 420px;
   --modal-width: 800px;           /* Medium 默认 */
-  --modal-width-large: 960px;
+  --modal-width-large: 1020px;
+  --modal-width-xlarge: 1200px;   /* Xlarge · 复杂表单 */
   --modal-max-height: calc(100vh - 80px);
   --modal-z-index: 1050;
   --modal-mask: var(--color-bg-mask);

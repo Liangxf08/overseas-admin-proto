@@ -29,23 +29,113 @@
     { key: 'campaign', label: '推广活动' }
   ];
 
-  var METRIC_CATALOG = {
-    '基础指标': ['总收入', '花费', '利润', 'DAU', 'ARPU', '新用户', '新增单价'],
-    '投放指标': ['当日ROAS', '累计ROAS', '总收入', '花费', '利润'],
-    '留存指标': ['DAU', 'ARPU', '新用户', '新增单价']
-  };
+  /**
+   * 自定义列数据（ColumnItem）
+   * key 与看板 metrics 存值一致，便于表格取值
+   */
+  var COLUMN_ITEMS = (function () {
+    var items = [];
+    function add(group, name, definition, opts) {
+      opts = opts || {};
+      items.push({
+        key: opts.key || name,
+        name: name,
+        group: group,
+        definition: definition || undefined,
+        defaultChecked: !!opts.defaultChecked,
+        defaultFrozen: !!opts.defaultFrozen
+      });
+    }
 
-  var METRIC_META = {
-    '总收入': { type: 'decimal', digits: 2, aggregate: 'sum' },
-    '花费': { type: 'decimal', digits: 2, aggregate: 'sum' },
-    '利润': { type: 'decimal', digits: 2, aggregate: 'sum' },
-    '当日ROAS': { type: 'percent', digits: 2, aggregate: 'avg' },
-    '累计ROAS': { type: 'percent', digits: 2, aggregate: 'avg' },
-    'DAU': { type: 'int', aggregate: 'sum' },
-    'ARPU': { type: 'decimal', digits: 4, aggregate: 'avg' },
-    '新用户': { type: 'int', aggregate: 'sum' },
-    '新增单价': { type: 'decimal', digits: 4, aggregate: 'avg' }
-  };
+    /* 示例分组 · 冻结指标演示 */
+    add('示例分组', '冻结指标', '此列为示例冻结指标，不可取消勾选或移出冻结区', { defaultChecked: true, defaultFrozen: true });
+    add('示例分组', '示例指标');
+
+    /* 核心概览 · 默认全选 */
+    add('核心概览', '总收入', '计算公式：广告收入+内购收入', { defaultChecked: true });
+    add('核心概览', '花费', '投放广告花费的金额', { defaultChecked: true });
+    add('核心概览', '利润', '计算公式：总收入-花费', { defaultChecked: true });
+    add('核心概览', '当日ROAS', '计算公式：总收入/花费', { defaultChecked: true });
+    add('核心概览', '累计ROAS', '取已更新的同期群 Dn ROAS 最大值', { defaultChecked: true });
+    add('核心概览', 'DAU', '当日有启动应用的用户即记为活跃用户（去重）', { defaultChecked: true });
+    add('核心概览', 'ARPU', '计算公式：总收入/DAU', { defaultChecked: true });
+    add('核心概览', '新用户', '计算公式：安装+再归因', { defaultChecked: true });
+    add('核心概览', '新增单价', '计算公式：花费/新用户', { defaultChecked: true });
+
+    /* 用户获取 · 全不选 */
+    [
+      '展示', '点击', '安装', '自然安装', '自然安装率', '再归因',
+      'CTR', 'CVR', 'IVR', 'IPM', 'eCPI', 'eCPC', 'eCPM'
+    ].forEach(function (name) { add('用户获取', name); });
+
+    /* 广告变现 · 全不选 */
+    [
+      '广告收入', '广告展示', '广告IPU', '广告ARPU', '广告eCPM', '内购收入', '内购ARPU'
+    ].forEach(function (name) {
+      add('广告变现', name, null, {
+        key: name === '内购收入' ? '广告变现_内购收入' : name
+      });
+    });
+
+    /* 内购变现 · 全不选 */
+    [
+      '付费用户', '付费率', '内购收入', 'ARPU', 'ARPPU'
+    ].forEach(function (name) {
+      var key = name;
+      if (name === '内购收入') key = '内购变现_内购收入';
+      if (name === 'ARPU') key = '内购变现_ARPU';
+      add('内购变现', name, null, { key: key });
+    });
+
+    /* 总LTV / 总ROAS · D0–D30 */
+    for (var d = 0; d <= 30; d++) {
+      add('总LTV', 'D' + d + ' 总LTV');
+      add('总ROAS', 'D' + d + ' 总ROAS');
+    }
+
+    return items;
+  })();
+
+  var COLUMN_MAP = COLUMN_ITEMS.reduce(function (acc, item) {
+    acc[item.key] = item;
+    return acc;
+  }, {});
+
+  var COLUMN_GROUPS = COLUMN_ITEMS.reduce(function (acc, item) {
+    if (acc.indexOf(item.group) < 0) acc.push(item.group);
+    return acc;
+  }, []);
+
+  function inferMetricMeta(key, name) {
+    var label = name || key || '';
+    if (/ROAS|CTR|CVR|IVR|率$|付费率|自然安装率/.test(label)) {
+      return { type: 'percent', digits: 2, aggregate: 'avg' };
+    }
+    if (/ARPU|ARPPU|IPU|IPM|eCPI|eCPC|eCPM|单价/.test(label)) {
+      return { type: 'decimal', digits: 4, aggregate: 'avg' };
+    }
+    if (/收入|花费|利润|LTV/.test(label)) {
+      return { type: 'decimal', digits: 2, aggregate: 'sum' };
+    }
+    if (/DAU|用户|展示|点击|安装|再归因/.test(label)) {
+      return { type: 'int', aggregate: 'sum' };
+    }
+    return { type: 'decimal', digits: 2, aggregate: 'sum' };
+  }
+
+  var METRIC_META = COLUMN_ITEMS.reduce(function (acc, item) {
+    acc[item.key] = inferMetricMeta(item.key, item.name);
+    return acc;
+  }, {});
+
+  /* 覆盖核心指标的展示精度 */
+  METRIC_META['ARPU'] = { type: 'decimal', digits: 4, aggregate: 'avg' };
+  METRIC_META['新增单价'] = { type: 'decimal', digits: 4, aggregate: 'avg' };
+  METRIC_META['内购变现_ARPU'] = { type: 'decimal', digits: 4, aggregate: 'avg' };
+  METRIC_META['内购ARPU'] = { type: 'decimal', digits: 4, aggregate: 'avg' };
+  METRIC_META['广告ARPU'] = { type: 'decimal', digits: 4, aggregate: 'avg' };
+  METRIC_META['广告IPU'] = { type: 'decimal', digits: 4, aggregate: 'avg' };
+  METRIC_META['广告eCPM'] = { type: 'decimal', digits: 2, aggregate: 'avg' };
 
   var PRODUCT_CATALOG = [
     { product: 'Tile Sort 3D (王牌分揀師)', platform: 'iOS' },
@@ -130,7 +220,9 @@
   ];
   var OPTIMIZERS = USERS.slice(0, 8);
 
-  var DEMO_METRICS = ['总收入', '花费', '利润', '当日ROAS', '累计ROAS', 'DAU', 'ARPU', '新用户', '新增单价'];
+  var DEMO_METRICS = COLUMN_ITEMS.filter(function (item) {
+    return item.defaultChecked;
+  }).map(function (item) { return item.key; });
   var DEMO_FILTERS = ['date', 'compare', 'product', 'channel'];
   var DEMO_DIMENSIONS = ['日期'];
   var DIM_COL_WIDTH = 120;
@@ -150,8 +242,10 @@
     boardFormSourceId: null,
     addTargetFolderId: 'mine',
     addBoardType: '',
-    metricCat: '基础指标',
+    metricCat: '示例分组',
     metricDraft: [],
+    metricFrozenCount: 0,
+    metricAnchorLock: false,
     shareAvailChecked: [],
     shareSelectedChecked: [],
     shareDraft: [],
@@ -167,6 +261,7 @@
     compareCustomEnd: null,
     compareCustomViewMonth: null,
     comparePickingStart: null,
+    sortSpecs: [],
     sortKey: null,
     sortDir: 'desc',
     sortInteractive: false,
@@ -229,7 +324,8 @@
       dimensions: (extra.dimensions || DEMO_DIMENSIONS).slice(),
       filters: (extra.filters || DEMO_FILTERS).slice(),
       metrics: (extra.metrics || DEMO_METRICS).slice(),
-      lockedMetric: extra.lockedMetric || DEMO_METRICS[0],
+      lockedMetric: extra.lockedMetric || '冻结指标',
+      frozenMetricCount: extra.frozenMetricCount != null ? extra.frozenMetricCount : 1,
       sharedUsers: (extra.sharedUsers || []).slice(),
       updatedAt: extra.updatedAt || '2026-08-06 12:47:01'
     };
@@ -700,6 +796,7 @@
     state.dimSelected = state.draft.dimensions.slice();
     state.filterValues = defaultFilterValues();
     state.page = 1;
+    state.sortSpecs = [];
     state.sortKey = null;
     state.sortDir = 'desc';
     state.sortInteractive = false;
@@ -1270,18 +1367,21 @@
 
   function genMetricRaw(name, i, mi) {
     var base = seeded(i * 17 + mi * 3 + 1);
-    if (name === '总收入') return base * 8000 + 1200;
+    if (name === '总收入' || name === '广告收入' || name === '内购收入' || name === '广告变现_内购收入' || name === '内购变现_内购收入') {
+      return base * 8000 + 1200;
+    }
     if (name === '花费') return base * 5000 + 800;
     if (name === '利润') return base * 2800 + 200;
-    if (name === '当日ROAS') return base * 180 + 20;
-    if (name === '累计ROAS') return base * 220 + 40;
-    if (name === 'DAU') return Math.floor(base * 40000 + 5000);
-    if (name === 'ARPU') return base * 2.5 + 0.12;
+    if (name === '当日ROAS' || /总ROAS$/.test(name) || name === '累计ROAS') return base * 180 + 20;
+    if (name === 'DAU' || name === '付费用户') return Math.floor(base * 40000 + 5000);
+    if (name === 'ARPU' || name === '内购变现_ARPU' || name === '内购ARPU' || name === '广告ARPU') return base * 2.5 + 0.12;
     if (name === '新用户') return Math.floor(base * 8000 + 300);
     if (name === '新增单价') return base * 3.8 + 0.05;
-    if (METRIC_META[name]) {
-      if (METRIC_META[name].type === 'int') return Math.floor(base * 50000 + 100);
-      if (METRIC_META[name].type === 'percent') return base * 100;
+    if (/总LTV$/.test(name)) return base * 12 + 0.5;
+    var meta = METRIC_META[name];
+    if (meta) {
+      if (meta.type === 'int') return Math.floor(base * 50000 + 100);
+      if (meta.type === 'percent') return base * 100;
       return base * 1000;
     }
     return Math.floor(base * 50000 + 100);
@@ -1313,7 +1413,9 @@
       cols.push({ key: d, label: d, kind: 'dim' });
     });
     metrics.forEach(function (m) {
-      cols.push({ key: m, label: m, kind: 'metric', metric: m });
+      var item = COLUMN_MAP[m];
+      var label = item ? item.name : m;
+      cols.push({ key: m, label: label, kind: 'metric', metric: m });
       if (showCompare) {
         cols.push({ key: '__delta_' + m, label: '% 变化', kind: 'delta', metric: m });
       }
@@ -1417,35 +1519,52 @@
   }
 
   function applySort(rows, cols) {
-    var key;
-    var dir;
-    if (state.sortInteractive && state.sortKey && cols.indexOf(state.sortKey) >= 0) {
-      key = state.sortKey;
-      dir = state.sortDir === 'asc' ? 'asc' : 'desc';
-    } else {
-      key = getDefaultSortKey(cols);
-      dir = 'desc';
-      state.sortKey = null;
-      state.sortDir = 'desc';
-      state.sortInteractive = false;
+    var specs = (state.sortSpecs || []).filter(function (s) {
+      return s && s.key && cols.indexOf(s.key) >= 0 && (s.dir === 'asc' || s.dir === 'desc');
+    });
+    if (specs.length) {
+      state.sortInteractive = true;
+      return UI.sortRowsBySpecs(rows, specs, function (a, b, key) {
+        return compareSortValues(a, b, key);
+      });
     }
+    /* 全不选：恢复默认排序 */
+    state.sortInteractive = false;
+    state.sortSpecs = [];
+    var key = getDefaultSortKey(cols);
     if (!key) return rows.slice();
     return rows.slice().sort(function (a, b) {
       var cmp = compareSortValues(a, b, key);
-      return dir === 'asc' ? cmp : -cmp;
+      return -cmp; /* 默认 desc */
     });
   }
 
   function thSortHtml(label, key) {
-    var active = state.sortInteractive && state.sortKey === key;
+    var spec = null;
+    (state.sortSpecs || []).some(function (s) {
+      if (s.key === key) { spec = s; return true; }
+      return false;
+    });
     var cls = 'th-sort';
-    if (active) cls += state.sortDir === 'asc' ? ' is-asc' : ' is-desc';
-    return '<button class="' + cls + '" type="button" data-sort-key="' + escapeHtml(key) + '">' +
-      escapeHtml(label) +
+    if (spec && spec.dir === 'asc') cls += ' is-asc is-active';
+    else if (spec && spec.dir === 'desc') cls += ' is-desc is-active';
+    var icons = UI.TH_SORT_ICONS_HTML || (
       '<span class="th-sort__icons">' +
-        '<svg class="asc" viewBox="0 0 10 8"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg>' +
-        '<svg class="desc" viewBox="0 0 10 8"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg>' +
-      '</span></button>';
+        '<button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序">' +
+          '<svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg>' +
+        '</button>' +
+        '<button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序">' +
+          '<svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg>' +
+        '</button>' +
+      '</span>'
+    );
+    if (spec) {
+      icons = icons
+        .replace('class="th-sort__dir asc"', 'class="th-sort__dir asc' + (spec.dir === 'asc' ? ' is-on' : '') + '"')
+        .replace('class="th-sort__dir desc"', 'class="th-sort__dir desc' + (spec.dir === 'desc' ? ' is-on' : '') + '"');
+    }
+    return '<span class="' + cls + '" data-sort-key="' + escapeHtml(key) + '">' +
+      escapeHtml(label) + icons + '</span>';
   }
 
   function renderTable() {
@@ -1454,10 +1573,10 @@
     var showCompare = isCompareEnabled();
     var displayCols = buildDisplayCols(dims, metrics, showCompare);
     var sortKeys = displayCols.map(function (c) { return c.key; });
-    if (state.sortInteractive && state.sortKey && sortKeys.indexOf(state.sortKey) < 0) {
-      state.sortKey = null;
-      state.sortDir = 'desc';
-      state.sortInteractive = false;
+    if (state.sortSpecs && state.sortSpecs.length) {
+      state.sortSpecs = state.sortSpecs.filter(function (s) {
+        return s && sortKeys.indexOf(s.key) >= 0;
+      });
     }
     var rows = applySort(genRows(), sortKeys);
     var total = rows.length;
@@ -2222,75 +2341,324 @@
     renderTable();
   }
 
-  function allMetricsFlat() {
-    var list = [];
-    Object.keys(METRIC_CATALOG).forEach(function (cat) {
-      METRIC_CATALOG[cat].forEach(function (m) {
-        list.push({ cat: cat, name: m });
-      });
+  function getColumnItem(key) {
+    return COLUMN_MAP[key] || { key: key, name: key, group: '基础指标' };
+  }
+
+  function isDefaultFrozenKey(key, board) {
+    var item = COLUMN_MAP[key];
+    if (item && item.defaultFrozen) return true;
+    if (board && board.lockedMetric && board.lockedMetric === key) return true;
+    return false;
+  }
+
+  function minFrozenCount(draft, board) {
+    var n = 0;
+    draft.forEach(function (key) {
+      if (isDefaultFrozenKey(key, board)) n += 1;
     });
-    return list;
+    return n;
+  }
+
+  function normalizeMetricDraft(draft, board) {
+    var seen = {};
+    var list = [];
+    (draft || []).forEach(function (key) {
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      list.push(key);
+    });
+    COLUMN_ITEMS.forEach(function (item) {
+      if (item.defaultFrozen && !seen[item.key]) {
+        list.unshift(item.key);
+        seen[item.key] = true;
+      }
+    });
+    if (board && board.lockedMetric && !seen[board.lockedMetric]) {
+      list.unshift(board.lockedMetric);
+    }
+    var locked = [];
+    var free = [];
+    list.forEach(function (key) {
+      if (isDefaultFrozenKey(key, board)) locked.push(key);
+      else free.push(key);
+    });
+    return locked.concat(free);
   }
 
   function openMetricModal() {
     var board = findNode(state.activeBoardId);
     if (!canManageConfig(board)) return;
-    state.metricDraft = (state.draft.metrics || []).slice();
-    state.metricCat = Object.keys(METRIC_CATALOG)[0];
+    state.metricDraft = normalizeMetricDraft(state.draft.metrics || [], board);
+    state.metricFrozenCount = Math.max(
+      minFrozenCount(state.metricDraft, board),
+      board && board.frozenMetricCount != null ? Math.min(board.frozenMetricCount, state.metricDraft.length) : 0
+    );
+    if (state.metricFrozenCount < minFrozenCount(state.metricDraft, board)) {
+      state.metricFrozenCount = minFrozenCount(state.metricDraft, board);
+    }
+    if (!state.metricFrozenCount && state.metricDraft.length) state.metricFrozenCount = 1;
+    state.metricCat = COLUMN_GROUPS[0];
     $('metricSearch').value = '';
     renderMetricModal();
     openModal('metricModal');
+    hideMetricDefTip();
+  }
+
+  function filteredColumnItems() {
+    var kw = ($('metricSearch').value || '').trim().toLowerCase();
+    return COLUMN_ITEMS.filter(function (item) {
+      if (!kw) return true;
+      return item.name.toLowerCase().indexOf(kw) >= 0 ||
+        item.key.toLowerCase().indexOf(kw) >= 0 ||
+        (item.definition || '').toLowerCase().indexOf(kw) >= 0;
+    });
+  }
+
+  function groupItems(items) {
+    var map = {};
+    COLUMN_GROUPS.forEach(function (g) { map[g] = []; });
+    items.forEach(function (item) {
+      if (!map[item.group]) map[item.group] = [];
+      map[item.group].push(item);
+    });
+    return map;
   }
 
   function renderMetricModal() {
-    var kw = ($('metricSearch').value || '').trim().toLowerCase();
-    var cats = Object.keys(METRIC_CATALOG);
-    $('metricCatList').innerHTML = cats.map(function (cat) {
-      return '<button class="metric-cat' + (cat === state.metricCat ? ' is-active' : '') + '" type="button" data-cat="' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</button>';
-    }).join('');
-
-    var options = allMetricsFlat().filter(function (m) {
-      if (kw) return m.name.toLowerCase().indexOf(kw) >= 0;
-      return m.cat === state.metricCat;
-    });
-
     var board = findNode(state.activeBoardId);
-    var locked = board ? board.lockedMetric : '';
+    var items = filteredColumnItems();
+    var grouped = groupItems(items);
+    var visibleGroups = COLUMN_GROUPS.filter(function (g) { return (grouped[g] || []).length; });
 
-    $('metricOptions').innerHTML = options.map(function (m) {
-      var checked = state.metricDraft.indexOf(m.name) >= 0;
-      var disabled = m.name === locked;
-      return '<label class="metric-option"><input type="checkbox" value="' + escapeHtml(m.name) + '"' + (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + '/><span>' + escapeHtml(m.name) + '</span></label>';
+    if (visibleGroups.indexOf(state.metricCat) < 0) {
+      state.metricCat = visibleGroups[0] || COLUMN_GROUPS[0];
+    }
+
+    $('metricCatList').innerHTML = visibleGroups.map(function (cat) {
+      return '<button class="metric-cat' + (cat === state.metricCat ? ' is-active' : '') + '" type="button" data-cat="' + escapeHtml(cat) + '">' + escapeHtml(cat) + '</button>';
+    }).join('') || '<div class="transfer__empty">无匹配</div>';
+
+    $('metricOptions').innerHTML = visibleGroups.map(function (cat) {
+      var list = grouped[cat] || [];
+      var selectable = list.filter(function (item) { return !isDefaultFrozenKey(item.key, board); });
+      var checkedCount = list.filter(function (item) { return state.metricDraft.indexOf(item.key) >= 0; }).length;
+      var allChecked = list.length > 0 && checkedCount === list.length;
+      var groupDisabled = selectable.length === 0;
+
+      return '<section class="metric-group" id="metric-group-' + escapeHtml(cat) + '" data-group="' + escapeHtml(cat) + '">' +
+        '<div class="metric-group__head">' +
+          '<input class="metric-check" type="checkbox" data-group-check="' + escapeHtml(cat) + '"' +
+            (allChecked ? ' checked' : '') +
+            (groupDisabled ? ' disabled' : '') +
+            ' aria-label="全选' + escapeHtml(cat) + '" />' +
+          '<span>' + escapeHtml(cat) + '</span>' +
+        '</div>' +
+        '<div class="metric-group__grid">' +
+          list.map(function (item) {
+            var checked = state.metricDraft.indexOf(item.key) >= 0;
+            var disabled = isDefaultFrozenKey(item.key, board);
+            return '<label class="metric-option' + (disabled ? ' is-disabled' : '') + '"' +
+              (item.definition ? ' data-definition="' + escapeHtml(item.definition) + '"' : '') + '>' +
+              '<input class="metric-check" type="checkbox" value="' + escapeHtml(item.key) + '"' +
+                (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + ' />' +
+              '<span class="metric-option__name">' + escapeHtml(item.name) + '</span>' +
+            '</label>';
+          }).join('') +
+        '</div>' +
+      '</section>';
     }).join('') || '<div class="transfer__empty">无匹配指标</div>';
 
-    $('metricSelectedCount').textContent = '已选 ' + state.metricDraft.length + ' 列';
-    var listHtml = '';
-    state.metricDraft.forEach(function (name, idx) {
-      if (idx === 1) {
-        listHtml += '<div class="metric-freeze">— 拖到上方的列将冻结显示 —</div>';
-      }
-      var isLocked = name === locked;
-      listHtml +=
-        '<div class="metric-selected__item" draggable="' + (!isLocked) + '" data-metric="' + escapeHtml(name) + '">' +
-          (isLocked
-            ? '<svg class="metric-selected__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="11" width="12" height="9" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>'
-            : '<svg class="metric-selected__drag" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7" r="1.2"/><circle cx="15" cy="7" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="17" r="1.2"/><circle cx="15" cy="17" r="1.2"/></svg>') +
-          '<span class="metric-selected__name">' + escapeHtml(name) + '</span>' +
-          (isLocked ? '' : '<button class="metric-selected__remove" type="button" data-remove-metric="' + escapeHtml(name) + '" aria-label="移除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg></button>') +
-        '</div>';
+    /* indeterminate for group checkboxes */
+    $('metricOptions').querySelectorAll('[data-group-check]').forEach(function (input) {
+      var cat = input.getAttribute('data-group-check');
+      var list = grouped[cat] || [];
+      var checkedCount = list.filter(function (item) { return state.metricDraft.indexOf(item.key) >= 0; }).length;
+      var allChecked = list.length > 0 && checkedCount === list.length;
+      input.indeterminate = checkedCount > 0 && !allChecked;
     });
-    $('metricSelectedList').innerHTML = listHtml || '<div class="transfer__empty">请添加指标</div>';
+
+    bindMetricDefinitionTips();
+
+    $('metricSelectedCount').textContent = '已选 ' + state.metricDraft.length + ' 列';
+    var freezeAt = Math.min(Math.max(state.metricFrozenCount, 0), state.metricDraft.length);
+    state.metricFrozenCount = Math.max(freezeAt, minFrozenCount(state.metricDraft, board));
+    freezeAt = state.metricFrozenCount;
+
+    var listHtml = '';
+    if (!state.metricDraft.length) {
+      listHtml = '<div class="transfer__empty">请添加指标</div>';
+    } else {
+      state.metricDraft.forEach(function (key, idx) {
+        if (idx === freezeAt) {
+          listHtml += '<div class="metric-freeze" data-freeze-line="1">拖到上方的列将冻结显示</div>';
+        }
+        var item = getColumnItem(key);
+        var forced = isDefaultFrozenKey(key, board);
+        var frozen = idx < freezeAt;
+        var canDrag = !forced;
+        var icon = frozen
+          ? '<svg class="metric-selected__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="11" width="12" height="9" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>'
+          : '<svg class="metric-selected__drag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+        var remove = forced
+          ? ''
+          : '<button class="metric-selected__remove" type="button" data-remove-metric="' + escapeHtml(key) + '" aria-label="移除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg></button>';
+        listHtml +=
+          '<div class="metric-selected__item' + (frozen ? ' is-frozen' : '') + '" draggable="' + (canDrag ? 'true' : 'false') + '" data-metric="' + escapeHtml(key) + '" data-index="' + idx + '">' +
+            icon +
+            '<span class="metric-selected__name">' + escapeHtml(item.name) + '</span>' +
+            remove +
+          '</div>';
+      });
+      if (freezeAt >= state.metricDraft.length) {
+        listHtml += '<div class="metric-freeze" data-freeze-line="1">拖到上方的列将冻结显示</div>';
+      }
+    }
+    $('metricSelectedList').innerHTML = listHtml;
+  }
+
+  function toggleMetricKey(key, checked) {
+    var board = findNode(state.activeBoardId);
+    if (isDefaultFrozenKey(key, board)) return;
+    var idx = state.metricDraft.indexOf(key);
+    if (checked && idx < 0) {
+      state.metricDraft.push(key);
+    } else if (!checked && idx >= 0) {
+      state.metricDraft.splice(idx, 1);
+      if (idx < state.metricFrozenCount) {
+        state.metricFrozenCount = Math.max(minFrozenCount(state.metricDraft, board), state.metricFrozenCount - 1);
+      }
+    }
+    state.metricFrozenCount = Math.max(state.metricFrozenCount, minFrozenCount(state.metricDraft, board));
   }
 
   function submitMetrics() {
+    var board = findNode(state.activeBoardId);
     if (!state.metricDraft.length) {
       showToast('请至少选择 1 个指标', 'error');
       return;
     }
     state.draft.metrics = state.metricDraft.slice();
+    if (board) board.frozenMetricCount = state.metricFrozenCount;
     closeModal('metricModal');
     renderTable();
-    showToast('指标已更新，保存看板后生效');
+    showToast('自定义列已更新，保存看板后生效');
+    /* 对外抛出排好序的 Key 列表，便于业务接入 */
+    try {
+      document.dispatchEvent(new CustomEvent('dashboard:columns-confirm', {
+        detail: { keys: state.metricDraft.slice(), frozenCount: state.metricFrozenCount }
+      }));
+    } catch (err) { /* ignore */ }
+  }
+
+  function scrollToMetricGroup(cat) {
+    var el = document.getElementById('metric-group-' + cat);
+    var scroller = $('metricOptions');
+    if (!el || !scroller) return;
+    state.metricAnchorLock = true;
+    state.metricCat = cat;
+    Array.prototype.forEach.call($('metricCatList').querySelectorAll('.metric-cat'), function (btn) {
+      btn.classList.toggle('is-active', btn.getAttribute('data-cat') === cat);
+    });
+    scroller.scrollTo({ top: Math.max(0, el.offsetTop - 8), behavior: 'smooth' });
+    window.setTimeout(function () { state.metricAnchorLock = false; }, 400);
+  }
+
+  function syncMetricAnchorOnScroll() {
+    if (state.metricAnchorLock) return;
+    var scroller = $('metricOptions');
+    if (!scroller) return;
+    var groups = scroller.querySelectorAll('.metric-group');
+    if (!groups.length) return;
+    var top = scroller.scrollTop + 24;
+    var active = groups[0].getAttribute('data-group');
+    Array.prototype.forEach.call(groups, function (g) {
+      if (g.offsetTop <= top) active = g.getAttribute('data-group');
+    });
+    if (active && active !== state.metricCat) {
+      state.metricCat = active;
+      Array.prototype.forEach.call($('metricCatList').querySelectorAll('.metric-cat'), function (btn) {
+        btn.classList.toggle('is-active', btn.getAttribute('data-cat') === active);
+      });
+    }
+  }
+
+  var metricDefTipTimer = null;
+  var metricDefTipEl = null;
+
+  function ensureMetricDefTip() {
+    if (metricDefTipEl) return metricDefTipEl;
+    metricDefTipEl = document.createElement('div');
+    metricDefTipEl.id = 'metricDefTip';
+    metricDefTipEl.className = 'form-help-tip';
+    metricDefTipEl.setAttribute('role', 'tooltip');
+    metricDefTipEl.innerHTML = '<span class="form-help-tip__text"></span><span class="form-help-tip__arrow" aria-hidden="true"></span>';
+    document.body.appendChild(metricDefTipEl);
+    return metricDefTipEl;
+  }
+
+  function hideMetricDefTip() {
+    if (metricDefTipTimer) {
+      clearTimeout(metricDefTipTimer);
+      metricDefTipTimer = null;
+    }
+    if (metricDefTipEl) metricDefTipEl.classList.remove('is-open', 'is-below');
+  }
+
+  function showMetricDefTip(anchor) {
+    var msg = anchor.getAttribute('data-definition') || '';
+    if (!msg) return;
+    var tip = ensureMetricDefTip();
+    var textEl = tip.querySelector('.form-help-tip__text');
+    if (textEl) textEl.textContent = msg;
+
+    /* 对齐指标名称，而非整行（含复选框的宽单元格） */
+    var target = anchor.querySelector('.metric-option__name') || anchor;
+
+    tip.classList.remove('is-below');
+    tip.classList.add('is-open');
+    tip.style.left = '0px';
+    tip.style.top = '0px';
+
+    function place() {
+      var a = target.getBoundingClientRect();
+      var t = tip.getBoundingClientRect();
+      if (!t.width || !t.height) return;
+      var gap = 6;
+      var pad = 8;
+      var left = a.left + a.width / 2 - t.width / 2;
+      left = Math.max(pad, Math.min(left, window.innerWidth - t.width - pad));
+      var top = a.top - t.height - gap;
+      if (top < pad) {
+        top = a.bottom + gap;
+        tip.classList.add('is-below');
+      } else {
+        tip.classList.remove('is-below');
+      }
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+      tip.style.setProperty('--arrow-left', (a.left + a.width / 2 - left) + 'px');
+    }
+
+    place();
+    requestAnimationFrame(place);
+  }
+
+  function bindMetricDefinitionTips() {
+    var root = $('metricOptions');
+    if (!root) return;
+    root.querySelectorAll('.metric-option[data-definition]').forEach(function (el) {
+      if (el.getAttribute('data-def-bound') === '1') return;
+      el.setAttribute('data-def-bound', '1');
+      el.addEventListener('mouseenter', function () {
+        hideMetricDefTip();
+        metricDefTipTimer = setTimeout(function () {
+          metricDefTipTimer = null;
+          showMetricDefTip(el);
+        }, 1000);
+      });
+      el.addEventListener('mouseleave', hideMetricDefTip);
+    });
   }
 
   function openShareModal() {
@@ -2305,14 +2673,44 @@
     openModal('shareModal');
   }
 
-  function renderShare() {
+  function getShareLists() {
     var availKw = ($('shareAvailSearch').value || '').trim().toLowerCase();
     var selKw = ($('shareSelectedSearch').value || '').trim().toLowerCase();
     var selected = state.shareDraft;
     var available = USERS.filter(function (u) { return selected.indexOf(u) < 0; });
-
     var availVisible = available.filter(function (u) { return !availKw || u.toLowerCase().indexOf(availKw) >= 0; });
     var selVisible = selected.filter(function (u) { return !selKw || u.toLowerCase().indexOf(selKw) >= 0; });
+    return {
+      selected: selected,
+      available: available,
+      availVisible: availVisible,
+      selVisible: selVisible
+    };
+  }
+
+  function syncShareCheckAll(el, visible, checkedArr) {
+    if (!el) return;
+    if (!visible.length) {
+      el.checked = false;
+      el.indeterminate = false;
+      el.disabled = true;
+      return;
+    }
+    el.disabled = false;
+    var n = 0;
+    visible.forEach(function (u) {
+      if (checkedArr.indexOf(u) >= 0) n += 1;
+    });
+    el.checked = n === visible.length;
+    el.indeterminate = n > 0 && n < visible.length;
+  }
+
+  function renderShare() {
+    var lists = getShareLists();
+    var available = lists.available;
+    var selected = lists.selected;
+    var availVisible = lists.availVisible;
+    var selVisible = lists.selVisible;
 
     $('shareAvailCount').textContent = state.shareAvailChecked.length + ' / ' + available.length;
     $('shareSelectedCount').textContent = state.shareSelectedChecked.length + ' / ' + selected.length;
@@ -2330,6 +2728,9 @@
           return '<label class="transfer__item' + (checked ? ' is-checked' : '') + '"><input type="checkbox" value="' + escapeHtml(u) + '"' + (checked ? ' checked' : '') + '/><span>' + escapeHtml(u) + '</span></label>';
         }).join('')
       : '<div class="transfer__empty">暂无已选</div>';
+
+    syncShareCheckAll($('shareAvailCheckAll'), availVisible, state.shareAvailChecked);
+    syncShareCheckAll($('shareSelectedCheckAll'), selVisible, state.shareSelectedChecked);
 
     $('shareMoveRight').disabled = !state.shareAvailChecked.length;
     $('shareMoveLeft').disabled = !state.shareSelectedChecked.length;
@@ -2350,6 +2751,7 @@
     board.dimensions = state.dimSelected.slice();
     board.filters = state.draft.filters.slice();
     board.metrics = state.draft.metrics.slice();
+    if (board.frozenMetricCount == null) board.frozenMetricCount = minFrozenCount(board.metrics, board);
     board.updatedAt = formatDateTime(new Date());
     state.saved = {
       dimensions: board.dimensions.slice(),
@@ -2620,17 +3022,17 @@
   $('exportBtn').addEventListener('click', function () { showToast('已导出当前列表'); });
 
   $('tableHead').addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-sort-key]');
-    if (!btn) return;
-    var key = btn.getAttribute('data-sort-key');
-    if (!key) return;
-    if (state.sortInteractive && state.sortKey === key) {
-      state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-      state.sortKey = key;
-      state.sortDir = 'desc';
-      state.sortInteractive = true;
-    }
+    var dirBtn = e.target.closest('[data-sort-dir]');
+    if (!dirBtn) return;
+    var wrap = dirBtn.closest('[data-sort-key]');
+    if (!wrap) return;
+    var key = wrap.getAttribute('data-sort-key');
+    var dir = dirBtn.getAttribute('data-sort-dir');
+    if (!key || (dir !== 'asc' && dir !== 'desc')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    state.sortSpecs = UI.toggleSortDir(state.sortSpecs || [], key, dir);
+    state.sortInteractive = state.sortSpecs.length > 0;
     state.page = 1;
     renderTable();
   });
@@ -2788,68 +3190,163 @@
   $('metricCatList').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-cat]');
     if (!btn) return;
-    state.metricCat = btn.getAttribute('data-cat');
-    $('metricSearch').value = '';
-    renderMetricModal();
+    scrollToMetricGroup(btn.getAttribute('data-cat'));
   });
 
   $('metricSearch').addEventListener('input', renderMetricModal);
 
+  $('metricOptions').addEventListener('scroll', function () {
+    hideMetricDefTip();
+    syncMetricAnchorOnScroll();
+  });
+
   $('metricOptions').addEventListener('change', function (e) {
-    var input = e.target.closest('input[type="checkbox"]');
-    if (!input || input.disabled) return;
-    var name = input.value;
-    if (input.checked) {
-      if (state.metricDraft.indexOf(name) < 0) state.metricDraft.push(name);
-    } else {
-      state.metricDraft = state.metricDraft.filter(function (n) { return n !== name; });
+    var groupInput = e.target.closest('[data-group-check]');
+    if (groupInput) {
+      var board = findNode(state.activeBoardId);
+      var cat = groupInput.getAttribute('data-group-check');
+      var checked = groupInput.checked;
+      COLUMN_ITEMS.forEach(function (item) {
+        if (item.group !== cat) return;
+        if (isDefaultFrozenKey(item.key, board)) return;
+        toggleMetricKey(item.key, checked);
+      });
+      renderMetricModal();
+      return;
     }
+    var input = e.target.closest('input.metric-check[type="checkbox"]');
+    if (!input || input.disabled || input.hasAttribute('data-group-check')) return;
+    toggleMetricKey(input.value, input.checked);
     renderMetricModal();
   });
 
   $('metricSelectedList').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-remove-metric]');
     if (!btn) return;
-    var name = btn.getAttribute('data-remove-metric');
-    state.metricDraft = state.metricDraft.filter(function (n) { return n !== name; });
+    toggleMetricKey(btn.getAttribute('data-remove-metric'), false);
     renderMetricModal();
   });
 
   $('metricClear').addEventListener('click', function () {
     var board = findNode(state.activeBoardId);
-    var locked = board ? board.lockedMetric : '';
-    state.metricDraft = locked ? [locked] : [];
+    state.metricDraft = state.metricDraft.filter(function (key) {
+      return isDefaultFrozenKey(key, board);
+    });
+    state.metricFrozenCount = state.metricDraft.length;
     renderMetricModal();
   });
 
-  /* drag reorder metrics */
+  /* drag reorder metrics + freeze line */
   var dragMetric = null;
   $('metricSelectedList').addEventListener('dragstart', function (e) {
     var item = e.target.closest('[data-metric]');
-    if (!item || item.getAttribute('draggable') === 'false') return;
+    if (!item || item.getAttribute('draggable') === 'false') {
+      e.preventDefault();
+      return;
+    }
     dragMetric = item.getAttribute('data-metric');
     item.classList.add('is-dragging');
+    try { e.dataTransfer.setData('text/plain', dragMetric); e.dataTransfer.effectAllowed = 'move'; } catch (err) { /* ignore */ }
   });
   $('metricSelectedList').addEventListener('dragend', function (e) {
     var item = e.target.closest('[data-metric]');
     if (item) item.classList.remove('is-dragging');
+    Array.prototype.forEach.call($('metricSelectedList').querySelectorAll('.is-drag-over'), function (el) {
+      el.classList.remove('is-drag-over');
+    });
     dragMetric = null;
   });
   $('metricSelectedList').addEventListener('dragover', function (e) {
     e.preventDefault();
+    if (!dragMetric) return;
+    var line = e.target.closest('[data-freeze-line]');
     var item = e.target.closest('[data-metric]');
-    if (!item || !dragMetric) return;
-    var target = item.getAttribute('data-metric');
-    if (target === dragMetric) return;
+    Array.prototype.forEach.call($('metricSelectedList').querySelectorAll('.is-drag-over'), function (el) {
+      el.classList.remove('is-drag-over');
+    });
+    if (line) line.classList.add('is-drag-over');
+    else if (item) item.classList.add('is-drag-over');
+  });
+  $('metricSelectedList').addEventListener('drop', function (e) {
+    e.preventDefault();
+    if (!dragMetric) return;
+    var board = findNode(state.activeBoardId);
+    var line = e.target.closest('[data-freeze-line]');
+    var item = e.target.closest('[data-metric]');
     var from = state.metricDraft.indexOf(dragMetric);
-    var to = state.metricDraft.indexOf(target);
-    if (from < 0 || to < 0) return;
-    state.metricDraft.splice(from, 1);
-    state.metricDraft.splice(to, 0, dragMetric);
+    if (from < 0) return;
+
+    if (line) {
+      /* drop on freeze line → become last frozen */
+      state.metricDraft.splice(from, 1);
+      var insertAt = from < state.metricFrozenCount
+        ? Math.max(0, state.metricFrozenCount - 1)
+        : state.metricFrozenCount;
+      insertAt = Math.max(0, Math.min(insertAt, state.metricDraft.length));
+      state.metricDraft.splice(insertAt, 0, dragMetric);
+      state.metricFrozenCount = Math.max(minFrozenCount(state.metricDraft, board), insertAt + 1);
+    } else if (item) {
+      var target = item.getAttribute('data-metric');
+      if (target === dragMetric) return;
+      var to = state.metricDraft.indexOf(target);
+      if (to < 0) return;
+      var wasFrozen = from < state.metricFrozenCount;
+      var toFrozen = to < state.metricFrozenCount;
+      if (isDefaultFrozenKey(dragMetric, board) && !toFrozen) return;
+
+      state.metricDraft.splice(from, 1);
+      state.metricDraft.splice(to, 0, dragMetric);
+
+      if (!wasFrozen && toFrozen) {
+        state.metricFrozenCount = Math.max(state.metricFrozenCount, minFrozenCount(state.metricDraft, board));
+      } else if (wasFrozen && !toFrozen && !isDefaultFrozenKey(dragMetric, board)) {
+        state.metricFrozenCount = Math.max(minFrozenCount(state.metricDraft, board), state.metricFrozenCount - 1);
+      }
+      state.metricFrozenCount = Math.max(minFrozenCount(state.metricDraft, board), Math.min(state.metricFrozenCount, state.metricDraft.length));
+    }
+
+    /* keep defaultFrozen in frozen zone */
+    var forced = [];
+    var rest = [];
+    state.metricDraft.forEach(function (key) {
+      if (isDefaultFrozenKey(key, board)) forced.push(key);
+      else rest.push(key);
+    });
+    var userFrozen = rest.splice(0, Math.max(0, state.metricFrozenCount - forced.length));
+    state.metricDraft = forced.concat(userFrozen, rest);
+    state.metricFrozenCount = forced.length + userFrozen.length;
     renderMetricModal();
   });
 
   /* Share transfer */
+  $('shareAvailCheckAll').addEventListener('change', function () {
+    var visible = getShareLists().availVisible;
+    if (this.checked) {
+      visible.forEach(function (u) {
+        if (state.shareAvailChecked.indexOf(u) < 0) state.shareAvailChecked.push(u);
+      });
+    } else {
+      state.shareAvailChecked = state.shareAvailChecked.filter(function (u) {
+        return visible.indexOf(u) < 0;
+      });
+    }
+    renderShare();
+  });
+
+  $('shareSelectedCheckAll').addEventListener('change', function () {
+    var visible = getShareLists().selVisible;
+    if (this.checked) {
+      visible.forEach(function (u) {
+        if (state.shareSelectedChecked.indexOf(u) < 0) state.shareSelectedChecked.push(u);
+      });
+    } else {
+      state.shareSelectedChecked = state.shareSelectedChecked.filter(function (u) {
+        return visible.indexOf(u) < 0;
+      });
+    }
+    renderShare();
+  });
+
   $('shareAvailList').addEventListener('change', function (e) {
     var input = e.target.closest('input[type="checkbox"]');
     if (!input) return;

@@ -860,38 +860,142 @@
     };
   }
 
+  /**
+   * 表头多列排序
+   * 升序 / 降序为独立按钮：点击选中，再点同向取消；点另一向则切换方向（保持优先级）
+   * 多列同时选中时，按选中先后作为优先级（先选优先）
+   * getState/setState 使用 { specs: [{ key, dir }, ...] }；兼容旧的 { key, dir }
+   */
+  var TH_SORT_ICONS_HTML =
+    '<span class="th-sort__icons">' +
+      '<button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序">' +
+        '<svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg>' +
+      '</button>' +
+      '<button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序">' +
+        '<svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg>' +
+      '</button>' +
+    '</span>';
+
+  function resolveSortSpecs(state) {
+    if (!state) return [];
+    if (Array.isArray(state.specs)) {
+      return state.specs.filter(function (s) { return s && s.key && (s.dir === 'asc' || s.dir === 'desc'); });
+    }
+    if (state.key && (state.dir === 'asc' || state.dir === 'desc')) {
+      return [{ key: state.key, dir: state.dir }];
+    }
+    return [];
+  }
+
+  /** 独立方向按钮：同向再点取消；异向切换；未选则追加 */
+  function toggleSortDir(specs, key, dir) {
+    if (dir !== 'asc' && dir !== 'desc') return (specs || []).slice();
+    var list = (specs || []).slice();
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].key === key) { idx = i; break; }
+    }
+    if (idx < 0) {
+      list.push({ key: key, dir: dir });
+    } else if (list[idx].dir === dir) {
+      list.splice(idx, 1);
+    } else {
+      list[idx] = { key: key, dir: dir };
+    }
+    return list;
+  }
+
+  /** @deprecated 列级循环，保留兼容；新交互请用 toggleSortDir */
+  function toggleSortSpec(specs, key, defaultDir) {
+    var list = (specs || []).slice();
+    var dir0 = defaultDir === 'asc' ? 'asc' : 'desc';
+    var existing = null;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].key === key) { existing = list[i]; break; }
+    }
+    if (!existing) return toggleSortDir(list, key, dir0);
+    if (existing.dir === dir0) return toggleSortDir(list, key, dir0 === 'asc' ? 'desc' : 'asc');
+    return toggleSortDir(list, key, existing.dir);
+  }
+
+  function packSortState(specs) {
+    var list = resolveSortSpecs({ specs: specs });
+    if (!list.length) return { specs: [], key: '', dir: '' };
+    return { specs: list, key: list[0].key, dir: list[0].dir };
+  }
+
+  function sortRowsBySpecs(rows, specs, compareFn) {
+    var list = resolveSortSpecs({ specs: specs });
+    if (!list.length) return rows.slice();
+    var cmp = compareFn || function (a, b, key) {
+      var av = a[key];
+      var bv = b[key];
+      if (typeof av === 'number' || typeof bv === 'number') {
+        var an = Number(av);
+        var bn = Number(bv);
+        if (!isFinite(an) && !isFinite(bn)) return 0;
+        if (!isFinite(an)) return 1;
+        if (!isFinite(bn)) return -1;
+        return an - bn;
+      }
+      return String(av == null ? '' : av).localeCompare(String(bv == null ? '' : bv), 'zh');
+    };
+    return rows.slice().sort(function (a, b) {
+      for (var i = 0; i < list.length; i++) {
+        var c = cmp(a, b, list[i].key);
+        if (c !== 0) return list[i].dir === 'asc' ? c : -c;
+      }
+      return 0;
+    });
+  }
+
   function bindThSort(cfg) {
     var root = typeof cfg.root === 'string' ? document.querySelector(cfg.root) : cfg.root;
     if (!root) return null;
 
+    function getWrapKey(wrap) {
+      return wrap.getAttribute('data-key') || wrap.getAttribute('data-sort-key') || '';
+    }
+
     function sync() {
-      var state = cfg.getState ? cfg.getState() : {};
-      root.querySelectorAll('.th-sort').forEach(function (btn) {
-        var key = btn.getAttribute('data-key');
-        var active = !!state.key && state.key === key;
-        btn.classList.toggle('is-asc', active && state.dir === 'asc');
-        btn.classList.toggle('is-desc', active && state.dir === 'desc');
+      var specs = resolveSortSpecs(cfg.getState ? cfg.getState() : null);
+      var map = {};
+      specs.forEach(function (s) { map[s.key] = s.dir; });
+      root.querySelectorAll('.th-sort').forEach(function (wrap) {
+        var key = getWrapKey(wrap);
+        var dir = map[key];
+        wrap.classList.toggle('is-asc', dir === 'asc');
+        wrap.classList.toggle('is-desc', dir === 'desc');
+        wrap.classList.toggle('is-active', !!dir);
+        wrap.querySelectorAll('.th-sort__dir').forEach(function (btn) {
+          var d = btn.getAttribute('data-sort-dir');
+          btn.classList.toggle('is-on', !!dir && d === dir);
+        });
       });
     }
 
     root.addEventListener('click', function (e) {
-      var btn = e.target.closest('.th-sort');
-      if (!btn || !root.contains(btn)) return;
-      var key = btn.getAttribute('data-key');
-      var state = cfg.getState ? cfg.getState() : {};
-      var next;
-      if (state.key === key) {
-        next = { key: key, dir: state.dir === 'desc' ? 'asc' : 'desc' };
-      } else {
-        next = { key: key, dir: cfg.defaultDir || 'desc' };
-      }
+      var dirBtn = e.target.closest('[data-sort-dir]');
+      if (!dirBtn || !root.contains(dirBtn)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var wrap = dirBtn.closest('.th-sort');
+      if (!wrap) return;
+      var key = getWrapKey(wrap);
+      var dir = dirBtn.getAttribute('data-sort-dir');
+      if (!key || (dir !== 'asc' && dir !== 'desc')) return;
+      var specs = resolveSortSpecs(cfg.getState ? cfg.getState() : null);
+      var next = packSortState(toggleSortDir(specs, key, dir));
       if (cfg.setState) cfg.setState(next);
       if (cfg.onChange) cfg.onChange(next);
       sync();
     });
 
     sync();
-    return { sync: sync };
+    return {
+      sync: sync,
+      resolveSpecs: function () { return resolveSortSpecs(cfg.getState ? cfg.getState() : null); }
+    };
   }
 
   function downloadText(filename, content, mime) {
@@ -973,26 +1077,31 @@
       var msg = anchor.getAttribute('data-tip') || '';
       if (!msg || !textEl) return;
       textEl.textContent = msg;
+      tip.classList.remove('is-below');
       tip.classList.add('is-open');
       tip.style.left = '0px';
       tip.style.top = '0px';
-      var a = anchor.getBoundingClientRect();
-      var t = tip.getBoundingClientRect();
-      var gap = 8;
-      var pad = 8;
-      var left = a.left + a.width / 2 - t.width / 2;
-      left = Math.max(pad, Math.min(left, window.innerWidth - t.width - pad));
-      var top = a.top - t.height - gap;
-      if (top < pad) {
-        top = a.bottom + gap;
-        tip.classList.add('is-below');
-      } else {
-        tip.classList.remove('is-below');
+      function place() {
+        var a = anchor.getBoundingClientRect();
+        var t = tip.getBoundingClientRect();
+        if (!t.width || !t.height) return;
+        var gap = 6;
+        var pad = 8;
+        var left = a.left + a.width / 2 - t.width / 2;
+        left = Math.max(pad, Math.min(left, window.innerWidth - t.width - pad));
+        var top = a.top - t.height - gap;
+        if (top < pad) {
+          top = a.bottom + gap;
+          tip.classList.add('is-below');
+        } else {
+          tip.classList.remove('is-below');
+        }
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+        tip.style.setProperty('--arrow-left', (a.left + a.width / 2 - left) + 'px');
       }
-      tip.style.left = left + 'px';
-      tip.style.top = top + 'px';
-      var arrowX = a.left + a.width / 2 - left;
-      tip.style.setProperty('--arrow-left', arrowX + 'px');
+      place();
+      requestAnimationFrame(place);
     }
 
     scope.querySelectorAll('.form-help[data-tip]').forEach(function (el) {
@@ -1029,6 +1138,12 @@
     bindInputClearable: bindInputClearable,
     bindFormHelp: bindFormHelp,
     bindThSort: bindThSort,
+    resolveSortSpecs: resolveSortSpecs,
+    sortRowsBySpecs: sortRowsBySpecs,
+    toggleSortSpec: toggleSortSpec,
+    toggleSortDir: toggleSortDir,
+    packSortState: packSortState,
+    TH_SORT_ICONS_HTML: TH_SORT_ICONS_HTML,
     bindSeg: bindSeg,
     getSegValue: getSegValue,
     setSegValue: setSegValue,

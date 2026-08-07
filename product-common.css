@@ -21,6 +21,25 @@ input, select, textarea {
   color: var(--color-text-1, #1D2129);
 }
 
+/* 禁用复选框：覆盖 UA not-allowed，任意状态保持默认箭头 */
+input[type="checkbox"]:disabled,
+input[type="checkbox"][disabled] {
+  cursor: default !important;
+}
+label:has(input[type="checkbox"]:disabled),
+label:has(input[type="checkbox"][disabled]),
+.metric-option.is-disabled,
+.metric-option.is-disabled *,
+.metric-group__head:has(input:disabled),
+.metric-group__head:has(input:disabled) *,
+.cell-check:has(input:disabled),
+.multi-option:has(input[type="checkbox"]:disabled),
+.filter-check:has(input:disabled),
+.filter-setting-item:has(> input[type="checkbox"]:disabled),
+.transfer__head-label:has(input:disabled) {
+  cursor: default !important;
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -1234,7 +1253,6 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  cursor: pointer;
   user-select: none;
   color: inherit;
   font: inherit;
@@ -1242,6 +1260,7 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
   background: transparent;
   border: 0;
   padding: 0;
+  cursor: default;
 }
 
 .th-sort__icons {
@@ -1250,11 +1269,39 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
   width: 10px;
   color: var(--color-text-4, #C9CDD4);
   line-height: 0;
+  gap: 0;
 }
 
-.th-sort__icons svg { width: 10px; height: 8px; }
-.th-sort.is-asc .th-sort__icons .asc,
-.th-sort.is-desc .th-sort__icons .desc { color: var(--color-primary); }
+.th-sort__dir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 8px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-4, #C9CDD4);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.th-sort__dir svg {
+  width: 10px;
+  height: 8px;
+  display: block;
+  pointer-events: none;
+}
+
+.th-sort__dir:hover,
+.th-sort__dir.is-on,
+.th-sort.is-asc .th-sort__dir.asc,
+.th-sort.is-desc .th-sort__dir.desc {
+  color: var(--color-primary);
+}
+
+.th-sort.is-active { color: var(--color-text-1, #1D2129); }
 
 /* 表格复选框列（首列）：总宽 64，仅用单元格 padding（data-table 的 0 12px），不再叠加列 padding */
 .col-check {
@@ -1447,9 +1494,9 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
 }
 
 .modal {
-  width: 800px;
+  width: var(--modal-width, 800px);
   max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 80px);
+  max-height: var(--modal-max-height, calc(100vh - 80px));
   display: flex;
   flex-direction: column;
   background: var(--color-bg-container, #fff);
@@ -1460,8 +1507,9 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
   overflow: hidden;
 }
 
-.modal--small { width: 420px; }
-.modal--large { width: 960px; }
+.modal--small { width: var(--modal-width-small, 420px); }
+.modal--large { width: var(--modal-width-large, 1020px); }
+.modal--xlarge { width: var(--modal-width-xlarge, 1200px); }
 .modal-mask.is-open .modal { transform: translateY(0); }
 
 .modal__header {
@@ -1656,21 +1704,20 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
 .form-help-tip__arrow {
   position: absolute;
   left: var(--arrow-left, 50%);
-  bottom: -6px;
+  bottom: -5px;
   width: 0;
   height: 0;
   margin-left: -6px;
-  border: 6px solid transparent;
-  border-top-color: var(--color-tooltip-bg, rgba(29, 33, 41, 0.95));
-  border-bottom-width: 0;
+  border-style: solid;
+  border-width: 6px 6px 0;
+  border-color: var(--color-tooltip-bg, rgba(29, 33, 41, 0.95)) transparent transparent;
+  box-sizing: border-box;
 }
 .form-help-tip.is-below .form-help-tip__arrow {
   bottom: auto;
-  top: -6px;
-  border-top-color: transparent;
-  border-bottom-width: 6px;
-  border-bottom-color: var(--color-tooltip-bg, rgba(29, 33, 41, 0.95));
-  border-top-width: 0;
+  top: -5px;
+  border-width: 0 6px 6px;
+  border-color: transparent transparent var(--color-tooltip-bg, rgba(29, 33, 41, 0.95));
 }
 
 .form-item__error {
@@ -2204,7 +2251,7 @@ body.drawer-open { overflow: hidden; }
 /* ========== Confirm Modal ========== */
 .confirm-modal {
   position: relative;
-  width: 400px;
+  width: var(--modal-width-small, 420px);
   max-width: calc(100vw - 32px);
   background: #fff;
   border-radius: 8px;
