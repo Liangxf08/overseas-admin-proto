@@ -32,6 +32,17 @@
       color: #4E5969;
       margin-bottom: 28px;
     }
+    .section {
+      margin-bottom: 28px;
+    }
+    .section:last-of-type { margin-bottom: 0; }
+    .section__title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 24px;
+      color: #1D2129;
+      margin-bottom: 12px;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -79,48 +90,71 @@
   <div class="wrap">
     <h1 class="brand">海外中台 · 原型预览</h1>
     <p class="desc">可对外分享的交互原型入口。后续需求会持续更新到本地址，供开发对照实现。</p>
-    <div class="grid">
-      <a class="card" href="./dashboard.html">
-        <h2>看板 · 已定版</h2>
-        <p>看板 · 文件夹管理、自定义看板、维度筛选指标配置、分享（2026-08-07 定版）</p>
-      </a>
-      <a class="card" href="./platform-config.html">
-        <h2>平台配置</h2>
-        <p>产品 · 平台管理 · 平台类型/标识、启用禁用、添加编辑</p>
-      </a>
-      <a class="card" href="./plugin-config.html">
-        <h2>插件配置</h2>
-        <p>产品 · 平台管理 · JSON Key、参数表、下发SDK、启停联动</p>
-      </a>
-      <a class="card" href="./developer-account.html">
-        <h2>开发者账号</h2>
-        <p>产品 · 平台管理 · Android/iOS Tab、凭证上传下载</p>
-      </a>
-      <a class="card" href="./app-apps.html">
-        <h2>APP应用</h2>
-        <p>产品 · APP管理 · 应用列表、产品配置、下载 JSON</p>
-      </a>
-      <a class="card" href="./app-user-query.html">
-        <h2>APP用户查询</h2>
-        <p>产品 · 平台工具 · 按用户ID / 设备ID 查询</p>
-      </a>
-      <a class="card" href="./tiktok-accounts.html">
-        <h2>Tiktok账户</h2>
-        <p>产品 · 资产管理 · 筛选导入、编辑/批量改产品优化师状态、导出</p>
-      </a>
-      <a class="card" href="./tiktok-grant.html">
-        <h2>TikTok赠款</h2>
-        <p>产品 · 资产管理 · 筛选查询、手动同步、复制账户ID、详情抽屉</p>
-      </a>
-      <a class="card" href="./menu-management.html">
-        <h2>菜单管理</h2>
-        <p>管理 · 菜单树表、添加编辑删除、排序拖拽、刷新加载、导航联动</p>
-      </a>
-      <a class="card" href="./feedback-tickets.html">
-        <h2>用户反馈</h2>
-        <p>工具 · 运营工具 · 工单筛选、批量改状态、详情抽屉</p>
-      </a>
-    </div>
+
+    <section class="section">
+      <h2 class="section__title">看板</h2>
+      <div class="grid">
+        <a class="card" href="./dashboard.html" target="_blank" rel="noopener noreferrer">
+          <h2>看板</h2>
+          <p>文件夹管理、自定义看板、维度筛选指标配置、分享</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section__title">产品</h2>
+      <div class="grid">
+        <a class="card" href="./app-apps.html" target="_blank" rel="noopener noreferrer">
+          <h2>APP应用</h2>
+          <p>APP管理 · 应用列表、产品配置、下载 JSON</p>
+        </a>
+        <a class="card" href="./platform-config.html" target="_blank" rel="noopener noreferrer">
+          <h2>平台配置</h2>
+          <p>平台管理 · 平台类型/标识、启用禁用、添加编辑</p>
+        </a>
+        <a class="card" href="./plugin-config.html" target="_blank" rel="noopener noreferrer">
+          <h2>插件配置</h2>
+          <p>平台管理 · JSON Key、参数表、下发SDK、启停联动</p>
+        </a>
+        <a class="card" href="./developer-account.html" target="_blank" rel="noopener noreferrer">
+          <h2>开发者账号</h2>
+          <p>平台管理 · Android/iOS Tab、凭证上传下载</p>
+        </a>
+        <a class="card" href="./app-user-query.html" target="_blank" rel="noopener noreferrer">
+          <h2>APP用户查询</h2>
+          <p>平台工具 · 按用户ID / 设备ID 查询</p>
+        </a>
+        <a class="card" href="./tiktok-accounts.html" target="_blank" rel="noopener noreferrer">
+          <h2>Tiktok账户</h2>
+          <p>资产管理 · 筛选导入、编辑/批量改产品优化师状态、导出</p>
+        </a>
+        <a class="card" href="./tiktok-grant.html" target="_blank" rel="noopener noreferrer">
+          <h2>TikTok赠款</h2>
+          <p>资产管理 · 筛选查询、手动同步、复制账户ID、详情抽屉</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section__title">工具</h2>
+      <div class="grid">
+        <a class="card" href="./feedback-tickets.html" target="_blank" rel="noopener noreferrer">
+          <h2>用户反馈</h2>
+          <p>运营工具 · 工单筛选、批量改状态、详情抽屉</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section__title">管理</h2>
+      <div class="grid">
+        <a class="card" href="./menu-management.html" target="_blank" rel="noopener noreferrer">
+          <h2>菜单管理</h2>
+          <p>菜单树表、添加编辑删除、排序拖拽、刷新加载、导航联动</p>
+        </a>
+      </div>
+    </section>
+
     <div class="tip">建议收藏本页地址。更新后刷新浏览器即可看到最新原型（如有缓存可强制刷新 Ctrl+F5）。</div>
   </div>
 </body>
