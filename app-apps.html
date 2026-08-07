@@ -93,12 +93,17 @@
       width: 308px;
       padding: 0 20px;
     }
-    #formModal.modal { overflow: visible; }
+    /* 添加/编辑产品：长表单 Body 可滚；下拉展开时抬高当前行 */
+    #formModal.modal-mask { overflow: visible; }
+    #formModal > .modal,
+    #formModal.is-open > .modal {
+      overflow: visible;
+      transform: none;
+    }
     #formModal .modal__body {
       overflow: auto;
       position: relative;
     }
-    /* 下拉展开时抬高当前行，避免被后续表单项盖住导致要点多次 */
     #formModal .form-item { position: relative; z-index: 1; }
     #formModal .form-item:has(.single-panel.is-open),
     #formModal .form-item:has(.date-panel.is-open),
@@ -878,7 +883,7 @@
   </div>
 
   <!-- 批量修改弹窗 -->
-  <div class="modal-mask" id="batchGroupModal" aria-hidden="true">
+  <div class="modal-mask modal-mask--dropdown" id="batchGroupModal" aria-hidden="true">
     <div class="modal modal--form" role="dialog" aria-modal="true">
       <div class="modal__header">
         <div class="modal__title">修改产品组</div>
@@ -905,7 +910,7 @@
     </div>
   </div>
 
-  <div class="modal-mask" id="batchTypeModal" aria-hidden="true">
+  <div class="modal-mask modal-mask--dropdown" id="batchTypeModal" aria-hidden="true">
     <div class="modal modal--form" role="dialog" aria-modal="true">
       <div class="modal__header">
         <div class="modal__title">修改产品类型</div>
@@ -932,7 +937,7 @@
     </div>
   </div>
 
-  <div class="modal-mask" id="batchOwnerModal" aria-hidden="true">
+  <div class="modal-mask modal-mask--dropdown" id="batchOwnerModal" aria-hidden="true">
     <div class="modal modal--form" role="dialog" aria-modal="true">
       <div class="modal__header">
         <div class="modal__title">修改负责人</div>
@@ -959,7 +964,7 @@
     </div>
   </div>
 
-  <div class="modal-mask" id="batchStatusModal" aria-hidden="true">
+  <div class="modal-mask modal-mask--dropdown" id="batchStatusModal" aria-hidden="true">
     <div class="modal modal--form" role="dialog" aria-modal="true">
       <div class="modal__header">
         <div class="modal__title">修改状态</div>

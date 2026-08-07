@@ -130,28 +130,6 @@
   font-size: 14px;
 }
 
-/* 编辑弹窗：下拉可浮出；取消 transform，避免 fixed 面板相对弹窗定位 */
-#editModal.modal-mask { overflow: visible; }
-#editModal .modal,
-#editModal.modal-mask.is-open .modal {
-  overflow: visible;
-  transform: none;
-}
-#editModal .modal__body {
-  overflow: visible;
-  padding-bottom: 24px;
-  position: relative;
-}
-#editModal .form-item {
-  position: relative;
-  z-index: 1;
-}
-#editModal .form-item:has(.single-panel.is-open),
-#editModal .form-item:has(.datetime-panel.is-open),
-#editModal .form-item:has(.select-trigger.is-open) {
-  z-index: 30;
-}
-
 .tooltip-wrap { position: relative; }
 
 .tooltip-wrap[data-tip]::after {

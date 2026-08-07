@@ -1611,6 +1611,36 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
   overflow: auto;
 }
 
+/**
+ * 含下拉的表单弹窗（定版）
+ * 用法：遮罩加 .modal-mask--dropdown（配合 .modal--form）
+ * 参照 APP用户查询「编辑用户」：面板可浮出弹窗外，不被 overflow / transform 裁切
+ */
+.modal-mask.modal-mask--dropdown {
+  overflow: visible;
+}
+.modal-mask--dropdown > .modal,
+.modal-mask--dropdown.is-open > .modal {
+  overflow: visible;
+  transform: none;
+}
+.modal-mask--dropdown .modal__body {
+  overflow: visible;
+  padding-bottom: 24px;
+  position: relative;
+}
+.modal-mask--dropdown .form-item {
+  position: relative;
+  z-index: 1;
+}
+.modal-mask--dropdown .form-item:has(.single-panel.is-open),
+.modal-mask--dropdown .form-item:has(.multi-panel.is-open),
+.modal-mask--dropdown .form-item:has(.date-panel.is-open),
+.modal-mask--dropdown .form-item:has(.datetime-panel.is-open),
+.modal-mask--dropdown .form-item:has(.select-trigger.is-open) {
+  z-index: 30;
+}
+
 .form-item {
   display: flex;
   align-items: flex-start;
