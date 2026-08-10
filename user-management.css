@@ -1,0 +1,103 @@
+/* 用户管理 · 页面特例 */
+
+.user-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.user-cell__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--color-fill-4, #C9CDD4);
+}
+
+.user-cell__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table .col-account {
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table .col-action {
+  width: 168px;
+}
+
+#logDrawer .drawer {
+  display: flex;
+  flex-direction: column;
+}
+
+#logDrawer .drawer__body {
+  padding-bottom: 16px;
+}
+
+#logDrawer .drawer__pager {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-border-2, #E5E6EB);
+  background: var(--color-bg-container, #fff);
+  padding: 12px 24px;
+}
+
+#logPagination[hidden] {
+  display: none !important;
+}
+
+.log-table-shell {
+  border: 1px solid var(--color-border-2, #E5E6EB);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.log-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.log-table th,
+.log-table td {
+  height: 44px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-2, #E5E6EB);
+  font-size: 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.log-table th {
+  background: var(--color-fill-1, #F7F8FA);
+  color: var(--color-text-2, #4E5969);
+  font-weight: 600;
+}
+
+.log-table tr:last-child td {
+  border-bottom: none;
+}
+
+.log-table__change {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--color-text-1, #1D2129);
+}
+
+.log-table__change-item {
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.log-table__empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--color-text-3, #86909C);
+  font-size: 14px;
+}
