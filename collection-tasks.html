@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>采集任务 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <link rel="stylesheet" href="collection-tasks.css" />
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+        <div class="content-card">
+          <div class="filter-bar" id="filterBar">
+            <div class="filter-item filter-item--date" id="dateRangeWrap">
+              <button class="date-range-trigger" type="button" id="dateRangeTrigger">
+                <span class="date-range-trigger__text" id="dateRangeLabel">创建时间：-</span>
+              </button>
+              <div class="date-panel" id="datePanel">
+                <div class="date-panel__shortcuts" id="dateShortcuts">
+                  <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
+                  <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
+                  <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
+                  <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
+                  <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
+                </div>
+                <div class="date-panel__calendars">
+                  <div class="date-cal" id="dateCalLeft"></div>
+                  <div class="date-cal" id="dateCalRight"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-item" id="creatorWrap">
+              <button class="select-trigger" type="button" id="creatorTrigger">
+                <span class="select-trigger__text" id="creatorLabel">创建人：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="creatorClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="search-select-panel" id="creatorPanel">
+                <div class="search-select-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="creatorSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="search-select-panel__list" id="creatorList"></div>
+              </div>
+            </div>
+
+            <div class="filter-item" id="statusWrap">
+              <button class="select-trigger" type="button" id="statusTrigger">
+                <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="statusClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="statusPanel">
+                <button class="single-option" type="button" data-value="">全部</button>
+                <button class="single-option" type="button" data-value="待开始">待开始</button>
+                <button class="single-option" type="button" data-value="进行中">进行中</button>
+                <button class="single-option" type="button" data-value="已完成">已完成</button>
+                <button class="single-option" type="button" data-value="已取消">已取消</button>
+                <button class="single-option" type="button" data-value="已失败">已失败</button>
+              </div>
+            </div>
+
+            <div class="filter-actions">
+              <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
+              <div class="pending-wrap" id="pendingWrap">
+                <button class="btn btn--default" type="button" id="pendingBtn">
+                  待提交
+                  <span class="pending-badge" id="pendingBadge" hidden>0</span>
+                </button>
+                <div class="pending-panel" id="pendingPanel" role="dialog" aria-label="待提交任务">
+                  <div class="pending-panel__head">待提交任务</div>
+                  <div class="pending-panel__list" id="pendingList"></div>
+                  <div class="pending-panel__empty" id="pendingEmpty" hidden>暂无待提交任务</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-panel" id="dataPanel">
+            <div class="table-shell">
+              <div class="table-wrap">
+                <table class="data-table" id="taskTable">
+                  <colgroup>
+                    <col data-col-width="80" />
+                    <col data-col-width="200" />
+                    <col data-col-width="112" />
+                    <col data-col-width="180" />
+                    <col data-col-width="180" />
+                    <col data-col-width="100" />
+                    <col data-col-width="308" />
+                    <col data-col-width="160" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>任务摘要</th>
+                      <th>创建人</th>
+                      <th>创建时间</th>
+                      <th>更新时间</th>
+                      <th>状态</th>
+                      <th>处理结果</th>
+                      <th class="col-action">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody"></tbody>
+                </table>
+                <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+              </div>
+            </div>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+      </main>
+  </div>
+
+  <!-- 配置任务抽屉 -->
+  <div class="drawer-mask" id="configDrawer" aria-hidden="true">
+    <aside class="drawer drawer--form" role="dialog" aria-modal="true" aria-labelledby="configDrawerTitle">
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="configDrawerTitle">配置任务</h2>
+        <button class="drawer__close" type="button" id="configDrawerClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="drawer__body">
+        <!-- 命名 -->
+        <div class="cfg-section">
+          <div class="form-item" id="cfgCreativeItem">
+            <label class="form-item__label is-required">创意人</label>
+            <div class="form-item__control" id="cfgCreativeWrap">
+              <button class="select-trigger" type="button" id="cfgCreativeTrigger">
+                <span class="select-trigger__text" id="cfgCreativeLabel"><span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="cfgCreativeClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="search-select-panel" id="cfgCreativePanel">
+                <div class="search-select-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="cfgCreativeSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="search-select-panel__list" id="cfgCreativeList"></div>
+              </div>
+              <div class="form-item__error">请选择创意人</div>
+            </div>
+          </div>
+
+          <div class="form-item" id="cfgNameItem">
+            <label class="form-item__label is-required">素材名称</label>
+            <div class="form-item__control">
+              <input class="input" id="cfgNameInput" type="text" autocomplete="off" />
+              <div class="meta-tags" id="cfgNameTags" data-target="cfgNameInput">
+                <button class="meta-tag" type="button" data-token="_" data-repeat="1">下划线</button>
+                <button class="meta-tag" type="button" data-token="{编号}">编号</button>
+                <button class="meta-tag" type="button" data-token="{序号}">序号</button>
+                <button class="meta-tag" type="button" data-token="{创意人}">创意人</button>
+                <button class="meta-tag" type="button" data-token="{尺寸}">尺寸</button>
+                <button class="meta-tag" type="button" data-token="{时长}">时长</button>
+                <button class="meta-tag" type="button" data-token="{YYYYMMDD}">YYYYMMDD</button>
+              </div>
+              <div class="form-item__error">请输入素材名称</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cfg-form-divider" role="separator"></div>
+
+        <!-- 处理 -->
+        <div class="cfg-section">
+          <div class="form-item">
+            <label class="form-item__label">修改 MD5</label>
+            <div class="form-item__control">
+              <button class="switch is-on" type="button" id="cfgMd5Switch" aria-label="修改MD5" aria-pressed="true"></button>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-item__label">修改尺寸</label>
+            <div class="form-item__control">
+              <div class="form-row-inline">
+                <button class="switch is-on" type="button" id="cfgSizeSwitch" aria-label="修改尺寸" aria-pressed="true"></button>
+                <div class="filter-item size-select-wrap" id="cfgSizeWrap">
+                  <button class="select-trigger" type="button" id="cfgSizeTrigger">
+                    <span class="select-trigger__text" id="cfgSizeLabel">1080x1920</span>
+                    <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <div class="single-panel size-cascade-panel" id="cfgSizePanel">
+                    <div class="size-cascade">
+                      <div class="size-cascade__col" id="cfgSizeGroupList"></div>
+                      <div class="size-cascade__col" id="cfgSizeValueList"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-item__label">剪辑时长</label>
+            <div class="form-item__control">
+              <div class="form-row-inline">
+                <button class="switch is-on" type="button" id="cfgTrimSwitch" aria-label="剪辑时长" aria-pressed="true"></button>
+                <div class="filter-item" id="cfgTrimModeWrap">
+                  <button class="select-trigger" type="button" id="cfgTrimModeTrigger">
+                    <span class="select-trigger__text" id="cfgTrimModeLabel">剪掉片尾</span>
+                    <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <div class="single-panel" id="cfgTrimModePanel">
+                    <button class="single-option is-active" type="button" data-value="剪掉片尾">剪掉片尾</button>
+                    <button class="single-option" type="button" data-value="剪掉片头">剪掉片头</button>
+                    <button class="single-option" type="button" data-value="片段截取">片段截取</button>
+                  </div>
+                </div>
+                <span class="trim-fields" id="cfgTrimSimple">
+                  <input class="input input--num" id="cfgTrimSec" type="number" min="0" step="1" value="4" />
+                  <span class="unit">秒</span>
+                </span>
+                <span class="trim-fields is-hidden" id="cfgTrimRange">
+                  <input class="input input--num" id="cfgTrimStart" type="number" min="0" step="1" value="0" placeholder="开始" />
+                  <span class="unit">-</span>
+                  <input class="input input--num" id="cfgTrimEnd" type="number" min="0" step="1" value="10" placeholder="结束" />
+                  <span class="unit">秒</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cfg-form-divider" role="separator"></div>
+
+        <!-- 入库 -->
+        <div class="cfg-section">
+          <div class="form-item">
+            <label class="form-item__label">上传 XMP</label>
+            <div class="form-item__control">
+              <div class="seg" id="cfgXmpSeg" role="group" aria-label="上传XMP">
+                <button type="button" class="seg__item is-active" data-value="是">是</button>
+                <button type="button" class="seg__item" data-value="否">否</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-item" id="cfgDupItem">
+            <label class="form-item__label">过滤重复素材</label>
+            <div class="form-item__control">
+              <button class="switch is-on" type="button" id="cfgDupSwitch" aria-label="过滤重复素材" aria-pressed="true"></button>
+            </div>
+          </div>
+
+          <div class="xmp-block" id="cfgXmpBlock">
+            <div class="form-item">
+              <label class="form-item__label">存储位置</label>
+              <div class="form-item__control">
+                <div class="seg" id="cfgFolderSeg" role="group" aria-label="存储位置">
+                  <button type="button" class="seg__item is-active" data-value="已有文件夹">已有文件夹</button>
+                  <button type="button" class="seg__item" data-value="创建文件夹">创建文件夹</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-item folder-existing" id="cfgTargetFolderItem">
+              <label class="form-item__label is-required">目标文件夹</label>
+              <div class="form-item__control" id="cfgTargetFolderWrap">
+                <button class="select-trigger" type="button" id="cfgTargetFolderTrigger">
+                  <span class="select-trigger__text" id="cfgTargetFolderLabel"><span class="muted">请选择</span></span>
+                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <button class="select-clear" type="button" id="cfgTargetFolderClear" aria-label="清除">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                </button>
+                <div class="search-select-panel" id="cfgTargetFolderPanel">
+                  <div class="search-select-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="cfgTargetFolderSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="search-select-panel__list" id="cfgTargetFolderList"></div>
+                </div>
+                <div class="form-item__error">请选择目标文件夹</div>
+              </div>
+            </div>
+
+            <div class="folder-create is-hidden" id="cfgCreateFolderBlock">
+              <div class="form-item">
+                <label class="form-item__label">父级文件夹</label>
+                <div class="form-item__control" id="cfgParentFolderWrap">
+                  <button class="select-trigger" type="button" id="cfgParentFolderTrigger">
+                    <span class="select-trigger__text" id="cfgParentFolderLabel"><span class="muted">请选择</span></span>
+                    <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <button class="select-clear" type="button" id="cfgParentFolderClear" aria-label="清除">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                  </button>
+                  <div class="search-select-panel" id="cfgParentFolderPanel">
+                    <div class="search-select-panel__search">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                      <input type="text" id="cfgParentFolderSearch" placeholder="搜索" autocomplete="off" />
+                    </div>
+                    <div class="search-select-panel__list" id="cfgParentFolderList"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-item" id="cfgFolderNameItem">
+                <label class="form-item__label is-required">文件夹名称</label>
+                <div class="form-item__control">
+                  <input class="input" id="cfgFolderNameInput" type="text" autocomplete="off" />
+                  <div class="meta-tags" id="cfgFolderNameTags" data-target="cfgFolderNameInput">
+                    <button class="meta-tag" type="button" data-token="_" data-repeat="1">下划线</button>
+                    <button class="meta-tag" type="button" data-token="{编号}">编号</button>
+                    <button class="meta-tag" type="button" data-token="{创意人}">创意人</button>
+                    <button class="meta-tag" type="button" data-token="{YYYYMMDD}">YYYYMMDD</button>
+                  </div>
+                  <div class="form-item__error">请输入文件夹名称</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer__footer">
+        <button class="btn btn--default" type="button" id="configCancelBtn">取消</button>
+        <button class="btn btn--primary" type="button" id="configSubmit">提交</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 详情抽屉 -->
+  <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="detailDrawerTitle">
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="detailDrawerTitle">任务详情</h2>
+        <button class="drawer__close" type="button" id="detailDrawerClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="drawer__body">
+        <div class="detail-top">
+          <div class="detail-grid" id="detailConfigGrid"></div>
+
+          <div class="detail-subfilter">
+            <div class="filter-item" id="subStatusWrap">
+              <button class="select-trigger" type="button" id="subStatusTrigger">
+                <span class="select-trigger__text" id="subStatusLabel">状态：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="subStatusClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="subStatusPanel">
+                <button class="single-option" type="button" data-value="">全部</button>
+                <button class="single-option" type="button" data-value="待开始">待开始</button>
+                <button class="single-option" type="button" data-value="进行中">进行中</button>
+                <button class="single-option" type="button" data-value="已完成">已完成</button>
+                <button class="single-option" type="button" data-value="已取消">已取消</button>
+                <button class="single-option" type="button" data-value="已失败">已失败</button>
+              </div>
+            </div>
+            <button class="btn btn--primary" type="button" id="subQueryBtn">查询</button>
+            <button class="btn btn--default" type="button" id="subBatchCancelBtn" disabled>批量取消</button>
+            <button class="btn btn--default" type="button" id="subBatchRetryBtn" disabled>批量重试</button>
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="subTable">
+              <colgroup>
+                <col class="col-check" />
+                <col data-col-width="260" />
+                <col data-col-width="100" />
+                <col data-col-width="100" />
+                <col data-col-width="160" />
+                <col data-col-width="180" />
+                <col data-col-width="88" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="col-check"><span class="cell-check"><input type="checkbox" id="subCheckAll" aria-label="全选" /></span></th>
+                  <th>素材名称</th>
+                  <th>采集渠道</th>
+                  <th>状态</th>
+                  <th>错误信息</th>
+                  <th>更新时间</th>
+                  <th class="col-action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="subTableBody"></tbody>
+            </table>
+            <div class="empty-tip" id="subEmptyTip" hidden>暂无数据</div>
+          </div>
+        </div>
+        <div class="pagination" id="subPagination"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 取消确认 -->
+  <div class="modal-mask modal-mask--confirm" id="cancelModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="cancelTitle">
+      <button class="confirm-modal__close" type="button" data-close="cancelModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--warning" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm-2-11a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2Zm4-18a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V15Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="cancelTitle">取消确认</h2>
+          <p class="confirm-modal__body">取消后将立即中断当前任务，且无法恢复。确认取消吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="cancelModal">取消</button>
+        <button class="btn btn--primary" type="button" id="cancelOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 重试确认 -->
+  <div class="modal-mask modal-mask--confirm" id="retryModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="retryTitle">
+      <button class="confirm-modal__close" type="button" data-close="retryModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--warning" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm-2-11a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2Zm4-18a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V15Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="retryTitle">重试确认</h2>
+          <p class="confirm-modal__body">系统将从上一次失败的步骤重新尝试执行。确认重试吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="retryModal">取消</button>
+        <button class="btn btn--primary" type="button" id="retryOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除待提交任务 -->
+  <div class="modal-mask modal-mask--confirm" id="pendingDeleteModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="pendingDeleteTitle">
+      <button class="confirm-modal__close" type="button" data-close="pendingDeleteModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--warning" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm-2-11a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2Zm4-18a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V15Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="pendingDeleteTitle">删除确认</h2>
+          <p class="confirm-modal__body">删除后将无法恢复该待提交任务及已采集素材链接。确认删除吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="pendingDeleteModal">取消</button>
+        <button class="btn btn--primary" type="button" id="pendingDeleteOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-tip" id="summaryTip" hidden></div>
+
+  <div class="page-msg" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <script src="product-common.js"></script>
+  <script src="material-sidebar.js"></script>
+  <script src="col-resize.js"></script>
+  <script>MaterialShell.mount('collection-tasks');</script>
+  <script src="collection-tasks.js"></script>
+</body>
+</html>

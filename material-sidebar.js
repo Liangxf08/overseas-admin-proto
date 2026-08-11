@@ -1,50 +1,39 @@
-/* 产品板块侧栏：APP管理 / 平台管理 / 平台工具 / 资产管理 */
+/* 素材板块侧栏：素材采集 / 素材库 / 模板库 */
 (function (global) {
   'use strict';
 
   var ICONS = {
-    platform: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
-    product: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 18h6"/></svg>',
-    tool: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
-    asset: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+    collection: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
+    library: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+    template: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
     page: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>',
     arrow: '<svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5L6 7.5L9 4.5"/></svg>'
   };
 
   var MENUS = [
     {
-      key: 'app',
-      title: 'APP管理',
-      icon: ICONS.product,
+      key: 'collection',
+      title: '素材采集',
+      icon: ICONS.collection,
       children: [
-        { key: 'app-apps', label: 'APP应用', href: 'app-apps.html' }
+        { key: 'collection-tasks', label: '采集任务', href: 'collection-tasks.html' },
+        { key: 'material-list', label: '素材列表', href: 'material-list.html' }
       ]
     },
     {
-      key: 'platform',
-      title: '平台管理',
-      icon: ICONS.platform,
+      key: 'library',
+      title: '素材库',
+      icon: ICONS.library,
       children: [
-        { key: 'platform-config', label: '平台配置', href: 'platform-config.html' },
-        { key: 'plugin-config', label: '插件配置', href: 'plugin-config.html' },
-        { key: 'developer-account', label: '开发者账号', href: 'developer-account.html' }
+        { key: 'material-library', label: '素材库', href: 'material-library.html' }
       ]
     },
     {
-      key: 'platform-tools',
-      title: '平台工具',
-      icon: ICONS.tool,
+      key: 'template',
+      title: '模板库',
+      icon: ICONS.template,
       children: [
-        { key: 'app-user-query', label: 'APP用户查询', href: 'app-user-query.html' }
-      ]
-    },
-    {
-      key: 'asset',
-      title: '资产管理',
-      icon: ICONS.asset,
-      children: [
-        { key: 'tiktok-accounts', label: 'Tiktok账户', href: 'tiktok-accounts.html' },
-        { key: 'tiktok-grant', label: 'TikTok赠款', href: 'tiktok-grant.html' }
+        { key: 'template-library', label: '模板库', href: 'template-library.html' }
       ]
     }
   ];
@@ -91,8 +80,8 @@
         '<nav class="header-nav" aria-label="顶部导航">' +
           '<a href="#" class="header-nav__item">首页</a>' +
           '<a href="dashboard.html" class="header-nav__item">看板</a>' +
-          '<a href="platform-config.html" class="header-nav__item is-active">产品</a>' +
-          '<a href="collection-tasks.html" class="header-nav__item">素材</a>' +
+          '<a href="tiktok-accounts.html" class="header-nav__item">产品</a>' +
+          '<a href="collection-tasks.html" class="header-nav__item is-active">素材</a>' +
           '<a href="feedback-tickets.html" class="header-nav__item">工具</a>' +
           '<a href="menu-management.html" class="header-nav__item">管理</a>' +
         '</nav>' +
@@ -100,7 +89,7 @@
           '<button class="header-icon" type="button" title="下载" aria-label="下载"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg></button>' +
           '<button class="header-icon" type="button" title="消息" aria-label="消息"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>' +
           '<a class="header-icon" href="https://m0v1x0i131y.feishu.cn/wiki/P7WcwmPrdigKg6keQbycBtYgn3d" target="_blank" rel="noopener noreferrer" title="帮助中心" aria-label="帮助中心"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></a>' +
-          '<button class="user-chip" type="button" aria-label="用户菜单"><img class="user-avatar" src="assets/avatar.jpg" width="32" height="32" alt="" /><span class="user-name">小风</span><svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg></button>' +
+          '<button class="user-chip" type="button" aria-label="用户菜单"><img class="user-avatar" src="assets/avatar.jpg" width="32" height="32" alt="" onerror="this.style.background=\'var(--color-fill-4)\';this.removeAttribute(\'src\')" /><span class="user-name">小风</span><svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg></button>' +
         '</div>' +
       '</header>'
     );
@@ -117,7 +106,7 @@
     }
   }
 
-  global.ProductShell = {
+  global.MaterialShell = {
     mount: mountShell,
     renderSidebar: renderSidebar,
     renderHeader: renderHeader

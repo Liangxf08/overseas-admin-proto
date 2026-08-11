@@ -49,7 +49,7 @@
 
     /* 冻结：复选框 + 产品名称 */
     .data-table .col-check.is-freeze { left: 0; }
-    .data-table .col-name.is-freeze { left: 64px; }
+    .data-table .col-name.is-freeze { left: 48px; }
     .data-table th.col-check.is-freeze { z-index: 5; }
     .data-table th.col-name.is-freeze { z-index: 5; }
 
@@ -377,7 +377,7 @@
       position: relative;
     }
     .config-table tbody tr:last-child td { border-bottom: none; }
-    /* 复选列：单元格左右 12；勾选框本身无 padding，列宽固定 48 */
+    /* 复选列：对齐用户反馈，固定 48 */
     .config-table .col-check {
       width: 48px !important;
       min-width: 48px !important;
@@ -604,7 +604,7 @@
           <div class="table-wrap">
             <table class="data-table" id="dataTable">
               <colgroup>
-                <col class="col-check" data-col-width="64" />
+                <col class="col-check" data-col-width="48" />
                 <col class="col-name" data-col-width="180" />
                 <col class="col-platform" data-col-width="100" />
                 <col class="col-id" data-col-width="140" />

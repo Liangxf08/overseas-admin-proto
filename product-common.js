@@ -79,7 +79,7 @@
   }
 
   function closePanels() {
-    document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open, .date-panel.is-open, .compare-panel.is-open, .batch-menu.is-open').forEach(function (p) {
+    document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open, .date-panel.is-open, .compare-panel.is-open, .batch-menu.is-open, .search-select-panel.is-open').forEach(function (p) {
       p.classList.remove('is-open');
       p.classList.remove('is-dropup');
       p.classList.remove('is-align-right');
@@ -101,7 +101,7 @@
     });
   }
 
-  /** 下拉超出视口时：右侧溢出则右对齐，下方空间不足则向上展开 */
+  /** 下拉超出视口/滚动容器时：右侧溢出则右对齐，下方空间不足则向上展开 */
   function adjustDropdownPlacement(panel, anchor) {
     if (!panel) return;
     panel.classList.remove('is-align-right', 'is-dropup');
@@ -115,6 +115,19 @@
     }
     var spaceBelow = window.innerHeight - aRect.bottom - pad;
     var spaceAbove = aRect.top - pad;
+    var node = anchorEl.parentElement;
+    while (node && node !== document.body) {
+      var st = window.getComputedStyle(node);
+      var oy = st.overflowY;
+      var ox = st.overflowX;
+      if (oy === 'auto' || oy === 'scroll' || oy === 'hidden' || ox === 'auto' || ox === 'scroll' || ox === 'hidden') {
+        var cRect = node.getBoundingClientRect();
+        spaceBelow = Math.min(spaceBelow, cRect.bottom - aRect.bottom - pad);
+        spaceAbove = Math.min(spaceAbove, aRect.top - cRect.top - pad);
+        break;
+      }
+      node = node.parentElement;
+    }
     if (pRect.height > spaceBelow && spaceAbove > spaceBelow) {
       panel.classList.add('is-dropup');
     }
@@ -600,14 +613,24 @@
     '待处理': 'status-dot--pending',
     '处理中': 'status-dot--processing',
     '已处理': 'status-dot--done',
-    '不处理': 'status-dot--ignored'
+    '不处理': 'status-dot--ignored',
+    '待开始': 'status-dot--pending',
+    '进行中': 'status-dot--processing',
+    '已完成': 'status-dot--done',
+    '已取消': 'status-dot--ignored',
+    '已失败': 'status-dot--error'
   };
 
   var TASK_STATUS_TAG = {
     '待处理': 'tag--pending',
     '处理中': 'tag--processing',
     '已处理': 'tag--done',
-    '不处理': 'tag--ignored'
+    '不处理': 'tag--ignored',
+    '待开始': 'tag--pending',
+    '进行中': 'tag--processing',
+    '已完成': 'tag--done',
+    '已取消': 'tag--ignored',
+    '已失败': 'tag--error'
   };
 
   function taskStatusDot(status) {

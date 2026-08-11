@@ -77,6 +77,22 @@
       ]
     },
     {
+      id: 'material',
+      name: '素材',
+      children: [
+        {
+          id: 'material-collection',
+          name: '素材采集',
+          children: [
+            { id: 'collection-tasks', name: '采集任务' },
+            { id: 'material-list', name: '素材列表' }
+          ]
+        },
+        { id: 'material-library', name: '素材库' },
+        { id: 'template-library', name: '模板库' }
+      ]
+    },
+    {
       id: 'tools',
       name: '工具',
       children: [

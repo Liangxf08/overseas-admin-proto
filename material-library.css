@@ -1,0 +1,93 @@
+/* 素材库 · 页面特例 */
+
+.data-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.data-table .col-action {
+  min-width: 120px;
+}
+
+.action-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-links .link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-link-6, #165DFF);
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 2px;
+  background: var(--color-fill-4, #C9CDD4);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, transparent 46%, rgba(255, 255, 255, 0.35) 50%, transparent 54%),
+    var(--color-fill-4, #C9CDD4);
+}
+
+.preview-pop {
+  display: none;
+  position: fixed;
+  z-index: 1200;
+  width: 280px;
+  padding: 8px;
+  background: var(--color-bg-white, #fff);
+  border: 1px solid var(--color-border-2, #E5E6EB);
+  border-radius: 6px;
+  box-shadow: var(--shadow-2, 0 4px 10px rgba(0, 0, 0, 0.1));
+  pointer-events: none;
+}
+
+.preview-pop.is-open {
+  display: block;
+}
+
+.preview-pop__media {
+  height: 160px;
+  border-radius: 2px;
+  background: var(--color-fill-4, #C9CDD4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-3, #86909C);
+  font-size: 13px;
+}
+
+.preview-pop__name {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--color-text-1, #1D2129);
+  word-break: break-all;
+}
+
+.folder-path {
+  color: var(--color-text-2, #4E5969);
+  word-break: break-all;
+}

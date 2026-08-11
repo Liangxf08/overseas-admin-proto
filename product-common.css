@@ -1228,6 +1228,7 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
 .tag--processing { background: var(--color-primary-1, #E8F3FF); color: var(--color-primary-6, #165DFF); }
 .tag--done { background: var(--color-success-1, #E8FFEA); color: var(--color-success-6, #00B42A); }
 .tag--ignored { background: var(--color-fill-2, #F2F3F5); color: var(--color-text-3, #86909C); }
+.tag--error { background: var(--color-danger-1, #FFECE8); color: var(--color-danger-6, #F53F3F); }
 
 /* 任务状态 · 圆点 */
 .status-dot {
@@ -1309,17 +1310,18 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
 
 .th-sort.is-active { color: var(--color-text-1, #1D2129); }
 
-/* 表格复选框列（首列）：总宽 64，仅用单元格 padding（data-table 的 0 12px），不再叠加列 padding */
+/* 表格复选框列（首列）：统一宽 48（对齐用户反馈），仅用单元格 padding（data-table 的 0 12px），不再叠加列 padding */
 .col-check {
-  width: 64px;
-  min-width: 64px;
-  max-width: 64px;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
   text-align: center;
   box-sizing: border-box;
 }
 
-.data-table col.col-check {
-  width: 64px;
+.data-table col.col-check,
+.config-table col.col-check {
+  width: 48px;
 }
 
 /* 表格复选框 */

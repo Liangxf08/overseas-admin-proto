@@ -4,7 +4,7 @@
 
   var SELECTOR = 'table.data-table, table.param-table, table.plugin-table, table.import-table, table.tree-table, table.config-table';
   var DEFAULT_MIN = 72;
-  var CHECK_COL_WIDTH = 64;
+  var CHECK_COL_WIDTH = 48;
 
   function isCheckCol(th) {
     return !!(th && th.classList && th.classList.contains('col-check'));
@@ -12,8 +12,7 @@
 
   function colMinWidth(th, minWidth) {
     if (!isCheckCol(th)) return minWidth;
-    /* 配置弹窗表复选列 48；其它表保持 64 */
-    if (th.closest && th.closest('table.config-table')) return 48;
+    /* 复选框首列统一 48（对齐用户反馈） */
     return CHECK_COL_WIDTH;
   }
 
@@ -52,7 +51,7 @@
 
   /**
    * 用「偏好宽度」布局：
-   * - 合计 < 容器：按比例拉满全部列（禁止只撑末列）
+   * - 合计 < 容器：按比例拉满可变列（复选框首列固定 48，不参与拉伸）
    * - 合计 >= 容器：保持 px，表格 minWidth = 合计
    */
   function syncTableWidth(table, minWidth) {
@@ -61,30 +60,74 @@
     if (!colgroup || !colgroup.children.length) return;
 
     var cols = Array.prototype.slice.call(colgroup.children);
+    var ths = table.querySelectorAll('thead th');
     var prefs = cols.map(function (col) {
       var w = getPreferredWidth(col, minWidth);
       setPreferredWidth(col, w);
       return w;
     });
+    var fixed = cols.map(function (col, i) {
+      return col.classList.contains('col-check') || isCheckCol(ths[i]);
+    });
+
+    /* 复选列强制固定偏好宽 */
+    prefs.forEach(function (w, i) {
+      if (fixed[i]) {
+        prefs[i] = CHECK_COL_WIDTH;
+        setPreferredWidth(cols[i], CHECK_COL_WIDTH);
+      }
+    });
+
     var sum = prefs.reduce(function (a, b) { return a + b; }, 0);
     if (sum <= 0) return;
 
     var available = getAvailableWidth(table);
+    var fixedSum = 0;
+    var flexSum = 0;
+    prefs.forEach(function (w, i) {
+      if (fixed[i]) fixedSum += w;
+      else flexSum += w;
+    });
 
-    if (available > 0 && sum < available) {
+    if (available > 0 && sum < available && flexSum > 0) {
+      var flexAvailable = Math.max(0, available - fixedSum);
       var allocated = 0;
-      cols.forEach(function (col, i) {
-        var w = i === cols.length - 1
-          ? Math.max(minWidth, available - allocated)
-          : Math.max(minWidth, Math.floor((prefs[i] / sum) * available));
+      var flexLast = -1;
+      var i;
+      for (i = 0; i < cols.length; i++) {
+        if (!fixed[i]) flexLast = i;
+      }
+      cols.forEach(function (col, idx) {
+        var w;
+        if (fixed[idx]) {
+          w = CHECK_COL_WIDTH;
+        } else if (idx === flexLast) {
+          w = Math.max(minWidth, available - allocated);
+        } else {
+          w = Math.max(minWidth, Math.floor((prefs[idx] / flexSum) * flexAvailable));
+        }
         allocated += w;
         col.style.width = w + 'px';
+        if (fixed[idx]) {
+          col.style.minWidth = CHECK_COL_WIDTH + 'px';
+          col.style.maxWidth = CHECK_COL_WIDTH + 'px';
+        } else {
+          col.style.minWidth = '';
+          col.style.maxWidth = '';
+        }
       });
       table.style.width = '100%';
       table.style.minWidth = '100%';
     } else {
-      cols.forEach(function (col, i) {
-        col.style.width = prefs[i] + 'px';
+      cols.forEach(function (col, idx) {
+        col.style.width = prefs[idx] + 'px';
+        if (fixed[idx]) {
+          col.style.minWidth = CHECK_COL_WIDTH + 'px';
+          col.style.maxWidth = CHECK_COL_WIDTH + 'px';
+        } else {
+          col.style.minWidth = '';
+          col.style.maxWidth = '';
+        }
       });
       table.style.width = '100%';
       table.style.minWidth = sum + 'px';
@@ -165,6 +208,8 @@
       if (isCheckCol(th)) {
         setPreferredWidth(col, CHECK_COL_WIDTH);
         col.style.width = CHECK_COL_WIDTH + 'px';
+        col.style.minWidth = CHECK_COL_WIDTH + 'px';
+        col.style.maxWidth = CHECK_COL_WIDTH + 'px';
         col.classList.add('col-check');
         return;
       }

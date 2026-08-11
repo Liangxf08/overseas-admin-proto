@@ -1,9 +1,9 @@
 /* TikTok 账户 · 页内特例（公共壳见 product-common） */
 
 .col-check {
-  width: 64px;
-  min-width: 64px;
-  max-width: 64px;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
   text-align: center;
   box-sizing: border-box;
 }
