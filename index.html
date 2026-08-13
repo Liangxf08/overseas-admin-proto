@@ -11,14 +11,14 @@
     body {
       min-height: 100vh;
       font-family: var(--font-family-base);
-      color: #1D2129;
+      color: var(--color-text-1, #1D2129);
       background:
         radial-gradient(1200px 500px at 10% -10%, #E8F3FF 0%, transparent 55%),
         radial-gradient(900px 420px at 100% 0%, #F2F3F5 0%, transparent 50%),
-        #F7F8FA;
+        var(--color-fill-1, #F7F8FA);
       padding: 48px 24px 64px;
     }
-    .wrap { max-width: 880px; margin: 0 auto; }
+    .wrap { max-width: 720px; margin: 0 auto; }
     .brand {
       font-size: 28px;
       font-weight: 600;
@@ -29,175 +29,404 @@
     .desc {
       font-size: 14px;
       line-height: 22px;
-      color: #4E5969;
+      color: var(--color-text-2, #4E5969);
       margin-bottom: 28px;
     }
-    .section {
-      margin-bottom: 28px;
-    }
-    .section:last-of-type { margin-bottom: 0; }
-    .section__title {
-      font-size: 16px;
-      font-weight: 600;
-      line-height: 24px;
-      color: #1D2129;
-      margin-bottom: 12px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    a.card {
-      display: block;
-      padding: 20px;
-      background: #fff;
-      border: 1px solid #E5E6EB;
+    .tree-card {
+      background: var(--color-bg-white, #fff);
+      border: 1px solid var(--color-border-2, #E5E6EB);
       border-radius: 8px;
-      text-decoration: none;
-      color: inherit;
-      transition: border-color 0.15s, box-shadow 0.15s;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      padding: 8px 0;
+      overflow: hidden;
     }
-    a.card:hover {
-      border-color: #165DFF;
-      box-shadow: 0 6px 16px rgba(22, 93, 255, 0.1);
+    .tree {
+      list-style: none;
     }
-    .card h2 {
-      font-size: 16px;
+    .tree ul {
+      list-style: none;
+    }
+    .tree-node {
+      position: relative;
+    }
+    .tree-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 40px;
+      padding: 0 16px;
+      font-size: 14px;
+      line-height: 22px;
+      color: var(--color-text-1, #1D2129);
+      user-select: none;
+    }
+    .tree-row:hover {
+      background: var(--color-gray-hover, #F5F7FA);
+    }
+    .tree-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-text-3, #86909C);
+      cursor: pointer;
+      padding: 0;
+      border-radius: 2px;
+    }
+    .tree-toggle:hover { color: var(--color-text-2, #4E5969); }
+    .tree-toggle svg {
+      width: 12px;
+      height: 12px;
+      transition: transform 0.15s;
+    }
+    .tree-node.is-collapsed > .tree-row .tree-toggle svg {
+      transform: rotate(-90deg);
+    }
+    .tree-node.is-collapsed > .tree-children {
+      display: none;
+    }
+    .tree-spacer {
+      width: 16px;
+      flex-shrink: 0;
+    }
+    .tree-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tree-row--module {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .tree-row--group {
       font-weight: 500;
-      line-height: 24px;
-      margin-bottom: 6px;
-      color: #165DFF;
+      color: var(--color-text-2, #4E5969);
     }
-    .card p {
-      font-size: 13px;
+    a.tree-link {
+      color: var(--color-primary, #165DFF);
+      text-decoration: none;
+    }
+    a.tree-link:hover {
+      text-decoration: underline;
+    }
+    .tree-row--leaf .tree-label:not(a) {
+      color: var(--color-text-3, #86909C);
+    }
+    .tree-badge {
+      flex-shrink: 0;
+      margin-left: 8px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 2px;
+      font-size: 12px;
       line-height: 20px;
-      color: #86909C;
+      color: var(--color-text-3, #86909C);
+      background: var(--color-fill-2, #F2F3F5);
     }
+    .tree-children {
+      position: relative;
+    }
+    /* indent guides */
+    .tree-children .tree-row { padding-left: 36px; }
+    .tree-children .tree-children .tree-row { padding-left: 56px; }
+    .tree-children .tree-children .tree-children .tree-row { padding-left: 76px; }
+
     .tip {
       margin-top: 24px;
       padding: 12px 16px;
-      background: #fff;
-      border: 1px solid #E5E6EB;
+      background: var(--color-bg-white, #fff);
+      border: 1px solid var(--color-border-2, #E5E6EB);
       border-radius: 4px;
       font-size: 13px;
       line-height: 20px;
-      color: #4E5969;
+      color: var(--color-text-2, #4E5969);
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1 class="brand">海外中台 · 原型预览</h1>
-    <p class="desc">可对外分享的交互原型入口。后续需求会持续更新到本地址，供开发对照实现。</p>
+    <p class="desc">按顶部模块与各侧边栏菜单顺序整理的原型入口（非菜单管理路由表）。后续需求持续更新到本地址。</p>
 
-    <section class="section">
-      <h2 class="section__title">看板</h2>
-      <div class="grid">
-        <a class="card" href="./dashboard.html" target="_blank" rel="noopener noreferrer">
-          <h2>看板</h2>
-          <p>文件夹管理、自定义看板、维度筛选指标配置、分享</p>
-        </a>
-      </div>
-    </section>
+    <div class="tree-card">
+      <ul class="tree" id="protoTree" aria-label="原型目录">
+        <!-- 看板 -->
+        <li class="tree-node" data-node>
+          <div class="tree-row tree-row--module">
+            <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <span class="tree-label">看板</span>
+          </div>
+          <ul class="tree-children">
+            <li class="tree-node">
+              <div class="tree-row tree-row--leaf">
+                <span class="tree-spacer"></span>
+                <a class="tree-label tree-link" href="./dashboard.html" target="_blank" rel="noopener noreferrer">看板</a>
+              </div>
+            </li>
+          </ul>
+        </li>
 
-    <section class="section">
-      <h2 class="section__title">产品</h2>
-      <div class="grid">
-        <a class="card" href="./app-apps.html" target="_blank" rel="noopener noreferrer">
-          <h2>APP应用</h2>
-          <p>APP管理 · 应用列表、产品配置、下载 JSON</p>
-        </a>
-        <a class="card" href="./platform-config.html" target="_blank" rel="noopener noreferrer">
-          <h2>平台配置</h2>
-          <p>平台管理 · 平台类型/标识、启用禁用、添加编辑</p>
-        </a>
-        <a class="card" href="./plugin-config.html" target="_blank" rel="noopener noreferrer">
-          <h2>插件配置</h2>
-          <p>平台管理 · JSON Key、参数表、下发SDK、启停联动</p>
-        </a>
-        <a class="card" href="./developer-account.html" target="_blank" rel="noopener noreferrer">
-          <h2>开发者账号</h2>
-          <p>平台管理 · Android/iOS Tab、凭证上传下载</p>
-        </a>
-        <a class="card" href="./app-user-query.html" target="_blank" rel="noopener noreferrer">
-          <h2>APP用户查询</h2>
-          <p>平台工具 · 安装时间/产品等筛选、用户属性表、自定义列</p>
-        </a>
-        <a class="card" href="./tiktok-accounts.html" target="_blank" rel="noopener noreferrer">
-          <h2>Tiktok账户</h2>
-          <p>资产管理 · 筛选导入、编辑/批量改产品优化师状态、导出</p>
-        </a>
-        <a class="card" href="./tiktok-grant.html" target="_blank" rel="noopener noreferrer">
-          <h2>TikTok赠款</h2>
-          <p>资产管理 · 筛选查询、手动同步、复制账户ID、详情抽屉</p>
-        </a>
-      </div>
-    </section>
+        <!-- 产品 · product-sidebar.js -->
+        <li class="tree-node" data-node>
+          <div class="tree-row tree-row--module">
+            <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <span class="tree-label">产品</span>
+          </div>
+          <ul class="tree-children">
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">APP管理</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./app-apps.html" target="_blank" rel="noopener noreferrer">APP应用</a>
+                  </div>
+                </li>
+              </ul>
+            </li>
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">平台管理</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./platform-config.html" target="_blank" rel="noopener noreferrer">平台配置</a>
+                  </div>
+                </li>
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./plugin-config.html" target="_blank" rel="noopener noreferrer">插件配置</a>
+                  </div>
+                </li>
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./developer-account.html" target="_blank" rel="noopener noreferrer">开发者账号</a>
+                  </div>
+                </li>
+              </ul>
+            </li>
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">平台工具</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./app-user-query.html" target="_blank" rel="noopener noreferrer">APP用户查询</a>
+                  </div>
+                </li>
+              </ul>
+            </li>
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">资产管理</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./tiktok-accounts.html" target="_blank" rel="noopener noreferrer">Tiktok账户</a>
+                  </div>
+                </li>
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./tiktok-grant.html" target="_blank" rel="noopener noreferrer">TikTok赠款</a>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
 
-    <section class="section">
-      <h2 class="section__title">素材</h2>
-      <div class="grid">
-        <a class="card" href="./material-library.html" target="_blank" rel="noopener noreferrer">
-          <h2>本地素材</h2>
-          <p>本地文件夹 · 上传 OSS · 文件级同步 XMP · 预览下载</p>
-        </a>
-        <a class="card" href="./template-library.html" target="_blank" rel="noopener noreferrer">
-          <h2>模板中心</h2>
-          <p>钩子/边框/口播/贴纸 · 合成画布导出到本地素材</p>
-        </a>
-        <a class="card" href="./tag-library.html" target="_blank" rel="noopener noreferrer">
-          <h2>标签管理</h2>
-          <p>标签 / 标签组管理 · Tabs 切换</p>
-        </a>
-        <a class="card" href="./collection-tasks.html" target="_blank" rel="noopener noreferrer">
-          <h2>采集任务</h2>
-          <p>任务筛选、配置加工链路、详情/取消/重试</p>
-        </a>
-        <a class="card" href="./derive-tasks.html" target="_blank" rel="noopener noreferrer">
-          <h2>衍生任务</h2>
-          <p>衍生加工任务（规划中）</p>
-        </a>
-        <a class="card" href="./template-compose.html" target="_blank" rel="noopener noreferrer">
-          <h2>新建合成</h2>
-          <p>模板合成画布 · 时间轴编排 · 导出本地素材</p>
-        </a>
-      </div>
-    </section>
+        <!-- 素材 · material-sidebar.js（一级叶子，无分组） -->
+        <li class="tree-node" data-node>
+          <div class="tree-row tree-row--module">
+            <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <span class="tree-label">素材</span>
+          </div>
+          <ul class="tree-children">
+            <li class="tree-node">
+              <div class="tree-row tree-row--leaf">
+                <span class="tree-spacer"></span>
+                <a class="tree-label tree-link" href="./material-library.html" target="_blank" rel="noopener noreferrer">本地素材</a>
+              </div>
+            </li>
+            <li class="tree-node">
+              <div class="tree-row tree-row--leaf">
+                <span class="tree-spacer"></span>
+                <a class="tree-label tree-link" href="./template-library.html" target="_blank" rel="noopener noreferrer">模板中心</a>
+              </div>
+            </li>
+            <li class="tree-node">
+              <div class="tree-row tree-row--leaf">
+                <span class="tree-spacer"></span>
+                <a class="tree-label tree-link" href="./tag-library.html" target="_blank" rel="noopener noreferrer">标签管理</a>
+              </div>
+            </li>
+            <li class="tree-node">
+              <div class="tree-row tree-row--leaf">
+                <span class="tree-spacer"></span>
+                <a class="tree-label tree-link" href="./collection-tasks.html" target="_blank" rel="noopener noreferrer">采集任务</a>
+              </div>
+            </li>
+            <li class="tree-node">
+              <div class="tree-row tree-row--leaf">
+                <span class="tree-spacer"></span>
+                <a class="tree-label tree-link" href="./derive-tasks.html" target="_blank" rel="noopener noreferrer">衍生任务</a>
+              </div>
+            </li>
+          </ul>
+        </li>
 
-    <section class="section">
-      <h2 class="section__title">工具</h2>
-      <div class="grid">
-        <a class="card" href="./feedback-tickets.html" target="_blank" rel="noopener noreferrer">
-          <h2>用户反馈</h2>
-          <p>运营工具 · 工单筛选、批量改状态、详情抽屉</p>
-        </a>
-      </div>
-    </section>
+        <!-- 工具 · feedback-tickets 侧栏 -->
+        <li class="tree-node" data-node>
+          <div class="tree-row tree-row--module">
+            <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <span class="tree-label">工具</span>
+          </div>
+          <ul class="tree-children">
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">运营工具</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./feedback-tickets.html" target="_blank" rel="noopener noreferrer">用户反馈</a>
+                  </div>
+                </li>
+              </ul>
+            </li>
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">任务中心</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <span class="tree-label">下载任务</span>
+                    <span class="tree-badge">暂无原型</span>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
 
-    <section class="section">
-      <h2 class="section__title">管理</h2>
-      <div class="grid">
-        <a class="card" href="./menu-management.html" target="_blank" rel="noopener noreferrer">
-          <h2>菜单管理</h2>
-          <p>菜单树表、添加编辑删除、排序拖拽、刷新加载、导航联动</p>
-        </a>
-        <a class="card" href="./user-management.html" target="_blank" rel="noopener noreferrer">
-          <h2>用户管理</h2>
-          <p>飞书组织用户、角色/数据组/状态编辑、扮演、编辑日志</p>
-        </a>
-        <a class="card" href="./role-management.html" target="_blank" rel="noopener noreferrer">
-          <h2>角色管理</h2>
-          <p>角色增删改、权限树配置、关联用户穿梭、删除校验</p>
-        </a>
-        <a class="card" href="./datagroup-management.html" target="_blank" rel="noopener noreferrer">
-          <h2>数据组管理</h2>
-          <p>数据组增删改、三级产品权限树、关联用户、删除校验</p>
-        </a>
-      </div>
-    </section>
+        <!-- 管理 · 管理页侧栏 -->
+        <li class="tree-node" data-node>
+          <div class="tree-row tree-row--module">
+            <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <span class="tree-label">管理</span>
+          </div>
+          <ul class="tree-children">
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">系统管理</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./menu-management.html" target="_blank" rel="noopener noreferrer">菜单管理</a>
+                  </div>
+                </li>
+              </ul>
+            </li>
+            <li class="tree-node" data-node>
+              <div class="tree-row tree-row--group">
+                <button class="tree-toggle" type="button" aria-label="折叠" data-toggle>
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <span class="tree-label">权限管理</span>
+              </div>
+              <ul class="tree-children">
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./user-management.html" target="_blank" rel="noopener noreferrer">用户管理</a>
+                  </div>
+                </li>
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./role-management.html" target="_blank" rel="noopener noreferrer">角色管理</a>
+                  </div>
+                </li>
+                <li class="tree-node">
+                  <div class="tree-row tree-row--leaf">
+                    <span class="tree-spacer"></span>
+                    <a class="tree-label tree-link" href="./datagroup-management.html" target="_blank" rel="noopener noreferrer">数据组管理</a>
+                  </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
 
     <div class="tip">建议收藏本页地址。更新后刷新浏览器即可看到最新原型（如有缓存可强制刷新 Ctrl+F5）。</div>
   </div>
+
+  <script>
+    (function () {
+      document.getElementById('protoTree').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-toggle]');
+        if (!btn) return;
+        var node = btn.closest('[data-node]');
+        if (!node) return;
+        node.classList.toggle('is-collapsed');
+        btn.setAttribute('aria-label', node.classList.contains('is-collapsed') ? '展开' : '折叠');
+      });
+    })();
+  </script>
 </body>
 </html>
