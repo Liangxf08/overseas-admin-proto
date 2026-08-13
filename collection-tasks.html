@@ -137,6 +137,27 @@
       <div class="drawer__body">
         <!-- 命名 -->
         <div class="cfg-section">
+          <div class="form-item" id="cfgLocalFolderItem">
+            <label class="form-item__label is-required">本地文件夹</label>
+            <div class="form-item__control" id="cfgLocalFolderWrap">
+              <button class="select-trigger" type="button" id="cfgLocalFolderTrigger">
+                <span class="select-trigger__text" id="cfgLocalFolderLabel"><span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="cfgLocalFolderClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="search-select-panel folder-tree-panel" id="cfgLocalFolderPanel">
+                <div class="search-select-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="cfgLocalFolderSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="search-select-panel__list folder-tree-panel__list" id="cfgLocalFolderList"></div>
+              </div>
+              <div class="form-item__error">请选择本地文件夹</div>
+            </div>
+          </div>
+
           <div class="form-item" id="cfgCreativeItem">
             <label class="form-item__label is-required">创意人</label>
             <div class="form-item__control" id="cfgCreativeWrap">
@@ -172,6 +193,41 @@
                 <button class="meta-tag" type="button" data-token="{YYYYMMDD}">YYYYMMDD</button>
               </div>
               <div class="form-item__error">请输入素材名称</div>
+            </div>
+          </div>
+
+          <div class="form-item" id="cfgTagItem">
+            <label class="form-item__label">标签</label>
+            <div class="form-item__control" id="cfgTagWrap">
+              <button class="select-trigger" type="button" id="cfgTagTrigger">
+                <span class="select-trigger__text" id="cfgTagLabel"><span class="muted">请选择标签</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="cfgTagClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="cascade-panel" id="cfgTagPanel">
+                <div class="cascade-panel__left">
+                  <div class="cascade-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="cfgTagSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="cascade-panel__toolbar">
+                    <button class="cascade-panel__link" type="button" id="cfgTagSelectAll">全选</button>
+                  </div>
+                  <div class="cascade-panel__list" id="cfgTagGroupList"></div>
+                </div>
+                <div class="cascade-panel__mid">
+                  <div class="cascade-panel__list" id="cfgTagChildList"></div>
+                </div>
+                <div class="cascade-panel__right">
+                  <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
+                    <span id="cfgTagCount">已选 0 项</span>
+                    <button class="cascade-panel__link" type="button" id="cfgTagClearAll">清空</button>
+                  </div>
+                  <div class="cascade-panel__list" id="cfgTagSelected"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -478,6 +534,7 @@
 
   <script src="product-common.js"></script>
   <script src="material-sidebar.js"></script>
+  <script src="material-folder-data.js"></script>
   <script src="col-resize.js"></script>
   <script>MaterialShell.mount('collection-tasks');</script>
   <script src="collection-tasks.js"></script>

@@ -80,17 +80,11 @@
       id: 'material',
       name: '素材',
       children: [
-        {
-          id: 'material-collection',
-          name: '素材采集',
-          children: [
-            { id: 'collection-tasks', name: '采集任务' },
-            { id: 'material-list', name: '采集素材' }
-          ]
-        },
         { id: 'material-library', name: '本地素材' },
-        { id: 'template-library', name: '模板管理' },
-        { id: 'tag-library', name: '标签管理' }
+        { id: 'template-library', name: '模板中心' },
+        { id: 'tag-library', name: '标签管理' },
+        { id: 'collection-tasks', name: '采集任务' },
+        { id: 'derive-tasks', name: '衍生任务' }
       ]
     },
     {

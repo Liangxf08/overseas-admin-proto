@@ -23,6 +23,35 @@
     '企业素材库/海外投放/FB'
   ];
 
+  /* 与本地素材筛选/编辑标签一致 · 级联多选 */
+  var TAG_TREE = [
+    { id: 'sys', label: '系统标签', children: ['衍生'] },
+    { id: 'lang', label: '语言', children: ['英语', '日语', '繁中'] },
+    { id: 'mix', label: '混合玩法', children: ['消消乐', '清理', '保护系列'] },
+    { id: 'feat', label: '素材特点', children: ['CTR', '副玩法', 'DOGE'] },
+    { id: 'fest', label: '节日限定', children: ['圣诞节', '夏日'] }
+  ];
+  var CASCADE_ARROW = '<svg class="cascade-option__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 3L7.5 6L4.5 9"/></svg>';
+  var CLEAR_ICON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>';
+
+  function flattenTreeLeaves(tree) {
+    var out = [];
+    (tree || []).forEach(function (g) {
+      (g.children || []).forEach(function (c) {
+        if (out.indexOf(c) === -1) out.push(c);
+      });
+    });
+    return out;
+  }
+
+  var FolderData = window.MaterialFolderData || {};
+  var SYSTEM_FOLDER = FolderData.SYSTEM_FOLDER || { id: 'system_all', name: '全部素材', system: true, children: [] };
+  var LOCAL_FOLDERS = [SYSTEM_FOLDER].concat(FolderData.CUSTOM_FOLDERS || []);
+  var getLocalFolderPath = FolderData.getFolderPath || function (id) {
+    if (id === SYSTEM_FOLDER.id) return SYSTEM_FOLDER.name;
+    return '';
+  };
+
   var SIZE_TREE = [
     { group: '竖版(9:16)', values: ['1080x1920', '720x1280'] },
     { group: '横版(16:9)', values: ['1920x1080', '1280x720'] },
@@ -74,6 +103,8 @@
 
   function defaultConfig() {
     return {
+      localFolderId: SYSTEM_FOLDER.id,
+      tags: [],
       creative: '',
       nameTpl: DEFAULT_NAME,
       md5: true,
@@ -565,6 +596,458 @@
   }
 
   /* ---------- config form ---------- */
+  function bindFolderTreeSelect(cfg) {
+    var wrap = $(cfg.wrapId);
+    var trigger = $(cfg.triggerId);
+    var panel = $(cfg.panelId);
+    var label = $(cfg.labelId);
+    var list = $(cfg.listId);
+    var search = $(cfg.searchId);
+    var clearBtn = $(cfg.clearId);
+    if (!wrap || !trigger || !panel || !label || !list) return null;
+
+    var collapsed = {};
+    LOCAL_FOLDERS.forEach(function (n) {
+      if (n.children && n.children.length) collapsed[n.id] = true;
+    });
+
+    function getValue() { return cfg.getValue ? cfg.getValue() : ''; }
+    function setValue(v) { if (cfg.setValue) cfg.setValue(v || ''); }
+
+    function syncLabel() {
+      var id = getValue();
+      if (!id) {
+        label.innerHTML = '<span class="muted">请选择</span>';
+        wrap.classList.remove('has-value');
+        return;
+      }
+      label.textContent = getLocalFolderPath(id) || id;
+      wrap.classList.add('has-value');
+    }
+
+    function nodeMatches(node, kw) {
+      if (!kw) return true;
+      if ((node.name || '').toLowerCase().indexOf(kw) !== -1) return true;
+      return (node.children || []).some(function (c) { return nodeMatches(c, kw); });
+    }
+
+    function renderNode(node, depth) {
+      var kw = search ? (search.value || '').trim().toLowerCase() : '';
+      if (kw && !nodeMatches(node, kw)) return '';
+      var hasChildren = !!(node.children && node.children.length);
+      var isCollapsed = !!collapsed[node.id] && !kw;
+      var active = node.id === getValue() ? ' is-active' : '';
+      var pad = 12 + depth * 16;
+      var toggle = hasChildren
+        ? ('<button class="folder-tree-node__toggle' + (isCollapsed ? '' : ' is-open') + '" type="button" data-toggle="' +
+          escapeHtml(node.id) + '" aria-label="展开/收起">' +
+          '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg></button>')
+        : '<span class="folder-tree-node__toggle is-empty" aria-hidden="true"></span>';
+      var html = '<div class="folder-tree-node' + active + '" style="padding-left:' + pad + 'px">' +
+        toggle +
+        '<button class="folder-tree-node__label" type="button" data-folder-id="' + escapeHtml(node.id) + '">' +
+          escapeHtml(node.name) +
+        '</button></div>';
+      if (hasChildren && !isCollapsed) {
+        node.children.forEach(function (child) {
+          html += renderNode(child, depth + 1);
+        });
+      }
+      return html;
+    }
+
+    function render() {
+      list.innerHTML = LOCAL_FOLDERS.map(function (n) { return renderNode(n, 0); }).join('') ||
+        '<div class="empty-tip" style="padding:12px;display:block">无匹配项</div>';
+    }
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = !panel.classList.contains('is-open');
+      UI.closePanels();
+      document.querySelectorAll('.search-select-panel.is-open').forEach(function (p) {
+        p.classList.remove('is-open');
+      });
+      if (open) {
+        panel.classList.add('is-open');
+        trigger.classList.add('is-open');
+        render();
+        if (search) {
+          search.value = '';
+          search.focus();
+        }
+        if (UI.adjustDropdownPlacement) {
+          UI.adjustDropdownPlacement(panel, trigger);
+        }
+      }
+    });
+
+    list.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var toggleBtn = e.target.closest('[data-toggle]');
+      if (toggleBtn) {
+        var tid = toggleBtn.getAttribute('data-toggle');
+        collapsed[tid] = !collapsed[tid];
+        render();
+        return;
+      }
+      var opt = e.target.closest('[data-folder-id]');
+      if (!opt) return;
+      setValue(opt.getAttribute('data-folder-id') || '');
+      if (cfg.onChange) cfg.onChange(getValue());
+      syncLabel();
+      panel.classList.remove('is-open');
+      trigger.classList.remove('is-open');
+    });
+
+    if (search) {
+      search.addEventListener('input', function () { render(); });
+      search.addEventListener('click', function (e) { e.stopPropagation(); });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        setValue('');
+        if (cfg.onChange) cfg.onChange('');
+        syncLabel();
+        panel.classList.remove('is-open');
+        trigger.classList.remove('is-open');
+      });
+    }
+    wrap.addEventListener('click', function (e) { e.stopPropagation(); });
+    syncLabel();
+    return { syncLabel: syncLabel, render: render };
+  }
+
+  var cfgLocalFolderApi = bindFolderTreeSelect({
+    wrapId: 'cfgLocalFolderWrap',
+    triggerId: 'cfgLocalFolderTrigger',
+    panelId: 'cfgLocalFolderPanel',
+    labelId: 'cfgLocalFolderLabel',
+    listId: 'cfgLocalFolderList',
+    searchId: 'cfgLocalFolderSearch',
+    clearId: 'cfgLocalFolderClear',
+    getValue: function () { return state.cfg.localFolderId; },
+    setValue: function (v) { state.cfg.localFolderId = v || ''; },
+    onChange: function () { clearError('cfgLocalFolderItem'); }
+  });
+
+  function bindCascadeMultiSelect(cfg) {
+    var wrap = $(cfg.wrapId);
+    var trigger = $(cfg.triggerId);
+    var panel = $(cfg.panelId);
+    var label = $(cfg.labelId);
+    var groupList = $(cfg.groupListId);
+    var childList = $(cfg.childListId);
+    var selectedEl = $(cfg.selectedId);
+    var search = cfg.searchId ? $(cfg.searchId) : null;
+    var countEl = cfg.countId ? $(cfg.countId) : null;
+    if (!wrap || !trigger || !panel || !groupList || !childList) return null;
+
+    var tree = cfg.tree || [];
+    var activeGroupId = tree[0] ? tree[0].id : '';
+    var CHEVRON = CASCADE_ARROW;
+
+    function getSelected() {
+      return (cfg.getSelected ? cfg.getSelected() : []).slice();
+    }
+
+    function setSelected(arr) {
+      if (cfg.setSelected) cfg.setSelected(arr);
+    }
+
+    function allLeaves() {
+      return flattenTreeLeaves(tree);
+    }
+
+    function findGroup(id) {
+      var i;
+      for (i = 0; i < tree.length; i++) {
+        if (tree[i].id === id) return tree[i];
+      }
+      return null;
+    }
+
+    function groupState(group, selected) {
+      var children = group.children || [];
+      var hit = 0;
+      children.forEach(function (c) {
+        if (selected.indexOf(c) !== -1) hit += 1;
+      });
+      return {
+        all: children.length > 0 && hit === children.length,
+        some: hit > 0 && hit < children.length,
+        hit: hit
+      };
+    }
+
+    function syncLabel() {
+      var selected = getSelected();
+      var prefix = cfg.prefix || '';
+      if (!selected.length) {
+        label.innerHTML = prefix + '<span class="muted">请选择标签</span>';
+        wrap.classList.remove('has-value');
+      } else {
+        label.innerHTML = prefix + '已选 ' + selected.length + ' 项';
+        wrap.classList.add('has-value');
+      }
+      if (countEl) countEl.textContent = '已选 ' + selected.length + ' 项';
+    }
+
+    function matchesKw(text, kw) {
+      if (!kw) return true;
+      return String(text).toLowerCase().indexOf(kw) !== -1;
+    }
+
+    function render() {
+      var kw = ((search && search.value) || '').trim().toLowerCase();
+      var selected = getSelected();
+      var visibleGroups = tree.filter(function (g) {
+        if (matchesKw(g.label, kw)) return true;
+        return (g.children || []).some(function (c) { return matchesKw(c, kw); });
+      });
+      if (!activeGroupId || !visibleGroups.some(function (g) { return g.id === activeGroupId; })) {
+        activeGroupId = visibleGroups[0] ? visibleGroups[0].id : '';
+      }
+
+      if (!visibleGroups.length) {
+        groupList.innerHTML = '<div class="cascade-panel__empty">暂无数据</div>';
+      } else {
+        groupList.innerHTML = visibleGroups.map(function (g) {
+          var st = groupState(g, selected);
+          var active = g.id === activeGroupId ? ' is-active' : '';
+          return '<label class="cascade-option' + active + '" data-group="' + escapeHtml(g.id) + '">' +
+            '<input type="checkbox" data-group-check="' + escapeHtml(g.id) + '"' + (st.all ? ' checked' : '') + ' />' +
+            '<span class="cascade-option__label">' + escapeHtml(g.label) + '</span>' +
+            CHEVRON +
+          '</label>';
+        }).join('');
+        groupList.querySelectorAll('input[data-group-check]').forEach(function (input) {
+          var g = findGroup(input.getAttribute('data-group-check'));
+          if (!g) return;
+          var st = groupState(g, selected);
+          input.indeterminate = st.some;
+        });
+      }
+
+      var activeGroup = findGroup(activeGroupId);
+      var children = ((activeGroup && activeGroup.children) || []).filter(function (c) {
+        return matchesKw(c, kw);
+      });
+      if (!activeGroup || !children.length) {
+        childList.innerHTML = '<div class="cascade-panel__empty">' + (activeGroup ? '暂无数据' : '请选择分组') + '</div>';
+      } else {
+        childList.innerHTML = children.map(function (c) {
+          var checked = selected.indexOf(c) !== -1 ? ' checked' : '';
+          return '<label class="cascade-option">' +
+            '<input type="checkbox" data-leaf="' + escapeHtml(c) + '"' + checked + ' />' +
+            '<span class="cascade-option__label">' + escapeHtml(c) + '</span>' +
+          '</label>';
+        }).join('');
+      }
+
+      if (selectedEl) {
+        if (!selected.length) {
+          selectedEl.innerHTML = '';
+        } else {
+          selectedEl.innerHTML = selected.map(function (name) {
+            return '<div class="multi-selected"><span class="multi-selected__name"><span title="' + escapeHtml(name) + '">' +
+              escapeHtml(name) + '</span></span><button class="multi-selected__remove" type="button" data-remove="' +
+              escapeHtml(name) + '" aria-label="移除">' + CLEAR_ICON + '</button></div>';
+          }).join('');
+        }
+      }
+      syncLabel();
+    }
+
+    function needsPortal() {
+      return !!(wrap.closest('.drawer') || wrap.closest('.modal-mask'));
+    }
+
+    function unportalPanel() {
+      panel.classList.remove('cascade-panel--portal');
+      panel.style.position = '';
+      panel.style.left = '';
+      panel.style.top = '';
+      panel.style.right = '';
+      panel.style.bottom = '';
+      panel.style.margin = '';
+      panel.style.zIndex = '';
+      var host = panel.__cascadeHost;
+      if (host && panel.parentElement !== host) host.appendChild(panel);
+    }
+
+    function portalPanel() {
+      if (!needsPortal()) return;
+      if (!panel.__cascadeHost) panel.__cascadeHost = panel.parentElement;
+      if (panel.parentElement !== document.body) {
+        document.body.appendChild(panel);
+      }
+      panel.classList.add('cascade-panel--portal');
+      var rect = trigger.getBoundingClientRect();
+      var pw = panel.offsetWidth || 640;
+      var ph = panel.offsetHeight || 280;
+      var pad = 8;
+      var left = rect.left;
+      if (left + pw > window.innerWidth - pad) {
+        left = Math.max(pad, window.innerWidth - pw - pad);
+      }
+      var top = rect.bottom + 4;
+      if (top + ph > window.innerHeight - pad && rect.top - ph - 4 >= pad) {
+        top = rect.top - ph - 4;
+      }
+      panel.style.position = 'fixed';
+      panel.style.left = left + 'px';
+      panel.style.top = top + 'px';
+      panel.style.right = 'auto';
+      panel.style.margin = '0';
+      panel.style.zIndex = '1200';
+    }
+
+    function closeCascadePanel() {
+      panel.classList.remove('is-open');
+      trigger.classList.remove('is-open');
+      unportalPanel();
+    }
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = !panel.classList.contains('is-open');
+      if (UI.closePanels) UI.closePanels();
+      document.querySelectorAll('.cascade-panel.is-open').forEach(function (p) {
+        if (p !== panel) {
+          p.classList.remove('is-open');
+          if (p.__cascadeHost && p.parentElement !== p.__cascadeHost) p.__cascadeHost.appendChild(p);
+          p.classList.remove('cascade-panel--portal');
+        }
+      });
+      if (open) {
+        panel.classList.add('is-open');
+        trigger.classList.add('is-open');
+        render();
+        portalPanel();
+        if (!panel.classList.contains('cascade-panel--portal') && UI.adjustDropdownPlacement) {
+          UI.adjustDropdownPlacement(panel, trigger);
+        }
+      } else {
+        closeCascadePanel();
+      }
+    });
+
+    if (search) {
+      search.addEventListener('input', render);
+      search.addEventListener('click', function (e) { e.stopPropagation(); });
+    }
+
+    groupList.addEventListener('click', function (e) {
+      var row = e.target.closest('[data-group]');
+      if (!row) return;
+      var gid = row.getAttribute('data-group');
+      if (e.target.closest('input[type="checkbox"]')) return;
+      activeGroupId = gid;
+      render();
+    });
+
+    groupList.addEventListener('change', function (e) {
+      var input = e.target.closest('input[data-group-check]');
+      if (!input) return;
+      var gid = input.getAttribute('data-group-check');
+      var group = findGroup(gid);
+      if (!group) return;
+      activeGroupId = gid;
+      var selected = getSelected();
+      var children = group.children || [];
+      if (input.checked) {
+        children.forEach(function (c) {
+          if (selected.indexOf(c) === -1) selected.push(c);
+        });
+      } else {
+        selected = selected.filter(function (c) { return children.indexOf(c) === -1; });
+      }
+      setSelected(selected);
+      render();
+    });
+
+    childList.addEventListener('change', function (e) {
+      var input = e.target.closest('input[data-leaf]');
+      if (!input) return;
+      var name = input.getAttribute('data-leaf');
+      var selected = getSelected();
+      if (input.checked) {
+        if (selected.indexOf(name) === -1) selected.push(name);
+      } else {
+        selected = selected.filter(function (n) { return n !== name; });
+      }
+      setSelected(selected);
+      render();
+    });
+
+    if (selectedEl) {
+      selectedEl.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-remove]');
+        if (!btn) return;
+        var name = btn.getAttribute('data-remove');
+        setSelected(getSelected().filter(function (n) { return n !== name; }));
+        render();
+      });
+    }
+
+    if (cfg.selectAllId && $(cfg.selectAllId)) {
+      $(cfg.selectAllId).addEventListener('click', function (e) {
+        e.stopPropagation();
+        var kw = ((search && search.value) || '').trim().toLowerCase();
+        var selected = getSelected();
+        allLeaves().forEach(function (name) {
+          if (!matchesKw(name, kw)) return;
+          if (selected.indexOf(name) === -1) selected.push(name);
+        });
+        setSelected(selected);
+        render();
+      });
+    }
+
+    if (cfg.clearAllId && $(cfg.clearAllId)) {
+      $(cfg.clearAllId).addEventListener('click', function (e) {
+        e.stopPropagation();
+        setSelected([]);
+        render();
+      });
+    }
+
+    if (cfg.clearId && $(cfg.clearId)) {
+      $(cfg.clearId).addEventListener('click', function (e) {
+        e.stopPropagation();
+        setSelected([]);
+        render();
+        closeCascadePanel();
+      });
+    }
+
+    wrap.addEventListener('click', function (e) { e.stopPropagation(); });
+    panel.addEventListener('click', function (e) { e.stopPropagation(); });
+    syncLabel();
+    return { render: render, syncLabel: syncLabel, close: closeCascadePanel };
+  }
+
+  var cfgTagSelect = bindCascadeMultiSelect({
+    wrapId: 'cfgTagWrap',
+    triggerId: 'cfgTagTrigger',
+    panelId: 'cfgTagPanel',
+    labelId: 'cfgTagLabel',
+    groupListId: 'cfgTagGroupList',
+    childListId: 'cfgTagChildList',
+    selectedId: 'cfgTagSelected',
+    searchId: 'cfgTagSearch',
+    countId: 'cfgTagCount',
+    selectAllId: 'cfgTagSelectAll',
+    clearAllId: 'cfgTagClearAll',
+    clearId: 'cfgTagClear',
+    prefix: '',
+    tree: TAG_TREE,
+    getSelected: function () { return state.cfg.tags || []; },
+    setSelected: function (arr) { state.cfg.tags = arr || []; }
+  });
+
   var cfgCreativeApi = bindSearchSelect({
     wrapId: 'cfgCreativeWrap',
     triggerId: 'cfgCreativeTrigger',
@@ -809,6 +1292,8 @@
 
   function fillConfigForm(cfg) {
     state.cfg = Object.assign(defaultConfig(), cfg || {});
+    if (!state.cfg.localFolderId) state.cfg.localFolderId = SYSTEM_FOLDER.id;
+    if (!Array.isArray(state.cfg.tags)) state.cfg.tags = [];
     state.sizeGroup = state.cfg.sizeGroup || '竖版(9:16)';
     $('cfgNameInput').value = state.cfg.nameTpl || DEFAULT_NAME;
     $('cfgFolderNameInput').value = state.cfg.folderName || DEFAULT_FOLDER_NAME;
@@ -830,9 +1315,15 @@
     syncSizeLabel();
     syncTrimFields();
     syncXmpBlock();
+    if (cfgLocalFolderApi) cfgLocalFolderApi.syncLabel();
     if (cfgCreativeApi) cfgCreativeApi.syncLabel();
     if (cfgTargetApi) cfgTargetApi.syncLabel();
     if (cfgParentApi) cfgParentApi.syncLabel();
+    if (cfgTagSelect && cfgTagSelect.render) cfgTagSelect.render();
+    else if ($('cfgTagLabel')) {
+      $('cfgTagLabel').innerHTML = '<span class="muted">请选择标签</span>';
+      if ($('cfgTagWrap')) $('cfgTagWrap').classList.remove('has-value');
+    }
     var trimModeLabel = $('cfgTrimModeLabel');
     if (trimModeLabel) trimModeLabel.textContent = state.cfg.trimMode;
     document.querySelectorAll('#cfgTrimModePanel .single-option').forEach(function (opt) {
@@ -840,7 +1331,7 @@
     });
     syncMetaTags('cfgNameInput');
     syncMetaTags('cfgFolderNameInput');
-    ['cfgCreativeItem', 'cfgNameItem', 'cfgTargetFolderItem', 'cfgFolderNameItem'].forEach(clearError);
+    ['cfgLocalFolderItem', 'cfgCreativeItem', 'cfgNameItem', 'cfgTargetFolderItem', 'cfgFolderNameItem'].forEach(clearError);
   }
 
   function openConfig(task) {
@@ -859,6 +1350,10 @@
 
   function validateConfig() {
     var ok = true;
+    if (!state.cfg.localFolderId) {
+      setError('cfgLocalFolderItem', true);
+      ok = false;
+    }
     if (!state.cfg.creative) {
       setError('cfgCreativeItem', true);
       ok = false;
@@ -940,8 +1435,10 @@
     /* 两列按行填充：左 ID/素材名称/修改尺寸/上传XMP/目标文件夹；右 创意人/修改MD5/剪辑时长/存储位置/创建时间 */
     var items = [
       ['ID', task.id],
+      ['本地文件夹', cfg.localFolderId ? (getLocalFolderPath(cfg.localFolderId) || cfg.localFolderId) : '—'],
       ['创意人', cfg.creative || task.creator || '—'],
       ['素材名称', cfg.nameTpl || '—'],
+      ['标签', (cfg.tags && cfg.tags.length) ? cfg.tags.join('、') : '—'],
       ['修改MD5', onOff(!!cfg.md5)],
       ['修改尺寸', detailResize(cfg)],
       ['剪辑时长', detailTrim(cfg)],

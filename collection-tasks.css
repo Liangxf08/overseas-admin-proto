@@ -1,4 +1,4 @@
-/* 采集任务 · 页面特例 */
+﻿/* 采集任务 · 页面特例 */
 
 .data-table .col-action {
   min-width: 160px;
@@ -304,7 +304,8 @@
   align-items: center;
 }
 
-#configDrawer .form-item:has(.meta-tags) {
+#configDrawer .form-item:has(.meta-tags),
+#configDrawer .form-item:has(.cascade-panel) {
   align-items: flex-start;
 }
 
@@ -536,3 +537,86 @@
   margin-top: 16px;
   margin-bottom: 0;
 }
+
+/* 本地文件夹 · 下拉树 */
+.folder-tree-panel {
+  min-width: 320px;
+  width: max(100%, 360px);
+}
+
+.folder-tree-panel__list {
+  max-height: 280px;
+}
+
+.folder-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.folder-tree-node__toggle {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3, #86909C);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.folder-tree-node__toggle svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.15s ease;
+}
+
+.folder-tree-node__toggle.is-open svg {
+  transform: rotate(0deg);
+}
+
+.folder-tree-node__toggle:not(.is-open) svg {
+  transform: rotate(-90deg);
+}
+
+.folder-tree-node__toggle.is-empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.folder-tree-node__label {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px 0 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-1, #1D2129);
+  font-family: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-tree-node:hover {
+  background: var(--color-gray-hover, #F5F7FA);
+}
+
+.folder-tree-node.is-active .folder-tree-node__label {
+  color: var(--color-primary, #165DFF);
+}
+
+
+/* 三栏级联样式见 product-common.css；页面仅保留场景覆盖 */
+#configDrawer .form-item__control { position: relative; }
+#configDrawer .cascade-panel { z-index: 40; }
+

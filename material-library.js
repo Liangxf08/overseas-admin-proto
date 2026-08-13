@@ -13,17 +13,17 @@
     return '用户' + String.fromCharCode(65 + i);
   });
 
+  /** 与标签管理定版示例数据对齐（素材迭代组无标签，筛选树不展示） */
   var TAG_TREE = [
-    { id: 'sys', label: '系统标签', children: ['未使用', '无消耗', '有消耗', '高CTR', '优质', '低效', '长视频', '繁中'] },
-    { id: 'source', label: '创意来源', children: ['品牌', 'UGC', '达人', '自制'] },
-    { id: 'lang', label: '语言', children: ['英语', '西语', '阿语', '葡语'] },
-    { id: 'feat', label: '素材特点', children: ['竖版', '横版', '16-30s', '高消耗', '低CPI'] },
-    { id: 'play', label: '玩法品类', children: ['副玩法', '主玩法', '剧情'] },
-    { id: 'fest', label: '节日限定', children: ['圣诞', '黑五', '春节'] }
+    { id: 'sys', label: '系统标签', system: true, children: ['衍生'] },
+    { id: 'lang', label: '语言', children: ['英语', '日语', '繁中'] },
+    { id: 'mix', label: '混合玩法', children: ['消消乐', '清理', '保护系列'] },
+    { id: 'feat', label: '素材特点', children: ['CTR', '副玩法', 'DOGE'] },
+    { id: 'fest', label: '节日限定', children: ['圣诞节', '夏日'] }
   ];
 
   var FORMAT_TREE = [
-    { id: 'image', label: '图片', children: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'gif'] },
+    { id: 'image', label: '图片', children: ['jpg', 'jpeg', 'png', 'bmp', 'gif'] },
     { id: 'video', label: '视频', children: ['mp4', 'mov', 'avi', 'mpeg'] }
   ];
 
@@ -46,6 +46,33 @@
 
   var TAG_OPTIONS = flattenTreeLeaves(TAG_TREE);
 
+  var SYSTEM_TAG_NAMES = [];
+  TAG_TREE.forEach(function (g) {
+    if (!g.system) return;
+    (g.children || []).forEach(function (c) {
+      if (SYSTEM_TAG_NAMES.indexOf(c) === -1) SYSTEM_TAG_NAMES.push(c);
+    });
+  });
+
+  function isSystemTagName(name) {
+    return SYSTEM_TAG_NAMES.indexOf(name) !== -1;
+  }
+
+  function sortTagsForDisplay(tags) {
+    var list = (tags || []).slice();
+    list.sort(function (a, b) {
+      var ia = SYSTEM_TAG_NAMES.indexOf(a);
+      var ib = SYSTEM_TAG_NAMES.indexOf(b);
+      var aSys = ia !== -1;
+      var bSys = ib !== -1;
+      if (aSys && bSys) return ia - ib;
+      if (aSys) return -1;
+      if (bSys) return 1;
+      return 0;
+    });
+    return list;
+  }
+
   var ALL_FILTERS = [
     { key: 'date', label: '上传时间', kind: 'date' },
     { key: 'creator', label: '创意人', kind: 'search' },
@@ -54,11 +81,14 @@
     { key: 'format', label: '格式', kind: 'cascade', tree: FORMAT_TREE },
     { key: 'size', label: '尺寸', kind: 'cascade', tree: SIZE_TREE },
     { key: 'duration', label: '时长', kind: 'multi', options: ['0-6s', '7-15s', '16-30s', '31-60s', '>60s'] },
+    { key: 'source', label: '来源', kind: 'single', options: ['本地上传', '外部采集'] },
     { key: 'xmp', label: '同步XMP', kind: 'single' },
     { key: 'name', label: '素材名称', kind: 'keyword' }
   ];
   var DEFAULT_VISIBLE_FILTERS = ['date', 'creator', 'tag', 'xmp', 'name'];
   var DURATION_OPTIONS = ['0-6s', '7-15s', '16-30s', '31-60s', '>60s'];
+  var SOURCE_OPTIONS = ['本地上传', '外部采集'];
+  var TT_COLLECTED_FOLDER_ID = 'tt_collected';
 
   var CASCADE_ARROW = '<svg class="cascade-option__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 3L7.5 6L4.5 9"/></svg>';
   var CLEAR_ICON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>';
@@ -86,7 +116,7 @@
   var MORE_SVG = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>';
 
   /** 系统文件夹：存放/展示全部素材，不可删改 */
-  var SYSTEM_FOLDER = {
+  var SYSTEM_FOLDER = (window.MaterialFolderData && window.MaterialFolderData.SYSTEM_FOLDER) || {
     id: 'system_all',
     name: '全部素材',
     system: true,
@@ -95,113 +125,9 @@
 
   /**
    * 自定义文件夹树（与 XMP 无关）
-   * 与「全部素材」平级
+   * 与「全部素材」平级 · 真源：material-folder-data.js
    */
-  var CUSTOM_FOLDERS = [
-    {
-      id: 'cube_out',
-      name: 'Cube Out 3D :Jam Puzzle',
-      children: [
-        { id: 'cube_orig', name: '原创', children: [] },
-        { id: 'cube_comp', name: '竞品', children: [] },
-        { id: 'cube_quality', name: '优质', children: [] },
-        {
-          id: 'cube_i18n',
-          name: '多语言',
-          children: [
-            { id: 'cube_i18n_cn', name: 'CN', children: [] },
-            { id: 'cube_i18n_de', name: 'DE', children: [] },
-            { id: 'cube_i18n_jp', name: 'JP', children: [] },
-            { id: 'cube_i18n_kr', name: 'KR', children: [] }
-          ]
-        },
-        {
-          id: 'cube_iter',
-          name: '迭代',
-          children: [
-            { id: 'cube_iter_260815', name: '260815改', children: [] },
-            { id: 'cube_iter_260710', name: '260710改', children: [] },
-            { id: 'cube_iter_260608', name: '260608改', children: [] },
-            { id: 'cube_iter_260524', name: '260524改', children: [] }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'girl_rescue',
-      name: 'Girl Rescue: Dragon Out!',
-      children: [
-        { id: 'girl_orig', name: '原创', children: [] },
-        { id: 'girl_comp', name: '竞品', children: [] },
-        {
-          id: 'girl_new',
-          name: '新玩法',
-          children: [
-            { id: 'girl_new_td', name: '塔防', children: [] },
-            { id: 'girl_new_yarn', name: '毛线打龙', children: [] },
-            { id: 'girl_new_water', name: '水排序', children: [] }
-          ]
-        },
-        { id: 'girl_trial', name: '试玩', children: [] }
-      ]
-    },
-    {
-      id: 'gems_flow',
-      name: 'Gems Flow Color Puzzle',
-      children: [
-        { id: 'gems_orig', name: '原创', children: [] },
-        { id: 'gems_wc', name: '世界杯', children: [] },
-        { id: 'gems_3d', name: '类3D', children: [] },
-        { id: 'gems_micro', name: '微片头', children: [] },
-        { id: 'gems_story', name: '剧情片头', children: [] },
-        { id: 'gems_short', name: 'Short', children: [] }
-      ]
-    },
-    {
-      id: 'ttminigame',
-      name: 'TTminigame',
-      children: [
-        {
-          id: 'tt_orig',
-          name: '原创',
-          children: [
-            { id: 'tt_orig_match', name: '匹配类', children: [] },
-            { id: 'tt_orig_puzzle', name: '益智类', children: [] },
-            { id: 'tt_orig_line', name: '划线合集', children: [] },
-            { id: 'tt_orig_pack', name: '合集包', children: [] },
-            { id: 'tt_orig_diff', name: '找茬类', children: [] },
-            { id: 'tt_orig_water', name: '水排序', children: [] },
-            { id: 'tt_orig_clean', name: '清洁类', children: [] },
-            { id: 'tt_orig_mgmt', name: '经营类', children: [] },
-            { id: 'tt_orig_mower', name: '转刀割草类', children: [] },
-            { id: 'tt_orig_racing', name: '飞车类', children: [] }
-          ]
-        },
-        {
-          id: 'tt_diff',
-          name: '找茬',
-          children: [
-            { id: 'tt_diff_ja', name: '日语', children: [] },
-            { id: 'tt_diff_en', name: '英语', children: [] }
-          ]
-        },
-        {
-          id: 'tt_puzzle',
-          name: '益智',
-          children: [
-            { id: 'tt_puzzle_ja', name: '日语', children: [] },
-            { id: 'tt_puzzle_en', name: '英语', children: [] },
-            { id: 'tt_puzzle_ms', name: '马来语', children: [] }
-          ]
-        },
-        { id: 'tt_drama', name: '短剧', children: [] },
-        { id: 'tt_scale', name: '跑量素材', children: [] },
-        { id: 'tt_scale_iter', name: '跑量迭代', children: [] },
-        { id: 'tt_creator', name: '达人视频', children: [] },
-        { id: 'tt_rise', name: '逆袭', children: [] }
-      ]
-    }
-  ];
+  var CUSTOM_FOLDERS = (window.MaterialFolderData && window.MaterialFolderData.CUSTOM_FOLDERS) || [];
 
   function pad2(n) { return n < 10 ? '0' + n : String(n); }
 
@@ -362,6 +288,20 @@
     return path.indexOf(ancestorPath + ' / ') === 0;
   }
 
+  function isTtCollectedFolder(folderId) {
+    if (!folderId) return false;
+    if (folderId === TT_COLLECTED_FOLDER_ID) return true;
+    return isDescendantFolder(folderId, TT_COLLECTED_FOLDER_ID);
+  }
+
+  function sourceForFolder(folderId) {
+    return isTtCollectedFolder(folderId) ? '外部采集' : '本地上传';
+  }
+
+  function rowSource(row) {
+    return (row && row.source) || sourceForFolder(row && row.folderId) || '本地上传';
+  }
+
   function countMaterialsInFolder(folderId) {
     if (isSystemFolder(folderId)) return ALL_ROWS.length;
     return ALL_ROWS.filter(function (r) {
@@ -395,25 +335,28 @@
     var today = startOfDay(new Date());
     var i = 0;
     folderIds.forEach(function (folderId) {
-      var count = randInt(10, 50);
+      var isDerivedFolder = folderId === 'cube_derived';
+      var count = isDerivedFolder ? 20 : randInt(10, 50);
       var c;
       for (c = 0; c < count; c++, i++) {
         var created = new Date(today);
         created.setDate(created.getDate() - (i % 20));
         created.setHours(9 + (i % 8), (i * 7) % 60, (i * 11) % 60, 0);
         var type = pick(types, i);
-        var format = type === '视频' ? pick(['mp4', 'mov'], i) : pick(['png', 'jpg', 'webp'], i);
+        var format = type === '视频' ? pick(['mp4', 'mov'], i) : pick(['png', 'jpg', 'gif'], i);
         var size = pick(['1080x1920', '720x1280', '1920x1080', '1080x1080', '800x800', '1280x720'], i);
         var durationSec = type === '视频'
           ? pick([3, 5, 10, 12, 20, 28, 40, 55, 75, 90], i)
           : 0;
         var tags = [];
-        if (i % 2 === 0) tags.push('高消耗');
-        if (i % 3 === 0) tags.push('低CPI');
-        if (i % 4 === 0) tags.push('优质');
-        if (i % 5 === 0) tags.push('16-30s');
-        if (i % 6 === 0) tags.push('副玩法');
-        if (!tags.length) tags.push(pick(['竖版', '品牌'], i));
+        /* 仅 Cube Out「衍生」文件夹打系统标签「衍生」 */
+        if (isDerivedFolder) tags.push('衍生');
+        if (i % 2 === 0) tags.push(pick(['英语', '繁中', '日语'], i));
+        if (i % 3 === 0) tags.push(pick(['消消乐', '清理', '保护系列'], i + 1));
+        if (i % 5 === 0) tags.push(pick(['CTR', '副玩法', 'DOGE'], i + 2));
+        if (i % 7 === 0) tags.push(pick(['圣诞节', '夏日'], i + 3));
+        if (!tags.length) tags.push(pick(['英语', 'CTR', '副玩法'], i));
+        tags = tags.filter(function (t, idx) { return tags.indexOf(t) === idx; });
         var sync = pick(syncCycle, i);
         var delivery = [];
         if (i % 2 === 0) delivery.push('tt');
@@ -422,7 +365,10 @@
         if (i % 7 === 0) delivery.push('ap');
         var row = {
           id: String(materialSeq++),
-          name: pick(['品牌片头', '投放竖版', '剧情混剪', '口播成片', '素材示例'], i) + '_' + (1000 + i) + '.' + format,
+          name: (isDerivedFolder
+            ? pick(['衍生混剪', '衍生竖版', '衍生片头', '衍生口播', '衍生示例'], i)
+            : pick(['品牌片头', '投放竖版', '剧情混剪', '口播成片', '素材示例'], i)
+          ) + '_' + (1000 + i) + '.' + format,
           folderId: folderId,
           type: type,
           format: format,
@@ -438,6 +384,7 @@
           xmpId: sync === '已同步' ? 'XMP' + (5000 + i) : '',
           failReason: sync === '同步失败' ? 'XMP 限流' : '',
           delivery: delivery,
+          source: sourceForFolder(folderId),
           ossUrl: ''
         };
         row.ossUrl = buildOssUrl(row.name, created, row.id, format);
@@ -461,7 +408,7 @@
     folderId: SYSTEM_FOLDER.id,
     folderKw: '',
     collapsed: buildDefaultCollapsed(),
-    draft: { tag: [], creator: '', xmp: '', type: '', format: [], size: [], duration: [], name: '' },
+    draft: { tag: [], creator: '', xmp: '', type: '', format: [], size: [], duration: [], source: '', name: '' },
     dateCleared: false,
     visibleFilters: DEFAULT_VISIBLE_FILTERS.slice(),
     filterVisibleDraft: null,
@@ -1058,6 +1005,16 @@
       getValue: function () { return state.draft.type; },
       onChange: function (v) { state.draft.type = v; }
     });
+    UI.bindSingleSelect({
+      wrapId: 'sourceWrap',
+      triggerId: 'sourceTrigger',
+      panelId: 'sourcePanel',
+      labelId: 'sourceLabel',
+      clearId: 'sourceClear',
+      prefix: '来源：',
+      getValue: function () { return state.draft.source; },
+      onChange: function (v) { state.draft.source = v; }
+    });
   }
 
   function isFilterVisible(key) {
@@ -1079,11 +1036,11 @@
     if (sizeSelect && sizeSelect.syncLabel) sizeSelect.syncLabel();
     if (durationSelect && durationSelect.syncLabel) durationSelect.syncLabel();
     if (creatorSelect && creatorSelect.syncLabel) creatorSelect.syncLabel();
-    ['xmp', 'type'].forEach(function (key) {
+    ['xmp', 'type', 'source'].forEach(function (key) {
       var wrap = $(key + 'Wrap');
       var label = $(key + 'Label');
       if (!wrap || !label) return;
-      var map = { xmp: '同步XMP：', type: '类型：' };
+      var map = { xmp: '同步XMP：', type: '类型：', source: '来源：' };
       var val = state.draft[key] || '';
       if (!val) {
         label.innerHTML = map[key] + '<span class="muted">请选择</span>';
@@ -1178,6 +1135,7 @@
     var options = [];
     if (key === 'type') options = ['视频', '图片'];
     else if (key === 'xmp') options = ['是', '否'];
+    else if (key === 'source') options = SOURCE_OPTIONS.slice();
     return '<div class="filter-setting-control" id="fsWrap_' + key + '">' +
       '<button class="select-trigger" type="button" id="fsTrigger_' + key + '">' +
         '<span class="select-trigger__text" id="fsLabel_' + key + '">' + f.label + '：<span class="muted">请选择</span></span>' +
@@ -1352,6 +1310,7 @@
           format: (state.draft.format || []).slice(),
           size: (state.draft.size || []).slice(),
           duration: (state.draft.duration || []).slice(),
+          source: state.draft.source,
           name: (($('filterName') && $('filterName').value) || '')
         },
         dateStart: dateApi && dateApi.getStart() ? new Date(dateApi.getStart().getTime()) : null,
@@ -1404,6 +1363,7 @@
     state.draft.format = (snap.draft.format || []).slice();
     state.draft.size = (snap.draft.size || []).slice();
     state.draft.duration = (snap.draft.duration || []).slice();
+    state.draft.source = snap.draft.source || '';
     if ($('filterName')) {
       $('filterName').value = snap.draft.name || '';
       if (nameClearApi && nameClearApi.sync) nameClearApi.sync();
@@ -1465,6 +1425,7 @@
       format: isFilterVisible('format') ? (state.draft.format || []).slice() : [],
       size: isFilterVisible('size') ? (state.draft.size || []).slice() : [],
       duration: isFilterVisible('duration') ? (state.draft.duration || []).slice() : [],
+      source: isFilterVisible('source') ? (state.draft.source || '') : '',
       name: isFilterVisible('name') ? (($('filterName') && $('filterName').value) || '').trim() : '',
       start: useDate && dateApi ? dateApi.getStart() : null,
       end: useDate && dateApi ? dateApi.getEnd() : null
@@ -1518,6 +1479,7 @@
       format: [],
       size: [],
       duration: [],
+      source: '',
       name: '',
       start: (!state.dateCleared && dateApi) ? dateApi.getStart() : null,
       end: (!state.dateCleared && dateApi) ? dateApi.getEnd() : null
@@ -1546,6 +1508,7 @@
       }
       if (f.size && f.size.length && f.size.indexOf(row.size) === -1) return false;
       if (f.duration && f.duration.length && !matchDurationBuckets(row.durationSec, f.duration)) return false;
+      if (f.source && rowSource(row) !== f.source) return false;
       if (f.name) {
         var kw = f.name.toLowerCase();
         if (row.name.toLowerCase().indexOf(kw) === -1) return false;
@@ -1718,10 +1681,11 @@
   }
 
   function tagsHtml(row, max) {
-    var tags = (row.tags || []).slice();
+    var tags = sortTagsForDisplay(row.tags || []);
     if (typeof max === 'number') tags = tags.slice(0, max);
     return '<div class="tag-list">' + tags.map(function (t) {
-      return '<span class="mat-tag">' + escapeHtml(t) + '</span>';
+      var cls = isSystemTagName(t) ? 'mat-tag mat-tag--system' : 'mat-tag';
+      return '<span class="' + cls + '">' + escapeHtml(t) + '</span>';
     }).join('') + '</div>';
   }
 
@@ -1796,6 +1760,7 @@
             '<td class="col-duration">' + PH + '</td>' +
             '<td>' + PH + '</td>' +
             '<td>' + PH + '</td>' +
+            '<td>' + PH + '</td>' +
             '<td class="col-action">' + PH + '</td>' +
           '</tr>'
         );
@@ -1827,6 +1792,7 @@
           '<td>' + escapeHtml(row.format) + '</td>' +
           '<td>' + escapeHtml(row.size) + '</td>' +
           '<td class="col-duration">' + escapeHtml(durationText) + '</td>' +
+          '<td>' + escapeHtml(rowSource(row)) + '</td>' +
           '<td>' + xmpTag(syncXmpYesNo(row)) + '</td>' +
           '<td>' + escapeHtml(row.createdAt) + '</td>' +
           '<td class="col-action"><span class="action-links">' +
@@ -2023,7 +1989,7 @@
       return r && (r.syncStatus === '未同步' || r.syncStatus === '同步失败' || opts.force);
     });
     if (!targets.length) {
-      if (!opts.silent) UI.showToast('没有可推送的素材');
+      if (!opts.silent) UI.showToast('没有可同步的素材');
       return;
     }
     targets.forEach(function (r) {
@@ -2047,7 +2013,7 @@
       if (!opts.silent) {
         var ok = targets.filter(function (r) { return r.syncStatus === '已同步'; }).length;
         var fail = targets.length - ok;
-        UI.showToast('推送完成：成功 ' + ok + (fail ? '，失败 ' + fail : ''), fail ? 'warning' : 'success');
+        UI.showToast('同步完成：成功 ' + ok + (fail ? '，失败 ' + fail : ''), fail ? 'warning' : 'success');
       }
     }, 700);
   }
@@ -2083,6 +2049,7 @@
     if ($('detailCreatedAt')) $('detailCreatedAt').textContent = row.createdAt || '—';
     if ($('detailSource')) $('detailSource').textContent = row.source || '本地上传';
     if ($('detailFileSize')) $('detailFileSize').textContent = mockFileSizeText(row);
+    if ($('detailType')) $('detailType').textContent = row.type || '—';
     if ($('detailFormat')) $('detailFormat').textContent = row.format || '—';
     if ($('detailDim')) $('detailDim').textContent = row.size || '—';
     if ($('detailDuration')) {
@@ -2136,6 +2103,7 @@
     var ext = state.detail.format || fileExt(row.name) || 'mp4';
     row.name = nameBase + (ext ? ('.' + ext) : '');
     row.folderId = state.detail.folderId;
+    row.source = sourceForFolder(state.detail.folderId);
     row.tags = state.detail.tags.slice();
     row.creator = state.detail.creator;
     closeDetailDrawer();
@@ -3227,25 +3195,24 @@
     }
   });
 
-  var upTagSelect = null;
-  if (UI.bindMultiSelect) {
-    upTagSelect = UI.bindMultiSelect({
-      wrapId: 'upTagWrap',
-      triggerId: 'upTagTrigger',
-      panelId: 'upTagPanel',
-      labelId: 'upTagLabel',
-      listId: 'upTagList',
-      selectedId: 'upTagSelected',
-      searchId: 'upTagSearch',
-      countId: 'upTagCount',
-      selectAllId: 'upTagSelectAll',
-      clearId: 'upTagClear',
-      prefix: '',
-      getOptions: function () { return TAG_OPTIONS; },
-      getSelected: function () { return state.upload.tags; },
-      setSelected: function (arr) { state.upload.tags = arr || []; }
-    });
-  }
+  var upTagSelect = bindCascadeMultiSelect({
+    wrapId: 'upTagWrap',
+    triggerId: 'upTagTrigger',
+    panelId: 'upTagPanel',
+    labelId: 'upTagLabel',
+    groupListId: 'upTagGroupList',
+    childListId: 'upTagChildList',
+    selectedId: 'upTagSelected',
+    searchId: 'upTagSearch',
+    countId: 'upTagCount',
+    selectAllId: 'upTagSelectAll',
+    clearAllId: 'upTagClearAll',
+    clearId: 'upTagClear',
+    prefix: '',
+    tree: TAG_TREE,
+    getSelected: function () { return state.upload.tags; },
+    setSelected: function (arr) { state.upload.tags = arr || []; }
+  });
 
   var detailTagSelect = bindCascadeMultiSelect({
     wrapId: 'detailTagWrap',
@@ -3284,13 +3251,6 @@
     getSelected: function () { return state.batchTags; },
     setSelected: function (arr) { state.batchTags = arr || []; }
   });
-
-  if ($('upTagPanelClear')) {
-    $('upTagPanelClear').addEventListener('click', function () {
-      state.upload.tags = [];
-      if (upTagSelect && upTagSelect.render) upTagSelect.render();
-    });
-  }
 
   function openBatchTagModal(ids) {
     state.batchTagIds = ids.slice();
@@ -3586,7 +3546,7 @@
     var now = new Date();
     var newIds = [];
     var targetFolder = state.upload.folderId;
-    var tags = state.upload.tags.length ? state.upload.tags.slice() : ['竖版'];
+    var tags = state.upload.tags.length ? state.upload.tags.slice() : ['英语'];
     var ready = state.upload.items.slice();
     ready.forEach(function (item, i) {
       var id = String(materialSeq++);
@@ -3612,6 +3572,7 @@
         xmpId: '',
         failReason: '',
         delivery: [],
+        source: sourceForFolder(targetFolder),
         ossUrl: buildOssUrl(fullName, now, id, ext)
       });
     });

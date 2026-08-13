@@ -1,4 +1,4 @@
-/* 素材板块侧栏：素材采集（目录）/ 本地素材·模板管理·标签管理（一级页） */
+/* 素材板块侧栏：本地素材 · 模板中心 · 标签管理 · 采集任务 · 衍生任务 */
 (function (global) {
   'use strict';
 
@@ -7,6 +7,8 @@
     library: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
     template: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
     tag: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><path d="M7 7h.01"/></svg>',
+    tasks: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    derive: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 3l-7 7"/><path d="M3 3l7 7"/><path d="M12 14v7"/><path d="M8 18h8"/></svg>',
     page: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>',
     arrow: '<svg class="menu-group__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5L6 7.5L9 4.5"/></svg>'
   };
@@ -15,16 +17,6 @@
    * type: group = 可展开目录；leaf = 一级页面（无子目录）
    */
   var MENUS = [
-    {
-      type: 'group',
-      key: 'collection',
-      title: '素材采集',
-      icon: ICONS.collection,
-      children: [
-        { key: 'collection-tasks', label: '采集任务', href: 'collection-tasks.html' },
-        { key: 'material-list', label: '采集素材', href: 'material-list.html' }
-      ]
-    },
     {
       type: 'leaf',
       key: 'material-library',
@@ -35,7 +27,7 @@
     {
       type: 'leaf',
       key: 'template-library',
-      label: '模板管理',
+      label: '模板中心',
       href: 'template-library.html',
       icon: ICONS.template
     },
@@ -45,6 +37,20 @@
       label: '标签管理',
       href: 'tag-library.html',
       icon: ICONS.tag
+    },
+    {
+      type: 'leaf',
+      key: 'collection-tasks',
+      label: '采集任务',
+      href: 'collection-tasks.html',
+      icon: ICONS.tasks
+    },
+    {
+      type: 'leaf',
+      key: 'derive-tasks',
+      label: '衍生任务',
+      href: 'derive-tasks.html',
+      icon: ICONS.derive
     }
   ];
 
@@ -119,7 +125,7 @@
           '<a href="#" class="header-nav__item">首页</a>' +
           '<a href="dashboard.html" class="header-nav__item">看板</a>' +
           '<a href="tiktok-accounts.html" class="header-nav__item">产品</a>' +
-          '<a href="collection-tasks.html" class="header-nav__item is-active">素材</a>' +
+          '<a href="material-library.html" class="header-nav__item is-active">素材</a>' +
           '<a href="feedback-tickets.html" class="header-nav__item">工具</a>' +
           '<a href="menu-management.html" class="header-nav__item">管理</a>' +
         '</nav>' +
@@ -143,7 +149,7 @@
     if (global.ProductUI && global.ProductUI.bindSidebar) {
       global.ProductUI.bindSidebar();
     }
-    /* 素材库 / 模板库为一级工作台页，进入后自动收起侧栏腾出横向空间 */
+    /* 本地素材 / 模板中心为一级工作台页，进入后自动收起侧栏腾出横向空间 */
     if (menuKey === 'material-library' || menuKey === 'template-library') {
       var sidebar = document.getElementById('sidebar');
       var toggle = document.getElementById('sidebarToggle');

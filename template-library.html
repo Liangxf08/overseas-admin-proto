@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>模板管理 - 海外中台</title>
+  <title>模板中心 - 海外中台</title>
   <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
   <link rel="stylesheet" href="product-common.css" />
@@ -79,35 +79,16 @@
               </div>
             </div>
 
-            <div class="filter-item" id="tagWrap" data-filter-key="tag">
-              <button class="select-trigger" type="button" id="tagTrigger">
-                <span class="select-trigger__text" id="tagLabel">标签：<span class="muted">请选择</span></span>
+            <div class="filter-item" id="categoryWrap" data-filter-key="category">
+              <button class="select-trigger" type="button" id="categoryTrigger">
+                <span class="select-trigger__text" id="categoryLabel">合成方式：<span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
               </button>
-              <button class="select-clear" type="button" id="tagClear" aria-label="清除">
+              <button class="select-clear" type="button" id="categoryClear" aria-label="清除">
                 <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
               </button>
-              <div class="cascade-panel" id="tagPanel">
-                <div class="cascade-panel__left">
-                  <div class="cascade-panel__search">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                    <input type="text" id="tagSearch" placeholder="搜索" autocomplete="off" />
-                  </div>
-                  <div class="cascade-panel__toolbar">
-                    <button class="cascade-panel__link" type="button" id="tagSelectAll">全选</button>
-                  </div>
-                  <div class="cascade-panel__list" id="tagGroupList"></div>
-                </div>
-                <div class="cascade-panel__mid">
-                  <div class="cascade-panel__list" id="tagChildList"></div>
-                </div>
-                <div class="cascade-panel__right">
-                  <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
-                    <span id="tagCount">已选 0 项</span>
-                    <button class="cascade-panel__link" type="button" id="tagClearAll">清空</button>
-                  </div>
-                  <div class="cascade-panel__list" id="tagSelected"></div>
-                </div>
+              <div class="multi-panel multi-panel--simple" id="categoryPanel">
+                <div class="multi-panel__list" id="categoryList"></div>
               </div>
             </div>
 
@@ -122,6 +103,7 @@
               <div class="single-panel" id="typePanel">
                 <button class="single-option" type="button" data-value="视频">视频</button>
                 <button class="single-option" type="button" data-value="图片">图片</button>
+                <button class="single-option" type="button" data-value="音频">音频</button>
               </div>
             </div>
 
@@ -189,22 +171,8 @@
               </div>
             </div>
 
-            <div class="filter-item" id="xmpWrap" data-filter-key="xmp">
-              <button class="select-trigger" type="button" id="xmpTrigger">
-                <span class="select-trigger__text" id="xmpLabel">同步XMP：<span class="muted">请选择</span></span>
-                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-              </button>
-              <button class="select-clear" type="button" id="xmpClear" aria-label="清除">
-                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-              </button>
-              <div class="single-panel" id="xmpPanel">
-                <button class="single-option" type="button" data-value="是">是</button>
-                <button class="single-option" type="button" data-value="否">否</button>
-              </div>
-            </div>
-
             <div class="filter-item" id="nameWrap" data-filter-key="name">
-              <input class="input input-clearable" id="filterName" type="text" placeholder="素材名称" autocomplete="off" />
+              <input class="input input-clearable" id="filterName" type="text" placeholder="模板名称" autocomplete="off" />
               <button class="select-clear" type="button" id="filterNameClear" aria-label="清除">
                 <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
               </button>
@@ -232,14 +200,12 @@
                 </button>
                 <div class="batch-menu" id="batchMenu" role="menu">
                   <button class="batch-menu__item" type="button" role="menuitem" data-batch="download">下载到本地</button>
-                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="push">推送到XMP</button>
-                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="tag">修改标签</button>
                   <button class="batch-menu__item" type="button" role="menuitem" data-batch="delete">批量删除</button>
                 </div>
               </div>
               <label class="toolbar-check" for="showSubfolderMaterials">
                 <input type="checkbox" id="showSubfolderMaterials" />
-                <span>显示子文件夹素材</span>
+                <span>显示子文件夹模板</span>
               </label>
             </div>
             <div class="lib-toolbar__right">
@@ -258,7 +224,6 @@
                     <col class="col-check" data-col-width="48" data-col-fixed="true" />
                     <col data-col-width="88" />
                     <col data-col-width="280" />
-                    <col data-col-width="200" />
                     <col data-col-width="104" />
                     <col data-col-width="104" />
                     <col data-col-width="104" />
@@ -272,14 +237,13 @@
                     <tr>
                       <th class="col-check is-freeze"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
                       <th class="col-id is-freeze">ID</th>
-                      <th class="col-material is-freeze">素材</th>
-                      <th>标签</th>
+                      <th class="col-material is-freeze">模板</th>
                       <th>创意人</th>
+                      <th>合成方式</th>
                       <th>类型</th>
                       <th>格式</th>
                       <th>尺寸</th>
                       <th>时长 (秒)</th>
-                      <th>同步XMP</th>
                       <th>上传时间</th>
                       <th class="col-action">操作</th>
                     </tr>
@@ -302,11 +266,11 @@
     </main>
   </div>
 
-  <!-- 上传素材抽屉 -->
+  <!-- 上传模板抽屉 -->
   <div class="drawer-mask" id="uploadDrawer" aria-hidden="true">
     <aside class="drawer drawer--upload" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
       <div class="drawer__header">
-        <h2 class="drawer__title" id="uploadTitle">上传素材</h2>
+        <h2 class="drawer__title" id="uploadTitle">上传模板</h2>
         <button class="drawer__close" type="button" id="uploadDrawerClose" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
@@ -354,50 +318,29 @@
           </div>
         </div>
 
-        <div class="form-item" id="upTagItem">
-          <label class="form-item__label">标签</label>
-          <div class="form-item__control" id="upTagWrap">
-            <button class="select-trigger" type="button" id="upTagTrigger">
-              <span class="select-trigger__text" id="upTagLabel"><span class="muted">请选择标签</span></span>
-              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-            </button>
-            <button class="select-clear" type="button" id="upTagClear" aria-label="清除">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-            </button>
-            <div class="multi-panel" id="upTagPanel">
-              <div class="multi-panel__left">
-                <div class="multi-panel__search">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                  <input type="text" id="upTagSearch" placeholder="搜索" autocomplete="off" />
-                </div>
-                <div class="multi-panel__toolbar">
-                  <button class="multi-panel__link" type="button" id="upTagSelectAll">全选</button>
-                </div>
-                <div class="multi-panel__list" id="upTagList"></div>
-              </div>
-              <div class="multi-panel__right">
-                <div class="multi-panel__toolbar multi-panel__toolbar--right">
-                  <span id="upTagCount">已选择 0 项</span>
-                  <button class="multi-panel__link" type="button" id="upTagPanelClear">清空</button>
-                </div>
-                <div class="multi-panel__list" id="upTagSelected"></div>
-              </div>
+        <div class="form-item" id="upCategoryItem">
+          <label class="form-item__label">合成方式</label>
+          <div class="form-item__control">
+            <div class="seg" id="upCategorySeg" role="radiogroup" aria-label="合成方式">
+              <button type="button" class="seg__item is-active" data-value="片段拼接">片段拼接</button>
+              <button type="button" class="seg__item" data-value="图层叠加">图层叠加</button>
+              <button type="button" class="seg__item" data-value="音频替换">音频替换</button>
             </div>
           </div>
         </div>
 
         <div class="form-item form-item--upload-hint">
-          <label class="form-item__label">上传素材</label>
+          <label class="form-item__label">上传模板</label>
           <div class="form-item__control">
-            <p class="upload-drawer__hint">添加素材后点击 "提交"，后台自动完成入库，无需在当前页等待</p>
+            <p class="upload-drawer__hint">添加模板后点击 "提交"，后台自动完成入库，无需在当前页等待</p>
           </div>
         </div>
         <div class="upload-zone" id="upFileZone" tabindex="0" role="button" aria-label="选择文件">
-          <input class="upload-zone__input" id="upFileInput" type="file" accept=".mp4,.mov,.png,.jpg,.jpeg,.webp,video/*,image/*" multiple />
+          <input class="upload-zone__input" id="upFileInput" type="file" accept=".mp4,.mov,.avi,.mpeg" multiple />
           <div class="upload-zone__icon" aria-hidden="true">
             <img src="assets/cloud_upload.svg" alt="" width="32" height="32" />
           </div>
-          <div class="upload-zone__title">点击或拖拽文件到此处上传（单次最多500个）</div>
+          <div class="upload-zone__title">点击或拖拽文件到此处上传（单次最多500个，支持 .mp4、.mov、.avi、.mpeg）</div>
         </div>
 
         <div class="upload-drawer__toolbar">
@@ -405,8 +348,8 @@
             <button class="btn btn--default" type="button" id="upBatchDeleteBtn" disabled>批量删除</button>
             <label class="upload-drawer__check">
               <span class="cell-check"><input type="checkbox" id="upDeriveDup" checked /></span>
-              <span>衍生重复素材</span>
-              <span class="form-help" data-tip="勾选自动衍生素材：重复素材自动变更 MD5 上传；不勾选将直接覆盖MD5重复的素材。" aria-label="说明" tabindex="0">?</span>
+              <span>衍生重复模板</span>
+              <span class="form-help" data-tip="勾选自动衍生模板：重复模板自动变更 MD5 上传；不勾选将直接覆盖MD5重复的模板。" aria-label="说明" tabindex="0">?</span>
             </label>
           </div>
           <div class="upload-drawer__count" id="upFileCount">已添加：0/500</div>
@@ -425,7 +368,7 @@
             <thead>
               <tr>
                 <th class="col-check"><span class="cell-check"><input type="checkbox" id="upCheckAll" aria-label="全选" /></span></th>
-                <th>素材</th>
+                <th>模板</th>
                 <th>大小</th>
                 <th>格式</th>
                 <th>尺寸</th>
@@ -545,11 +488,11 @@
     </div>
   </div>
 
-  <!-- 素材详情抽屉 -->
+  <!-- 模板详情抽屉 -->
   <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
     <aside class="drawer drawer--detail" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
       <div class="drawer__header">
-        <h2 class="drawer__title" id="detailTitle">编辑素材</h2>
+        <h2 class="drawer__title" id="detailTitle">编辑模板</h2>
         <button class="drawer__close" type="button" id="detailDrawerClose" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
@@ -559,6 +502,7 @@
           <div class="detail-drawer__preview">
             <div class="detail-drawer__preview-media" id="detailPreviewMedia">
               <span class="detail-drawer__preview-placeholder">预览</span>
+              <span class="detail-drawer__audio-icon" id="detailPreviewAudio" hidden aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
               <span class="thumb__play" id="detailPreviewPlay" hidden aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg></span>
             </div>
           </div>
@@ -570,10 +514,10 @@
               </div>
             </div>
             <div class="form-item" id="detailNameItem">
-              <label class="form-item__label is-required">素材</label>
+              <label class="form-item__label is-required">模板</label>
               <div class="form-item__control">
-                <input class="input input-clearable" id="detailName" type="text" placeholder="请输入素材名称" autocomplete="off" />
-                <div class="form-item__error">请输入素材名称</div>
+                <input class="input input-clearable" id="detailName" type="text" placeholder="请输入模板名称" autocomplete="off" />
+                <div class="form-item__error">请输入模板名称</div>
               </div>
             </div>
             <div class="form-item" id="detailFolderItem">
@@ -616,38 +560,10 @@
                 <div class="form-item__error">请选择创意人</div>
               </div>
             </div>
-            <div class="form-item" id="detailTagItem">
-              <label class="form-item__label">标签</label>
-              <div class="form-item__control" id="detailTagWrap">
-                <button class="select-trigger" type="button" id="detailTagTrigger">
-                  <span class="select-trigger__text" id="detailTagLabel"><span class="muted">请选择标签</span></span>
-                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-                </button>
-                <button class="select-clear" type="button" id="detailTagClear" aria-label="清除">
-                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-                </button>
-                <div class="cascade-panel" id="detailTagPanel">
-                  <div class="cascade-panel__left">
-                    <div class="cascade-panel__search">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                      <input type="text" id="detailTagSearch" placeholder="搜索" autocomplete="off" />
-                    </div>
-                    <div class="cascade-panel__toolbar">
-                      <button class="cascade-panel__link" type="button" id="detailTagSelectAll">全选</button>
-                    </div>
-                    <div class="cascade-panel__list" id="detailTagGroupList"></div>
-                  </div>
-                  <div class="cascade-panel__mid">
-                    <div class="cascade-panel__list" id="detailTagChildList"></div>
-                  </div>
-                  <div class="cascade-panel__right">
-                    <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
-                      <span id="detailTagCount">已选 0 项</span>
-                      <button class="cascade-panel__link" type="button" id="detailTagClearAll">清空</button>
-                    </div>
-                    <div class="cascade-panel__list" id="detailTagSelected"></div>
-                  </div>
-                </div>
+            <div class="form-item" id="detailCategoryItem">
+              <label class="form-item__label">合成方式</label>
+              <div class="form-item__control">
+                <div class="detail-drawer__readonly" id="detailCategory">—</div>
               </div>
             </div>
             <div class="form-item">
@@ -661,6 +577,10 @@
             <div class="form-item">
               <label class="form-item__label">大小</label>
               <div class="form-item__control"><div class="detail-drawer__readonly" id="detailFileSize">—</div></div>
+            </div>
+            <div class="form-item">
+              <label class="form-item__label">类型</label>
+              <div class="form-item__control"><div class="detail-drawer__readonly" id="detailType">—</div></div>
             </div>
             <div class="form-item">
               <label class="form-item__label">格式</label>
@@ -784,7 +704,7 @@
   </div>
 
   <div class="name-edit-pop" id="nameEditPop" aria-hidden="true">
-    <input class="input" id="nameEditInput" type="text" maxlength="120" placeholder="请输入素材名称" autocomplete="off" />
+    <input class="input" id="nameEditInput" type="text" maxlength="120" placeholder="请输入模板名称" autocomplete="off" />
     <div class="name-edit-pop__footer">
       <button class="btn btn--default" type="button" id="nameEditCancel">取消</button>
       <button class="btn btn--primary" type="button" id="nameEditOk">确定</button>

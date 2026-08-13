@@ -22,9 +22,19 @@
     { id: 'fest', label: '节日限定', children: ['圣诞', '黑五', '春节'] }
   ];
 
+  var CATEGORY_OPTIONS = ['片段拼接', '图层叠加', '音频替换'];
+
+  /* 合成方式 ↔ 上传支持格式 */
+  var UPLOAD_CATEGORY_FORMATS = {
+    '片段拼接': ['mp4', 'mov', 'avi', 'mpeg'],
+    '图层叠加': ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'mov'],
+    '音频替换': ['mp3', 'wav', 'aac', 'm4a']
+  };
+
   var FORMAT_TREE = [
     { id: 'image', label: '图片', children: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'gif'] },
-    { id: 'video', label: '视频', children: ['mp4', 'mov', 'avi', 'mpeg'] }
+    { id: 'video', label: '视频', children: ['mp4', 'mov', 'avi', 'mpeg'] },
+    { id: 'audio', label: '音频', children: ['mp3', 'wav', 'aac', 'm4a'] }
   ];
 
   var SIZE_TREE = [
@@ -49,14 +59,13 @@
   var ALL_FILTERS = [
     { key: 'date', label: '上传时间', kind: 'date' },
     { key: 'creator', label: '创意人', kind: 'search' },
-    { key: 'tag', label: '标签', kind: 'cascade', tree: TAG_TREE },
+    { key: 'category', label: '合成方式', kind: 'multi', options: CATEGORY_OPTIONS },
     { key: 'type', label: '类型', kind: 'single' },
     { key: 'format', label: '格式', kind: 'cascade', tree: FORMAT_TREE },
     { key: 'size', label: '尺寸', kind: 'cascade', tree: SIZE_TREE },
-    { key: 'xmp', label: '同步XMP', kind: 'single' },
-    { key: 'name', label: '素材名称', kind: 'keyword' }
+    { key: 'name', label: '模板名称', kind: 'keyword' }
   ];
-  var DEFAULT_VISIBLE_FILTERS = ['date', 'creator', 'tag', 'xmp', 'name'];
+  var DEFAULT_VISIBLE_FILTERS = ['date', 'creator', 'category', 'name'];
 
   var CASCADE_ARROW = '<svg class="cascade-option__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 3L7.5 6L4.5 9"/></svg>';
   var CLEAR_ICON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>';
@@ -95,57 +104,70 @@
    * 自定义文件夹树（与 XMP 无关）
    * 与「全部模板」平级
    */
+  function buildPlatformTemplateChildren(prefix) {
+    return [
+      {
+        id: prefix + '_bgm',
+        name: 'BGM',
+        children: [
+          { id: prefix + '_bgm_puzzle', name: '益智', children: [] },
+          { id: prefix + '_bgm_casual', name: '休闲', children: [] },
+          { id: prefix + '_bgm_suspense', name: '悬疑', children: [] }
+        ]
+      },
+      {
+        id: prefix + '_voice',
+        name: '口播',
+        children: [
+          { id: prefix + '_voice_en', name: '英语', children: [] },
+          { id: prefix + '_voice_ja', name: '日语', children: [] }
+        ]
+      },
+      {
+        id: prefix + '_sticker',
+        name: '贴纸',
+        children: [
+          { id: prefix + '_sticker_meme', name: 'MEME', children: [] },
+          { id: prefix + '_sticker_gui', name: 'GUI', children: [] },
+          { id: prefix + '_sticker_comment', name: '评论', children: [] },
+          { id: prefix + '_sticker_cta', name: '引导点击', children: [] }
+        ]
+      },
+      {
+        id: prefix + '_border',
+        name: '边框',
+        children: [
+          { id: prefix + '_border_ud', name: '上下边框', children: [] },
+          { id: prefix + '_border_full', name: '全包边', children: [] }
+        ]
+      },
+      {
+        id: prefix + '_intro',
+        name: '片头',
+        children: [
+          { id: prefix + '_intro_hook', name: 'Hook 爆点', children: [] },
+          { id: prefix + '_intro_ai', name: 'AI真人', children: [] },
+          { id: prefix + '_intro_story', name: '剧情', children: [] }
+        ]
+      }
+    ];
+  }
+
   var CUSTOM_FOLDERS = [
     {
-      id: 'clip',
-      name: '片段库',
-      children: [
-        { id: 'clip_gameplay', name: '玩法展示', children: [] },
-        { id: 'clip_hook', name: '剧情钩子', children: [] },
-        { id: 'clip_transition', name: '转场', children: [] }
-      ]
+      id: 'ttminigame',
+      name: 'TTminigame',
+      children: buildPlatformTemplateChildren('tt')
     },
     {
-      id: 'sticker',
-      name: '贴纸库',
-      children: [
-        { id: 'sticker_meme', name: 'MEME', children: [] },
-        { id: 'sticker_gui', name: 'GUI', children: [] },
-        { id: 'sticker_hint', name: '互动提示', children: [] },
-        { id: 'sticker_comment', name: '评论挂件', children: [] }
-      ]
+      id: 'app',
+      name: 'APP',
+      children: buildPlatformTemplateChildren('app')
     },
-    {
-      id: 'border',
-      name: '边框库',
-      children: [
-        { id: 'border_en', name: '上下英文', children: [] },
-        { id: 'border_full', name: '全包边', children: [] }
-      ]
-    },
-    {
-      id: 'audio',
-      name: '音频库',
-      children: [
-        {
-          id: 'audio_bgm',
-          name: 'BGM',
-          children: [
-            { id: 'audio_bgm_puzzle', name: '益智', children: [] },
-            { id: 'audio_bgm_relax', name: '轻松', children: [] },
-            { id: 'audio_bgm_magic', name: '魔性', children: [] }
-          ]
-        },
-        {
-          id: 'audio_voice',
-          name: '口播',
-          children: [
-            { id: 'audio_voice_female', name: '女声', children: [] },
-            { id: 'audio_voice_male', name: '男声', children: [] }
-          ]
-        }
-      ]
-    }
+    { id: 'common_bgm', name: '通用BGM', children: [] },
+    { id: 'common_sticker', name: '通用贴纸', children: [] },
+    { id: 'common_intro', name: '通用片头', children: [] },
+    { id: 'scale_tpl', name: '跑量模板', children: [] }
   ];
 
   function pad2(n) { return n < 10 ? '0' + n : String(n); }
@@ -311,55 +333,117 @@
   function buildMockRows() {
     var folderIds = listCustomFolderIds();
     var syncCycle = ['已同步', '已同步', '未同步', '同步失败', '已同步'];
-    var types = ['视频', '视频', '视频', '图片'];
+    /* 合成方式 ↔ 支持格式（与业务说明一致） */
+    var SYNTHESIS_SPECS = {
+      '片段拼接': {
+        type: '视频',
+        formats: ['mp4', 'mov', 'avi', 'mpeg'],
+        names: ['片头拼接', '片尾拼接', '前后拼接', '转场拼接', '片段合集']
+      },
+      '图层叠加': {
+        formats: ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'mov'],
+        names: ['边框贴纸', '角标挂件', '装饰文字', '引导点击', '动态挂件']
+      },
+      '音频替换': {
+        type: '音频',
+        formats: ['mp3', 'wav', 'aac', 'm4a'],
+        names: ['BGM替换', '口播替换', '音效混音', '背景音轨', '音频模板']
+      }
+    };
+
+    /**
+     * 文件夹 → 合成方式
+     * BGM / 口播 / 通用BGM → 音频替换
+     * 贴纸 / 边框 / 通用贴纸 → 图层叠加
+     * 片头 / 通用片头 → 片段拼接
+     * 跑量模板 / 其余根目录 → 不限
+     */
+    function categoryForFolder(folderId) {
+      var node = findFolderNode(folderId);
+      var name = (node && node.name) || '';
+      var path = getFolderPath(folderId) || '';
+      if (folderId === 'scale_tpl' || name === '跑量模板') return '';
+      if (folderId === 'common_bgm' || name === '通用BGM' ||
+          /(^| \/ )BGM( \/ |$)/.test(path) || /(^| \/ )口播( \/ |$)/.test(path)) {
+        return '音频替换';
+      }
+      if (folderId === 'common_sticker' || name === '通用贴纸' ||
+          /(^| \/ )贴纸( \/ |$)/.test(path) || /(^| \/ )边框( \/ |$)/.test(path)) {
+        return '图层叠加';
+      }
+      if (folderId === 'common_intro' || name === '通用片头' ||
+          /(^| \/ )片头( \/ |$)/.test(path)) {
+        return '片段拼接';
+      }
+      return '';
+    }
+
+    function mockCountForFolder(folderId) {
+      var node = findFolderNode(folderId);
+      if (!node) return 2;
+      if (node.children && node.children.length) return 2;
+      return 4;
+    }
+
     var list = [];
     var today = startOfDay(new Date());
-    var i;
-    for (i = 0; i < 48; i++) {
-      var created = new Date(today);
-      created.setDate(created.getDate() - (i % 20));
-      created.setHours(9 + (i % 8), (i * 7) % 60, (i * 11) % 60, 0);
-      var type = pick(types, i);
-      var format = type === '视频' ? pick(['mp4', 'mov'], i) : pick(['png', 'jpg', 'webp'], i);
-      var size = pick(['1080x1920', '720x1280', '1920x1080', '1080x1080', '800x800', '1280x720'], i);
-      var durationSec = type === '视频' ? (8 + (i % 40)) : 0;
-      var tags = [];
-      if (i % 2 === 0) tags.push('高消耗');
-      if (i % 3 === 0) tags.push('低CPI');
-      if (i % 4 === 0) tags.push('优质');
-      if (i % 5 === 0) tags.push('16-30s');
-      if (i % 6 === 0) tags.push('副玩法');
-      if (!tags.length) tags.push(pick(['竖版', '品牌'], i));
-      var sync = pick(syncCycle, i);
-      var delivery = [];
-      if (i % 2 === 0) delivery.push('tt');
-      if (i % 3 === 0) delivery.push('fb');
-      if (i % 4 === 0) delivery.push('gg');
-      if (i % 7 === 0) delivery.push('ap');
-      list.push({
-        id: String(materialSeq++),
-        name: pick(['品牌片头', '投放竖版', '剧情混剪', '口播成片', '素材示例'], i) + '_' + (1000 + i) + '.' + format,
-        folderId: pick(folderIds, i),
-        type: type,
-        format: format,
-        size: size,
-        durationSec: durationSec,
-        tags: tags,
-        creator: pick(USERS, i + 2),
-        createdAt: formatDateTime(created),
-        createdDate: formatDateYMD(created),
-        createdTs: created.getTime(),
-        status: i % 11 === 0 ? '禁用' : '启用',
-        syncStatus: sync,
-        xmpId: sync === '已同步' ? 'XMP' + (5000 + i) : '',
-        failReason: sync === '同步失败' ? 'XMP 限流' : '',
-        delivery: delivery,
-        ossUrl: ''
-      });
-      list[list.length - 1].ossUrl = buildOssUrl(list[list.length - 1].name, created, list[list.length - 1].id, format);
-    }
+    var i = 0;
+    folderIds.forEach(function (folderId) {
+      var fixedCategory = categoryForFolder(folderId);
+      var count = mockCountForFolder(folderId);
+      var c;
+      for (c = 0; c < count; c++, i++) {
+        var created = new Date(today);
+        created.setDate(created.getDate() - (i % 20));
+        created.setHours(9 + (i % 8), (i * 7) % 60, (i * 11) % 60, 0);
+        var category = fixedCategory || pick(CATEGORY_OPTIONS, i);
+        var spec = SYNTHESIS_SPECS[category];
+        var format = pick(spec.formats, i);
+        var type = spec.type || (format === 'mov' ? '视频' : '图片');
+        var size = type === '音频'
+          ? '—'
+          : pick(['1080x1920', '720x1280', '1920x1080', '1080x1080', '800x800', '1280x720'], i);
+        var durationSec = (type === '视频' || type === '音频') ? (8 + (i % 40)) : 0;
+        var tags = [];
+        if (i % 2 === 0) tags.push('高消耗');
+        if (i % 3 === 0) tags.push('低CPI');
+        if (i % 4 === 0) tags.push('优质');
+        if (i % 5 === 0) tags.push('16-30s');
+        if (i % 6 === 0) tags.push('副玩法');
+        if (!tags.length) tags.push(pick(['竖版', '品牌'], i));
+        var sync = pick(syncCycle, i);
+        var delivery = [];
+        if (i % 2 === 0) delivery.push('tt');
+        if (i % 3 === 0) delivery.push('fb');
+        if (i % 4 === 0) delivery.push('gg');
+        if (i % 7 === 0) delivery.push('ap');
+        list.push({
+          id: String(materialSeq++),
+          name: pick(spec.names, i) + '_' + (1000 + i) + '.' + format,
+          folderId: folderId,
+          type: type,
+          format: format,
+          size: size,
+          durationSec: durationSec,
+          category: category,
+          tags: tags,
+          creator: pick(USERS, i + 2),
+          createdAt: formatDateTime(created),
+          createdDate: formatDateYMD(created),
+          createdTs: created.getTime(),
+          status: i % 11 === 0 ? '禁用' : '启用',
+          syncStatus: sync,
+          xmpId: sync === '已同步' ? 'XMP' + (5000 + i) : '',
+          failReason: sync === '同步失败' ? 'XMP 限流' : '',
+          delivery: delivery,
+          ossUrl: ''
+        });
+        list[list.length - 1].ossUrl = buildOssUrl(list[list.length - 1].name, created, list[list.length - 1].id, format);
+      }
+    });
     return list;
   }
+
 
   var ALL_ROWS = buildMockRows();
 
@@ -375,7 +459,7 @@
     folderId: SYSTEM_FOLDER.id,
     folderKw: '',
     collapsed: buildDefaultCollapsed(),
-    draft: { tag: [], creator: '', xmp: '', type: '', format: [], size: [], name: '' },
+    draft: { category: [], creator: '', type: '', format: [], size: [], name: '' },
     dateCleared: false,
     visibleFilters: DEFAULT_VISIBLE_FILTERS.slice(),
     filterVisibleDraft: null,
@@ -386,12 +470,12 @@
     paginationBound: false,
     selected: {},
     view: 'list',
-    /** false：仅当前文件夹素材 + 子文件夹行；true：含子文件夹素材平铺 */
+    /** false：仅当前文件夹模板 + 子文件夹行；true：含子文件夹模板平铺 */
     showSubfolderMaterials: false,
     upload: {
+      category: '片段拼接',
       folderId: '',
       creator: CURRENT_USER,
-      tags: [],
       deriveDup: true,
       items: [],
       selected: {}
@@ -405,7 +489,7 @@
       nameBase: '',
       format: '',
       folderId: '',
-      tags: [],
+      category: '片段拼接',
       creator: ''
     },
     folderModal: {
@@ -859,24 +943,21 @@
     });
   }
 
-  var tagSelect = bindCascadeMultiSelect({
-    wrapId: 'tagWrap',
-    triggerId: 'tagTrigger',
-    panelId: 'tagPanel',
-    labelId: 'tagLabel',
-    groupListId: 'tagGroupList',
-    childListId: 'tagChildList',
-    selectedId: 'tagSelected',
-    searchId: 'tagSearch',
-    countId: 'tagCount',
-    selectAllId: 'tagSelectAll',
-    clearAllId: 'tagClearAll',
-    clearId: 'tagClear',
-    prefix: '标签：',
-    tree: TAG_TREE,
-    getSelected: function () { return state.draft.tag; },
-    setSelected: function (arr) { state.draft.tag = arr; }
-  });
+  var categorySelect = null;
+  if (UI.bindMultiSelect) {
+    categorySelect = UI.bindMultiSelect({
+      wrapId: 'categoryWrap',
+      triggerId: 'categoryTrigger',
+      panelId: 'categoryPanel',
+      labelId: 'categoryLabel',
+      listId: 'categoryList',
+      clearId: 'categoryClear',
+      prefix: '合成方式：',
+      getOptions: function () { return CATEGORY_OPTIONS; },
+      getSelected: function () { return state.draft.category; },
+      setSelected: function (arr) { state.draft.category = arr || []; }
+    });
+  }
 
   var formatSelect = bindCascadeMultiSelect({
     wrapId: 'formatWrap',
@@ -937,16 +1018,6 @@
 
   if (UI.bindSingleSelect) {
     UI.bindSingleSelect({
-      wrapId: 'xmpWrap',
-      triggerId: 'xmpTrigger',
-      panelId: 'xmpPanel',
-      labelId: 'xmpLabel',
-      clearId: 'xmpClear',
-      prefix: '同步XMP：',
-      getValue: function () { return state.draft.xmp; },
-      onChange: function (v) { state.draft.xmp = v; }
-    });
-    UI.bindSingleSelect({
       wrapId: 'typeWrap',
       triggerId: 'typeTrigger',
       panelId: 'typePanel',
@@ -972,15 +1043,15 @@
   }
 
   function syncMainFilterLabels() {
-    if (tagSelect && tagSelect.syncLabel) tagSelect.syncLabel();
+    if (categorySelect && categorySelect.syncLabel) categorySelect.syncLabel();
     if (formatSelect && formatSelect.syncLabel) formatSelect.syncLabel();
     if (sizeSelect && sizeSelect.syncLabel) sizeSelect.syncLabel();
     if (creatorSelect && creatorSelect.syncLabel) creatorSelect.syncLabel();
-    ['xmp', 'type'].forEach(function (key) {
+    ['type'].forEach(function (key) {
       var wrap = $(key + 'Wrap');
       var label = $(key + 'Label');
       if (!wrap || !label) return;
-      var map = { xmp: '同步XMP：', type: '类型：' };
+      var map = { type: '类型：' };
       var val = state.draft[key] || '';
       if (!val) {
         label.innerHTML = map[key] + '<span class="muted">请选择</span>';
@@ -1036,6 +1107,18 @@
         cascadePanelHtml(key) +
       '</div>';
     }
+    if (f.kind === 'multi') {
+      return '<div class="filter-setting-control" id="fsWrap_' + key + '">' +
+        '<button class="select-trigger" type="button" id="fsTrigger_' + key + '">' +
+          '<span class="select-trigger__text" id="fsLabel_' + key + '">' + f.label + '：<span class="muted">请选择</span></span>' +
+          '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
+        '</button>' +
+        '<button class="select-clear" type="button" id="fsClear_' + key + '" aria-label="清除">' + CLEAR_ICON + '</button>' +
+        '<div class="multi-panel multi-panel--simple" id="fsPanel_' + key + '">' +
+          '<div class="multi-panel__list" id="fsList_' + key + '"></div>' +
+        '</div>' +
+      '</div>';
+    }
     if (f.kind === 'search') {
       return '<div class="filter-setting-control" id="fsWrap_' + key + '">' +
         '<button class="select-trigger" type="button" id="fsTrigger_' + key + '">' +
@@ -1060,8 +1143,7 @@
       '</div>';
     }
     var options = [];
-    if (key === 'type') options = ['视频', '图片'];
-    else if (key === 'xmp') options = ['是', '否'];
+    if (key === 'type') options = ['视频', '图片', '音频'];
     return '<div class="filter-setting-control" id="fsWrap_' + key + '">' +
       '<button class="select-trigger" type="button" id="fsTrigger_' + key + '">' +
         '<span class="select-trigger__text" id="fsLabel_' + key + '">' + f.label + '：<span class="muted">请选择</span></span>' +
@@ -1138,11 +1220,31 @@
           setSelected: function (arr) {
             state.draft[key] = arr;
             syncMainFilterLabels();
-            if (key === 'tag' && tagSelect && tagSelect.render) tagSelect.render();
             if (key === 'format' && formatSelect && formatSelect.render) formatSelect.render();
             if (key === 'size' && sizeSelect && sizeSelect.render) sizeSelect.render();
           }
         });
+        return;
+      }
+      if (f.kind === 'multi') {
+        if (UI.bindMultiSelect) {
+          UI.bindMultiSelect({
+            wrapId: 'fsWrap_' + key,
+            triggerId: 'fsTrigger_' + key,
+            panelId: 'fsPanel_' + key,
+            labelId: 'fsLabel_' + key,
+            listId: 'fsList_' + key,
+            clearId: 'fsClear_' + key,
+            prefix: f.label + '：',
+            getOptions: function () { return f.options || CATEGORY_OPTIONS; },
+            getSelected: function () { return state.draft[key] || []; },
+            setSelected: function (arr) {
+              state.draft[key] = arr || [];
+              syncMainFilterLabels();
+              if (key === 'category' && categorySelect && categorySelect.render) categorySelect.render();
+            }
+          });
+        }
         return;
       }
       if (f.kind === 'search') {
@@ -1208,9 +1310,8 @@
     if (!state.filterSettingsSnapshot) {
       state.filterSettingsSnapshot = {
         draft: {
-          tag: (state.draft.tag || []).slice(),
+          category: (state.draft.category || []).slice(),
           creator: state.draft.creator,
-          xmp: state.draft.xmp,
           type: state.draft.type,
           format: (state.draft.format || []).slice(),
           size: (state.draft.size || []).slice(),
@@ -1259,9 +1360,8 @@
   function restoreFilterSettingsSnapshot() {
     var snap = state.filterSettingsSnapshot;
     if (!snap) return;
-    state.draft.tag = (snap.draft.tag || []).slice();
+    state.draft.category = (snap.draft.category || []).slice();
     state.draft.creator = snap.draft.creator;
-    state.draft.xmp = snap.draft.xmp;
     state.draft.type = snap.draft.type;
     state.draft.format = (snap.draft.format || []).slice();
     state.draft.size = (snap.draft.size || []).slice();
@@ -1274,7 +1374,7 @@
       dateApi.setRange(snap.dateStart, snap.dateEnd, null, true);
     }
     syncMainFilterLabels();
-    if (tagSelect && tagSelect.render) tagSelect.render();
+    if (categorySelect && categorySelect.render) categorySelect.render();
     if (formatSelect && formatSelect.render) formatSelect.render();
     if (sizeSelect && sizeSelect.render) sizeSelect.render();
     state.filterSettingsSnapshot = null;
@@ -1305,22 +1405,12 @@
     UI.closeModal('filterModal');
   }
 
-  function syncXmpYesNo(row) {
-    return row.syncStatus === '已同步' ? '是' : '否';
-  }
-
-  function xmpTag(val) {
-    var ok = val === '是';
-    return '<span class="tag tag--' + (ok ? 'enabled' : 'disabled') + '">' + escapeHtml(val) + '</span>';
-  }
-
   function applyFilters() {
     var useDate = isFilterVisible('date') && !state.dateCleared;
     state.applied = {
       folderId: state.folderId,
-      tag: isFilterVisible('tag') ? (state.draft.tag || []).slice() : [],
+      category: isFilterVisible('category') ? (state.draft.category || []).slice() : [],
       creator: isFilterVisible('creator') ? state.draft.creator : '',
-      xmp: isFilterVisible('xmp') ? (state.draft.xmp || '') : '',
       type: isFilterVisible('type') ? (state.draft.type || '') : '',
       format: isFilterVisible('format') ? (state.draft.format || []).slice() : [],
       size: isFilterVisible('size') ? (state.draft.size || []).slice() : [],
@@ -1357,9 +1447,8 @@
   function getFilteredRows() {
     var f = state.applied || {
       folderId: state.folderId,
-      tag: [],
+      category: [],
       creator: '',
-      xmp: '',
       type: '',
       format: [],
       size: [],
@@ -1379,11 +1468,10 @@
           return false;
         }
       }
-      if (f.tag && f.tag.length) {
-        if (!f.tag.some(function (t) { return row.tags.indexOf(t) !== -1; })) return false;
+      if (f.category && f.category.length) {
+        if (f.category.indexOf(row.category) === -1) return false;
       }
       if (f.creator && row.creator !== f.creator) return false;
-      if (f.xmp && syncXmpYesNo(row) !== f.xmp) return false;
       if (f.type && row.type !== f.type) return false;
       if (f.format && f.format.length) {
         var fmt = String(row.format || '').toLowerCase();
@@ -1561,12 +1649,8 @@
     return row.format + ' | ' + row.size;
   }
 
-  function tagsHtml(row, max) {
-    var tags = (row.tags || []).slice();
-    if (typeof max === 'number') tags = tags.slice(0, max);
-    return '<div class="tag-list">' + tags.map(function (t) {
-      return '<span class="mat-tag">' + escapeHtml(t) + '</span>';
-    }).join('') + '</div>';
+  function categoryText(row) {
+    return escapeHtml(row.category || '—');
   }
 
   function gridMoreBtnHtml(attr, id) {
@@ -1600,6 +1684,13 @@
   }
 
   var PLAY_ICON = '<span class="thumb__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg></span>';
+  var AUDIO_ICON = '<span class="thumb__audio-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>';
+
+  function mediaThumbInnerHtml(row, previewClass) {
+    if (row.type === '音频') return AUDIO_ICON;
+    var playIcon = row.type === '视频' ? PLAY_ICON : '';
+    return '<span class="' + (previewClass || 'thumb__preview') + '" aria-hidden="true"></span>' + playIcon;
+  }
 
   function updateBatchBtn() {
     var btn = $('batchBtn');
@@ -1639,15 +1730,14 @@
             '<td>' + PH + '</td>' +
             '<td class="col-duration">' + PH + '</td>' +
             '<td>' + PH + '</td>' +
-            '<td>' + PH + '</td>' +
             '<td class="col-action">' + PH + '</td>' +
           '</tr>'
         );
       }
       var row = entry.row;
       var checked = state.selected[row.id] ? ' checked' : '';
-      var playIcon = row.type === '视频' ? PLAY_ICON : '';
-      var durationText = row.type === '视频' ? String(row.durationSec || 0) : '—';
+      var isAudio = row.type === '音频';
+      var durationText = (row.type === '视频' || isAudio) ? String(row.durationSec || 0) : '—';
       var nameNoExt = stripExt(row.name);
       var oss = row.ossUrl || buildOssUrl(row.name, new Date(row.createdTs || Date.now()), row.id, row.format);
       return (
@@ -1655,8 +1745,10 @@
           '<td class="col-check is-freeze"><span class="cell-check"><input type="checkbox" data-check="' + escapeHtml(row.id) + '"' + checked + ' aria-label="选择" /></span></td>' +
           '<td class="col-id is-freeze">' + escapeHtml(row.id) + '</td>' +
           '<td class="col-material is-freeze"><div class="material-cell">' +
-            '<button class="thumb" type="button" data-preview="' + escapeHtml(row.id) + '" data-oss="' + escapeHtml(oss) + '" aria-label="打开素材">' +
-              '<span class="thumb__preview" aria-hidden="true"></span>' + playIcon +
+            '<button class="thumb' + (isAudio ? ' thumb--audio' : '') + '" type="button"' +
+              (isAudio ? '' : ' data-preview="' + escapeHtml(row.id) + '"') +
+              ' data-oss="' + escapeHtml(oss) + '" aria-label="打开模板">' +
+              mediaThumbInnerHtml(row, 'thumb__preview') +
             '</button>' +
             '<div class="material-cell__meta">' +
               '<div class="material-cell__name-wrap">' +
@@ -1665,13 +1757,12 @@
               '</div>' +
             '</div>' +
           '</div></td>' +
-          '<td class="col-tags"><div class="tag-cell">' + tagsHtml(row) + cellEditBtnHtml('tag') + '</div></td>' +
           '<td>' + escapeHtml(row.creator) + '</td>' +
+          '<td>' + categoryText(row) + '</td>' +
           '<td>' + escapeHtml(row.type) + '</td>' +
           '<td>' + escapeHtml(row.format) + '</td>' +
           '<td>' + escapeHtml(row.size) + '</td>' +
           '<td class="col-duration">' + escapeHtml(durationText) + '</td>' +
-          '<td>' + xmpTag(syncXmpYesNo(row)) + '</td>' +
           '<td>' + escapeHtml(row.createdAt) + '</td>' +
           '<td class="col-action"><span class="action-links">' +
             '<button class="link" type="button" data-act="detail">编辑</button>' +
@@ -1754,17 +1845,19 @@
       var checked = state.selected[row.id] ? ' checked' : '';
       var nameNoExt = stripExt(row.name);
       var oss = row.ossUrl || buildOssUrl(row.name, new Date(row.createdTs || Date.now()), row.id, row.format);
-      var playIcon = row.type === '视频' ? PLAY_ICON : '';
+      var isAudio = row.type === '音频';
       var sizeText = row.size || '—';
-      var durationText = row.type === '视频' ? formatDuration(row.durationSec || 0) : '';
+      var durationText = (row.type === '视频' || isAudio) ? formatDuration(row.durationSec || 0) : '';
       return (
         '<div class="grid-card" data-id="' + escapeHtml(row.id) + '">' +
           '<span class="grid-card__check cell-check">' +
             '<input type="checkbox" data-check="' + escapeHtml(row.id) + '"' + checked + ' aria-label="选择" />' +
           '</span>' +
           '<div class="grid-card__stage">' +
-            '<button class="grid-card__thumb" type="button" data-oss="' + escapeHtml(oss) + '" aria-label="打开素材">' +
-              '<span class="grid-card__preview" aria-hidden="true"></span>' + playIcon +
+            '<button class="grid-card__thumb' + (isAudio ? ' grid-card__thumb--audio' : '') + '" type="button" data-oss="' + escapeHtml(oss) + '" aria-label="打开模板">' +
+              (isAudio
+                ? '<span class="grid-card__preview grid-card__preview--audio" aria-hidden="true">' + AUDIO_ICON + '</span>'
+                : mediaThumbInnerHtml(row, 'grid-card__preview')) +
             '</button>' +
             '<div class="grid-card__meta-bar" aria-hidden="true">' +
               '<span class="grid-card__meta-size">' + escapeHtml(sizeText) + '</span>' +
@@ -1779,7 +1872,7 @@
               cellEditBtnHtml('name') +
             '</div>' +
             '<div class="grid-card__tags tag-cell">' +
-              tagsHtml(row, 3) +
+              '<span class="grid-card__category">' + categoryText(row) + '</span>' +
               gridMoreBtnHtml('data-material-more', row.id) +
             '</div>' +
           '</div>' +
@@ -1913,13 +2006,22 @@
     UI.closeDrawer('detailDrawer');
   }
 
+  function syncCategorySeg(segId, value) {
+    var seg = $(segId);
+    if (!seg) return;
+    var v = value || '片段拼接';
+    seg.querySelectorAll('.seg__item').forEach(function (el) {
+      el.classList.toggle('is-active', (el.getAttribute('data-value') || '') === v);
+    });
+  }
+
   function openDetail(row) {
     if (!row) return;
     state.detail.id = row.id;
     state.detail.nameBase = stripExt(row.name);
     state.detail.format = row.format || fileExt(row.name) || '';
     state.detail.folderId = row.folderId || SYSTEM_FOLDER.id;
-    state.detail.tags = (row.tags || []).slice();
+    state.detail.category = row.category || '片段拼接';
     state.detail.creator = row.creator || '';
 
     if ($('detailId')) $('detailId').textContent = row.id;
@@ -1927,13 +2029,20 @@
     if ($('detailCreatedAt')) $('detailCreatedAt').textContent = row.createdAt || '—';
     if ($('detailSource')) $('detailSource').textContent = row.source || '本地上传';
     if ($('detailFileSize')) $('detailFileSize').textContent = mockFileSizeText(row);
+    if ($('detailType')) $('detailType').textContent = row.type || '—';
     if ($('detailFormat')) $('detailFormat').textContent = row.format || '—';
     if ($('detailDim')) $('detailDim').textContent = row.size || '—';
     if ($('detailDuration')) {
-      $('detailDuration').textContent = row.type === '视频' ? (String(row.durationSec || 0) + ' 秒') : '—';
+      $('detailDuration').textContent = (row.type === '视频' || row.type === '音频') ? (String(row.durationSec || 0) + ' 秒') : '—';
     }
+    var previewMedia = $('detailPreviewMedia');
     var play = $('detailPreviewPlay');
+    var placeholder = previewMedia ? previewMedia.querySelector('.detail-drawer__preview-placeholder') : null;
+    var audioIcon = $('detailPreviewAudio');
+    if (previewMedia) previewMedia.classList.toggle('is-audio', row.type === '音频');
+    if (placeholder) placeholder.hidden = row.type === '音频';
     if (play) play.hidden = row.type !== '视频';
+    if (audioIcon) audioIcon.hidden = row.type !== '音频';
 
     ['detailNameItem', 'detailFolderItem', 'detailCreatorItem'].forEach(function (id) {
       var el = $(id);
@@ -1942,8 +2051,7 @@
 
     if (detailFolderSelect && detailFolderSelect.syncLabel) detailFolderSelect.syncLabel();
     if (detailCreatorSelect && detailCreatorSelect.syncLabel) detailCreatorSelect.syncLabel();
-    if (detailTagSelect && detailTagSelect.render) detailTagSelect.render();
-    else if (detailTagSelect && detailTagSelect.syncLabel) detailTagSelect.syncLabel();
+    if ($('detailCategory')) $('detailCategory').textContent = state.detail.category || '—';
 
     UI.openDrawer('detailDrawer');
   }
@@ -1980,7 +2088,7 @@
     var ext = state.detail.format || fileExt(row.name) || 'mp4';
     row.name = nameBase + (ext ? ('.' + ext) : '');
     row.folderId = state.detail.folderId;
-    row.tags = state.detail.tags.slice();
+    row.category = state.detail.category || '片段拼接';
     row.creator = state.detail.creator;
     closeDetailDrawer();
     renderAll();
@@ -2634,16 +2742,11 @@
       onAction: function (action) {
         var ids = getSelectedIds();
         if (!ids.length) {
-          UI.showToast('请先勾选素材');
+          UI.showToast('请先勾选模板');
           return;
         }
         if (action === 'download') {
           UI.showToast('下载任务已创建，请到任务中心查看', 'success');
-          return;
-        }
-        if (action === 'push') pushRows(ids);
-        if (action === 'tag') {
-          openBatchTagModal(ids);
           return;
         }
         if (action === 'delete') {
@@ -2789,7 +2892,7 @@
     if (!btn) return;
     if ($('nameEditPop') && $('nameEditPop').classList.contains('is-open')) return;
     var row = findRow(btn.getAttribute('data-preview'));
-    if (!row) return;
+    if (!row || row.type === '音频') return;
     showPreview(stripExt(row.name), btn);
   });
   $('tableBody').addEventListener('mouseout', function (e) {
@@ -2812,7 +2915,6 @@
       if (!qRow) return;
       var kind = quick.getAttribute('data-quick');
       if (kind === 'name') startQuickNameEdit(qRow, quick);
-      else if (kind === 'tag') openQuickTagEdit(qRow);
       return;
     }
     var thumb = e.target.closest('[data-oss]');
@@ -3073,44 +3175,22 @@
     }
   });
 
-  var upTagSelect = null;
-  if (UI.bindMultiSelect) {
-    upTagSelect = UI.bindMultiSelect({
-      wrapId: 'upTagWrap',
-      triggerId: 'upTagTrigger',
-      panelId: 'upTagPanel',
-      labelId: 'upTagLabel',
-      listId: 'upTagList',
-      selectedId: 'upTagSelected',
-      searchId: 'upTagSearch',
-      countId: 'upTagCount',
-      selectAllId: 'upTagSelectAll',
-      clearId: 'upTagClear',
-      prefix: '',
-      getOptions: function () { return TAG_OPTIONS; },
-      getSelected: function () { return state.upload.tags; },
-      setSelected: function (arr) { state.upload.tags = arr || []; }
-    });
+  function syncUpCategorySeg() {
+    syncCategorySeg('upCategorySeg', state.upload.category);
   }
 
-  var detailTagSelect = bindCascadeMultiSelect({
-    wrapId: 'detailTagWrap',
-    triggerId: 'detailTagTrigger',
-    panelId: 'detailTagPanel',
-    labelId: 'detailTagLabel',
-    groupListId: 'detailTagGroupList',
-    childListId: 'detailTagChildList',
-    selectedId: 'detailTagSelected',
-    searchId: 'detailTagSearch',
-    countId: 'detailTagCount',
-    selectAllId: 'detailTagSelectAll',
-    clearAllId: 'detailTagClearAll',
-    clearId: 'detailTagClear',
-    prefix: '',
-    tree: TAG_TREE,
-    getSelected: function () { return state.detail.tags; },
-    setSelected: function (arr) { state.detail.tags = arr || []; }
-  });
+  if ($('upCategorySeg')) {
+    $('upCategorySeg').addEventListener('click', function (e) {
+      var item = e.target.closest('.seg__item');
+      if (!item) return;
+      var next = item.getAttribute('data-value') || '片段拼接';
+      if (next === state.upload.category) return;
+      state.upload.category = next;
+      syncUpCategorySeg();
+      syncUploadAccept();
+      pruneUploadItemsByCategory();
+    });
+  }
 
   var batchTagSelect = bindCascadeMultiSelect({
     wrapId: 'batchTagWrap',
@@ -3130,13 +3210,6 @@
     getSelected: function () { return state.batchTags; },
     setSelected: function (arr) { state.batchTags = arr || []; }
   });
-
-  if ($('upTagPanelClear')) {
-    $('upTagPanelClear').addEventListener('click', function () {
-      state.upload.tags = [];
-      if (upTagSelect && upTagSelect.render) upTagSelect.render();
-    });
-  }
 
   function openBatchTagModal(ids) {
     state.batchTagIds = ids.slice();
@@ -3226,13 +3299,18 @@
     body.innerHTML = items.map(function (item) {
       var checked = state.upload.selected[item.uid] ? ' checked' : '';
       var displayName = stripExt(item.name);
-      var playIcon = item.mediaType === '视频' ? PLAY_ICON : '';
+      var isAudio = item.mediaType === '音频';
+      var thumbInner = isAudio
+        ? AUDIO_ICON
+        : ('<span class="thumb__preview" aria-hidden="true"></span>' + (item.mediaType === '视频' ? PLAY_ICON : ''));
       return (
         '<tr data-uid="' + item.uid + '">' +
           '<td class="col-check"><span class="cell-check"><input type="checkbox" data-up-check="' + item.uid + '"' + checked + ' /></span></td>' +
           '<td class="col-material"><div class="material-cell">' +
-            '<button class="thumb" type="button" data-up-preview="' + item.uid + '" aria-label="预览">' +
-              '<span class="thumb__preview" aria-hidden="true"></span>' + playIcon +
+            '<button class="thumb' + (isAudio ? ' thumb--audio' : '') + '" type="button"' +
+              (isAudio ? '' : ' data-up-preview="' + item.uid + '"') +
+              ' aria-label="预览">' +
+              thumbInner +
             '</button>' +
             '<div class="material-cell__meta">' +
               '<span class="material-cell__name" title="' + escapeHtml(displayName) + '">' + escapeHtml(displayName) + '</span>' +
@@ -3258,34 +3336,88 @@
     syncUpBatchBtn();
   }
 
+  function getUploadAllowedFormats(category) {
+    return UPLOAD_CATEGORY_FORMATS[category || state.upload.category] || UPLOAD_CATEGORY_FORMATS['片段拼接'];
+  }
+
+  function formatAcceptList(formats) {
+    return (formats || []).map(function (ext) { return '.' + ext; }).join(',');
+  }
+
+  function formatExtHint(formats) {
+    return (formats || []).map(function (ext) { return '.' + ext; }).join('、');
+  }
+
+  function syncUploadAccept() {
+    var formats = getUploadAllowedFormats();
+    var input = $('upFileInput');
+    if (input) input.accept = formatAcceptList(formats);
+    var title = document.querySelector('#upFileZone .upload-zone__title');
+    if (title) {
+      title.textContent = '点击或拖拽文件到此处上传（单次最多500个，支持 ' + formatExtHint(formats) + '）';
+    }
+  }
+
+  function pruneUploadItemsByCategory() {
+    var formats = getUploadAllowedFormats();
+    var before = state.upload.items.length;
+    state.upload.items = state.upload.items.filter(function (it) {
+      var ok = formats.indexOf((it.format || '').toLowerCase()) !== -1;
+      if (!ok) delete state.upload.selected[it.uid];
+      return ok;
+    });
+    var removed = before - state.upload.items.length;
+    if (removed > 0) {
+      renderUploadTable();
+      UI.showToast('已移除 ' + removed + ' 个与当前合成方式不符的文件');
+    }
+  }
+
   function addUploadFiles(fileList) {
     var arr = Array.prototype.slice.call(fileList || []);
     if (!arr.length) return;
+    var allowed = getUploadAllowedFormats();
+    var accepted = [];
+    var rejected = 0;
+    arr.forEach(function (file) {
+      var ext = (fileExt(file.name) || '').toLowerCase();
+      if (allowed.indexOf(ext) === -1) {
+        rejected += 1;
+        return;
+      }
+      accepted.push(file);
+    });
+    if (rejected > 0) {
+      UI.showToast('当前合成方式仅支持 ' + formatExtHint(allowed) + '，已忽略 ' + rejected + ' 个文件');
+    }
+    if (!accepted.length) return;
+
     var remain = UPLOAD_MAX - state.upload.items.length;
     if (remain <= 0) {
       UI.showToast('单次最多上传 ' + UPLOAD_MAX + ' 个文件');
       return;
     }
-    if (arr.length > remain) {
+    if (accepted.length > remain) {
       UI.showToast('超出上限，仅添加前 ' + remain + ' 个');
-      arr = arr.slice(0, remain);
+      accepted = accepted.slice(0, remain);
     }
-    arr.forEach(function (file) {
-      var ext = fileExt(file.name);
-      var isImage = ['png', 'jpg', 'jpeg', 'webp', 'gif'].indexOf(ext) !== -1;
+    accepted.forEach(function (file) {
+      var ext = (fileExt(file.name) || '').toLowerCase();
+      var isImage = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'].indexOf(ext) !== -1;
+      var isAudio = ['mp3', 'wav', 'aac', 'm4a'].indexOf(ext) !== -1;
       var item = {
         uid: uploadUid++,
         name: file.name,
         displayName: stripExt(file.name),
         format: ext || '—',
-        mediaType: isImage ? '图片' : '视频',
+        mediaType: isAudio ? '音频' : (isImage ? '图片' : '视频'),
         size: file.size || 0,
         sizeText: formatFileSize(file.size),
         sizeDim: '—',
         file: file
       };
       state.upload.items.push(item);
-      probeLocalMeta(item);
+      if (!isAudio) probeLocalMeta(item);
     });
     renderUploadTable();
   }
@@ -3295,9 +3427,9 @@
   }
 
   function openUpload() {
+    state.upload.category = '片段拼接';
     state.upload.folderId = state.folderId || SYSTEM_FOLDER.id;
     state.upload.creator = CURRENT_USER;
-    state.upload.tags = [];
     state.upload.deriveDup = true;
     state.upload.items = [];
     state.upload.selected = {};
@@ -3307,13 +3439,10 @@
       var el = $(id);
       if (el) el.classList.remove('is-error');
     });
+    syncUpCategorySeg();
+    syncUploadAccept();
     if (upFolderSelect && upFolderSelect.syncLabel) upFolderSelect.syncLabel();
     if (upCreatorSelect && upCreatorSelect.syncLabel) upCreatorSelect.syncLabel();
-    if (upTagSelect && upTagSelect.render) upTagSelect.render();
-    else if ($('upTagLabel')) {
-      $('upTagLabel').innerHTML = '<span class="muted">请选择标签</span>';
-      if ($('upTagWrap')) $('upTagWrap').classList.remove('has-value');
-    }
     renderUploadTable();
     UI.openDrawer('uploadDrawer');
   }
@@ -3378,7 +3507,7 @@
       if (!btn) return;
       var uid = Number(btn.getAttribute('data-up-preview'));
       var item = state.upload.items.find(function (it) { return it.uid === uid; });
-      if (!item) return;
+      if (!item || item.mediaType === '音频') return;
       showPreview(stripExt(item.name), btn);
     });
     $('upFileBody').addEventListener('mouseout', function (e) {
@@ -3424,7 +3553,7 @@
       ok = false;
     }
     if (!state.upload.items.length) {
-      UI.showToast('请先添加素材文件');
+      UI.showToast('请先添加模板文件');
       ok = false;
     }
     if (!ok) return;
@@ -3432,23 +3561,25 @@
     var now = new Date();
     var newIds = [];
     var targetFolder = state.upload.folderId;
-    var tags = state.upload.tags.length ? state.upload.tags.slice() : ['竖版'];
+    var category = state.upload.category || '片段拼接';
     var ready = state.upload.items.slice();
     ready.forEach(function (item, i) {
       var id = String(materialSeq++);
       newIds.push(id);
       var ext = item.format && item.format !== '—' ? item.format : fileExt(item.name) || 'mp4';
       var isImage = item.mediaType === '图片' || ['png', 'jpg', 'jpeg', 'webp', 'gif'].indexOf(ext) !== -1;
+      var isAudio = ['mp3', 'wav', 'aac', 'm4a'].indexOf(ext) !== -1;
       var fullName = item.name.indexOf('.') > 0 ? item.name : (item.name + '.' + ext);
       ALL_ROWS.unshift({
         id: id,
         name: fullName,
         folderId: targetFolder,
-        type: isImage ? '图片' : '视频',
+        type: isAudio ? '音频' : (isImage ? '图片' : '视频'),
         format: ext,
-        size: item.sizeDim && item.sizeDim !== '—' ? item.sizeDim : '1080x1920',
+        size: item.sizeDim && item.sizeDim !== '—' ? item.sizeDim : (isAudio ? '—' : '1080x1920'),
         durationSec: isImage ? 0 : 12 + i,
-        tags: tags,
+        category: category,
+        tags: [],
         creator: state.upload.creator,
         createdAt: formatDateTime(now),
         createdDate: formatDateYMD(now),
@@ -3462,7 +3593,7 @@
       });
     });
     closeUploadDrawer();
-    UI.showToast('已提交 ' + newIds.length + ' 个素材，后台开始上传至 OSS（原型）', 'success');
+    UI.showToast('已提交 ' + newIds.length + ' 个模板，后台开始上传至 OSS（原型）', 'success');
     applyFilters();
     pushRows(newIds, { force: true, silent: true });
   });
