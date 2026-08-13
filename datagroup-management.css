@@ -5,7 +5,8 @@
 }
 
 .form-item--top .form-item__label {
-  padding-top: 5px;
+  /* 与多行控件顶齐：沿用全局 Label 垂直居中盒，勿再叠加 padding-top */
+  align-self: flex-start;
 }
 
 .form-item__hint {

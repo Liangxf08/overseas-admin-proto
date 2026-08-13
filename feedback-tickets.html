@@ -940,7 +940,6 @@
       document.getElementById('drawerCancel').addEventListener('click', closeTicketDrawer);
       document.getElementById('drawerSave').addEventListener('click', saveDrawerStatus);
       document.getElementById('detailDrawer').addEventListener('click', function (e) {
-        if (e.target === this) closeTicketDrawer();
         const copyBtn = e.target.closest('[data-copy]');
         if (copyBtn) copyText(copyBtn.getAttribute('data-copy'));
         const statusBtn = e.target.closest('#drawerStatusQuick [data-status]');

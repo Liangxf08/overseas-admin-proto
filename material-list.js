@@ -1,4 +1,4 @@
-/* 素材列表 */
+/* 采集素材 */
 (function () {
   'use strict';
 
@@ -393,15 +393,13 @@
 
   /* preview */
   var previewPop = $('previewPop');
-  var previewName = $('previewName');
   var previewTimer = null;
 
   function showPreview(btn) {
     if (!previewPop || btn.getAttribute('data-expired') === '1') return;
-    previewName.textContent = btn.getAttribute('data-name') || '';
     var rect = btn.getBoundingClientRect();
     var popW = 280;
-    var popH = 520;
+    var popH = 480;
     var left = rect.right + 12;
     var top = rect.top;
     if (left + popW > window.innerWidth - 16) left = rect.left - popW - 12;

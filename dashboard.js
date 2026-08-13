@@ -666,7 +666,7 @@
 
   /* ========== Tree ========== */
   function iconFolder() {
-    return '<span class="board-tree__icon board-tree__icon--folder"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6.5A1.5 1.5 0 014.5 5H9l2 2h8.5A1.5 1.5 0 0121 8.5v9A1.5 1.5 0 0119.5 19h-15A1.5 1.5 0 013 17.5v-11z"/></svg></span>';
+    return '<span class="board-tree__icon board-tree__icon--folder"><img src="assets/文件夹.png" width="16" height="16" alt="" /></span>';
   }
 
   function iconBoard() {
@@ -2928,8 +2928,8 @@
       var folder = findNode(folderId);
       var hasKids = folder && folder.children && folder.children.length;
       $('confirmModalBody').textContent = hasKids
-        ? '文件夹内含有看板，删除后看板将一并移除，确定删除吗？'
-        : '确定删除该文件夹吗？删除后不可恢复。';
+        ? '此操作不可撤销，确认删除文件夹及文件夹下所有的看板？'
+        : '此操作不可撤销，确认删除吗？';
       openModal('confirmModal');
     }
   });
@@ -2971,7 +2971,7 @@
     } else if (op === 'delete' && canDeleteBoard(board)) {
       state.confirmAction = { type: 'deleteBoard', id: board.id };
       $('confirmModalTitle').textContent = '删除确认';
-      $('confirmModalBody').textContent = '此操作不可撤销，确定删除吗？';
+      $('confirmModalBody').textContent = '此操作不可撤销，确认删除吗？';
       openModal('confirmModal');
     }
   });

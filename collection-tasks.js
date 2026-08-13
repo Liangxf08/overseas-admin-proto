@@ -1158,15 +1158,9 @@
   }
 
   $('detailDrawerClose').addEventListener('click', closeDetailDrawer);
-  $('detailDrawer').addEventListener('click', function (e) {
-    if (e.target === e.currentTarget) closeDetailDrawer();
-  });
 
   $('configDrawerClose').addEventListener('click', closeConfigDrawer);
   $('configCancelBtn').addEventListener('click', closeConfigDrawer);
-  $('configDrawer').addEventListener('click', function (e) {
-    if (e.target === e.currentTarget) closeConfigDrawer();
-  });
 
   $('configSubmit').addEventListener('click', function () {
     if (!validateConfig()) return;

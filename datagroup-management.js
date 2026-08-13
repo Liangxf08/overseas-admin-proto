@@ -22,26 +22,13 @@
     { name: '开发测试', remark: '', scope: 'partial', products: 2, users: 1 },
     { name: 'APP-无花果', remark: '', scope: 'partial', products: 8, users: 2 },
     { name: 'APP-奇异果', remark: '', scope: 'partial', products: 12, users: 3 },
-    { name: 'TikTok微短剧', remark: '', scope: 'partial', products: 6, users: 1 },
-    { name: 'TT投放-小酥肉', remark: '', scope: 'partial', products: 4, users: 2 },
-    { name: 'TT投放-阿严', remark: '', scope: 'partial', products: 5, users: 1 },
-    { name: '投放组-国内', remark: '', scope: 'partial', products: 3, users: 2 },
-    { name: '投放组-海外', remark: '', scope: 'partial', products: 7, users: 4 },
-    { name: '数据组-全部', remark: '全量授权', scope: 'all', products: 0, users: 1 },
-    { name: 'SDK联调', remark: '', scope: 'partial', products: 2, users: 1 },
-    { name: '商务联运', remark: '', scope: 'partial', products: 5, users: 2 },
-    { name: '内容安全', remark: '', scope: 'partial', products: 1, users: 1 },
-    { name: '增长实验', remark: '', scope: 'partial', products: 4, users: 3 },
-    { name: '素材审核', remark: '', scope: 'partial', products: 2, users: 1 },
-    { name: '财务只读', remark: '', scope: 'partial', products: 3, users: 2 },
-    { name: '客服支持', remark: '', scope: 'partial', products: 2, users: 1 },
-    { name: '产品体验', remark: '', scope: 'partial', products: 6, users: 2 },
-    { name: '质量保障', remark: '', scope: 'partial', products: 5, users: 1 },
-    { name: '运营中台', remark: '', scope: 'partial', products: 9, users: 5 },
-    { name: '市场投放', remark: '', scope: 'partial', products: 8, users: 3 },
-    { name: '外部联运-A', remark: '', scope: 'partial', products: 4, users: 1 },
-    { name: '外部联运-B', remark: '', scope: 'partial', products: 3, users: 2 },
-    { name: '演示账号组', remark: '', scope: 'partial', products: 2, users: 0 }
+    { name: 'TikTok微短剧', remark: '', scope: 'partial', products: 0, users: 0 },
+    { name: 'TikTok小游戏', remark: '', scope: 'partial', products: 6, users: 2 },
+    { name: 'APP投放组', remark: '', scope: 'partial', products: 5, users: 2 },
+    { name: '小游戏投放组', remark: '', scope: 'partial', products: 4, users: 1 },
+    { name: 'APP运营组', remark: '', scope: 'partial', products: 7, users: 3 },
+    { name: '小游戏运营组', remark: '', scope: 'partial', products: 5, users: 2 },
+    { name: '全产品', remark: '全量授权', scope: 'all', products: 0, users: 1 }
   ];
 
   var ALL_USER_POOL = Array.from({ length: 24 }, function (_, i) {
@@ -816,9 +803,9 @@
     var count = row.userIds ? row.userIds.length : 0;
     state.deleteBlocked = count > 0;
     if (state.deleteBlocked) {
-      $('deleteBody').textContent = '当前数据组存在关联用户，请移除后再执行删除？';
+      $('deleteBody').textContent = '当前数据组存在关联用户，请移除后再执行删除。';
     } else {
-      $('deleteBody').textContent = '确认删除数据组「' + row.name + '」吗？删除后不可恢复。';
+      $('deleteBody').textContent = '此操作不可撤销，确认删除吗？';
     }
     UI.openModal('deleteModal');
   }

@@ -1177,9 +1177,6 @@
   });
   $('editSubmit').addEventListener('click', submitEdit);
   $('logDrawerClose').addEventListener('click', closeLogDrawer);
-  $('logDrawer').addEventListener('click', function (e) {
-    if (e.target === e.currentTarget) closeLogDrawer();
-  });
 
   var sandboxConfirmPending = null;
 

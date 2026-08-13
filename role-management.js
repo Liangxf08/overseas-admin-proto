@@ -11,7 +11,7 @@
   var ROLE_SEED = [
     { name: '研发测试', code: '44759271', remark: '产品授权', users: 7 },
     { name: '海外素材', code: '44759280', remark: '', users: 8 },
-    { name: '创新中心', code: '44758607', remark: '', users: 1 },
+    { name: '创新中心', code: '44758607', remark: '', users: 0 },
     { name: '研发负责人', code: '44759301', remark: '', users: 4 },
     { name: '财务审计', code: '44759312', remark: '', users: 2 },
     { name: '数据管理', code: '44759325', remark: '', users: 6 },
@@ -85,11 +85,12 @@
           name: '素材采集',
           children: [
             { id: 'collection-tasks', name: '采集任务' },
-            { id: 'material-list', name: '素材列表' }
+            { id: 'material-list', name: '采集素材' }
           ]
         },
-        { id: 'material-library', name: '素材库' },
-        { id: 'template-library', name: '模板库' }
+        { id: 'material-library', name: '本地素材' },
+        { id: 'template-library', name: '模板管理' },
+        { id: 'tag-library', name: '标签管理' }
       ]
     },
     {
@@ -694,10 +695,10 @@
     state.deleteBlocked = count > 0;
     if (state.deleteBlocked) {
       $('deleteTitle').textContent = '删除确认';
-      $('deleteBody').textContent = '当前角色存在关联用户，请移除后再执行删除？';
+      $('deleteBody').textContent = '当前角色存在关联用户，请移除后再执行删除。';
     } else {
       $('deleteTitle').textContent = '删除确认';
-      $('deleteBody').textContent = '确认删除角色「' + row.name + '」吗？删除后不可恢复。';
+      $('deleteBody').textContent = '此操作不可撤销，确认删除吗？';
     }
     UI.openModal('deleteModal');
   }

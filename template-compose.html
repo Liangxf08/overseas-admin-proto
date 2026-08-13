@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>新建合成 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="template-compose.css" />
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="compose-page">
+        <div class="compose-topbar">
+          <div class="compose-topbar__left">
+            <a class="compose-back" href="template-library.html">← 返回模板管理</a>
+            <span class="compose-divider"></span>
+            <h1 class="compose-title">新建合成</h1>
+            <span class="compose-spec">1080 × 1920</span>
+          </div>
+          <div class="compose-topbar__right">
+            <button class="btn btn--default" type="button" id="previewPlayBtn">预览</button>
+            <button class="btn btn--primary" type="button" id="exportBtn">导出到素材库</button>
+          </div>
+        </div>
+
+        <div class="compose-body">
+          <aside class="compose-assets" aria-label="素材与零件">
+            <div class="compose-assets__tabs" role="tablist">
+              <button class="compose-assets__tab is-active" type="button" data-panel="main" role="tab">主片</button>
+              <button class="compose-assets__tab" type="button" data-panel="hook" role="tab">钩子</button>
+              <button class="compose-assets__tab" type="button" data-panel="border" role="tab">边框</button>
+              <button class="compose-assets__tab" type="button" data-panel="voice" role="tab">口播</button>
+              <button class="compose-assets__tab" type="button" data-panel="sticker" role="tab">贴纸</button>
+            </div>
+            <div class="compose-assets__search">
+              <input class="input" id="assetSearch" type="text" placeholder="搜索名称" autocomplete="off" />
+            </div>
+            <div class="compose-assets__list" id="assetList"></div>
+            <p class="compose-assets__tip" id="assetTip">主片仅可选素材库成片</p>
+          </aside>
+
+          <section class="compose-stage">
+            <div class="compose-canvas-wrap">
+              <div class="compose-canvas" id="composeCanvas">
+                <div class="compose-canvas__frame">
+                  <div class="compose-canvas__placeholder" id="canvasPlaceholder">请从左侧选择主片</div>
+                  <div class="compose-canvas__layers" id="canvasLayers" hidden></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="compose-timeline" id="timeline">
+              <div class="timeline-head">
+                <span class="timeline-head__title">时间轴</span>
+                <span class="timeline-head__meta" id="timelineMeta">总时长 —</span>
+              </div>
+              <div class="timeline-tracks" id="timelineTracks"></div>
+            </div>
+          </section>
+
+          <aside class="compose-props" aria-label="属性">
+            <h2 class="compose-props__title">属性</h2>
+            <div id="propsEmpty" class="compose-props__empty">选中时间轴片段后可编辑</div>
+            <div id="propsForm" class="compose-props__form" hidden>
+              <div class="prop-row">
+                <label class="prop-label">名称</label>
+                <div class="prop-value" id="propName">—</div>
+              </div>
+              <div class="prop-row">
+                <label class="prop-label">类型</label>
+                <div class="prop-value" id="propType">—</div>
+              </div>
+              <div class="prop-row" id="propRangeRow">
+                <label class="prop-label">时段（秒）</label>
+                <div class="prop-range">
+                  <input class="input input--sm" id="propStart" type="number" min="0" step="0.1" />
+                  <span>—</span>
+                  <input class="input input--sm" id="propEnd" type="number" min="0" step="0.1" />
+                </div>
+              </div>
+              <div class="prop-row" id="propCoverRow" hidden>
+                <label class="prop-label">覆盖原声</label>
+                <label class="prop-switch">
+                  <input type="checkbox" id="propCoverAudio" />
+                  <span>开启后替换主片音轨</span>
+                </label>
+              </div>
+              <button class="btn btn--default btn--block" type="button" id="propRemove">移除片段</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 导出 -->
+  <div class="modal-mask modal-mask--dropdown" id="exportModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="exportTitle">导出到素材库</h2>
+        <button class="modal__close" type="button" data-close="exportModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="exNameItem">
+          <label class="form-item__label is-required">素材名称</label>
+          <div class="form-item__control">
+            <input class="input" id="exNameInput" type="text" placeholder="请输入" autocomplete="off" />
+            <div class="form-item__error">请输入素材名称</div>
+          </div>
+        </div>
+        <div class="form-item" id="exFolderItem">
+          <label class="form-item__label is-required">目标文件夹</label>
+          <div class="form-item__control" id="exFolderControl">
+            <button class="select-trigger" type="button" id="exFolderTrigger">
+              <span class="select-trigger__text" id="exFolderLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="search-select-panel" id="exFolderPanel">
+              <div class="search-select-panel__list" id="exFolderList"></div>
+            </div>
+            <div class="form-item__error">请选择目标文件夹</div>
+          </div>
+        </div>
+        <p class="form-hint">导出写入素材库自有 OSS，并按素材库策略自动同步 XMP（不同步文件夹）。</p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="exportModal">取消</button>
+        <button class="btn btn--primary" type="button" id="exSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 离开确认 -->
+  <div class="modal-mask" id="leaveModal" aria-hidden="true">
+    <div class="modal modal--small confirm-modal" role="dialog" aria-modal="true" aria-labelledby="leaveTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="leaveTitle">离开合成</h2>
+        <button class="modal__close" type="button" data-close="leaveModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="confirm-modal__content">
+          <span class="confirm-modal__icon confirm-modal__icon--warning" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm0 14a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 16zm0-9a1.2 1.2 0 0 1 1.2 1.2v5.1a1.2 1.2 0 1 1-2.4 0v-5.1A1.2 1.2 0 0 1 12 7z"/></svg>
+          </span>
+          <div class="confirm-modal__text">未导出，离开将丢失当前编排。确定离开？</div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="leaveModal">取消</button>
+        <button class="btn btn--primary" type="button" id="leaveOk">确定离开</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-msg" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <script src="product-common.js"></script>
+  <script src="material-sidebar.js"></script>
+  <script>MaterialShell.mount('template-compose');</script>
+  <script src="template-compose.js"></script>
+</body>
+</html>

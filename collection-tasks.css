@@ -181,8 +181,9 @@
   left: 0;
   margin-top: 4px;
   z-index: 20;
+  box-sizing: border-box;
+  width: 100%;
   min-width: 100%;
-  width: 240px;
   background: var(--color-bg-white, #fff);
   border: 1px solid var(--color-border-2, #E5E6EB);
   border-radius: var(--border-radius-medium, 4px);
@@ -242,7 +243,35 @@
   max-height: 216px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(201, 205, 212, 0.36) transparent;
+  scrollbar-color: rgba(201, 205, 212, 0.2) transparent;
+}
+
+.search-select-panel__list::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.search-select-panel__list::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.search-select-panel__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.search-select-panel__list::-webkit-scrollbar-thumb {
+  background: rgba(201, 205, 212, 0.18);
+  border-radius: 4px;
+}
+
+.search-select-panel__list:hover::-webkit-scrollbar-thumb {
+  background: rgba(201, 205, 212, 0.36);
+}
+
+.search-select-panel__list::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 205, 212, 0.48);
 }
 
 .search-select-panel .single-option {

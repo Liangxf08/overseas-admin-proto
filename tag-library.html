@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>标签管理 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <link rel="stylesheet" href="tag-library.css" />
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-panel">
+          <div class="page-tabs" role="tablist" aria-label="标签管理">
+            <button class="page-tabs__item is-active" type="button" role="tab" aria-selected="true" data-tab="tag" id="tabTag">标签</button>
+            <button class="page-tabs__item" type="button" role="tab" aria-selected="false" data-tab="group" id="tabGroup">标签组</button>
+          </div>
+
+          <div class="filter-bar" id="filterBarTag">
+            <div class="filter-item" id="filterTagNameWrap">
+              <input class="input input-clearable" id="filterTagName" type="text" placeholder="标签名称" autocomplete="off" />
+              <button class="select-clear" type="button" id="filterTagNameClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="filter-item" id="filterTagGroupWrap">
+              <button class="select-trigger" type="button" id="filterTagGroupTrigger">
+                <span class="select-trigger__text" id="filterTagGroupLabel">标签组：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="filterTagGroupClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="filterTagGroupPanel"></div>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn--primary" type="button" id="queryTagBtn">查询</button>
+              <button class="btn btn--success" type="button" id="addTagBtn">添加</button>
+              <div class="batch-wrap" id="tagBatchWrap">
+                <button class="btn btn--default btn--dropdown" type="button" id="tagBatchBtn" disabled>
+                  批量操作
+                  <svg class="btn__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <div class="batch-menu" id="tagBatchMenu" role="menu">
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="group">修改标签组</button>
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="delete">批量删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-bar" id="filterBarGroup" hidden>
+            <div class="filter-item" id="filterGroupNameWrap">
+              <input class="input input-clearable" id="filterGroupName" type="text" placeholder="标签组名称" autocomplete="off" />
+              <button class="select-clear" type="button" id="filterGroupNameClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn--primary" type="button" id="queryGroupBtn">查询</button>
+              <button class="btn btn--success" type="button" id="addGroupBtn">添加</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-panel" id="dataPanelTag">
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="tagTable">
+                <colgroup>
+                  <col class="col-check" data-col-width="48" />
+                  <col data-col-width="160" />
+                  <col data-col-width="120" />
+                  <col data-col-width="160" />
+                  <col data-col-width="120" />
+                  <col data-col-width="180" />
+                  <col data-col-width="140" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="col-check">
+                      <label class="cell-check">
+                        <input type="checkbox" id="tagCheckAll" />
+                      </label>
+                    </th>
+                    <th>标签名称</th>
+                    <th>关联素材数</th>
+                    <th>所属标签组</th>
+                    <th>更新人</th>
+                    <th>更新时间</th>
+                    <th class="col-action">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="tagTableBody"></tbody>
+              </table>
+              <div class="empty-tip" id="tagEmptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+          <div class="pagination" id="tagPagination"></div>
+        </div>
+
+        <div class="data-panel" id="dataPanelGroup" hidden>
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="groupTable">
+                <colgroup>
+                  <col data-col-width="200" />
+                  <col data-col-width="120" />
+                  <col data-col-width="120" />
+                  <col data-col-width="180" />
+                  <col data-col-width="140" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>标签组名称</th>
+                    <th>关联标签数</th>
+                    <th>更新人</th>
+                    <th>更新时间</th>
+                    <th class="col-action">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="groupTableBody"></tbody>
+              </table>
+              <div class="empty-tip" id="groupEmptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+          <div class="pagination" id="groupPagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 添加 / 编辑标签组 · 标准 Medium 800 -->
+  <div class="modal-mask modal-mask--dropdown" id="groupFormModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="groupFormTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="groupFormTitle">添加标签组</h2>
+        <button class="modal__close" type="button" data-close="groupFormModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="groupNameItem">
+          <label class="form-item__label is-required">标签组名称</label>
+          <div class="form-item__control">
+            <div class="input-clearable" id="groupNameClearWrap">
+              <input class="input" id="groupNameInput" type="text" placeholder="请输入" autocomplete="off" maxlength="40" />
+              <button class="select-clear" type="button" id="groupNameClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="form-item__error" id="groupNameError">请输入标签组名称</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="groupFormModal">取消</button>
+        <button class="btn btn--primary" type="button" id="groupFormSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加 / 编辑标签 · 标准 Medium 800 -->
+  <div class="modal-mask modal-mask--dropdown" id="tagFormModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="tagFormTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="tagFormTitle">添加标签</h2>
+        <button class="modal__close" type="button" data-close="tagFormModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="tagNameItem">
+          <label class="form-item__label is-required">标签名称</label>
+          <div class="form-item__control">
+            <div class="input-clearable" id="tagNameClearWrap">
+              <input class="input" id="tagNameInput" type="text" placeholder="请输入" autocomplete="off" maxlength="40" />
+              <button class="select-clear" type="button" id="tagNameClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="form-item__error" id="tagNameError">请输入标签名称</div>
+          </div>
+        </div>
+        <div class="form-item" id="tagGroupItem">
+          <label class="form-item__label is-required">所属标签组</label>
+          <div class="form-item__control">
+            <div class="filter-item" id="tagFormGroupWrap" style="width:100%">
+              <button class="select-trigger" type="button" id="tagFormGroupTrigger">
+                <span class="select-trigger__text" id="tagFormGroupLabel"><span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="tagFormGroupClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="tagFormGroupPanel"></div>
+            </div>
+            <div class="form-item__error" id="tagGroupError">请选择所属标签组</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="tagFormModal">取消</button>
+        <button class="btn btn--primary" type="button" id="tagFormSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量修改标签组 · 标准 Medium 800 -->
+  <div class="modal-mask modal-mask--dropdown" id="batchGroupModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchGroupTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="batchGroupTitle">修改标签组</h2>
+        <button class="modal__close" type="button" data-close="batchGroupModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="batchGroupItem">
+          <label class="form-item__label is-required">标签组</label>
+          <div class="form-item__control">
+            <div class="filter-item" id="batchGroupWrap" style="width:100%">
+              <button class="select-trigger" type="button" id="batchGroupTrigger">
+                <span class="select-trigger__text" id="batchGroupLabel"><span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="batchGroupClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="batchGroupPanel"></div>
+            </div>
+            <div class="form-item__error" id="batchGroupError">请选择标签组</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="batchGroupModal">取消</button>
+        <button class="btn btn--primary" type="button" id="batchGroupSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除确认 -->
+  <div class="modal-mask modal-mask--confirm" id="deleteModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <button class="confirm-modal__close" type="button" data-close="deleteModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--danger" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm4.955-27.771-4.95 4.95-4.95-4.95a1 1 0 0 0-1.414 0l-1.414 1.414a1 1 0 0 0 0 1.414l4.95 4.95-4.95 4.95a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l4.95-4.95 4.95 4.95a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-4.95-4.95 4.95-4.95a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="deleteTitle">删除确认</h2>
+          <p class="confirm-modal__body" id="deleteBody">此操作不可撤销，确认删除吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="deleteModal">取消</button>
+        <button class="btn btn--primary" type="button" id="deleteOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="product-common.js"></script>
+  <script src="material-sidebar.js"></script>
+  <script src="col-resize.js"></script>
+  <script>MaterialShell.mount('tag-library');</script>
+  <script src="tag-library.js"></script>
+</body>
+</html>

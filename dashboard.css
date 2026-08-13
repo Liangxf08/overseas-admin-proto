@@ -205,9 +205,15 @@
   justify-content: center;
 }
 
-.board-tree__icon--folder { color: #FFB400; }
+.board-tree__icon--folder { color: transparent; }
 .board-tree__icon--board { color: var(--color-success-6, #00B42A); }
 .board-tree__icon svg { width: 16px; height: 16px; }
+.board-tree__icon img {
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: contain;
+}
 
 .board-tree__label {
   flex: 1;

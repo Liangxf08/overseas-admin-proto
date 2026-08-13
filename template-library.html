@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>模板库 - 海外中台</title>
+  <title>模板管理 - 海外中台</title>
   <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
   <link rel="stylesheet" href="product-common.css" />
@@ -12,97 +12,276 @@
 </head>
 <body>
   <div class="app" id="appShell">
-    <main class="main" data-main>
-        <div class="content-card">
-          <div class="filter-panel">
-            <div class="page-tabs" id="typeTabs" role="tablist" aria-label="模板类型">
-              <button class="page-tabs__item is-active" type="button" data-type="" role="tab" aria-selected="true">全部</button>
-              <button class="page-tabs__item" type="button" data-type="钩子" role="tab" aria-selected="false">钩子</button>
-              <button class="page-tabs__item" type="button" data-type="边框" role="tab" aria-selected="false">边框</button>
-              <button class="page-tabs__item" type="button" data-type="口播" role="tab" aria-selected="false">口播</button>
-              <button class="page-tabs__item" type="button" data-type="贴纸" role="tab" aria-selected="false">贴纸</button>
+    <main class="main main--lib" data-main>
+      <div class="lib-page">
+        <!-- 左侧：本地文件夹 -->
+        <aside class="lib-sider" aria-label="本地文件夹">
+          <div class="lib-sider__search">
+            <div class="lib-search">
+              <svg class="lib-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+              <input class="lib-search__input" id="folderKw" type="text" placeholder="搜索文件夹" autocomplete="off" />
+            </div>
+            <button class="btn btn--default lib-sider__add" type="button" id="newFolderBtn" title="新建文件夹" aria-label="新建文件夹">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+          <div class="lib-tree" id="folderTree"></div>
+        </aside>
+
+        <!-- 右侧工作区 -->
+        <section class="lib-workspace">
+          <div class="lib-breadcrumb" id="breadcrumb">全部模板</div>
+
+          <div class="lib-filter" id="filterBar">
+            <button class="filter-gear" type="button" id="filterSettingBtn" aria-label="筛选设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"/></svg>
+            </button>
+
+            <div class="filter-item filter-item--date has-value" id="dateRangeWrap" data-filter-key="date">
+              <button class="date-range-trigger" type="button" id="dateRangeTrigger">
+                <span class="date-range-trigger__text" id="dateRangeLabel">上传时间：-</span>
+              </button>
+              <button class="select-clear" type="button" id="dateRangeClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="date-panel" id="datePanel">
+                <div class="date-panel__shortcuts" id="dateShortcuts">
+                  <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
+                  <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
+                  <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
+                  <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
+                  <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
+                  <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
+                </div>
+                <div class="date-panel__calendars">
+                  <div class="date-cal" id="dateCalLeft"></div>
+                  <div class="date-cal" id="dateCalRight"></div>
+                </div>
+              </div>
             </div>
 
-            <div class="filter-bar" id="filterBar">
-              <div class="filter-item filter-item--date" id="dateRangeWrap">
-                <button class="date-range-trigger" type="button" id="dateRangeTrigger">
-                  <span class="date-range-trigger__text" id="dateRangeLabel">上传时间：-</span>
-                </button>
-                <div class="date-panel" id="datePanel">
-                  <div class="date-panel__shortcuts" id="dateShortcuts">
-                    <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
-                    <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
-                    <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
-                    <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
-                    <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
-                    <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
-                    <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
-                    <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
-                  </div>
-                  <div class="date-panel__calendars">
-                    <div class="date-cal" id="dateCalLeft"></div>
-                    <div class="date-cal" id="dateCalRight"></div>
-                  </div>
+            <div class="filter-item" id="creatorWrap" data-filter-key="creator">
+              <button class="select-trigger" type="button" id="creatorTrigger">
+                <span class="select-trigger__text" id="creatorLabel">创意人：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="creatorClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="search-select-panel" id="creatorPanel">
+                <div class="search-select-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="creatorSearch" placeholder="搜索" autocomplete="off" />
                 </div>
+                <div class="search-select-panel__list" id="creatorList"></div>
               </div>
+            </div>
 
-              <div class="filter-item" id="uploaderWrap">
-                <button class="select-trigger" type="button" id="uploaderTrigger">
-                  <span class="select-trigger__text" id="uploaderLabel">上传人：<span class="muted">请选择</span></span>
-                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-                </button>
-                <button class="select-clear" type="button" id="uploaderClear" aria-label="清除">
-                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-                </button>
-                <div class="search-select-panel" id="uploaderPanel">
-                  <div class="search-select-panel__search">
+            <div class="filter-item" id="tagWrap" data-filter-key="tag">
+              <button class="select-trigger" type="button" id="tagTrigger">
+                <span class="select-trigger__text" id="tagLabel">标签：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="tagClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="cascade-panel" id="tagPanel">
+                <div class="cascade-panel__left">
+                  <div class="cascade-panel__search">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                    <input type="text" id="uploaderSearch" placeholder="搜索" autocomplete="off" />
+                    <input type="text" id="tagSearch" placeholder="搜索" autocomplete="off" />
                   </div>
-                  <div class="search-select-panel__list" id="uploaderList"></div>
+                  <div class="cascade-panel__toolbar">
+                    <button class="cascade-panel__link" type="button" id="tagSelectAll">全选</button>
+                  </div>
+                  <div class="cascade-panel__list" id="tagGroupList"></div>
+                </div>
+                <div class="cascade-panel__mid">
+                  <div class="cascade-panel__list" id="tagChildList"></div>
+                </div>
+                <div class="cascade-panel__right">
+                  <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
+                    <span id="tagCount">已选 0 项</span>
+                    <button class="cascade-panel__link" type="button" id="tagClearAll">清空</button>
+                  </div>
+                  <div class="cascade-panel__list" id="tagSelected"></div>
                 </div>
               </div>
+            </div>
 
-              <div class="filter-item">
-                <input class="input" id="filterName" type="text" placeholder="模板名称" autocomplete="off" />
+            <div class="filter-item" id="typeWrap" data-filter-key="type" hidden>
+              <button class="select-trigger" type="button" id="typeTrigger">
+                <span class="select-trigger__text" id="typeLabel">类型：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="typeClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="typePanel">
+                <button class="single-option" type="button" data-value="视频">视频</button>
+                <button class="single-option" type="button" data-value="图片">图片</button>
               </div>
+            </div>
 
-              <div class="filter-actions">
-                <button class="btn btn--default" type="button" id="resetBtn">重置</button>
-                <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
-                <button class="btn btn--primary" type="button" id="uploadBtn">上传</button>
+            <div class="filter-item" id="formatWrap" data-filter-key="format" hidden>
+              <button class="select-trigger" type="button" id="formatTrigger">
+                <span class="select-trigger__text" id="formatLabel">格式：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="formatClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="cascade-panel" id="formatPanel">
+                <div class="cascade-panel__left">
+                  <div class="cascade-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="formatSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="cascade-panel__toolbar">
+                    <button class="cascade-panel__link" type="button" id="formatSelectAll">全选</button>
+                  </div>
+                  <div class="cascade-panel__list" id="formatGroupList"></div>
+                </div>
+                <div class="cascade-panel__mid">
+                  <div class="cascade-panel__list" id="formatChildList"></div>
+                </div>
+                <div class="cascade-panel__right">
+                  <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
+                    <span id="formatCount">已选 0 项</span>
+                    <button class="cascade-panel__link" type="button" id="formatClearAll">清空</button>
+                  </div>
+                  <div class="cascade-panel__list" id="formatSelected"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-item" id="sizeWrap" data-filter-key="size" hidden>
+              <button class="select-trigger" type="button" id="sizeTrigger">
+                <span class="select-trigger__text" id="sizeLabel">尺寸：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="sizeClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="cascade-panel" id="sizePanel">
+                <div class="cascade-panel__left">
+                  <div class="cascade-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="sizeSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="cascade-panel__toolbar">
+                    <button class="cascade-panel__link" type="button" id="sizeSelectAll">全选</button>
+                  </div>
+                  <div class="cascade-panel__list" id="sizeGroupList"></div>
+                </div>
+                <div class="cascade-panel__mid">
+                  <div class="cascade-panel__list" id="sizeChildList"></div>
+                </div>
+                <div class="cascade-panel__right">
+                  <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
+                    <span id="sizeCount">已选 0 项</span>
+                    <button class="cascade-panel__link" type="button" id="sizeClearAll">清空</button>
+                  </div>
+                  <div class="cascade-panel__list" id="sizeSelected"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-item" id="xmpWrap" data-filter-key="xmp">
+              <button class="select-trigger" type="button" id="xmpTrigger">
+                <span class="select-trigger__text" id="xmpLabel">同步XMP：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="xmpClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="xmpPanel">
+                <button class="single-option" type="button" data-value="是">是</button>
+                <button class="single-option" type="button" data-value="否">否</button>
+              </div>
+            </div>
+
+            <div class="filter-item" id="nameWrap" data-filter-key="name">
+              <input class="input input-clearable" id="filterName" type="text" placeholder="素材名称" autocomplete="off" />
+              <button class="select-clear" type="button" id="filterNameClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+
+            <div class="filter-actions">
+              <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
+            </div>
+          </div>
+
+          <div class="lib-toolbar">
+            <div class="lib-toolbar__left">
+              <button class="btn btn--primary" type="button" id="uploadBtn">
+                <img class="btn__icon" src="assets/cloud_upload.svg" alt="" width="14" height="14" aria-hidden="true" />
+                上传
+              </button>
+              <button class="btn btn--default" type="button" id="newFolderToolbarBtn">
+                <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><path d="M12 11v6M9 14h6"/></svg>
+                新建文件夹
+              </button>
+              <div class="batch-wrap" id="batchWrap">
+                <button class="btn btn--default btn--dropdown" type="button" id="batchBtn" disabled>
+                  批量操作
+                  <svg class="btn__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <div class="batch-menu" id="batchMenu" role="menu">
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="download">下载到本地</button>
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="push">推送到XMP</button>
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="tag">修改标签</button>
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="delete">批量删除</button>
+                </div>
+              </div>
+              <label class="toolbar-check" for="showSubfolderMaterials">
+                <input type="checkbox" id="showSubfolderMaterials" />
+                <span>显示子文件夹素材</span>
+              </label>
+            </div>
+            <div class="lib-toolbar__right">
+              <div class="view-switch" role="group" aria-label="视图切换">
+                <button class="view-switch__btn is-active" type="button" data-view="list" id="viewListBtn">列表</button>
+                <button class="view-switch__btn" type="button" data-view="grid" id="viewGridBtn">网格</button>
               </div>
             </div>
           </div>
 
-          <div class="data-panel" id="dataPanel">
-            <div class="type-hint" id="typeHint">
-              <span class="type-hint__label">用法说明</span>
-              <span class="type-hint__text" id="typeHintText">钩子用于片头/片尾拼接；边框、贴纸盖在原视频上；口播叠加音轨。</span>
-            </div>
-            <div class="table-shell">
-              <div class="table-wrap" id="tableWrap">
-                <table class="data-table" id="dataTable">
-                  <colgroup>
-                    <col style="width:88px" />
-                    <col style="width:200px" />
-                    <col style="width:100px" />
-                    <col style="width:140px" />
-                    <col style="width:140px" />
-                    <col style="width:112px" />
-                    <col style="width:180px" />
-                    <col style="width:140px" />
+          <div class="lib-content" id="libContent">
+            <div class="table-shell" id="listView">
+              <div class="table-wrap">
+                <table class="data-table" id="libraryTable">
+                  <colgroup id="colgroup">
+                    <col class="col-check" data-col-width="48" data-col-fixed="true" />
+                    <col data-col-width="88" />
+                    <col data-col-width="280" />
+                    <col data-col-width="200" />
+                    <col data-col-width="104" />
+                    <col data-col-width="104" />
+                    <col data-col-width="104" />
+                    <col data-col-width="104" />
+                    <col data-col-width="104" />
+                    <col data-col-width="104" />
+                    <col data-col-width="180" />
+                    <col data-col-width="160" />
                   </colgroup>
                   <thead>
                     <tr>
-                      <th>预览</th>
-                      <th>模板名称</th>
+                      <th class="col-check is-freeze"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
+                      <th class="col-id is-freeze">ID</th>
+                      <th class="col-material is-freeze">素材</th>
+                      <th>标签</th>
+                      <th>创意人</th>
                       <th>类型</th>
-                      <th>用法</th>
-                      <th>规格</th>
-                      <th>上传人</th>
+                      <th>格式</th>
+                      <th>尺寸</th>
+                      <th>时长 (秒)</th>
+                      <th>同步XMP</th>
                       <th>上传时间</th>
-                      <th>操作</th>
+                      <th class="col-action">操作</th>
                     </tr>
                   </thead>
                   <tbody id="tableBody"></tbody>
@@ -110,129 +289,509 @@
                 <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
               </div>
             </div>
-            <div class="pagination" id="pagination"></div>
+
+            <div class="grid-view" id="gridView" hidden>
+              <div class="grid-view__list" id="gridList"></div>
+              <div class="empty-tip" id="gridEmpty" hidden>暂无数据</div>
+            </div>
           </div>
-        </div>
-      </main>
+
+          <div class="pagination" id="pagination"></div>
+        </section>
+      </div>
+    </main>
   </div>
 
-  <!-- 上传模板 -->
-  <div class="modal-mask modal-mask--dropdown" id="uploadModal" aria-hidden="true">
-    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
-      <div class="modal__header">
-        <h2 class="modal__title" id="uploadModalTitle">上传模板</h2>
-        <button class="modal__close" type="button" data-close="uploadModal" aria-label="关闭">
+  <!-- 上传素材抽屉 -->
+  <div class="drawer-mask" id="uploadDrawer" aria-hidden="true">
+    <aside class="drawer drawer--upload" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="uploadTitle">上传素材</h2>
+        <button class="drawer__close" type="button" id="uploadDrawerClose" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
-      <div class="modal__body">
-        <div class="form-item" id="upTypeItem">
-          <label class="form-item__label is-required">模板类型</label>
-          <div class="form-item__control">
-            <div class="seg" id="upTypeSeg" role="group" aria-label="模板类型">
-              <button type="button" class="seg__item is-active" data-value="钩子">钩子</button>
-              <button type="button" class="seg__item" data-value="边框">边框</button>
-              <button type="button" class="seg__item" data-value="口播">口播</button>
-              <button type="button" class="seg__item" data-value="贴纸">贴纸</button>
-            </div>
-            <div class="form-tip" id="upTypeTip">主要用于在原视频的片头或片尾拼接</div>
-            <div class="form-item__error">请选择模板类型</div>
-          </div>
-        </div>
-
-        <div class="form-item" id="upHookPosItem">
-          <label class="form-item__label is-required">拼接位置</label>
-          <div class="form-item__control">
-            <div class="seg" id="upHookPosSeg" role="group" aria-label="拼接位置">
-              <button type="button" class="seg__item is-active" data-value="片头">片头</button>
-              <button type="button" class="seg__item" data-value="片尾">片尾</button>
-            </div>
-            <div class="form-item__error">请选择拼接位置</div>
-          </div>
-        </div>
-
-        <div class="form-item" id="upNameItem">
-          <label class="form-item__label is-required">模板名称</label>
-          <div class="form-item__control">
-            <input class="input" id="upNameInput" type="text" placeholder="请输入" autocomplete="off" />
-            <div class="form-item__error">请输入模板名称</div>
-          </div>
-        </div>
-
-        <div class="form-item" id="upFileItem">
-          <label class="form-item__label is-required">上传文件</label>
-          <div class="form-item__control">
-            <div class="upload-zone" id="upFileZone" tabindex="0" role="button" aria-label="选择文件">
-              <input class="upload-zone__input" id="upFileInput" type="file" />
-              <div class="upload-zone__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/></svg>
+      <div class="drawer__body" id="uploadDrawerBody">
+        <div class="form-item" id="upFolderItem">
+          <label class="form-item__label is-required">文件夹</label>
+          <div class="form-item__control" id="upFolderWrap">
+            <button class="select-trigger" type="button" id="upFolderTrigger">
+              <span class="select-trigger__text" id="upFolderLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="upFolderClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="search-select-panel" id="upFolderPanel">
+              <div class="search-select-panel__search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                <input type="text" id="upFolderSearch" placeholder="搜索" autocomplete="off" />
               </div>
-              <div class="upload-zone__title">点击或拖拽文件到此处</div>
-              <div class="upload-zone__desc" id="upFileDesc">支持 mp4 / mov</div>
-              <div class="upload-zone__file" id="upFileName" hidden></div>
+              <div class="search-select-panel__list" id="upFolderList"></div>
             </div>
-            <div class="form-item__error">请上传文件</div>
+            <div class="form-item__error">请选择文件夹</div>
           </div>
         </div>
 
-        <div class="form-item">
-          <label class="form-item__label">备注</label>
-          <div class="form-item__control">
-            <input class="input" id="upRemarkInput" type="text" placeholder="选填" autocomplete="off" />
+        <div class="form-item" id="upCreatorItem">
+          <label class="form-item__label is-required">创意人</label>
+          <div class="form-item__control" id="upCreatorWrap">
+            <button class="select-trigger" type="button" id="upCreatorTrigger">
+              <span class="select-trigger__text" id="upCreatorLabel"><span class="muted">请选择创意人</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="upCreatorClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="search-select-panel" id="upCreatorPanel">
+              <div class="search-select-panel__search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                <input type="text" id="upCreatorSearch" placeholder="搜索" autocomplete="off" />
+              </div>
+              <div class="search-select-panel__list" id="upCreatorList"></div>
+            </div>
+            <div class="form-item__error">请选择创意人</div>
           </div>
+        </div>
+
+        <div class="form-item" id="upTagItem">
+          <label class="form-item__label">标签</label>
+          <div class="form-item__control" id="upTagWrap">
+            <button class="select-trigger" type="button" id="upTagTrigger">
+              <span class="select-trigger__text" id="upTagLabel"><span class="muted">请选择标签</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="upTagClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel" id="upTagPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="upTagSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="upTagSelectAll">全选</button>
+                </div>
+                <div class="multi-panel__list" id="upTagList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="upTagCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="upTagPanelClear">清空</button>
+                </div>
+                <div class="multi-panel__list" id="upTagSelected"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-item form-item--upload-hint">
+          <label class="form-item__label">上传素材</label>
+          <div class="form-item__control">
+            <p class="upload-drawer__hint">添加素材后点击 "提交"，后台自动完成入库，无需在当前页等待</p>
+          </div>
+        </div>
+        <div class="upload-zone" id="upFileZone" tabindex="0" role="button" aria-label="选择文件">
+          <input class="upload-zone__input" id="upFileInput" type="file" accept=".mp4,.mov,.png,.jpg,.jpeg,.webp,video/*,image/*" multiple />
+          <div class="upload-zone__icon" aria-hidden="true">
+            <img src="assets/cloud_upload.svg" alt="" width="32" height="32" />
+          </div>
+          <div class="upload-zone__title">点击或拖拽文件到此处上传（单次最多500个）</div>
+        </div>
+
+        <div class="upload-drawer__toolbar">
+          <div class="upload-drawer__toolbar-left">
+            <button class="btn btn--default" type="button" id="upBatchDeleteBtn" disabled>批量删除</button>
+            <label class="upload-drawer__check">
+              <span class="cell-check"><input type="checkbox" id="upDeriveDup" checked /></span>
+              <span>衍生重复素材</span>
+              <span class="form-help" data-tip="勾选自动衍生素材：重复素材自动变更 MD5 上传；不勾选将直接覆盖MD5重复的素材。" aria-label="说明" tabindex="0">?</span>
+            </label>
+          </div>
+          <div class="upload-drawer__count" id="upFileCount">已添加：0/500</div>
+        </div>
+
+        <div class="upload-drawer__table-wrap">
+          <table class="data-table upload-drawer__table" id="upFileTable">
+            <colgroup>
+              <col class="col-check" />
+              <col class="col-up-material" />
+              <col class="col-up-size" />
+              <col class="col-up-format" />
+              <col class="col-up-dim" />
+              <col class="col-up-action" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="col-check"><span class="cell-check"><input type="checkbox" id="upCheckAll" aria-label="全选" /></span></th>
+                <th>素材</th>
+                <th>大小</th>
+                <th>格式</th>
+                <th>尺寸</th>
+                <th class="col-action">操作</th>
+              </tr>
+            </thead>
+            <tbody id="upFileBody"></tbody>
+          </table>
         </div>
       </div>
-      <div class="modal__footer">
-        <button class="btn btn--default" type="button" data-close="uploadModal">取消</button>
+      <div class="drawer__footer">
+        <button class="btn btn--default" type="button" id="uploadDrawerCancel">取消</button>
         <button class="btn btn--primary" type="button" id="upSubmit">提交</button>
       </div>
-    </div>
+    </aside>
   </div>
 
-  <!-- 删除确认 -->
-  <div class="modal-mask" id="deleteModal" aria-hidden="true">
-    <div class="modal modal--small confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+  <!-- 新建 / 编辑文件夹 -->
+  <div class="modal-mask" id="folderModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="folderTitle">
       <div class="modal__header">
-        <h2 class="modal__title" id="deleteTitle">删除模板</h2>
-        <button class="modal__close" type="button" data-close="deleteModal" aria-label="关闭">
+        <h2 class="modal__title" id="folderTitle">新建文件夹</h2>
+        <button class="modal__close" type="button" data-close="folderModal" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
       <div class="modal__body">
+        <div class="form-item" id="folderParentItem">
+          <label class="form-item__label">父级目录</label>
+          <div class="form-item__control">
+            <input class="input" id="folderParentLabel" type="text" disabled />
+          </div>
+        </div>
+        <div class="form-item" id="folderNameItem">
+          <label class="form-item__label is-required">文件夹名称</label>
+          <div class="form-item__control">
+            <input class="input" id="folderNameInput" type="text" placeholder="请输入" autocomplete="off" maxlength="40" />
+            <div class="form-item__error" id="folderNameError">请输入文件夹名称</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="folderModal">取消</button>
+        <button class="btn btn--primary" type="button" id="folderSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 文件夹更多操作 -->
+  <div class="folder-more-menu" id="folderMoreMenu" role="menu" aria-hidden="true">
+    <button class="folder-more-menu__item" type="button" role="menuitem" data-folder-menu="add">新建</button>
+    <button class="folder-more-menu__item" type="button" role="menuitem" data-folder-menu="edit" id="folderMoreEdit">编辑</button>
+    <button class="folder-more-menu__item" type="button" role="menuitem" data-folder-menu="move" id="folderMoreMove">移动</button>
+    <button class="folder-more-menu__item folder-more-menu__item--danger" type="button" role="menuitem" data-folder-menu="delete" id="folderMoreDelete">删除</button>
+  </div>
+
+  <div class="folder-more-menu" id="materialMoreMenu" role="menu" aria-hidden="true">
+    <button class="folder-more-menu__item" type="button" role="menuitem" data-material-menu="edit">编辑</button>
+    <button class="folder-more-menu__item" type="button" role="menuitem" data-material-menu="download">下载</button>
+    <button class="folder-more-menu__item folder-more-menu__item--danger" type="button" role="menuitem" data-material-menu="delete">删除</button>
+  </div>
+
+  <!-- 移动文件夹 -->
+  <div class="modal-mask modal-mask--dropdown" id="moveFolderModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="moveFolderTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="moveFolderTitle">移动文件夹</h2>
+        <button class="modal__close" type="button" data-close="moveFolderModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="moveFolderParentItem">
+          <label class="form-item__label is-required">目标父级目录</label>
+          <div class="form-item__control">
+            <div class="select-wrap" id="moveFolderParentWrap">
+              <button class="select-trigger" type="button" id="moveFolderParentTrigger" aria-haspopup="listbox">
+                <span class="select-value is-placeholder" id="moveFolderParentLabel">请选择</span>
+                <span class="select-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </span>
+              </button>
+              <div class="single-panel" id="moveFolderParentPanel"></div>
+            </div>
+            <div class="form-item__error" id="moveFolderParentError">请选择目标父级目录</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="moveFolderModal">取消</button>
+        <button class="btn btn--primary" type="button" id="moveFolderSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除文件夹确认 -->
+  <div class="modal-mask modal-mask--confirm" id="deleteFolderModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle">
+      <button class="confirm-modal__close" type="button" data-close="deleteFolderModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M2 2l8 8M10 2L2 10"/>
+        </svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--danger" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm4.955-27.771-4.95 4.95-4.95-4.95a1 1 0 0 0-1.414 0l-1.414 1.414a1 1 0 0 0 0 1.414l4.95 4.95-4.95 4.95a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l4.95-4.95 4.95 4.95a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-4.95-4.95 4.95-4.95a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0Z"/></svg>
+        </span>
         <div class="confirm-modal__content">
-          <span class="confirm-modal__icon confirm-modal__icon--info" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm0 14a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 16zm0-9a1.2 1.2 0 0 1 1.2 1.2v5.1a1.2 1.2 0 1 1-2.4 0v-5.1A1.2 1.2 0 0 1 12 7z"/></svg>
-          </span>
-          <div class="confirm-modal__text">确定删除该模板？删除后不可恢复。</div>
+          <h2 class="confirm-modal__title" id="deleteFolderTitle">删除确认</h2>
+          <p class="confirm-modal__body" id="deleteFolderText">此操作不可撤销，确认删除文件夹及文件夹下所有的素材？</p>
         </div>
       </div>
-      <div class="modal__footer">
-        <button class="btn btn--default" type="button" data-close="deleteModal">取消</button>
-        <button class="btn btn--primary" type="button" id="deleteOk">确定</button>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="deleteFolderModal">取消</button>
+        <button class="btn btn--primary" type="button" id="deleteFolderOk">确认</button>
       </div>
     </div>
   </div>
 
-  <!-- 预览 -->
-  <div class="modal-mask" id="previewModal" aria-hidden="true">
-    <div class="modal modal--preview" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+  <!-- 素材详情抽屉 -->
+  <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
+    <aside class="drawer drawer--detail" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="drawer__header">
+        <h2 class="drawer__title" id="detailTitle">编辑素材</h2>
+        <button class="drawer__close" type="button" id="detailDrawerClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="drawer__body detail-drawer__body">
+        <div class="detail-drawer__layout">
+          <div class="detail-drawer__preview">
+            <div class="detail-drawer__preview-media" id="detailPreviewMedia">
+              <span class="detail-drawer__preview-placeholder">预览</span>
+              <span class="thumb__play" id="detailPreviewPlay" hidden aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86a1 1 0 0 0-1.5.86z"/></svg></span>
+            </div>
+          </div>
+          <div class="detail-drawer__info">
+            <div class="form-item">
+              <label class="form-item__label">ID</label>
+              <div class="form-item__control">
+                <div class="detail-drawer__readonly" id="detailId">—</div>
+              </div>
+            </div>
+            <div class="form-item" id="detailNameItem">
+              <label class="form-item__label is-required">素材</label>
+              <div class="form-item__control">
+                <input class="input input-clearable" id="detailName" type="text" placeholder="请输入素材名称" autocomplete="off" />
+                <div class="form-item__error">请输入素材名称</div>
+              </div>
+            </div>
+            <div class="form-item" id="detailFolderItem">
+              <label class="form-item__label is-required">文件夹</label>
+              <div class="form-item__control" id="detailFolderWrap">
+                <button class="select-trigger" type="button" id="detailFolderTrigger">
+                  <span class="select-trigger__text" id="detailFolderLabel"><span class="muted">请选择</span></span>
+                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <button class="select-clear" type="button" id="detailFolderClear" aria-label="清除">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                </button>
+                <div class="search-select-panel" id="detailFolderPanel">
+                  <div class="search-select-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="detailFolderSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="search-select-panel__list" id="detailFolderList"></div>
+                </div>
+                <div class="form-item__error">请选择文件夹</div>
+              </div>
+            </div>
+            <div class="form-item" id="detailCreatorItem">
+              <label class="form-item__label is-required">创意人</label>
+              <div class="form-item__control" id="detailCreatorWrap">
+                <button class="select-trigger" type="button" id="detailCreatorTrigger">
+                  <span class="select-trigger__text" id="detailCreatorLabel"><span class="muted">请选择创意人</span></span>
+                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <button class="select-clear" type="button" id="detailCreatorClear" aria-label="清除">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                </button>
+                <div class="search-select-panel" id="detailCreatorPanel">
+                  <div class="search-select-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="detailCreatorSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="search-select-panel__list" id="detailCreatorList"></div>
+                </div>
+                <div class="form-item__error">请选择创意人</div>
+              </div>
+            </div>
+            <div class="form-item" id="detailTagItem">
+              <label class="form-item__label">标签</label>
+              <div class="form-item__control" id="detailTagWrap">
+                <button class="select-trigger" type="button" id="detailTagTrigger">
+                  <span class="select-trigger__text" id="detailTagLabel"><span class="muted">请选择标签</span></span>
+                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <button class="select-clear" type="button" id="detailTagClear" aria-label="清除">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                </button>
+                <div class="cascade-panel" id="detailTagPanel">
+                  <div class="cascade-panel__left">
+                    <div class="cascade-panel__search">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                      <input type="text" id="detailTagSearch" placeholder="搜索" autocomplete="off" />
+                    </div>
+                    <div class="cascade-panel__toolbar">
+                      <button class="cascade-panel__link" type="button" id="detailTagSelectAll">全选</button>
+                    </div>
+                    <div class="cascade-panel__list" id="detailTagGroupList"></div>
+                  </div>
+                  <div class="cascade-panel__mid">
+                    <div class="cascade-panel__list" id="detailTagChildList"></div>
+                  </div>
+                  <div class="cascade-panel__right">
+                    <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
+                      <span id="detailTagCount">已选 0 项</span>
+                      <button class="cascade-panel__link" type="button" id="detailTagClearAll">清空</button>
+                    </div>
+                    <div class="cascade-panel__list" id="detailTagSelected"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-item">
+              <label class="form-item__label">上传时间</label>
+              <div class="form-item__control"><div class="detail-drawer__readonly" id="detailCreatedAt">—</div></div>
+            </div>
+            <div class="form-item">
+              <label class="form-item__label">来源</label>
+              <div class="form-item__control"><div class="detail-drawer__readonly" id="detailSource">本地上传</div></div>
+            </div>
+            <div class="form-item">
+              <label class="form-item__label">大小</label>
+              <div class="form-item__control"><div class="detail-drawer__readonly" id="detailFileSize">—</div></div>
+            </div>
+            <div class="form-item">
+              <label class="form-item__label">格式</label>
+              <div class="form-item__control"><div class="detail-drawer__readonly" id="detailFormat">—</div></div>
+            </div>
+            <div class="form-item">
+              <label class="form-item__label">尺寸</label>
+              <div class="form-item__control"><div class="detail-drawer__readonly" id="detailDim">—</div></div>
+            </div>
+            <div class="form-item">
+              <label class="form-item__label">时长</label>
+              <div class="form-item__control"><div class="detail-drawer__readonly" id="detailDuration">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer__footer">
+        <button class="btn btn--default" type="button" id="detailDrawerCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="detailSubmit">提交</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 筛选设置 -->
+  <div class="modal-mask modal-mask--dropdown" id="filterModal" aria-hidden="true">
+    <div class="modal modal--form modal--filter-settings" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle">
       <div class="modal__header">
-        <h2 class="modal__title" id="previewTitle">预览</h2>
-        <button class="modal__close" type="button" data-close="previewModal" aria-label="关闭">
+        <div class="modal__title" id="filterModalTitle">筛选设置</div>
+        <button class="modal__close" type="button" data-close="filterModal" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
       <div class="modal__body">
-        <div class="preview-stage" id="previewStage">
-          <div class="preview-stage__placeholder" id="previewPlaceholder">暂无预览</div>
-        </div>
-        <div class="preview-meta" id="previewMeta"></div>
+        <div class="filter-check-grid" id="filterCheckGrid"></div>
       </div>
       <div class="modal__footer">
-        <button class="btn btn--default" type="button" data-close="previewModal">关闭</button>
+        <button class="btn btn--default" type="button" data-close="filterModal">取消</button>
+        <button class="btn btn--primary" type="button" id="filterSubmit">确定</button>
       </div>
     </div>
   </div>
+
+  <!-- 批量/快捷修改标签 -->
+  <div class="modal-mask modal-mask--dropdown" id="batchTagModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchTagTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="batchTagTitle">修改标签</h2>
+        <button class="modal__close" type="button" data-close="batchTagModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="batchTagItem">
+          <label class="form-item__label">标签</label>
+          <div class="form-item__control" id="batchTagWrap">
+            <button class="select-trigger" type="button" id="batchTagTrigger">
+              <span class="select-trigger__text" id="batchTagLabel"><span class="muted">请选择标签</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="batchTagClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="cascade-panel" id="batchTagPanel">
+              <div class="cascade-panel__left">
+                <div class="cascade-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="batchTagSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="cascade-panel__toolbar">
+                  <button class="cascade-panel__link" type="button" id="batchTagSelectAll">全选</button>
+                </div>
+                <div class="cascade-panel__list" id="batchTagGroupList"></div>
+              </div>
+              <div class="cascade-panel__mid">
+                <div class="cascade-panel__list" id="batchTagChildList"></div>
+              </div>
+              <div class="cascade-panel__right">
+                <div class="cascade-panel__toolbar cascade-panel__toolbar--right">
+                  <span id="batchTagCount">已选 0 项</span>
+                  <button class="cascade-panel__link" type="button" id="batchTagClearAll">清空</button>
+                </div>
+                <div class="cascade-panel__list" id="batchTagSelected"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="batchTagModal">取消</button>
+        <button class="btn btn--primary" type="button" id="batchTagSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除素材确认 -->
+  <div class="modal-mask modal-mask--confirm" id="deleteModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <button class="confirm-modal__close" type="button" data-close="deleteModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <path d="M2 2l8 8M10 2L2 10"/>
+        </svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--danger" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm4.955-27.771-4.95 4.95-4.95-4.95a1 1 0 0 0-1.414 0l-1.414 1.414a1 1 0 0 0 0 1.414l4.95 4.95-4.95 4.95a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l4.95-4.95 4.95 4.95a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-4.95-4.95 4.95-4.95a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="deleteTitle">删除确认</h2>
+          <p class="confirm-modal__body" id="deleteText">此操作不可撤销，确认删除吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="deleteModal">取消</button>
+        <button class="btn btn--primary" type="button" id="deleteOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-pop" id="previewPop" aria-hidden="true">
+    <div class="preview-pop__media">预览</div>
+  </div>
+
+  <div class="name-edit-pop" id="nameEditPop" aria-hidden="true">
+    <input class="input" id="nameEditInput" type="text" maxlength="120" placeholder="请输入素材名称" autocomplete="off" />
+    <div class="name-edit-pop__footer">
+      <button class="btn btn--default" type="button" id="nameEditCancel">取消</button>
+      <button class="btn btn--primary" type="button" id="nameEditOk">确定</button>
+    </div>
+  </div>
+
+  <div class="page-msg" id="pageMsg" role="status" aria-live="polite"></div>
 
   <script src="product-common.js"></script>
   <script src="material-sidebar.js"></script>

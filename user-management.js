@@ -8,9 +8,34 @@
   var $ = UI.$;
   var escapeHtml = UI.escapeHtml;
 
-  var DEPARTMENTS = ['奇异果', '无花果', '国内发行', '人力行政部', '技术中心', '市场部', '财务部'];
-  var ROLES = ['研发测试', '海外投放', '产品运营', '数据分析', '商务合作', '管理员'];
-  var DATA_GROUPS = ['APP-奇异果', 'APP-无花果', '投放组-啊严', '投放组-国内', '数据组-全部'];
+  var DEPARTMENTS = ['奇异果', '国内发行', '无花果', '硕果组', '苹果组', '人力行政部', '海外发行', '财务部'];
+  var ROLES = [
+    '研发测试', '海外素材', '创新中心', '研发负责人', '财务审计', '数据管理',
+    'SDK开发', '海外投放', '海外运营', '海外负责人', '管理员'
+  ];
+  var DATA_GROUPS = [
+    '开发测试', 'APP-无花果', 'APP-奇异果', 'TikTok微短剧', 'TikTok小游戏',
+    'APP投放组', '小游戏投放组', 'APP运营组', '小游戏运营组', '全产品'
+  ];
+  /* 部门 / 角色组合示例（来自业务样本，随机分配到用户） */
+  var DEPT_ROLE_SAMPLES = [
+    { departments: ['奇异果'], roles: ['研发测试'] },
+    { departments: ['国内发行'], roles: [] },
+    { departments: ['无花果', '硕果组'], roles: [] },
+    { departments: ['人力行政部'], roles: [] },
+    { departments: ['无花果'], roles: [] },
+    { departments: ['硕果组', '苹果组'], roles: [] },
+    { departments: ['海外发行'], roles: ['海外投放'] },
+    { departments: ['无花果', '硕果组'], roles: [] },
+    { departments: ['奇异果'], roles: [] },
+    { departments: ['财务部'], roles: ['财务审计'] },
+    { departments: ['海外发行'], roles: ['海外投放'] },
+    { departments: ['苹果组'], roles: [] },
+    { departments: ['奇异果'], roles: [] },
+    { departments: ['硕果组', '苹果组'], roles: [] },
+    { departments: ['海外发行'], roles: ['海外素材'] },
+    { departments: ['国内发行'], roles: [] }
+  ];
   var NICKNAMES = Array.from({ length: 24 }, function (_, i) {
     return '用户' + String.fromCharCode(65 + i);
   });
@@ -51,21 +76,31 @@
 
   function buildMockRows(count) {
     var list = [];
+    var pool = DEPT_ROLE_SAMPLES.slice();
     var i;
+    /* 打乱样本池后循环分配，保证分布接近随机 */
+    for (i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = pool[i];
+      pool[i] = pool[j];
+      pool[j] = tmp;
+    }
     for (i = 0; i < count; i++) {
-      var depts;
-      if (i % 11 === 0) {
-        depts = [pick(DEPARTMENTS, i), pick(DEPARTMENTS, i + 3)];
-      } else {
-        depts = [pick(DEPARTMENTS, i)];
-      }
-      var roles = i % 5 === 0 ? [] : [pick(ROLES, i)];
-      if (i % 17 === 0) roles = [ROLES[0], ROLES[1]];
+      var sample = pool[i % pool.length];
+      var depts = (sample.departments || []).slice();
+      var roles = (sample.roles || []).slice();
       var groups = i % 4 === 0 ? [] : [pick(DATA_GROUPS, i)];
       if (i % 19 === 0) groups = [DATA_GROUPS[0], DATA_GROUPS[2]];
       var updated = new Date(2026, 7, 10, 9, 30, 4);
       updated.setMinutes(updated.getMinutes() - i * 17);
       updated.setSeconds(updated.getSeconds() - (i % 40));
+      var status = i % 9 === 0 ? '禁用' : '启用';
+      /* 禁用用户不保留部门 / 角色 / 数据组关联 */
+      if (status === '禁用') {
+        depts = [];
+        roles = [];
+        groups = [];
+      }
       list.push({
         id: 'u-' + (i + 1),
         nickname: pick(NICKNAMES, i),
@@ -73,7 +108,7 @@
         departments: depts,
         roles: roles,
         dataGroups: groups,
-        status: i % 9 === 0 ? '禁用' : '启用',
+        status: status,
         updatedAt: formatDateTime(updated)
       });
     }
@@ -243,6 +278,22 @@
 
   UI.bindSeg('editStatusSeg', function (v) {
     state.editStatus = v || '启用';
+    if (state.editStatus === '禁用') {
+      state.editRoles = [];
+      state.editDataGroups = [];
+      if ($('editDept')) $('editDept').value = '';
+      if (editRoleSelect && editRoleSelect.render) editRoleSelect.render();
+      if (editDataGroupSelect && editDataGroupSelect.render) editDataGroupSelect.render();
+    } else {
+      var row = findRow(state.editId);
+      if (row && row.status !== '禁用') {
+        if ($('editDept')) $('editDept').value = (row.departments || []).join(', ');
+        state.editRoles = (row.roles || []).slice();
+        state.editDataGroups = (row.dataGroups || []).slice();
+        if (editRoleSelect && editRoleSelect.render) editRoleSelect.render();
+        if (editDataGroupSelect && editDataGroupSelect.render) editDataGroupSelect.render();
+      }
+    }
   });
 
   $('filterNickname').addEventListener('input', function () {
@@ -333,9 +384,10 @@
   function submitEdit() {
     var row = findRow(state.editId);
     if (!row) return;
-    var nextRoles = (state.editRoles || []).slice();
-    var nextGroups = (state.editDataGroups || []).slice();
     var nextStatus = state.editStatus || '启用';
+    var nextRoles = nextStatus === '禁用' ? [] : (state.editRoles || []).slice();
+    var nextGroups = nextStatus === '禁用' ? [] : (state.editDataGroups || []).slice();
+    var nextDepts = nextStatus === '禁用' ? [] : (row.departments || []).slice();
     var operator = '用户A';
     var now = formatDateTime(new Date());
     var changed = false;
@@ -348,6 +400,10 @@
     if (!sameList(row.dataGroups, nextGroups)) {
       pushEditLog(row.id, '修改数据组', displayList(row.dataGroups), displayList(nextGroups), operator, now);
       row.dataGroups = nextGroups;
+      changed = true;
+    }
+    if (!sameList(row.departments, nextDepts)) {
+      row.departments = nextDepts;
       changed = true;
     }
     if (row.status !== nextStatus) {
@@ -516,9 +572,6 @@
   $('impersonateOk').addEventListener('click', confirmImpersonate);
 
   $('logDrawerClose').addEventListener('click', closeLogDrawer);
-  $('logDrawer').addEventListener('click', function (e) {
-    if (e.target === e.currentTarget) closeLogDrawer();
-  });
 
   if (UI.bindSidebar) UI.bindSidebar();
 

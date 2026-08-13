@@ -322,7 +322,7 @@
         </span>
         <div class="confirm-modal__content">
           <h2 class="confirm-modal__title" id="confirmModalTitle">删除确认</h2>
-          <p class="confirm-modal__body" id="confirmModalBody">此操作不可撤销，确定删除吗？</p>
+          <p class="confirm-modal__body" id="confirmModalBody">此操作不可撤销，确认删除吗？</p>
         </div>
       </div>
       <div class="confirm-modal__footer">
@@ -624,7 +624,7 @@
         },
         {
           "id": "28",
-          "name": "素材列表",
+          "name": "采集素材",
           "type": "page",
           "parent": "素材采集",
           "path": "list",
@@ -634,42 +634,32 @@
         },
         {
           "id": "46",
-          "name": "素材库",
-          "type": "dir",
+          "name": "本地素材",
+          "type": "page",
           "parent": "素材",
-          "path": "material/library",
-          "perm": "MaterialLibraryDir",
+          "path": "material-library.html",
+          "perm": "MaterialLibrary",
           "icon": "IconStorage",
           "status": "启用"
         },
         {
-          "id": "47",
-          "name": "素材库",
-          "type": "page",
-          "parent": "素材库",
-          "path": "library",
-          "perm": "MaterialLibrary",
-          "icon": "",
-          "status": "启用"
-        },
-        {
           "id": "48",
-          "name": "模板库",
-          "type": "dir",
+          "name": "模板管理",
+          "type": "page",
           "parent": "素材",
-          "path": "material/template",
-          "perm": "TemplateLibraryDir",
+          "path": "template-library.html",
+          "perm": "TemplateLibrary",
           "icon": "IconCommon",
           "status": "启用"
         },
         {
-          "id": "28a",
-          "name": "模板库",
+          "id": "49",
+          "name": "标签管理",
           "type": "page",
-          "parent": "模板库",
-          "path": "template",
-          "perm": "TemplateLibrary",
-          "icon": "",
+          "parent": "素材",
+          "path": "tag-library.html",
+          "perm": "TagLibrary",
+          "icon": "IconTags",
           "status": "启用"
         },
         {
@@ -1549,8 +1539,8 @@
         pendingDeleteId = String(id);
         const hasKids = !!row.hasChildren;
         document.getElementById('confirmModalBody').textContent = hasKids
-          ? '此操作将删除菜单及其子菜单，确定删除吗？'
-          : '此操作不可撤销，确定删除吗？';
+          ? '此操作不可撤销，确认删除菜单及其子菜单？'
+          : '此操作不可撤销，确认删除吗？';
         UI.openModal('confirmModal');
       }
 
