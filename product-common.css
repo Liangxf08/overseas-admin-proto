@@ -124,6 +124,7 @@ label:has(input[type="checkbox"][disabled]),
 }
 
 .header-icon {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,6 +136,43 @@ label:has(input[type="checkbox"][disabled]),
 
 .header-icon:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
 .header-icon svg { width: 18px; height: 18px; }
+
+.header-icon[data-tip]::after,
+.header-icon[data-tip]::before {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 20;
+}
+.header-icon[data-tip]::after {
+  content: attr(data-tip);
+  top: calc(100% + 6px);
+  padding: 6px 10px;
+  background: var(--color-tooltip-bg, rgba(29, 33, 41, 0.95));
+  color: #fff;
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 400;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.header-icon[data-tip]::before {
+  content: '';
+  top: calc(100% + 1px);
+  border: 5px solid transparent;
+  border-bottom-color: var(--color-tooltip-bg, rgba(29, 33, 41, 0.95));
+}
+.header-icon[data-tip]:hover::after,
+.header-icon[data-tip]:hover::before,
+.header-icon[data-tip]:focus::after,
+.header-icon[data-tip]:focus::before {
+  opacity: 1;
+  visibility: visible;
+}
 
 .user-chip {
   display: inline-flex;

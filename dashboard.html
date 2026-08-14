@@ -12,36 +12,7 @@
 </head>
 <body>
   <div class="app">
-    <header class="header">
-      <div class="header-left">
-        <img class="logo" src="assets/logo.png" width="32" height="32" alt="海外中台" />
-        <span class="brand-name">海外中台</span>
-      </div>
-      <nav class="header-nav" aria-label="顶部导航">
-        <a href="#" class="header-nav__item">首页</a>
-        <a href="dashboard.html" class="header-nav__item is-active">看板</a>
-        <a href="platform-config.html" class="header-nav__item">产品</a>
-        <a href="collection-tasks.html" class="header-nav__item">素材</a>
-        <a href="download-tasks.html" class="header-nav__item">工具</a>
-        <a href="menu-management.html" class="header-nav__item">管理</a>
-      </nav>
-      <div class="header-right">
-        <button class="header-icon" type="button" title="下载" aria-label="下载">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
-        </button>
-        <button class="header-icon" type="button" title="消息" aria-label="消息">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
-        <a class="header-icon" href="https://m0v1x0i131y.feishu.cn/wiki/P7WcwmPrdigKg6keQbycBtYgn3d" target="_blank" rel="noopener noreferrer" title="帮助中心" aria-label="帮助中心">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-        </a>
-        <button class="user-chip" type="button" aria-label="用户菜单">
-          <img class="user-avatar" src="assets/avatar.jpg" width="32" height="32" alt="" />
-          <span class="user-name">小风</span>
-          <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-        </button>
-      </div>
-    </header>
+    <header class="header"></header>
 
     <div class="body">
       <aside class="board-sidebar" id="sidebar">
@@ -414,6 +385,7 @@
   <div class="page-msg" id="pageMsg" role="status"></div>
 
   <script src="product-common.js"></script>
+  <script src="menu.js" data-page="dashboard"></script>
   <script src="col-resize.js"></script>
   <script src="dashboard.js"></script>
 </body>
