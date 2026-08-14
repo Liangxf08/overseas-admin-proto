@@ -46,14 +46,19 @@
           ]
         },
         {
-          id: 'mini-mgmt',
-          name: '小游戏管理',
+          id: 'ops-tools',
+          name: '运营工具',
           children: [
-            { id: 'mini-game', name: '小游戏' },
-            { id: 'mini-series', name: '产品系列' }
+            { id: 'feedback', name: '用户反馈' }
           ]
         },
-        { id: 'product-group', name: '产品组管理' },
+        {
+          id: 'platform-tools',
+          name: '平台工具',
+          children: [
+            { id: 'app-user-query', name: 'APP用户查询' }
+          ]
+        },
         {
           id: 'platform-mgmt',
           name: '平台管理',
@@ -64,6 +69,15 @@
             { id: 'sdk-boot', name: 'SDK启动配置' }
           ]
         },
+        {
+          id: 'mini-mgmt',
+          name: '小游戏管理',
+          children: [
+            { id: 'mini-game', name: '小游戏' },
+            { id: 'mini-series', name: '产品系列' }
+          ]
+        },
+        { id: 'product-group', name: '产品组管理' },
         {
           id: 'ad-strategy',
           name: '广告策略',
@@ -91,7 +105,14 @@
       id: 'tools',
       name: '工具',
       children: [
-        { id: 'feedback', name: '用户反馈' }
+        {
+          id: 'task-center',
+          name: '任务中心',
+          children: [
+            { id: 'task-export', name: '下载任务' },
+            { id: 'task-batch', name: '批量任务' }
+          ]
+        }
       ]
     },
     {

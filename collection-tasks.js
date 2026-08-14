@@ -8,20 +8,165 @@
   var $ = UI.$;
   var escapeHtml = UI.escapeHtml;
 
+  var DROPDOWN_PANEL_SEL = '.single-panel, .multi-panel, .date-panel, .search-select-panel, .folder-tree-panel, .size-cascade-panel';
+
+  function unportalDropdown(panel) {
+    if (!panel || !panel.classList.contains('dropdown-portal')) return;
+    panel.classList.remove('dropdown-portal');
+    panel.style.position = '';
+    panel.style.left = '';
+    panel.style.top = '';
+    panel.style.right = '';
+    panel.style.bottom = '';
+    panel.style.margin = '';
+    panel.style.zIndex = '';
+    panel.style.width = '';
+    panel.style.minWidth = '';
+    panel.style.maxHeight = '';
+    panel.style.overflow = '';
+    panel.style.height = '';
+    panel.style.removeProperty('--size-cascade-col-width');
+    var host = panel.__dropdownHost;
+    if (host && panel.parentElement !== host) host.appendChild(panel);
+  }
+
+  function unportalAllDropdowns() {
+    document.querySelectorAll('.dropdown-portal').forEach(unportalDropdown);
+  }
+
+  function portalDropdown(panel, trigger) {
+    if (!panel || !trigger) return;
+    if (!trigger.closest('.drawer--form, #configDrawer')) return;
+    if (trigger.closest('.pagination, .page-size-wrap')) return;
+    if (!panel.__dropdownHost) panel.__dropdownHost = panel.parentElement;
+
+    var rect = trigger.getBoundingClientRect();
+    var pad = 8;
+    var gap = 4;
+    var triggerW = rect.width;
+    var isOverlay = panel.classList.contains('date-panel') || panel.classList.contains('cascade-panel');
+    var isFolderTree = panel.classList.contains('folder-tree-panel');
+    var isSizeCascade = panel.classList.contains('size-cascade-panel');
+    var pw = triggerW;
+    if (isSizeCascade) {
+      pw = triggerW * 2;
+      panel.style.setProperty('--size-cascade-col-width', triggerW + 'px');
+    } else if (!isOverlay && !isFolderTree && panel.parentElement !== document.body) {
+      pw = Math.max(panel.offsetWidth || 0, triggerW);
+    }
+
+    if (panel.parentElement !== document.body) document.body.appendChild(panel);
+    panel.classList.add('dropdown-portal');
+    panel.classList.remove('is-dropup', 'is-align-right');
+    if (!isOverlay) {
+      panel.style.minWidth = pw + 'px';
+      panel.style.width = pw + 'px';
+    }
+
+    var spaceBelow = window.innerHeight - rect.bottom - pad;
+    var spaceAbove = rect.top - pad;
+    var cap = 0;
+    if (isFolderTree) {
+      cap = parseInt((getComputedStyle(document.documentElement).getPropertyValue('--select-panel-height') || '').trim(), 10) || 296;
+    } else if (isSizeCascade) {
+      cap = 240;
+    }
+    var ph = isSizeCascade ? 240 : (panel.scrollHeight || panel.offsetHeight || 280);
+    if (cap) ph = Math.min(ph, cap);
+    var openDown = spaceBelow >= Math.min(ph, 200) || spaceBelow >= spaceAbove;
+    var avail = (openDown ? spaceBelow : spaceAbove) - gap;
+    if (avail < 120) avail = Math.max(spaceBelow, spaceAbove, 120) - gap;
+    if (cap) avail = Math.min(avail, cap);
+    var usedH = Math.min(ph, avail);
+    var left = rect.left;
+    if (left + pw > window.innerWidth - pad) left = Math.max(pad, window.innerWidth - pw - pad);
+    var top = openDown ? rect.bottom + gap : Math.max(pad, rect.top - usedH - gap);
+
+    panel.style.position = 'fixed';
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.margin = '0';
+    panel.style.zIndex = '1200';
+    if (isFolderTree) panel.style.maxHeight = avail + 'px';
+    if (isSizeCascade) {
+      panel.style.height = '240px';
+      panel.style.maxHeight = '240px';
+    }
+  }
+
+  var _closePanels = UI.closePanels;
+  UI.closePanels = function () {
+    document.querySelectorAll('.size-cascade-panel.is-open, .folder-tree-panel.is-open').forEach(function (p) {
+      p.classList.remove('is-open', 'is-dropup', 'is-align-right');
+      unportalDropdown(p);
+    });
+    unportalAllDropdowns();
+    if (_closePanels) _closePanels();
+  };
+
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('.select-trigger, .date-range-trigger');
+    if (!trigger || !trigger.closest('.drawer--form, #configDrawer')) return;
+    if (trigger.closest('.pagination, .page-size-wrap')) return;
+    setTimeout(function () {
+      var wrap = trigger.closest('.filter-item, .form-item__control, .size-select-wrap, .date-range-wrap');
+      var panel = wrap ? wrap.querySelector(DROPDOWN_PANEL_SEL + '.is-open') : null;
+      if (!panel && trigger.parentElement) {
+        panel = trigger.parentElement.querySelector(DROPDOWN_PANEL_SEL + '.is-open');
+      }
+      if (panel) portalDropdown(panel, trigger);
+    }, 0);
+  }, true);
+
+  document.addEventListener('scroll', function (e) {
+    var el = e.target;
+    if (el && el.closest && el.closest(DROPDOWN_PANEL_SEL)) return;
+    if (!document.querySelector('.dropdown-portal, ' + DROPDOWN_PANEL_SEL + '.is-open')) return;
+    UI.closePanels();
+  }, true);
+
+  if (UI.bindFormHelp) UI.bindFormHelp(document);
+
   var USERS = Array.from({ length: 16 }, function (_, i) {
     return '用户' + String.fromCharCode(65 + i);
   });
 
-  var FOLDERS = [
-    '企业素材库/短剧/竖版',
-    '企业素材库/短剧/横版',
-    '企业素材库/投放素材',
-    '企业素材库/测试文件夹',
-    '企业素材库/品牌素材',
-    '企业素材库/竞品参考',
-    '企业素材库/海外投放/TT',
-    '企业素材库/海外投放/FB'
+  var XMP_FOLDERS = [
+    '短剧/竖版',
+    '短剧/横版',
+    '投放素材',
+    '测试文件夹',
+    '品牌素材',
+    '竞品参考',
+    '海外投放/TT',
+    '海外投放/FB'
   ];
+  function pathsToFolderTree(paths) {
+    var roots = [];
+    function ensure(nodes, name, id) {
+      var i;
+      for (i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === id) return nodes[i];
+      }
+      var node = { id: id, name: name, children: [] };
+      nodes.push(node);
+      return node;
+    }
+    (paths || []).forEach(function (p) {
+      var parts = String(p).split('/');
+      var acc = '';
+      var cur = roots;
+      parts.forEach(function (part) {
+        acc = acc ? acc + '/' + part : part;
+        var node = ensure(cur, part, acc);
+        cur = node.children;
+      });
+    });
+    return roots;
+  }
+  var XMP_FOLDER_TREE = pathsToFolderTree(XMP_FOLDERS);
 
   /* 与本地素材筛选/编辑标签一致 · 级联多选 */
   var TAG_TREE = [
@@ -31,6 +176,8 @@
     { id: 'feat', label: '素材特点', children: ['CTR', '副玩法', 'DOGE'] },
     { id: 'fest', label: '节日限定', children: ['圣诞节', '夏日'] }
   ];
+  var FORM_TAG_TREE = TAG_TREE.filter(function (g) { return g.id !== 'sys'; });
+  var SYSTEM_TAG = '衍生';
   var CASCADE_ARROW = '<svg class="cascade-option__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 3L7.5 6L4.5 9"/></svg>';
   var CLEAR_ICON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>';
 
@@ -119,7 +266,7 @@
       uploadXmp: '是',
       filterDup: true,
       folderMode: '已有文件夹',
-      targetFolder: FOLDERS[0],
+      targetFolder: XMP_FOLDERS[0],
       parentFolder: '',
       folderName: DEFAULT_FOLDER_NAME,
       configured: false
@@ -177,10 +324,10 @@
 
   function buildMockTasks() {
     var list = [];
-    var statuses = ['已完成', '已失败', '进行中', '已完成', '已取消', '待开始', '进行中', '已完成'];
+    var statuses = ['待开始', '进行中', '已完成', '已取消', '已失败'];
     var i;
     for (i = 0; i < 18; i++) {
-      var status = statuses[i % statuses.length];
+      var status = i < statuses.length ? statuses[i] : '已完成';
       var total = status === '进行中' && i % 4 === 2 ? 1000 : (12 + (i % 6) * 5);
       var success = 0;
       var fail = 0;
@@ -350,6 +497,7 @@
             UI.adjustDropdownPlacement(panel, trigger);
           });
         }
+        portalDropdown(panel, trigger);
       }
     });
 
@@ -362,6 +510,7 @@
       syncLabel();
       panel.classList.remove('is-open', 'is-dropup', 'is-align-right');
       trigger.classList.remove('is-open');
+      unportalDropdown(panel);
     });
 
     if (search) {
@@ -377,6 +526,7 @@
           if (cfg.onChange) cfg.onChange('');
           syncLabel();
           panel.classList.remove('is-open', 'is-dropup', 'is-align-right');
+          unportalDropdown(panel);
         });
       }
     }
@@ -389,6 +539,7 @@
   document.addEventListener('click', function () {
     document.querySelectorAll('.search-select-panel.is-open').forEach(function (p) {
       p.classList.remove('is-open', 'is-dropup', 'is-align-right');
+      unportalDropdown(p);
     });
   });
 
@@ -607,7 +758,8 @@
     if (!wrap || !trigger || !panel || !label || !list) return null;
 
     var collapsed = {};
-    LOCAL_FOLDERS.forEach(function (n) {
+    var roots = cfg.getRoots ? cfg.getRoots() : LOCAL_FOLDERS;
+    roots.forEach(function (n) {
       if (n.children && n.children.length) collapsed[n.id] = true;
     });
 
@@ -617,11 +769,11 @@
     function syncLabel() {
       var id = getValue();
       if (!id) {
-        label.innerHTML = '<span class="muted">请选择</span>';
+        label.innerHTML = '<span class="muted">' + (cfg.placeholder || '请选择') + '</span>';
         wrap.classList.remove('has-value');
         return;
       }
-      label.textContent = getLocalFolderPath(id) || id;
+      label.textContent = (cfg.getPath ? cfg.getPath(id) : getLocalFolderPath(id)) || id;
       wrap.classList.add('has-value');
     }
 
@@ -657,8 +809,10 @@
     }
 
     function render() {
-      list.innerHTML = LOCAL_FOLDERS.map(function (n) { return renderNode(n, 0); }).join('') ||
+      var currentRoots = cfg.getRoots ? cfg.getRoots() : roots;
+      list.innerHTML = currentRoots.map(function (n) { return renderNode(n, 0); }).join('') ||
         '<div class="empty-tip" style="padding:12px;display:block">无匹配项</div>';
+      if (panel.classList.contains('is-open')) portalDropdown(panel, trigger);
     }
 
     trigger.addEventListener('click', function (e) {
@@ -679,6 +833,7 @@
         if (UI.adjustDropdownPlacement) {
           UI.adjustDropdownPlacement(panel, trigger);
         }
+        portalDropdown(panel, trigger);
       }
     });
 
@@ -698,6 +853,7 @@
       syncLabel();
       panel.classList.remove('is-open');
       trigger.classList.remove('is-open');
+      unportalDropdown(panel);
     });
 
     if (search) {
@@ -712,6 +868,7 @@
         syncLabel();
         panel.classList.remove('is-open');
         trigger.classList.remove('is-open');
+        unportalDropdown(panel);
       });
     }
     wrap.addEventListener('click', function (e) { e.stopPropagation(); });
@@ -729,6 +886,8 @@
     clearId: 'cfgLocalFolderClear',
     getValue: function () { return state.cfg.localFolderId; },
     setValue: function (v) { state.cfg.localFolderId = v || ''; },
+    getRoots: function () { return LOCAL_FOLDERS; },
+    getPath: function (id) { return getLocalFolderPath(id); },
     onChange: function () { clearError('cfgLocalFolderItem'); }
   });
 
@@ -1043,9 +1202,9 @@
     clearAllId: 'cfgTagClearAll',
     clearId: 'cfgTagClear',
     prefix: '',
-    tree: TAG_TREE,
-    getSelected: function () { return state.cfg.tags || []; },
-    setSelected: function (arr) { state.cfg.tags = arr || []; }
+    tree: FORM_TAG_TREE,
+    getSelected: function () { return (state.cfg.tags || []).filter(function (t) { return t !== SYSTEM_TAG; }); },
+    setSelected: function (arr) { state.cfg.tags = (arr || []).filter(function (t) { return t !== SYSTEM_TAG; }); }
   });
 
   var cfgCreativeApi = bindSearchSelect({
@@ -1064,7 +1223,7 @@
     }
   });
 
-  var cfgTargetApi = bindSearchSelect({
+  var cfgTargetApi = bindFolderTreeSelect({
     wrapId: 'cfgTargetFolderWrap',
     triggerId: 'cfgTargetFolderTrigger',
     panelId: 'cfgTargetFolderPanel',
@@ -1072,15 +1231,15 @@
     listId: 'cfgTargetFolderList',
     searchId: 'cfgTargetFolderSearch',
     clearId: 'cfgTargetFolderClear',
-    getOptions: function () { return FOLDERS; },
+    placeholder: '请选择',
+    getRoots: function () { return XMP_FOLDER_TREE; },
+    getPath: function (id) { return id || ''; },
     getValue: function () { return state.cfg.targetFolder; },
-    onChange: function (v) {
-      state.cfg.targetFolder = v;
-      clearError('cfgTargetFolderItem');
-    }
+    setValue: function (v) { state.cfg.targetFolder = v || ''; },
+    onChange: function () { clearError('cfgTargetFolderItem'); }
   });
 
-  var cfgParentApi = bindSearchSelect({
+  var cfgParentApi = bindFolderTreeSelect({
     wrapId: 'cfgParentFolderWrap',
     triggerId: 'cfgParentFolderTrigger',
     panelId: 'cfgParentFolderPanel',
@@ -1088,9 +1247,11 @@
     listId: 'cfgParentFolderList',
     searchId: 'cfgParentFolderSearch',
     clearId: 'cfgParentFolderClear',
-    getOptions: function () { return FOLDERS; },
+    placeholder: '请选择',
+    getRoots: function () { return XMP_FOLDER_TREE; },
+    getPath: function (id) { return id || ''; },
     getValue: function () { return state.cfg.parentFolder; },
-    onChange: function (v) { state.cfg.parentFolder = v; }
+    setValue: function (v) { state.cfg.parentFolder = v || ''; }
   });
 
   UI.bindSingleSelect({
@@ -1111,12 +1272,16 @@
     if (!groupList || !valueList) return;
     groupList.innerHTML = SIZE_TREE.map(function (g) {
       var active = g.group === state.sizeGroup ? ' is-active' : '';
-      return '<button class="size-cascade__item' + active + '" type="button" data-group="' + escapeHtml(g.group) + '">' + escapeHtml(g.group) + '</button>';
+      return '<button class="size-cascade__item' + active + '" type="button" data-group="' + escapeHtml(g.group) + '">' +
+        '<span class="size-cascade__label">' + escapeHtml(g.group) + '</span>' + CASCADE_ARROW +
+      '</button>';
     }).join('');
     var current = SIZE_TREE.find(function (g) { return g.group === state.sizeGroup; }) || SIZE_TREE[0];
     valueList.innerHTML = current.values.map(function (v) {
       var active = v === state.cfg.size ? ' is-active' : '';
-      return '<button class="size-cascade__item' + active + '" type="button" data-size="' + escapeHtml(v) + '">' + escapeHtml(v) + '</button>';
+      return '<button class="size-cascade__item' + active + '" type="button" data-size="' + escapeHtml(v) + '">' +
+        '<span class="size-cascade__label">' + escapeHtml(v) + '</span>' +
+      '</button>';
     }).join('');
   }
 
@@ -1138,12 +1303,7 @@
         panel.classList.add('is-open');
         trigger.classList.add('is-open');
         renderSizeCascade();
-        if (UI.adjustDropdownPlacement) {
-          UI.adjustDropdownPlacement(panel, trigger);
-          requestAnimationFrame(function () {
-            UI.adjustDropdownPlacement(panel, trigger);
-          });
-        }
+        portalDropdown(panel, trigger);
       }
     });
     panel.addEventListener('click', function (e) {
@@ -1152,6 +1312,7 @@
       if (groupBtn) {
         state.sizeGroup = groupBtn.getAttribute('data-group');
         renderSizeCascade();
+        portalDropdown(panel, trigger);
         return;
       }
       var sizeBtn = e.target.closest('[data-size]');
@@ -1161,6 +1322,7 @@
         syncSizeLabel();
         panel.classList.remove('is-open', 'is-dropup', 'is-align-right');
         trigger.classList.remove('is-open');
+        unportalDropdown(panel);
       }
     });
     wrap.addEventListener('click', function (e) { e.stopPropagation(); });
@@ -1343,6 +1505,7 @@
   }
 
   function closeConfigDrawer() {
+    UI.closePanels();
     UI.closeDrawer('configDrawer');
     syncPendingBadge();
     renderPendingList();
@@ -1398,30 +1561,27 @@
     onChange: function (v) { state.subDraft.status = v; }
   });
 
-  function onOff(v) { return v ? '开' : '关'; }
+  function detailEditOps(cfg) {
+    var parts = [];
+    if (cfg.md5) parts.push('修改MD5');
+    if (cfg.resize && cfg.size) parts.push(cfg.size);
+    if (cfg.trim) {
+      if (cfg.trimMode === '片段截取') {
+        parts.push('片段截取' + cfg.trimStart + '-' + cfg.trimEnd + '秒');
+      } else {
+        parts.push((cfg.trimMode || '剪掉片尾') + (cfg.trimSec || 0) + '秒');
+      }
+    }
+    return parts.length ? parts.join('、') : '—';
+  }
 
-  function detailTargetFolder(cfg) {
+  function detailXmpFolder(cfg) {
     if (cfg.uploadXmp !== '是') return '—';
-    if (cfg.folderMode === '创建文件夹') return cfg.folderName || '—';
-    var folder = cfg.targetFolder || '';
-    var parts = folder.split('/');
-    return parts[parts.length - 1] || folder || '—';
-  }
-
-  function detailStorage(cfg) {
-    if (cfg.uploadXmp !== '是') return '—';
-    return cfg.folderMode || '—';
-  }
-
-  function detailResize(cfg) {
-    if (!cfg.resize) return '关';
-    return '开; ' + (cfg.size || '—');
-  }
-
-  function detailTrim(cfg) {
-    if (!cfg.trim) return '关';
-    if (cfg.trimMode === '片段截取') return '开; 片段截取 ' + cfg.trimStart + '-' + cfg.trimEnd + ' 秒';
-    return '开; ' + cfg.trimMode + ' ' + cfg.trimSec + ' 秒';
+    if (cfg.folderMode === '创建文件夹') {
+      var parent = cfg.parentFolder ? cfg.parentFolder + ' / ' : '';
+      return parent + (cfg.folderName || '—');
+    }
+    return cfg.targetFolder || '—';
   }
 
   function openDetail(task) {
@@ -1432,20 +1592,14 @@
     state.subSelected = {};
     var cfg = task.config || defaultConfig();
     var grid = $('detailConfigGrid');
-    /* 两列按行填充：左 ID/素材名称/修改尺寸/上传XMP/目标文件夹；右 创意人/修改MD5/剪辑时长/存储位置/创建时间 */
     var items = [
       ['ID', task.id],
-      ['本地文件夹', cfg.localFolderId ? (getLocalFolderPath(cfg.localFolderId) || cfg.localFolderId) : '—'],
+      ['采集数量', String(task.total != null ? task.total : '—')],
       ['创意人', cfg.creative || task.creator || '—'],
       ['素材名称', cfg.nameTpl || '—'],
-      ['标签', (cfg.tags && cfg.tags.length) ? cfg.tags.join('、') : '—'],
-      ['修改MD5', onOff(!!cfg.md5)],
-      ['修改尺寸', detailResize(cfg)],
-      ['剪辑时长', detailTrim(cfg)],
-      ['上传XMP', cfg.uploadXmp || '—'],
-      ['存储位置', detailStorage(cfg)],
-      ['目标文件夹', detailTargetFolder(cfg)],
-      ['创建时间', task.createdAt]
+      ['本地文件夹', cfg.localFolderId ? (getLocalFolderPath(cfg.localFolderId) || cfg.localFolderId) : '—'],
+      ['XMP文件夹', detailXmpFolder(cfg)],
+      ['编辑操作', detailEditOps(cfg)]
     ];
     grid.innerHTML = items.map(function (it) {
       return '<div class="detail-kv"><div class="detail-kv__label">' + escapeHtml(it[0]) + '</div><div class="detail-kv__value">' + escapeHtml(String(it[1])) + '</div></div>';

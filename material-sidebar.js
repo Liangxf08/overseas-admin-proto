@@ -126,7 +126,7 @@
           '<a href="dashboard.html" class="header-nav__item">看板</a>' +
           '<a href="tiktok-accounts.html" class="header-nav__item">产品</a>' +
           '<a href="material-library.html" class="header-nav__item is-active">素材</a>' +
-          '<a href="feedback-tickets.html" class="header-nav__item">工具</a>' +
+          '<a href="download-tasks.html" class="header-nav__item">工具</a>' +
           '<a href="menu-management.html" class="header-nav__item">管理</a>' +
         '</nav>' +
         '<div class="header-right">' +

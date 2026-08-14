@@ -21,6 +21,7 @@
     { id: 'feat', label: '素材特点', children: ['CTR', '副玩法', 'DOGE'] },
     { id: 'fest', label: '节日限定', children: ['圣诞节', '夏日'] }
   ];
+  var FORM_TAG_TREE = TAG_TREE.filter(function (g) { return g.id !== 'sys'; });
 
   var FORMAT_TREE = [
     { id: 'image', label: '图片', children: ['jpg', 'jpeg', 'png', 'bmp', 'gif'] },
@@ -56,6 +57,15 @@
 
   function isSystemTagName(name) {
     return SYSTEM_TAG_NAMES.indexOf(name) !== -1;
+  }
+
+  function withoutSystemTags(arr) {
+    return (arr || []).filter(function (t) { return !isSystemTagName(t); });
+  }
+
+  function keepSystemTags(next, prev) {
+    var sys = (prev || []).filter(isSystemTagName);
+    return sys.concat(withoutSystemTags(next).filter(function (t) { return sys.indexOf(t) === -1; }));
   }
 
   function sortTagsForDisplay(tags) {
@@ -3209,9 +3219,9 @@
     clearAllId: 'upTagClearAll',
     clearId: 'upTagClear',
     prefix: '',
-    tree: TAG_TREE,
-    getSelected: function () { return state.upload.tags; },
-    setSelected: function (arr) { state.upload.tags = arr || []; }
+    tree: FORM_TAG_TREE,
+    getSelected: function () { return withoutSystemTags(state.upload.tags); },
+    setSelected: function (arr) { state.upload.tags = withoutSystemTags(arr); }
   });
 
   var detailTagSelect = bindCascadeMultiSelect({
@@ -3228,9 +3238,9 @@
     clearAllId: 'detailTagClearAll',
     clearId: 'detailTagClear',
     prefix: '',
-    tree: TAG_TREE,
-    getSelected: function () { return state.detail.tags; },
-    setSelected: function (arr) { state.detail.tags = arr || []; }
+    tree: FORM_TAG_TREE,
+    getSelected: function () { return withoutSystemTags(state.detail.tags); },
+    setSelected: function (arr) { state.detail.tags = keepSystemTags(arr, state.detail.tags); }
   });
 
   var batchTagSelect = bindCascadeMultiSelect({
@@ -3247,9 +3257,9 @@
     clearAllId: 'batchTagClearAll',
     clearId: 'batchTagClear',
     prefix: '',
-    tree: TAG_TREE,
-    getSelected: function () { return state.batchTags; },
-    setSelected: function (arr) { state.batchTags = arr || []; }
+    tree: FORM_TAG_TREE,
+    getSelected: function () { return withoutSystemTags(state.batchTags); },
+    setSelected: function (arr) { state.batchTags = keepSystemTags(arr, state.batchTags); }
   });
 
   function openBatchTagModal(ids) {
@@ -3266,10 +3276,10 @@
   if ($('batchTagSubmit')) {
     $('batchTagSubmit').addEventListener('click', function () {
       var ids = state.batchTagIds || [];
-      var tags = state.batchTags.slice();
+      var tags = withoutSystemTags(state.batchTags);
       ids.forEach(function (id) {
         var row = findRow(id);
-        if (row) row.tags = tags.slice();
+        if (row) row.tags = keepSystemTags(tags, row.tags);
       });
       state.batchTagIds = [];
       state.batchTags = [];
@@ -3546,7 +3556,7 @@
     var now = new Date();
     var newIds = [];
     var targetFolder = state.upload.folderId;
-    var tags = state.upload.tags.length ? state.upload.tags.slice() : ['英语'];
+    var tags = withoutSystemTags(state.upload.tags).length ? withoutSystemTags(state.upload.tags) : ['英语'];
     var ready = state.upload.items.slice();
     ready.forEach(function (item, i) {
       var id = String(materialSeq++);

@@ -1,0 +1,23 @@
+/* 任务中心 · 空状态占位 */
+.page-empty {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-2, 8px);
+  padding: var(--size-10, 40px) var(--size-4, 16px);
+}
+
+.page-empty__img {
+  width: 64px;
+  height: 41px;
+}
+
+.page-empty__text {
+  margin: 0;
+  font-size: var(--font-size-body-2, 14px);
+  line-height: 22px;
+  color: var(--color-text-3, #86909C);
+}

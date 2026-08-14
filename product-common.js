@@ -79,7 +79,7 @@
   }
 
   function closePanels() {
-    document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open, .cascade-panel.is-open, .date-panel.is-open, .compare-panel.is-open, .batch-menu.is-open, .search-select-panel.is-open').forEach(function (p) {
+    document.querySelectorAll('.single-panel.is-open, .multi-panel.is-open, .cascade-panel.is-open, .date-panel.is-open, .compare-panel.is-open, .batch-menu.is-open, .search-select-panel.is-open, .size-cascade-panel.is-open').forEach(function (p) {
       p.classList.remove('is-open');
       p.classList.remove('is-dropup');
       p.classList.remove('is-align-right');

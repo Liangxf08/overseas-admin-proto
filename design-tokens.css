@@ -336,6 +336,7 @@
   --form-error-gap: 4px; /* 错误提示与下方元素间隙 */
   --form-placeholder-color: var(--color-text-4); /* #C9CDD4 输入/选择器占位 */
   --select-option-height: 36px;
+  --select-panel-height: 296px; /* 双栏多选 / 级联多选 固定高度；树选择 最大高度 */
   --checkbox-size: 16px;
   --checkbox-border-color: var(--color-border-2); /* #E5E6EB 选择器多选 */
   --checkbox-border-color-table: var(--color-border-3); /* #C9CDD4 表格 */

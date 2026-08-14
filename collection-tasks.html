@@ -94,12 +94,12 @@
                 <table class="data-table" id="taskTable">
                   <colgroup>
                     <col data-col-width="80" />
-                    <col data-col-width="200" />
+                    <col data-col-width="260" />
                     <col data-col-width="112" />
                     <col data-col-width="180" />
                     <col data-col-width="180" />
                     <col data-col-width="100" />
-                    <col data-col-width="308" />
+                    <col data-col-width="280" />
                     <col data-col-width="160" />
                   </colgroup>
                   <thead>
@@ -253,11 +253,9 @@
                     <span class="select-trigger__text" id="cfgSizeLabel">1080x1920</span>
                     <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
                   </button>
-                  <div class="single-panel size-cascade-panel" id="cfgSizePanel">
-                    <div class="size-cascade">
-                      <div class="size-cascade__col" id="cfgSizeGroupList"></div>
-                      <div class="size-cascade__col" id="cfgSizeValueList"></div>
-                    </div>
+                  <div class="size-cascade-panel" id="cfgSizePanel">
+                    <div class="size-cascade__col" id="cfgSizeGroupList"></div>
+                    <div class="size-cascade__col" id="cfgSizeValueList"></div>
                   </div>
                 </div>
               </div>
@@ -337,12 +335,12 @@
                 <button class="select-clear" type="button" id="cfgTargetFolderClear" aria-label="清除">
                   <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
                 </button>
-                <div class="search-select-panel" id="cfgTargetFolderPanel">
+                <div class="search-select-panel folder-tree-panel" id="cfgTargetFolderPanel">
                   <div class="search-select-panel__search">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
                     <input type="text" id="cfgTargetFolderSearch" placeholder="搜索" autocomplete="off" />
                   </div>
-                  <div class="search-select-panel__list" id="cfgTargetFolderList"></div>
+                  <div class="search-select-panel__list folder-tree-panel__list" id="cfgTargetFolderList"></div>
                 </div>
                 <div class="form-item__error">请选择目标文件夹</div>
               </div>
@@ -350,7 +348,12 @@
 
             <div class="folder-create is-hidden" id="cfgCreateFolderBlock">
               <div class="form-item">
-                <label class="form-item__label">父级文件夹</label>
+                <label class="form-item__label">
+                  <span class="form-item__label-row">
+                    父级文件夹
+                    <span class="form-help" data-tip="父级文件夹为空时，默认创建一级文件夹。" aria-label="说明" tabindex="0">?</span>
+                  </span>
+                </label>
                 <div class="form-item__control" id="cfgParentFolderWrap">
                   <button class="select-trigger" type="button" id="cfgParentFolderTrigger">
                     <span class="select-trigger__text" id="cfgParentFolderLabel"><span class="muted">请选择</span></span>
@@ -359,12 +362,12 @@
                   <button class="select-clear" type="button" id="cfgParentFolderClear" aria-label="清除">
                     <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
                   </button>
-                  <div class="search-select-panel" id="cfgParentFolderPanel">
+                  <div class="search-select-panel folder-tree-panel" id="cfgParentFolderPanel">
                     <div class="search-select-panel__search">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
                       <input type="text" id="cfgParentFolderSearch" placeholder="搜索" autocomplete="off" />
                     </div>
-                    <div class="search-select-panel__list" id="cfgParentFolderList"></div>
+                    <div class="search-select-panel__list folder-tree-panel__list" id="cfgParentFolderList"></div>
                   </div>
                 </div>
               </div>
@@ -434,9 +437,9 @@
             <table class="data-table" id="subTable">
               <colgroup>
                 <col class="col-check" />
-                <col data-col-width="260" />
-                <col data-col-width="100" />
-                <col data-col-width="100" />
+                <col data-col-width="236" />
+                <col data-col-width="112" />
+                <col data-col-width="112" />
                 <col data-col-width="160" />
                 <col data-col-width="180" />
                 <col data-col-width="88" />
@@ -474,7 +477,7 @@
         </span>
         <div class="confirm-modal__content">
           <h2 class="confirm-modal__title" id="cancelTitle">取消确认</h2>
-          <p class="confirm-modal__body">取消后将立即中断当前任务，且无法恢复。确认取消吗？</p>
+          <p class="confirm-modal__body">确认立即中断当前任务吗？</p>
         </div>
       </div>
       <div class="confirm-modal__footer">
@@ -496,7 +499,7 @@
         </span>
         <div class="confirm-modal__content">
           <h2 class="confirm-modal__title" id="retryTitle">重试确认</h2>
-          <p class="confirm-modal__body">系统将从上一次失败的步骤重新尝试执行。确认重试吗？</p>
+          <p class="confirm-modal__body">确认从上一次失败的步骤开始重试吗？</p>
         </div>
       </div>
       <div class="confirm-modal__footer">

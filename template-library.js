@@ -21,6 +21,7 @@
     { id: 'play', label: '玩法品类', children: ['副玩法', '主玩法', '剧情'] },
     { id: 'fest', label: '节日限定', children: ['圣诞', '黑五', '春节'] }
   ];
+  var FORM_TAG_TREE = TAG_TREE.filter(function (g) { return g.id !== 'sys'; });
 
   var CATEGORY_OPTIONS = ['片段拼接', '图层叠加', '音频替换'];
 
@@ -55,6 +56,24 @@
   }
 
   var TAG_OPTIONS = flattenTreeLeaves(TAG_TREE);
+
+  var SYSTEM_TAG_NAMES = [];
+  TAG_TREE.forEach(function (g) {
+    if (g.id !== 'sys') return;
+    (g.children || []).forEach(function (c) {
+      if (SYSTEM_TAG_NAMES.indexOf(c) === -1) SYSTEM_TAG_NAMES.push(c);
+    });
+  });
+  function isSystemTagName(name) {
+    return SYSTEM_TAG_NAMES.indexOf(name) !== -1;
+  }
+  function withoutSystemTags(arr) {
+    return (arr || []).filter(function (t) { return !isSystemTagName(t); });
+  }
+  function keepSystemTags(next, prev) {
+    var sys = (prev || []).filter(isSystemTagName);
+    return sys.concat(withoutSystemTags(next).filter(function (t) { return sys.indexOf(t) === -1; }));
+  }
 
   var ALL_FILTERS = [
     { key: 'date', label: '上传时间', kind: 'date' },
@@ -3206,9 +3225,9 @@
     clearAllId: 'batchTagClearAll',
     clearId: 'batchTagClear',
     prefix: '',
-    tree: TAG_TREE,
-    getSelected: function () { return state.batchTags; },
-    setSelected: function (arr) { state.batchTags = arr || []; }
+    tree: FORM_TAG_TREE,
+    getSelected: function () { return withoutSystemTags(state.batchTags); },
+    setSelected: function (arr) { state.batchTags = keepSystemTags(arr, state.batchTags); }
   });
 
   function openBatchTagModal(ids) {
@@ -3225,10 +3244,10 @@
   if ($('batchTagSubmit')) {
     $('batchTagSubmit').addEventListener('click', function () {
       var ids = state.batchTagIds || [];
-      var tags = state.batchTags.slice();
+      var tags = withoutSystemTags(state.batchTags);
       ids.forEach(function (id) {
         var row = findRow(id);
-        if (row) row.tags = tags.slice();
+        if (row) row.tags = keepSystemTags(tags, row.tags);
       });
       state.batchTagIds = [];
       state.batchTags = [];
