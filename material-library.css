@@ -251,6 +251,12 @@
   box-shadow: inset 0 -2px 0 0 var(--color-primary-6, #165DFF);
 }
 
+.tree-node__row.is-drop-inside,
+.tree-section-label.is-drop-inside {
+  background: var(--color-primary-1, #E8F3FF);
+  box-shadow: inset 0 0 0 1px var(--color-primary-6, #165DFF);
+}
+
 /* 文件夹更多操作菜单（挂 body） */
 .folder-more-menu {
   position: fixed;
@@ -1974,6 +1980,149 @@
 
 .detail-grid {
   display: none;
+}
+
+#batchXmpModal .form-item__label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#batchXmpModal .search-select-panel {
+  z-index: 20;
+}
+
+.search-select-panel.folder-tree-panel.is-open {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: var(--select-panel-height, 296px);
+}
+
+.folder-tree-panel {
+  width: 100%;
+  min-width: 100%;
+}
+
+.folder-tree-panel .search-select-panel__search {
+  flex-shrink: 0;
+}
+
+.folder-tree-panel__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+
+.dropdown-portal.folder-tree-panel {
+  overflow: hidden;
+}
+
+.dropdown-portal.folder-tree-panel .folder-tree-panel__list {
+  max-height: none;
+}
+
+.folder-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.folder-tree-node__toggle {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3, #86909C);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.folder-tree-node__toggle svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.15s ease;
+}
+
+.folder-tree-node__toggle:not(.is-open) svg {
+  transform: rotate(-90deg);
+}
+
+.folder-tree-node__toggle.is-empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.folder-tree-node__label {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px 0 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-1, #1D2129);
+  font-family: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-tree-node:hover { background: var(--color-gray-hover, #F5F7FA); }
+.folder-tree-node.is-active .folder-tree-node__label { color: var(--color-primary, #165DFF); }
+
+.dropdown-portal {
+  position: fixed !important;
+  z-index: 1200 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.folder-existing.is-hidden,
+.folder-create.is-hidden {
+  display: none !important;
+}
+
+.meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border-2, #E5E6EB);
+  border-radius: 2px;
+  background: var(--color-fill-1, #F7F8FA);
+  color: var(--color-text-2, #4E5969);
+  font-size: 12px;
+  line-height: 20px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.meta-tag:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.meta-tag.is-used:not([data-repeat="1"]) {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .detail-preview {

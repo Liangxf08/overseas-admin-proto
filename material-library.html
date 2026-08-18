@@ -792,6 +792,103 @@
     </div>
   </div>
 
+  <!-- 批量同步 XMP -->
+  <div class="modal-mask modal-mask--dropdown" id="batchXmpModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchXmpTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="batchXmpTitle">同步 XMP</h2>
+        <button class="modal__close" type="button" data-close="batchXmpModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="batchXmpDupItem">
+          <label class="form-item__label">过滤重复素材</label>
+          <div class="form-item__control">
+            <button class="switch is-on" type="button" id="batchXmpDupSwitch" aria-label="过滤重复素材" aria-pressed="true"></button>
+          </div>
+        </div>
+
+        <div class="xmp-block" id="batchXmpBlock">
+          <div class="form-item">
+            <label class="form-item__label">存储位置</label>
+            <div class="form-item__control">
+              <div class="seg" id="batchXmpFolderSeg" role="group" aria-label="存储位置">
+                <button type="button" class="seg__item is-active" data-value="已有文件夹">已有文件夹</button>
+                <button type="button" class="seg__item" data-value="创建文件夹">创建文件夹</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-item folder-existing" id="batchXmpTargetItem">
+            <label class="form-item__label is-required">目标文件夹</label>
+            <div class="form-item__control" id="batchXmpTargetWrap">
+              <button class="select-trigger" type="button" id="batchXmpTargetTrigger">
+                <span class="select-trigger__text" id="batchXmpTargetLabel"><span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="batchXmpTargetClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="search-select-panel folder-tree-panel" id="batchXmpTargetPanel">
+                <div class="search-select-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="batchXmpTargetSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="search-select-panel__list folder-tree-panel__list" id="batchXmpTargetList"></div>
+              </div>
+              <div class="form-item__error">请选择目标文件夹</div>
+            </div>
+          </div>
+
+          <div class="folder-create is-hidden" id="batchXmpCreateBlock">
+            <div class="form-item">
+              <label class="form-item__label">
+                <span class="form-item__label-row">
+                  父级文件夹
+                  <span class="form-help" data-tip="父级文件夹为空时，默认创建一级文件夹。" aria-label="说明" tabindex="0">?</span>
+                </span>
+              </label>
+              <div class="form-item__control" id="batchXmpParentWrap">
+                <button class="select-trigger" type="button" id="batchXmpParentTrigger">
+                  <span class="select-trigger__text" id="batchXmpParentLabel"><span class="muted">请选择</span></span>
+                  <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                </button>
+                <button class="select-clear" type="button" id="batchXmpParentClear" aria-label="清除">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                </button>
+                <div class="search-select-panel folder-tree-panel" id="batchXmpParentPanel">
+                  <div class="search-select-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="batchXmpParentSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="search-select-panel__list folder-tree-panel__list" id="batchXmpParentList"></div>
+                </div>
+              </div>
+            </div>
+            <div class="form-item" id="batchXmpFolderNameItem">
+              <label class="form-item__label is-required">文件夹名称</label>
+              <div class="form-item__control">
+                <input class="input" id="batchXmpFolderNameInput" type="text" autocomplete="off" />
+                <div class="meta-tags" id="batchXmpFolderNameTags" data-target="batchXmpFolderNameInput">
+                  <button class="meta-tag" type="button" data-token="_" data-repeat="1">下划线</button>
+                  <button class="meta-tag" type="button" data-token="{编号}">编号</button>
+                  <button class="meta-tag" type="button" data-token="{创意人}">创意人</button>
+                  <button class="meta-tag" type="button" data-token="{YYYYMMDD}">YYYYMMDD</button>
+                </div>
+                <div class="form-item__error">请输入文件夹名称</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="batchXmpModal">取消</button>
+        <button class="btn btn--primary" type="button" id="batchXmpSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 提交上传确认 -->
   <div class="modal-mask modal-mask--confirm" id="submitUploadModal" aria-hidden="true">
     <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="submitUploadTitle">
@@ -830,7 +927,7 @@
         </span>
         <div class="confirm-modal__content">
           <h2 class="confirm-modal__title" id="abortUploadTitle">终止上传</h2>
-          <p class="confirm-modal__body" id="abortUploadText">有N个文件正在上传，确认终止任务并删除上传文件吗？</p>
+          <p class="confirm-modal__body" id="abortUploadText">有N个文件尚未入库，确认终止任务并删除上传文件吗？</p>
         </div>
       </div>
       <div class="confirm-modal__footer">

@@ -33,7 +33,7 @@
   };
 
   var FORMAT_TREE = [
-    { id: 'image', label: '图片', children: ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'gif'] },
+    { id: 'image', label: '图片', children: ['jpg', 'jpeg', 'png', 'bmp', 'gif'] },
     { id: 'video', label: '视频', children: ['mp4', 'mov', 'avi', 'mpeg'] },
     { id: 'audio', label: '音频', children: ['mp3', 'wav', 'aac', 'm4a'] }
   ];
@@ -41,8 +41,8 @@
   var SIZE_TREE = [
     { id: 'portrait', label: '竖版 (16:9)', children: ['1080x1920', '720x1280'] },
     { id: 'landscape', label: '横版 (9:16)', children: ['1920x1080', '1280x720'] },
-    { id: 'square', label: '方形 (1:1)', children: ['1080x1080', '800x800', '512x512'] },
-    { id: 'other', label: '其他', children: ['300x300', '180x180'] }
+    { id: 'square', label: '方形 (1:1)', children: ['1080x1080', '800x800', '512x512', '300x300', '180x180'] },
+    { id: 'other', label: '其他', children: ['1200x628'] }
   ];
 
   function flattenTreeLeaves(tree) {
@@ -320,6 +320,21 @@
     return (parent && parent.children ? parent.children : []).map(function (n) { return n.name; });
   }
 
+  /** 同级重名时自动加 (1)(2)…；不同父级可同名 */
+  function allocateSiblingFolderName(desiredName, occupiedNames) {
+    var names = occupiedNames || [];
+    var base = String(desiredName || '').trim();
+    if (!base) return base;
+    if (names.indexOf(base) === -1) return base;
+    var n = 1;
+    var candidate;
+    do {
+      candidate = base + '(' + n + ')';
+      n += 1;
+    } while (names.indexOf(candidate) !== -1);
+    return candidate;
+  }
+
   function isDescendantFolder(childId, ancestorId) {
     if (!childId || !ancestorId || isSystemFolder(ancestorId) || isSystemFolder(childId)) return false;
     var path = getFolderPath(childId);
@@ -497,7 +512,8 @@
       creator: CURRENT_USER,
       deriveDup: true,
       items: [],
-      selected: {}
+      selected: {},
+      uploading: false
     },
     nameEditId: null,
     deleteIds: [],
@@ -1633,6 +1649,7 @@
       return (
         '<div class="tree-node' + collapsedCls + systemCls + '" data-id="' + escapeHtml(node.id) + '">' +
           '<div class="tree-node__row' + active + '" data-select="' + escapeHtml(node.id) + '" data-depth="' + depth + '"' +
+            ' data-folder-drop="' + escapeHtml(node.id) + '"' +
             (canDrag ? ' draggable="true" data-folder-drag="' + escapeHtml(node.id) + '"' : '') +
             ' style="padding-left:' + (8 + depth * 20) + 'px">' +
             '<button class="tree-node__toggle' + toggleCls + '" type="button" data-toggle="' + escapeHtml(node.id) + '" aria-label="展开">' +
@@ -1657,7 +1674,7 @@
 
     root.innerHTML =
       renderNode(SYSTEM_FOLDER, 0, false) +
-      '<div class="tree-section-label">自定义文件夹</div>' +
+      '<div class="tree-section-label" data-folder-drop="' + escapeHtml(SYSTEM_FOLDER.id) + '">自定义文件夹</div>' +
       (customHtml || '<div class="tree-empty">暂无自定义文件夹</div>');
   }
 
@@ -2188,32 +2205,91 @@
   });
 
   function clearFolderDropMarks() {
-    document.querySelectorAll('.tree-node__row.is-drop-before, .tree-node__row.is-drop-after, .tree-node__row.is-dragging').forEach(function (el) {
-      el.classList.remove('is-drop-before', 'is-drop-after', 'is-dragging');
+    var root = $('folderTree');
+    if (!root) return;
+    root.querySelectorAll('.is-drop-before, .is-drop-after, .is-drop-inside, .is-dragging').forEach(function (el) {
+      el.classList.remove('is-drop-before', 'is-drop-after', 'is-drop-inside', 'is-dragging');
+      el.removeAttribute('data-drop-place');
     });
   }
 
-  function sameParentList(aId, bId) {
-    var aList = findParentList(aId);
-    var bList = findParentList(bId);
-    return !!(aList && bList && aList === bList);
+  function markFolderDragging(dragId) {
+    var dragging = document.querySelector('.tree-node__row[data-folder-drag="' + dragId + '"]');
+    if (dragging) dragging.classList.add('is-dragging');
   }
 
-  function reorderSibling(dragId, targetId, place) {
-    if (!dragId || !targetId || dragId === targetId) return false;
-    var list = findParentList(dragId);
-    if (!list || findParentList(targetId) !== list) return false;
-    var from = list.findIndex(function (n) { return n.id === dragId; });
-    if (from < 0) return false;
-    var item = list.splice(from, 1)[0];
-    var to = list.findIndex(function (n) { return n.id === targetId; });
-    if (to < 0) {
-      list.splice(from, 0, item);
-      return false;
+  function resolveFolderDropPlace(row, clientY) {
+    var targetId = row.getAttribute('data-folder-drop');
+    if (!targetId || isSystemFolder(targetId) || row.classList.contains('tree-section-label')) {
+      return 'inside';
     }
-    var insertAt = place === 'before' ? to : to + 1;
-    list.splice(insertAt, 0, item);
-    return true;
+    var rect = row.getBoundingClientRect();
+    var y = clientY - rect.top;
+    var h = rect.height || 1;
+    if (y < h * 0.28) return 'before';
+    if (y > h * 0.72) return 'after';
+    return 'inside';
+  }
+
+  function canDropFolder(dragId, targetId, place) {
+    if (!dragId || !targetId || dragId === targetId) return false;
+    if (isSystemFolder(dragId)) return false;
+    if (isDescendantFolder(targetId, dragId)) return false;
+    if (isSystemFolder(targetId)) return place === 'inside';
+    return place === 'before' || place === 'after' || place === 'inside';
+  }
+
+  function getFolderChildrenList(parentId) {
+    if (!parentId || isSystemFolder(parentId)) return CUSTOM_FOLDERS;
+    var parent = findFolderNode(parentId);
+    if (!parent || parent.system) return null;
+    if (!parent.children) parent.children = [];
+    return parent.children;
+  }
+
+  function relocateFolder(dragId, targetId, place) {
+    if (!canDropFolder(dragId, targetId, place)) return { ok: false };
+    var node = findFolderNode(dragId);
+    var fromList = findParentList(dragId);
+    if (!node || !fromList) return { ok: false };
+    var oldParentId = getFolderParentId(dragId) || SYSTEM_FOLDER.id;
+    var newParentId;
+    var toList;
+    var insertAt;
+    if (place === 'inside') {
+      newParentId = isSystemFolder(targetId) ? SYSTEM_FOLDER.id : targetId;
+      toList = getFolderChildrenList(newParentId);
+      if (!toList) return { ok: false };
+      insertAt = toList.length;
+    } else {
+      newParentId = getFolderParentId(targetId) || SYSTEM_FOLDER.id;
+      toList = findParentList(targetId);
+      if (!toList) return { ok: false };
+      insertAt = toList.findIndex(function (n) { return n.id === targetId; });
+      if (insertAt < 0) return { ok: false };
+      if (place === 'after') insertAt += 1;
+    }
+    var fromIndex = fromList.findIndex(function (n) { return n.id === dragId; });
+    if (fromIndex < 0) return { ok: false };
+    var sameList = fromList === toList;
+    fromList.splice(fromIndex, 1);
+    if (sameList && fromIndex < insertAt) insertAt -= 1;
+    var desiredName = node.name;
+    var occupied = toList.map(function (n) { return n.name; });
+    var finalName = allocateSiblingFolderName(desiredName, occupied);
+    node.name = finalName;
+    if (insertAt < 0) insertAt = 0;
+    if (insertAt > toList.length) insertAt = toList.length;
+    toList.splice(insertAt, 0, node);
+    if (place === 'inside' && !isSystemFolder(targetId)) {
+      state.collapsed[targetId] = false;
+    }
+    return {
+      ok: true,
+      name: finalName,
+      autoRenamed: finalName !== desiredName,
+      parentChanged: oldParentId !== newParentId
+    };
   }
 
   $('folderTree').addEventListener('dragstart', function (e) {
@@ -2242,45 +2318,64 @@
   $('folderTree').addEventListener('dragover', function (e) {
     var dragId = state.dragFolderId;
     if (!dragId) return;
-    var row = e.target.closest('[data-folder-drag]');
-    if (!row) return;
-    var targetId = row.getAttribute('data-folder-drag');
-    if (!targetId || targetId === dragId || !sameParentList(dragId, targetId)) return;
+    var row = e.target.closest('[data-folder-drop]');
+    if (!row) {
+      clearFolderDropMarks();
+      markFolderDragging(dragId);
+      return;
+    }
+    var targetId = row.getAttribute('data-folder-drop');
+    var place = resolveFolderDropPlace(row, e.clientY);
+    if (!canDropFolder(dragId, targetId, place)) {
+      clearFolderDropMarks();
+      markFolderDragging(dragId);
+      return;
+    }
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     clearFolderDropMarks();
-    var dragging = document.querySelector('.tree-node__row[data-folder-drag="' + dragId + '"]');
-    if (dragging) dragging.classList.add('is-dragging');
-    var rect = row.getBoundingClientRect();
-    var place = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
-    row.classList.add(place === 'before' ? 'is-drop-before' : 'is-drop-after');
+    markFolderDragging(dragId);
+    var placeCls = place === 'inside' ? 'is-drop-inside' : (place === 'before' ? 'is-drop-before' : 'is-drop-after');
+    row.classList.add(placeCls);
     row.setAttribute('data-drop-place', place);
   });
 
   $('folderTree').addEventListener('dragleave', function (e) {
-    var row = e.target.closest('[data-folder-drag]');
+    var row = e.target.closest('[data-folder-drop]');
     if (!row) return;
     if (row.contains(e.relatedTarget)) return;
-    row.classList.remove('is-drop-before', 'is-drop-after');
+    row.classList.remove('is-drop-before', 'is-drop-after', 'is-drop-inside');
     row.removeAttribute('data-drop-place');
   });
 
   $('folderTree').addEventListener('drop', function (e) {
     var dragId = state.dragFolderId;
-    var row = e.target.closest('[data-folder-drag]');
+    var row = e.target.closest('[data-folder-drop]');
     if (!dragId || !row) {
       clearFolderDropMarks();
       state.dragFolderId = null;
       return;
     }
     e.preventDefault();
-    var targetId = row.getAttribute('data-folder-drag');
-    var place = row.getAttribute('data-drop-place') ||
-      (e.clientY < row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2 ? 'before' : 'after');
+    var targetId = row.getAttribute('data-folder-drop');
+    var place = row.getAttribute('data-drop-place') || resolveFolderDropPlace(row, e.clientY);
     clearFolderDropMarks();
     state.dragFolderId = null;
-    if (reorderSibling(dragId, targetId, place)) {
-      renderFolderTree();
+    var moved = relocateFolder(dragId, targetId, place);
+    if (!moved.ok) return;
+    expandFolderAncestors(dragId);
+    if (moved.parentChanged) renderAll();
+    else renderFolderTree();
+    requestAnimationFrame(function () {
+      var el = document.querySelector('.tree-node__row[data-select="' + dragId + '"]');
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      }
+    });
+    if (moved.autoRenamed) {
+      UI.showToast('文件夹已移动，因同名已命名为 ' + moved.name, 'success');
+    } else if (moved.parentChanged) {
+      UI.showToast('文件夹已移动', 'success');
     }
   });
 
@@ -2368,17 +2463,22 @@
     positionMoreMenu(menu, btn);
   }
 
+  function formatFolderParentLabel(parentId) {
+    if (!parentId || isSystemFolder(parentId)) return '自定义文件夹（根级）';
+    return getFolderPath(parentId) || '自定义文件夹（根级）';
+  }
+
+  function fillFolderParentField(parentId) {
+    var parentItem = $('folderParentItem');
+    if (parentItem) parentItem.hidden = false;
+    if ($('folderParentLabel')) $('folderParentLabel').value = formatFolderParentLabel(parentId);
+  }
+
   function openFolderCreate(parentId) {
     parentId = parentId || state.folderId || SYSTEM_FOLDER.id;
     state.folderModal = { mode: 'create', parentId: parentId, targetId: null };
     if ($('folderTitle')) $('folderTitle').textContent = '新建文件夹';
-    var parentItem = $('folderParentItem');
-    if (parentItem) parentItem.hidden = false;
-    if ($('folderParentLabel')) {
-      $('folderParentLabel').value = isSystemFolder(parentId)
-        ? '自定义文件夹（根级）'
-        : (getFolderPath(parentId) || '自定义文件夹');
-    }
+    fillFolderParentField(parentId);
     if ($('folderNameInput')) $('folderNameInput').value = '';
     clearFolderFormError();
     UI.openModal('folderModal');
@@ -2391,10 +2491,10 @@
     }
     var node = findFolderNode(id);
     if (!node) return;
-    state.folderModal = { mode: 'rename', parentId: '', targetId: id };
+    var parentId = getFolderParentId(id) || SYSTEM_FOLDER.id;
+    state.folderModal = { mode: 'rename', parentId: parentId, targetId: id };
     if ($('folderTitle')) $('folderTitle').textContent = '编辑文件夹';
-    var parentItem = $('folderParentItem');
-    if (parentItem) parentItem.hidden = true;
+    fillFolderParentField(parentId);
     if ($('folderNameInput')) $('folderNameInput').value = node.name;
     clearFolderFormError();
     UI.openModal('folderModal');
@@ -3013,6 +3113,151 @@
   /* upload drawer */
   var UPLOAD_MAX = 500;
   var uploadUid = 1;
+  var uploadProgressTimer = null;
+
+  function canRetryItem(item) {
+    return item && item.status === 'failed';
+  }
+
+  function canDeleteItem(item) {
+    return item && item.status !== 'uploading';
+  }
+
+  function isUploadBusyItem(item) {
+    return item && item.status === 'uploading';
+  }
+
+  function hasUploadingItems() {
+    return state.upload.items.some(isUploadBusyItem);
+  }
+
+  function getSelectedUploadItems() {
+    return state.upload.items.filter(function (it) { return state.upload.selected[it.uid]; });
+  }
+
+  function uploadProgressHtml(item) {
+    if (item.status === 'failed') {
+      return UI.taskStatusDot ? UI.taskStatusDot('已失败') : '<span class="status-dot status-dot--error">已失败</span>';
+    }
+    if (item.status === 'done') {
+      return UI.taskStatusDot ? UI.taskStatusDot('已完成') : '<span class="status-dot status-dot--done">已完成</span>';
+    }
+    var pct = Math.max(0, Math.min(100, Math.round(Number(item.progress) || 0)));
+    return (
+      '<div class="upload-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '">' +
+        '<div class="upload-progress__track" aria-hidden="true"><span class="upload-progress__fill" style="width:' + pct + '%"></span></div>' +
+        '<span class="upload-progress__text">' + pct + '%</span>' +
+      '</div>'
+    );
+  }
+
+  function uploadActionHtml(item) {
+    var retryOff = !canRetryItem(item);
+    var delOff = !canDeleteItem(item);
+    return (
+      '<span class="action-links">' +
+        '<button class="link' + (retryOff ? ' is-disabled' : '') + '" type="button" data-up-act="retry" data-uid="' + item.uid + '"' +
+          (retryOff ? ' disabled' : '') + '>重试</button>' +
+        '<button class="link link--danger' + (delOff ? ' is-disabled' : '') + '" type="button" data-up-act="delete" data-uid="' + item.uid + '"' +
+          (delOff ? ' disabled' : '') + '>删除</button>' +
+      '</span>'
+    );
+  }
+
+  function syncUploadBusy() {
+    var uploading = hasUploadingItems();
+    var transferring = !!uploadProgressTimer;
+    state.upload.uploading = transferring;
+    var panel = document.querySelector('#uploadDrawer .drawer');
+    if (panel) panel.classList.toggle('is-uploading', transferring);
+    var submit = $('upSubmit');
+    if (submit) submit.disabled = uploading;
+  }
+
+  function stopUploadProgressTimer() {
+    if (uploadProgressTimer) {
+      clearInterval(uploadProgressTimer);
+      uploadProgressTimer = null;
+    }
+  }
+
+  function patchUploadProgressCells() {
+    state.upload.items.forEach(function (item) {
+      var cell = document.querySelector('#upFileBody tr[data-uid="' + item.uid + '"] td[data-col="progress"]');
+      if (cell) cell.innerHTML = uploadProgressHtml(item);
+    });
+  }
+
+  function ensureUploadProgressTimer() {
+    if (uploadProgressTimer) return;
+    uploadProgressTimer = setInterval(function () {
+      var anyUploading = false;
+      var statusChanged = false;
+      state.upload.items.forEach(function (item) {
+        if (item.status !== 'uploading') return;
+        anyUploading = true;
+        item.progress = Math.min(100, (Number(item.progress) || 0) + (item.progressSpeed || 8));
+        if (item.failAt != null && item.progress >= item.failAt) {
+          item.status = 'failed';
+          item.progress = item.failAt;
+          item.failAt = null;
+          statusChanged = true;
+          return;
+        }
+        if (item.progress >= 100) {
+          item.progress = 100;
+          item.status = 'done';
+          statusChanged = true;
+        }
+      });
+      patchUploadProgressCells();
+      if (statusChanged) {
+        syncUploadBusy();
+        renderUploadTable();
+      }
+      if (!anyUploading) {
+        stopUploadProgressTimer();
+        syncUploadBusy();
+      }
+    }, 220);
+  }
+
+  function retryUploadItems(items) {
+    var targets = (items || []).filter(canRetryItem);
+    if (!targets.length) {
+      UI.showToast('请选择上传失败的模板');
+      return;
+    }
+    targets.forEach(function (item, i) {
+      item.status = 'uploading';
+      item.progress = 0;
+      item.failAt = null;
+      item.progressSpeed = 8 + ((i * 5) % 10);
+    });
+    renderUploadTable();
+    ensureUploadProgressTimer();
+    syncUploadBusy();
+  }
+
+  function getUploadSummary() {
+    var total = state.upload.items.length;
+    var done = 0;
+    var failed = 0;
+    state.upload.items.forEach(function (it) {
+      if (it.status === 'done') done++;
+      else if (it.status === 'failed') failed++;
+    });
+    return { total: total, done: done, failed: failed };
+  }
+
+  function openSubmitUploadConfirm() {
+    var s = getUploadSummary();
+    var text = $('submitUploadText');
+    if (text) {
+      text.textContent = '上传模板共' + s.total + '个，已完成' + s.done + '个，已失败' + s.failed + '个。';
+    }
+    UI.openModal('submitUploadModal');
+  }
 
   function listFolderSelectOptions() {
     var opts = [{ id: SYSTEM_FOLDER.id, name: SYSTEM_FOLDER.name }];
@@ -3279,9 +3524,11 @@
   }
 
   function syncUpBatchBtn() {
-    var btn = $('upBatchDeleteBtn');
-    if (!btn) return;
-    btn.disabled = !Object.keys(state.upload.selected).some(function (k) { return state.upload.selected[k]; });
+    var selected = getSelectedUploadItems();
+    var retryBtn = $('upBatchRetryBtn');
+    var delBtn = $('upBatchDeleteBtn');
+    if (retryBtn) retryBtn.disabled = !selected.some(canRetryItem);
+    if (delBtn) delBtn.disabled = !selected.some(canDeleteItem);
   }
 
   function syncUpCount() {
@@ -3293,7 +3540,7 @@
     var file = item.file;
     if (!file) return;
     var url = URL.createObjectURL(file);
-    var isImage = ['png', 'jpg', 'jpeg', 'webp', 'gif'].indexOf(item.format) !== -1;
+    var isImage = ['png', 'jpg', 'jpeg', 'gif'].indexOf(item.format) !== -1;
     function done(w, h) {
       try { URL.revokeObjectURL(url); } catch (err) { /* ignore */ }
       if (!state.upload.items.some(function (x) { return x.uid === item.uid; })) return;
@@ -3320,6 +3567,7 @@
     var items = state.upload.items;
     body.innerHTML = items.map(function (item) {
       var checked = state.upload.selected[item.uid] ? ' checked' : '';
+      var checkDisabled = isUploadBusyItem(item) ? ' disabled' : '';
       var displayName = stripExt(item.name);
       var isAudio = item.mediaType === '音频';
       var thumbInner = isAudio
@@ -3327,7 +3575,7 @@
         : ('<span class="thumb__preview" aria-hidden="true"></span>' + (item.mediaType === '视频' ? PLAY_ICON : ''));
       return (
         '<tr data-uid="' + item.uid + '">' +
-          '<td class="col-check"><span class="cell-check"><input type="checkbox" data-up-check="' + item.uid + '"' + checked + ' /></span></td>' +
+          '<td class="col-check"><span class="cell-check"><input type="checkbox" data-up-check="' + item.uid + '"' + checked + checkDisabled + ' /></span></td>' +
           '<td class="col-material"><div class="material-cell">' +
             '<button class="thumb' + (isAudio ? ' thumb--audio' : '') + '" type="button"' +
               (isAudio ? '' : ' data-up-preview="' + item.uid + '"') +
@@ -3340,22 +3588,23 @@
           '</div></td>' +
           '<td>' + escapeHtml(item.sizeText) + '</td>' +
           '<td>' + escapeHtml(item.format || '—') + '</td>' +
-          '<td>' + escapeHtml(item.sizeDim || '—') + '</td>' +
-          '<td class="col-action"><span class="action-links">' +
-            '<button class="link link--danger" type="button" data-up-act="delete" data-uid="' + item.uid + '">删除</button>' +
-          '</span></td>' +
+          '<td class="col-up-progress" data-col="progress">' + uploadProgressHtml(item) + '</td>' +
+          '<td class="col-action">' + uploadActionHtml(item) + '</td>' +
         '</tr>'
       );
     }).join('');
 
     var checkAll = $('upCheckAll');
     if (checkAll) {
-      var allChecked = items.length > 0 && items.every(function (it) { return state.upload.selected[it.uid]; });
+      var operable = items.filter(function (it) { return !isUploadBusyItem(it); });
+      var allChecked = operable.length > 0 && operable.every(function (it) { return state.upload.selected[it.uid]; });
       checkAll.checked = allChecked;
-      checkAll.indeterminate = !allChecked && items.some(function (it) { return state.upload.selected[it.uid]; });
+      checkAll.indeterminate = !allChecked && operable.some(function (it) { return state.upload.selected[it.uid]; });
+      checkAll.disabled = operable.length === 0;
     }
     syncUpCount();
     syncUpBatchBtn();
+    syncUploadBusy();
   }
 
   function getUploadAllowedFormats(category) {
@@ -3425,7 +3674,7 @@
     }
     accepted.forEach(function (file) {
       var ext = (fileExt(file.name) || '').toLowerCase();
-      var isImage = ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp'].indexOf(ext) !== -1;
+      var isImage = ['png', 'jpg', 'jpeg', 'bmp', 'gif'].indexOf(ext) !== -1;
       var isAudio = ['mp3', 'wav', 'aac', 'm4a'].indexOf(ext) !== -1;
       var item = {
         uid: uploadUid++,
@@ -3436,25 +3685,57 @@
         size: file.size || 0,
         sizeText: formatFileSize(file.size),
         sizeDim: '—',
-        file: file
+        file: file,
+        progress: 0,
+        status: 'uploading',
+        failAt: (state.upload.items.length % 5 === 4) ? (35 + (state.upload.items.length % 4) * 12) : null,
+        progressSpeed: 6 + ((state.upload.items.length * 7) % 11)
       };
       state.upload.items.push(item);
       if (!isAudio) probeLocalMeta(item);
     });
     renderUploadTable();
+    ensureUploadProgressTimer();
+    syncUploadBusy();
   }
 
-  function closeUploadDrawer() {
+  function discardUploadAndClose() {
+    stopUploadProgressTimer();
+    state.upload.items = [];
+    state.upload.selected = {};
+    syncUploadBusy();
+    if (UI.closeModal) UI.closeModal('abortUploadModal');
     UI.closeDrawer('uploadDrawer');
   }
 
+  function closeUploadDrawer(opts) {
+    opts = opts || {};
+    if (opts.force) {
+      discardUploadAndClose();
+      return;
+    }
+    if (!state.upload.items.length) {
+      stopUploadProgressTimer();
+      UI.closeDrawer('uploadDrawer');
+      return;
+    }
+    var n = state.upload.items.length;
+    var title = $('abortUploadTitle');
+    var text = $('abortUploadText');
+    if (title) title.textContent = '终止上传';
+    if (text) text.textContent = '有' + n + '个文件尚未入库，确认终止任务并删除上传文件吗？';
+    UI.openModal('abortUploadModal');
+  }
+
   function openUpload() {
+    stopUploadProgressTimer();
     state.upload.category = '片段拼接';
     state.upload.folderId = state.folderId || SYSTEM_FOLDER.id;
     state.upload.creator = CURRENT_USER;
     state.upload.deriveDup = true;
     state.upload.items = [];
     state.upload.selected = {};
+    syncUploadBusy();
     if ($('upDeriveDup')) $('upDeriveDup').checked = true;
     if ($('upFileInput')) $('upFileInput').value = '';
     ['upFolderItem', 'upCreatorItem'].forEach(function (id) {
@@ -3472,6 +3753,12 @@
   $('uploadBtn').addEventListener('click', openUpload);
   $('uploadDrawerClose').addEventListener('click', closeUploadDrawer);
   $('uploadDrawerCancel').addEventListener('click', closeUploadDrawer);
+  if ($('abortUploadOk')) {
+    $('abortUploadOk').addEventListener('click', discardUploadAndClose);
+  }
+  if ($('submitUploadOk')) {
+    $('submitUploadOk').addEventListener('click', commitUploadedItems);
+  }
 
   (function bindUploadZone() {
     var zone = $('upFileZone');
@@ -3503,6 +3790,7 @@
     $('upCheckAll').addEventListener('change', function () {
       var on = $('upCheckAll').checked;
       state.upload.items.forEach(function (it) {
+        if (isUploadBusyItem(it)) return;
         state.upload.selected[it.uid] = on;
       });
       renderUploadTable();
@@ -3518,7 +3806,7 @@
       syncUpBatchBtn();
       var checkAll = $('upCheckAll');
       if (checkAll) {
-        var items = state.upload.items;
+        var items = state.upload.items.filter(function (it) { return !isUploadBusyItem(it); });
         var allChecked = items.length > 0 && items.every(function (it) { return state.upload.selected[it.uid]; });
         checkAll.checked = allChecked;
         checkAll.indeterminate = !allChecked && items.some(function (it) { return state.upload.selected[it.uid]; });
@@ -3537,12 +3825,18 @@
     });
     $('upFileBody').addEventListener('click', function (e) {
       var btn = e.target.closest('[data-up-act]');
-      if (!btn) return;
+      if (!btn || btn.disabled) return;
       var uid = Number(btn.getAttribute('data-uid'));
       var act = btn.getAttribute('data-up-act');
       var idx = state.upload.items.findIndex(function (it) { return it.uid === uid; });
       if (idx < 0) return;
+      var item = state.upload.items[idx];
+      if (act === 'retry') {
+        retryUploadItems([item]);
+        return;
+      }
       if (act === 'delete') {
+        if (!canDeleteItem(item)) return;
         hidePreview();
         state.upload.items.splice(idx, 1);
         delete state.upload.selected[uid];
@@ -3551,45 +3845,42 @@
     });
   }
 
-  if ($('upBatchDeleteBtn')) {
-    $('upBatchDeleteBtn').addEventListener('click', function () {
-      var uids = Object.keys(state.upload.selected).filter(function (k) { return state.upload.selected[k]; }).map(Number);
-      if (!uids.length) {
-        UI.showToast('请先勾选文件');
+  if ($('upBatchRetryBtn')) {
+    $('upBatchRetryBtn').addEventListener('click', function () {
+      var targets = getSelectedUploadItems().filter(canRetryItem);
+      if (!targets.length) {
+        UI.showToast('请先勾选上传失败的模板');
         return;
       }
+      retryUploadItems(targets);
+    });
+  }
+
+  if ($('upBatchDeleteBtn')) {
+    $('upBatchDeleteBtn').addEventListener('click', function () {
+      var targets = getSelectedUploadItems().filter(canDeleteItem);
+      if (!targets.length) {
+        UI.showToast('请先勾选要删除的模板');
+        return;
+      }
+      var uids = targets.map(function (it) { return it.uid; });
       state.upload.items = state.upload.items.filter(function (it) { return uids.indexOf(it.uid) === -1; });
       uids.forEach(function (u) { delete state.upload.selected[u]; });
       renderUploadTable();
     });
   }
 
-  $('upSubmit').addEventListener('click', function () {
-    var ok = true;
-    if (!state.upload.folderId) {
-      if ($('upFolderItem')) $('upFolderItem').classList.add('is-error');
-      ok = false;
-    }
-    if (!state.upload.creator) {
-      if ($('upCreatorItem')) $('upCreatorItem').classList.add('is-error');
-      ok = false;
-    }
-    if (!state.upload.items.length) {
-      UI.showToast('请先添加模板文件');
-      ok = false;
-    }
-    if (!ok) return;
-
+  function commitUploadedItems() {
     var now = new Date();
     var newIds = [];
     var targetFolder = state.upload.folderId;
     var category = state.upload.category || '片段拼接';
-    var ready = state.upload.items.slice();
+    var ready = state.upload.items.filter(function (item) { return item.status === 'done'; });
     ready.forEach(function (item, i) {
       var id = String(materialSeq++);
       newIds.push(id);
       var ext = item.format && item.format !== '—' ? item.format : fileExt(item.name) || 'mp4';
-      var isImage = item.mediaType === '图片' || ['png', 'jpg', 'jpeg', 'webp', 'gif'].indexOf(ext) !== -1;
+      var isImage = item.mediaType === '图片' || ['png', 'jpg', 'jpeg', 'gif'].indexOf(ext) !== -1;
       var isAudio = ['mp3', 'wav', 'aac', 'm4a'].indexOf(ext) !== -1;
       var fullName = item.name.indexOf('.') > 0 ? item.name : (item.name + '.' + ext);
       ALL_ROWS.unshift({
@@ -3614,10 +3905,37 @@
         ossUrl: buildOssUrl(fullName, now, id, ext)
       });
     });
-    closeUploadDrawer();
-    UI.showToast('已提交 ' + newIds.length + ' 个模板，后台开始上传至 OSS（原型）', 'success');
+    syncUploadBusy();
+    if (UI.closeModal) UI.closeModal('submitUploadModal');
+    closeUploadDrawer({ force: true });
+    UI.showToast('已上传 ' + newIds.length + ' 个模板', 'success');
     applyFilters();
     pushRows(newIds, { force: true, silent: true });
+  }
+
+  $('upSubmit').addEventListener('click', function () {
+    if (hasUploadingItems()) return;
+    var ok = true;
+    if (!state.upload.folderId) {
+      if ($('upFolderItem')) $('upFolderItem').classList.add('is-error');
+      ok = false;
+    }
+    if (!state.upload.creator) {
+      if ($('upCreatorItem')) $('upCreatorItem').classList.add('is-error');
+      ok = false;
+    }
+    if (!state.upload.items.length) {
+      UI.showToast('请先添加模板文件');
+      ok = false;
+    }
+    if (!ok) return;
+    openSubmitUploadConfirm();
+  });
+
+  window.addEventListener('beforeunload', function (e) {
+    if (!hasUploadingItems()) return;
+    e.preventDefault();
+    e.returnValue = '';
   });
 
   /* 去掉 HTML 里无效的全部时间快捷，避免落到近7天歧义 */
