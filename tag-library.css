@@ -13,20 +13,18 @@
   width: 48px;
 }
 
-.num-cell {
-  font-variant-numeric: tabular-nums;
+.data-table .cell-check input[type="checkbox"]:disabled {
+  background: var(--color-fill-2, #F2F3F5);
+  border-color: var(--color-border-2, #E5E6EB);
 }
 
-#tagFormGroupWrap.select-trigger,
-#tagFormGroupWrap .select-trigger,
-#batchGroupWrap .select-trigger {
-  width: 100%;
+.num-cell {
+  font-variant-numeric: tabular-nums;
 }
 
 #tagFormGroupWrap,
 #batchGroupWrap {
   width: 100%;
-  margin: 0;
 }
 
 .link--danger {

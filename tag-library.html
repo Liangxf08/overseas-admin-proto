@@ -188,17 +188,15 @@
         </div>
         <div class="form-item" id="tagGroupItem">
           <label class="form-item__label is-required">所属标签组</label>
-          <div class="form-item__control">
-            <div class="filter-item" id="tagFormGroupWrap" style="width:100%">
-              <button class="select-trigger" type="button" id="tagFormGroupTrigger">
-                <span class="select-trigger__text" id="tagFormGroupLabel"><span class="muted">请选择</span></span>
-                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-              </button>
-              <button class="select-clear" type="button" id="tagFormGroupClear" aria-label="清除">
-                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-              </button>
-              <div class="single-panel" id="tagFormGroupPanel"></div>
-            </div>
+          <div class="form-item__control" id="tagFormGroupWrap">
+            <button class="select-trigger" type="button" id="tagFormGroupTrigger">
+              <span class="select-trigger__text" id="tagFormGroupLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="tagFormGroupClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="tagFormGroupPanel"></div>
             <div class="form-item__error" id="tagGroupError">请选择所属标签组</div>
           </div>
         </div>
@@ -222,17 +220,15 @@
       <div class="modal__body">
         <div class="form-item" id="batchGroupItem">
           <label class="form-item__label is-required">标签组</label>
-          <div class="form-item__control">
-            <div class="filter-item" id="batchGroupWrap" style="width:100%">
-              <button class="select-trigger" type="button" id="batchGroupTrigger">
-                <span class="select-trigger__text" id="batchGroupLabel"><span class="muted">请选择</span></span>
-                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-              </button>
-              <button class="select-clear" type="button" id="batchGroupClear" aria-label="清除">
-                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-              </button>
-              <div class="single-panel" id="batchGroupPanel"></div>
-            </div>
+          <div class="form-item__control" id="batchGroupWrap">
+            <button class="select-trigger" type="button" id="batchGroupTrigger">
+              <span class="select-trigger__text" id="batchGroupLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="batchGroupClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="batchGroupPanel"></div>
             <div class="form-item__error" id="batchGroupError">请选择标签组</div>
           </div>
         </div>
@@ -265,6 +261,8 @@
       </div>
     </div>
   </div>
+
+  <div class="page-msg" id="pageMsg" role="status" aria-live="polite"></div>
 
   <script src="product-common.js"></script>
   <script src="menu.js"></script>
