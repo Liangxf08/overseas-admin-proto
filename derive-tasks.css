@@ -275,6 +275,24 @@
   white-space: nowrap;
   flex-shrink: 0;
   box-sizing: border-box;
+  user-select: none;
+}
+
+.cfg-subtabs__item[draggable="true"] {
+  cursor: grab;
+}
+
+.cfg-subtabs__item.is-dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.cfg-subtabs__item.is-drag-over-before {
+  box-shadow: inset 2px 0 0 var(--color-primary, #165DFF);
+}
+
+.cfg-subtabs__item.is-drag-over-after {
+  box-shadow: inset -2px 0 0 var(--color-primary, #165DFF);
 }
 
 .cfg-subtabs__item:hover { color: var(--color-primary, #165DFF); }
@@ -539,6 +557,8 @@
 .xmp-block.is-hidden,
 .folder-existing.is-hidden,
 .folder-create.is-hidden,
+.form-item.is-hidden,
+.tpl-subform.is-hidden,
 #cfgDupItem.is-hidden,
 .filter-item.is-hidden {
   display: none !important;

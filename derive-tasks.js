@@ -416,7 +416,9 @@
 
   (function buildPools() {
     var matNames = ['跑量成片', '竞品竖版', '口播混剪', '试玩主片', '剧情片头', '玩法演示'];
-    var matFormats = ['mp4', 'mov'];
+    var matTypes = ['视频', '视频', '视频', '图片'];
+    var videoFormats = ['mp4', 'mov'];
+    var imageFormats = ['png', 'jpg', 'gif'];
     var matSizes = ['1080x1920', '720x1280', '1920x1080', '1080x1080'];
     var durations = [3, 5, 10, 12, 20, 28, 40, 55, 75, 90];
     var folderIds = listAllFolderIds(CUSTOM_FOLDERS);
@@ -426,7 +428,8 @@
       var n = 8 + (fi % 8);
       var c;
       for (c = 0; c < n; c++, i++) {
-        var format = pick(matFormats, i);
+        var type = pick(matTypes, i);
+        var format = type === '视频' ? pick(videoFormats, i) : pick(imageFormats, i);
         var created = new Date();
         created.setDate(created.getDate() - (i % 18));
         created.setHours(9 + (i % 8), (i * 7) % 60, 0, 0);
@@ -439,10 +442,10 @@
           id: String(1000001 + i),
           name: pick(matNames, i) + '_' + (2000 + i) + '.' + format,
           folderId: fid,
-          type: '视频',
+          type: type,
           format: format,
           size: pick(matSizes, i),
-          durationSec: pick(durations, i),
+          durationSec: type === '视频' ? pick(durations, i) : 0,
           creator: pick(USERS, i),
           tags: tags,
           source: sourceForFolder(fid),
@@ -610,6 +613,7 @@
 
   function defaultConfig() {
     return {
+      materialType: '视频',
       materials: [],
       clips: { intro: [], outro: [] },
       layers: [makeLayerGroup(1)],
@@ -795,11 +799,13 @@
     var clipPool = templatesByCategory('片段拼接');
     var layerPool = templatesByCategory('图层叠加');
     var audioPool = templatesByCategory('音频替换');
+    var videoPool = MATERIAL_POOL.filter(function (it) { return it.type === '视频'; });
     var i;
     for (i = 0; i < 14; i++) {
       var status = i < statuses.length ? statuses[i] : '已完成';
       var cfg = defaultConfig();
-      cfg.materials = pickSlice(MATERIAL_POOL, i * 3, 4 + (i % 5));
+      cfg.materialType = '视频';
+      cfg.materials = pickSlice(videoPool.length ? videoPool : MATERIAL_POOL, i * 3, 4 + (i % 5));
       cfg.clips = {
         intro: pickSlice(clipPool, i * 2, 1 + (i % 3)),
         outro: i % 2 ? pickSlice(clipPool, i + 3, 1 + (i % 2)) : []
@@ -819,7 +825,7 @@
       cfg.fixedCount = 24 + (i % 6) * 8;
       cfg.trim = true;
       if (i === 2) {
-        cfg.materials = pickSlice(MATERIAL_POOL, 0, 20);
+        cfg.materials = pickSlice(videoPool.length ? videoPool : MATERIAL_POOL, 0, 20);
         cfg.clips = { intro: pickSlice(clipPool, 0, 6), outro: pickSlice(clipPool, 6, 4) };
         cfg.layers[0].items = pickSlice(layerPool, 0, 5);
         cfg.layers[0].insertMode = '开场';
@@ -1780,6 +1786,61 @@
     if (createBlock) createBlock.classList.toggle('is-hidden', !create);
   }
 
+  function isImageType(cfg) {
+    return ((cfg || state.cfg).materialType === '图片');
+  }
+
+  function setTrimSwitch(on) {
+    state.cfg.trim = !!on;
+    var el = $('cfgTrimSwitch');
+    if (el) {
+      el.classList.toggle('is-on', !!on);
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    syncTrimFields();
+  }
+
+  function syncMaterialTypeUi() {
+    var image = isImageType();
+    UI.setSegValue('cfgMaterialTypeSeg', image ? '图片' : '视频');
+    var trimItem = $('cfgTrimItem');
+    if (trimItem) trimItem.classList.toggle('is-hidden', image);
+    var clipItem = $('cfgClipItem');
+    var audioItem = $('cfgAudioItem');
+    if (clipItem) clipItem.classList.toggle('is-hidden', image);
+    if (audioItem) audioItem.classList.toggle('is-hidden', image);
+    var subform = $('layerSubform');
+    if (subform) subform.classList.toggle('is-hidden', image);
+    if (image) setTrimSwitch(false);
+    else syncTrimFields();
+  }
+
+  function setMaterialType(type) {
+    type = type === '图片' ? '图片' : '视频';
+    var prev = state.cfg.materialType === '图片' ? '图片' : '视频';
+    if (prev === type) {
+      syncMaterialTypeUi();
+      return;
+    }
+    var hadMaterials = dimLen(state.cfg.materials);
+    state.cfg.materialType = type;
+    state.cfg.materials = [];
+    if (type === '图片') {
+      state.cfg.clips = { intro: [], outro: [] };
+      state.cfg.audios = [];
+    }
+    syncPickField('materials');
+    syncPickField('clips');
+    syncPickField('audios');
+    syncDeriveCountInput(true);
+    syncMaterialTypeUi();
+    updateFissionHint();
+    if (hadMaterials) UI.showToast('已切换类型，请重新添加素材', 'warning');
+  }
+
+  UI.bindSeg('cfgMaterialTypeSeg', function (v) {
+    setMaterialType(v);
+  });
   UI.bindSeg('cfgFolderInheritSeg', function (v) {
     state.cfg.folderMode = v;
     clearError('cfgLocalFolderItem');
@@ -2072,17 +2133,18 @@
   function readLayerFields() {
     var g = currentLayerGroup();
     if (!g) return;
-    var orderEl = $('layerOrderInput');
-    if (orderEl) {
-      var n = parseInt(orderEl.value, 10);
-      if (!isNaN(n)) g.order = n;
-    }
     var sec = $('layerInsertSec');
     if (sec) g.insertSec = Number(sec.value) || 0;
     var start = $('layerInsertStart');
     if (start) g.insertStart = Number(start.value) || 0;
     var end = $('layerInsertEnd');
     if (end) g.insertEnd = Number(end.value) || 0;
+  }
+
+  function syncLayerOrders() {
+    (state.cfg.layers || []).forEach(function (g, i) {
+      g.order = i + 1;
+    });
   }
 
   function syncLayerInsertFields() {
@@ -2105,8 +2167,6 @@
   function syncLayerFields() {
     var g = currentLayerGroup();
     if (!g) return;
-    var orderEl = $('layerOrderInput');
-    if (orderEl) orderEl.value = g.order != null ? String(g.order) : '';
     var sec = $('layerInsertSec');
     if (sec) sec.value = String(g.insertSec || 0);
     var start = $('layerInsertStart');
@@ -2122,13 +2182,15 @@
     if (!host) return;
     ensureLayerGroups();
     var layers = state.cfg.layers;
+    var canDrag = layers.length > 1;
     var html = layers.map(function (g, i) {
       var active = i === state.layerTab ? ' is-active' : '';
       var close = layers.length > 1
-        ? '<button class="cfg-subtabs__close" type="button" data-layer-remove="' + i + '" aria-label="删除' + escapeHtml(g.name) + '">' +
+        ? '<button class="cfg-subtabs__close" type="button" draggable="false" data-layer-remove="' + i + '" aria-label="删除' + escapeHtml(g.name) + '">' +
           '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>'
         : '';
-      return '<div class="cfg-subtabs__item' + active + '" role="tab" aria-selected="' + (i === state.layerTab ? 'true' : 'false') + '" data-layer-tab="' + i + '">' +
+      return '<div class="cfg-subtabs__item' + active + '" role="tab" aria-selected="' + (i === state.layerTab ? 'true' : 'false') + '" data-layer-tab="' + i + '"' +
+        (canDrag ? ' draggable="true" title="拖拽调整叠加顺序"' : '') + '>' +
         '<span>' + escapeHtml(g.name) + '</span>' + close +
       '</div>';
     }).join('');
@@ -2149,6 +2211,7 @@
     var idx = nextLayerNameIndex();
     state.cfg.layers.push(makeLayerGroup(idx));
     state.layerTab = state.cfg.layers.length - 1;
+    syncLayerOrders();
     renderLayerTabs();
     syncLayerFields();
     syncPickField('layers');
@@ -2162,6 +2225,7 @@
     if (idx < state.layerTab) state.layerTab -= 1;
     if (state.layerTab >= state.cfg.layers.length) state.layerTab = state.cfg.layers.length - 1;
     if (state.layerTab < 0) state.layerTab = 0;
+    syncLayerOrders();
     renderLayerTabs();
     syncLayerFields();
     syncPickField('layers');
@@ -2205,22 +2269,87 @@
       syncLayerFields();
       syncPickField('layers');
     });
+
+    var layerDragFrom = null;
+
+    function clearLayerDragOver() {
+      layerTabsEl.querySelectorAll('.is-drag-over-before, .is-drag-over-after').forEach(function (el) {
+        el.classList.remove('is-drag-over-before', 'is-drag-over-after');
+      });
+    }
+
+    function moveLayerGroup(from, insertAt) {
+      ensureLayerGroups();
+      var arr = state.cfg.layers;
+      if (from < 0 || from >= arr.length) return;
+      if (insertAt === from || insertAt === from + 1) return;
+      readLayerFields();
+      var item = arr.splice(from, 1)[0];
+      if (insertAt > from) insertAt -= 1;
+      insertAt = Math.max(0, Math.min(insertAt, arr.length));
+      arr.splice(insertAt, 0, item);
+      state.layerTab = insertAt;
+      syncLayerOrders();
+      renderLayerTabs();
+      syncLayerFields();
+      syncPickField('layers');
+    }
+
+    layerTabsEl.addEventListener('dragstart', function (e) {
+      if (e.target.closest('[data-layer-remove], [data-layer-add]')) {
+        e.preventDefault();
+        return;
+      }
+      var tab = e.target.closest('[data-layer-tab]');
+      if (!tab || tab.getAttribute('draggable') !== 'true') {
+        e.preventDefault();
+        return;
+      }
+      layerDragFrom = Number(tab.getAttribute('data-layer-tab'));
+      tab.classList.add('is-dragging');
+      try {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(layerDragFrom));
+      } catch (err) { /* ignore */ }
+    });
+    layerTabsEl.addEventListener('dragend', function () {
+      layerDragFrom = null;
+      layerTabsEl.querySelectorAll('.is-dragging').forEach(function (el) {
+        el.classList.remove('is-dragging');
+      });
+      clearLayerDragOver();
+    });
+    layerTabsEl.addEventListener('dragover', function (e) {
+      if (layerDragFrom == null) return;
+      var tab = e.target.closest('[data-layer-tab]');
+      if (!tab || !layerTabsEl.contains(tab)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      var rect = tab.getBoundingClientRect();
+      var after = e.clientX > rect.left + rect.width / 2;
+      clearLayerDragOver();
+      tab.classList.add(after ? 'is-drag-over-after' : 'is-drag-over-before');
+    });
+    layerTabsEl.addEventListener('drop', function (e) {
+      e.preventDefault();
+      var tab = e.target.closest('[data-layer-tab]');
+      if (!tab || layerDragFrom == null) {
+        clearLayerDragOver();
+        return;
+      }
+      var rect = tab.getBoundingClientRect();
+      var idx = Number(tab.getAttribute('data-layer-tab'));
+      var insertAt = e.clientX > rect.left + rect.width / 2 ? idx + 1 : idx;
+      moveLayerGroup(layerDragFrom, insertAt);
+      layerDragFrom = null;
+      clearLayerDragOver();
+    });
   }
 
-  ['layerOrderInput', 'layerInsertSec', 'layerInsertStart', 'layerInsertEnd'].forEach(function (id) {
+  ['layerInsertSec', 'layerInsertStart', 'layerInsertEnd'].forEach(function (id) {
     var el = $(id);
     if (!el) return;
     el.addEventListener('input', readLayerFields);
-    if (id === 'layerOrderInput') {
-      el.addEventListener('blur', function () {
-        var g = currentLayerGroup();
-        var n = parseInt(el.value, 10);
-        if (g && !isNaN(n)) {
-          g.order = n;
-          el.value = String(n);
-        }
-      });
-    }
   });
 
   /* ---------- picker drawer ---------- */
@@ -2419,6 +2548,10 @@
     var kind = state.picker.kind;
     var meta = PICK_KINDS[kind];
     var pool = poolForKind(kind);
+    if (kind === 'materials') {
+      var type = isImageType() ? '图片' : '视频';
+      pool = pool.filter(function (it) { return it.type === type; });
+    }
     if (meta.category) {
       return pool.filter(function (it) { return it.category === meta.category; });
     }
@@ -2807,8 +2940,11 @@
 
   function syncPickFilterVisibility() {
     var isMaterial = state.picker.kind === 'materials';
+    var image = isMaterial && isImageType();
     var tagWrap = $('pickTagWrap');
     if (tagWrap) tagWrap.classList.toggle('is-hidden', !isMaterial);
+    var durationWrap = $('pickDurationWrap');
+    if (durationWrap) durationWrap.classList.toggle('is-hidden', image);
     var nameInput = $('pickNameInput');
     if (nameInput) nameInput.placeholder = isMaterial ? '素材名称' : '模板名称';
     var showSubLabel = $('pickShowSubLabel');
@@ -3110,6 +3246,8 @@
     });
     state.cfg.clips = normalizeClipGroups(state.cfg.clips);
     state.cfg.layers = normalizeLayerGroups(state.cfg.layers);
+    state.cfg.materialType = state.cfg.materialType === '图片' ? '图片' : '视频';
+    if (state.cfg.materialType === '图片') state.cfg.trim = false;
     state.clipTab = 'intro';
     state.layerTab = 0;
     state.sizeGroup = state.cfg.sizeGroup || '竖版(9:16)';
@@ -3138,6 +3276,7 @@
     UI.setSegValue('cfgXmpFolderSeg', state.cfg.xmpFolderMode || '已有文件夹');
     $('cfgSizeWrap').classList.toggle('is-hidden', !state.cfg.resize);
     syncSizeLabel();
+    syncMaterialTypeUi();
     syncTrimFields();
     syncInheritExtras();
     syncXmpBlock();
@@ -3198,7 +3337,13 @@
     if (!dimLen(state.cfg.materials)) {
       mark('cfgMaterialItem');
     }
-    if (!clipCount(state.cfg) && !layerItemCount(state.cfg) && !dimLen(state.cfg.audios)) {
+    if (isImageType()) {
+      if (!layerItemCount(state.cfg)) {
+        UI.showToast('请添加图层', 'warning');
+        if (!firstAnchor) firstAnchor = $('cardTemplates');
+        ok = false;
+      }
+    } else if (!clipCount(state.cfg) && !layerItemCount(state.cfg) && !dimLen(state.cfg.audios)) {
       UI.showToast('请至少选择片段、图层或音频中的一类模板', 'warning');
       if (!firstAnchor) firstAnchor = $('cardTemplates');
       ok = false;
@@ -3241,7 +3386,13 @@
     state.cfg.countMode = 'fixed';
     state.cfg.tags = ensureSystemTag(state.cfg.tags);
     readLayerFields();
+    if (isImageType()) {
+      state.cfg.trim = false;
+      state.cfg.clips = { intro: [], outro: [] };
+      state.cfg.audios = [];
+    }
     return {
+      materialType: isImageType() ? '图片' : '视频',
       materials: snapshotItems(state.cfg.materials),
       clips: snapshotClipGroups(state.cfg.clips),
       layers: snapshotLayerGroups(state.cfg.layers),
@@ -3289,7 +3440,7 @@
     var parts = [];
     if (cfg.md5) parts.push('修改MD5');
     if (cfg.resize && cfg.size) parts.push(cfg.size);
-    if (cfg.trim) {
+    if (cfg.trim && cfg.materialType !== '图片') {
       if (cfg.trimMode === '片段截取') {
         parts.push('片段截取' + cfg.trimStart + '-' + cfg.trimEnd + '秒');
       } else {
@@ -3299,6 +3450,9 @@
     return parts.length ? parts.join('、') : '—';
   }
   function detailComposeOps(cfg) {
+    if (cfg.materialType === '图片') {
+      return '图层叠加' + layerItemCount(cfg);
+    }
     return '片段拼接' + clipCount(cfg) +
       '、图层叠加' + layerItemCount(cfg) +
       '、音频替换' + dimLen(cfg.audios);

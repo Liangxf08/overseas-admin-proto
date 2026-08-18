@@ -437,7 +437,8 @@
       tags: [],
       deriveDup: true,
       items: [],
-      selected: {}
+      selected: {},
+      uploading: false
     },
     nameEditId: null,
     deleteIds: [],
@@ -2770,6 +2771,9 @@
           return;
         }
         if (action === 'download') {
+          if (window.DownloadTaskStore && DownloadTaskStore.createPack) {
+            DownloadTaskStore.createPack({ source: '本地素材', count: ids.length });
+          }
           UI.showToast('下载任务已创建，请到任务中心查看', 'success');
           return;
         }
@@ -3021,6 +3025,226 @@
   /* upload drawer */
   var UPLOAD_MAX = 500;
   var uploadUid = 1;
+  var uploadProgressTimer = null;
+
+  function canRetryItem(item) {
+    return item && item.status === 'failed';
+  }
+
+  function canDeleteItem(item) {
+    return item && (item.status === 'failed' || item.status === 'pending');
+  }
+
+  function isUploadBusyItem(item) {
+    return item && item.status === 'uploading';
+  }
+
+  function hasUploadingItems() {
+    return state.upload.items.some(isUploadBusyItem);
+  }
+
+  function countUploadingItems() {
+    return state.upload.items.filter(isUploadBusyItem).length;
+  }
+
+  function getSelectedUploadItems() {
+    return state.upload.items.filter(function (it) { return state.upload.selected[it.uid]; });
+  }
+
+  function uploadProgressHtml(item) {
+    if (item.status === 'failed') {
+      return UI.taskStatusDot ? UI.taskStatusDot('已失败') : '<span class="status-dot status-dot--error">已失败</span>';
+    }
+    if (item.status === 'done') {
+      return UI.taskStatusDot ? UI.taskStatusDot('已完成') : '<span class="status-dot status-dot--done">已完成</span>';
+    }
+    var pct = Math.max(0, Math.min(100, Math.round(Number(item.progress) || 0)));
+    return (
+      '<div class="upload-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '">' +
+        '<div class="upload-progress__track" aria-hidden="true"><span class="upload-progress__fill" style="width:' + pct + '%"></span></div>' +
+        '<span class="upload-progress__text">' + pct + '%</span>' +
+      '</div>'
+    );
+  }
+
+  function uploadActionHtml(item) {
+    var retryOff = !canRetryItem(item);
+    var delOff = !canDeleteItem(item);
+    return (
+      '<span class="action-links">' +
+        '<button class="link' + (retryOff ? ' is-disabled' : '') + '" type="button" data-up-act="retry" data-uid="' + item.uid + '"' +
+          (retryOff ? ' disabled' : '') + '>重试</button>' +
+        '<button class="link link--danger' + (delOff ? ' is-disabled' : '') + '" type="button" data-up-act="delete" data-uid="' + item.uid + '"' +
+          (delOff ? ' disabled' : '') + '>删除</button>' +
+      '</span>'
+    );
+  }
+
+  function syncUploadBusy() {
+    var uploading = hasUploadingItems();
+    var transferring = !!uploadProgressTimer;
+    state.upload.uploading = transferring;
+    var panel = document.querySelector('#uploadDrawer .drawer');
+    if (panel) panel.classList.toggle('is-uploading', transferring);
+    var submit = $('upSubmit');
+    if (submit) submit.disabled = uploading;
+  }
+
+  function stopUploadProgressTimer() {
+    if (uploadProgressTimer) {
+      clearInterval(uploadProgressTimer);
+      uploadProgressTimer = null;
+    }
+  }
+
+  function patchUploadProgressCells() {
+    state.upload.items.forEach(function (item) {
+      var cell = document.querySelector('#upFileBody tr[data-uid="' + item.uid + '"] td[data-col="progress"]');
+      if (cell) cell.innerHTML = uploadProgressHtml(item);
+    });
+  }
+
+  function ensureUploadProgressTimer() {
+    if (uploadProgressTimer) return;
+    uploadProgressTimer = setInterval(function () {
+      var anyUploading = false;
+      var statusChanged = false;
+      state.upload.items.forEach(function (item) {
+        if (item.status !== 'uploading') return;
+        anyUploading = true;
+        item.progress = Math.min(100, (Number(item.progress) || 0) + (item.progressSpeed || 8));
+        if (item.failAt != null && item.progress >= item.failAt) {
+          item.status = 'failed';
+          item.progress = item.failAt;
+          item.failAt = null;
+          statusChanged = true;
+          return;
+        }
+        if (item.progress >= 100) {
+          item.progress = 100;
+          item.status = 'done';
+          statusChanged = true;
+        }
+      });
+      patchUploadProgressCells();
+      if (statusChanged) {
+        syncUploadBusy();
+        renderUploadTable();
+      }
+      if (!anyUploading) {
+        stopUploadProgressTimer();
+        syncUploadBusy();
+      }
+    }, 220);
+  }
+
+  function retryUploadItems(items) {
+    var targets = (items || []).filter(canRetryItem);
+    if (!targets.length) {
+      UI.showToast('请选择上传失败的素材');
+      return;
+    }
+    targets.forEach(function (item, i) {
+      item.status = 'uploading';
+      item.progress = 0;
+      item.failAt = null;
+      item.progressSpeed = 8 + ((i * 5) % 10);
+    });
+    renderUploadTable();
+    ensureUploadProgressTimer();
+    syncUploadBusy();
+  }
+
+  function startPendingUploads() {
+    var started = 0;
+    state.upload.items.forEach(function (item, i) {
+      if (item.status === 'pending') {
+        item.status = 'uploading';
+        item.failAt = (i % 5 === 4) ? (35 + (i % 4) * 12) : null;
+        item.progressSpeed = 6 + ((i * 7) % 11);
+        started++;
+        return;
+      }
+      if (item.status === 'uploading') {
+        if (!item.progressSpeed) item.progressSpeed = 6 + ((i * 7) % 11);
+        started++;
+      }
+    });
+    if (!started) {
+      if (state.upload.items.some(canRetryItem)) {
+        UI.showToast('存在上传失败的素材，请重试');
+      } else {
+        UI.showToast('没有待上传的素材');
+      }
+      return false;
+    }
+    renderUploadTable();
+    ensureUploadProgressTimer();
+    syncUploadBusy();
+    return true;
+  }
+
+  function getUploadSummary() {
+    var total = state.upload.items.length;
+    var done = 0;
+    var failed = 0;
+    state.upload.items.forEach(function (it) {
+      if (it.status === 'done') done++;
+      else if (it.status === 'failed') failed++;
+    });
+    return { total: total, done: done, failed: failed };
+  }
+
+  function openSubmitUploadConfirm() {
+    var s = getUploadSummary();
+    var text = $('submitUploadText');
+    if (text) {
+      text.textContent = '上传素材共' + s.total + '个，已完成' + s.done + '个，已失败' + s.failed + '个。';
+    }
+    UI.openModal('submitUploadModal');
+  }
+
+  function commitUploadedItems() {
+    var now = new Date();
+    var newIds = [];
+    var targetFolder = state.upload.folderId;
+    var tags = withoutSystemTags(state.upload.tags).length ? withoutSystemTags(state.upload.tags) : ['英语'];
+    var ready = state.upload.items.filter(function (item) { return item.status === 'done'; });
+    ready.forEach(function (item, i) {
+      var id = String(materialSeq++);
+      newIds.push(id);
+      var ext = item.format && item.format !== '—' ? item.format : fileExt(item.name) || 'mp4';
+      var isImage = item.mediaType === '图片' || ['png', 'jpg', 'jpeg', 'webp', 'gif'].indexOf(ext) !== -1;
+      var fullName = item.name.indexOf('.') > 0 ? item.name : (item.name + '.' + ext);
+      ALL_ROWS.unshift({
+        id: id,
+        name: fullName,
+        folderId: targetFolder,
+        type: isImage ? '图片' : '视频',
+        format: ext,
+        size: item.sizeDim && item.sizeDim !== '—' ? item.sizeDim : '1080x1920',
+        durationSec: isImage ? 0 : 12 + i,
+        tags: tags,
+        creator: state.upload.creator,
+        createdAt: formatDateTime(now),
+        createdDate: formatDateYMD(now),
+        createdTs: now.getTime() + i,
+        status: '启用',
+        syncStatus: '未同步',
+        xmpId: '',
+        failReason: '',
+        delivery: [],
+        source: sourceForFolder(targetFolder),
+        ossUrl: buildOssUrl(fullName, now, id, ext)
+      });
+    });
+    syncUploadBusy();
+    if (UI.closeModal) UI.closeModal('submitUploadModal');
+    closeUploadDrawer();
+    UI.showToast('已上传 ' + newIds.length + ' 个素材', 'success');
+    applyFilters();
+    pushRows(newIds, { force: true, silent: true });
+  }
 
   function listFolderSelectOptions() {
     var opts = [{ id: SYSTEM_FOLDER.id, name: SYSTEM_FOLDER.name }];
@@ -3308,9 +3532,11 @@
   }
 
   function syncUpBatchBtn() {
-    var btn = $('upBatchDeleteBtn');
-    if (!btn) return;
-    btn.disabled = !Object.keys(state.upload.selected).some(function (k) { return state.upload.selected[k]; });
+    var selected = getSelectedUploadItems();
+    var retryBtn = $('upBatchRetryBtn');
+    var delBtn = $('upBatchDeleteBtn');
+    if (retryBtn) retryBtn.disabled = !selected.some(canRetryItem);
+    if (delBtn) delBtn.disabled = !selected.some(canDeleteItem);
   }
 
   function syncUpCount() {
@@ -3327,6 +3553,7 @@
       try { URL.revokeObjectURL(url); } catch (err) { /* ignore */ }
       if (!state.upload.items.some(function (x) { return x.uid === item.uid; })) return;
       if (w > 0 && h > 0) item.sizeDim = w + 'x' + h;
+      if (state.upload.uploading) return;
       renderUploadTable();
     }
     if (isImage) {
@@ -3349,11 +3576,12 @@
     var items = state.upload.items;
     body.innerHTML = items.map(function (item) {
       var checked = state.upload.selected[item.uid] ? ' checked' : '';
+      var checkDisabled = isUploadBusyItem(item) ? ' disabled' : '';
       var displayName = stripExt(item.name);
       var playIcon = item.mediaType === '视频' ? PLAY_ICON : '';
       return (
         '<tr data-uid="' + item.uid + '">' +
-          '<td class="col-check"><span class="cell-check"><input type="checkbox" data-up-check="' + item.uid + '"' + checked + ' /></span></td>' +
+          '<td class="col-check"><span class="cell-check"><input type="checkbox" data-up-check="' + item.uid + '"' + checked + checkDisabled + ' /></span></td>' +
           '<td class="col-material"><div class="material-cell">' +
             '<button class="thumb" type="button" data-up-preview="' + item.uid + '" aria-label="预览">' +
               '<span class="thumb__preview" aria-hidden="true"></span>' + playIcon +
@@ -3364,25 +3592,27 @@
           '</div></td>' +
           '<td>' + escapeHtml(item.sizeText) + '</td>' +
           '<td>' + escapeHtml(item.format || '—') + '</td>' +
-          '<td>' + escapeHtml(item.sizeDim || '—') + '</td>' +
-          '<td class="col-action"><span class="action-links">' +
-            '<button class="link link--danger" type="button" data-up-act="delete" data-uid="' + item.uid + '">删除</button>' +
-          '</span></td>' +
+          '<td class="col-up-progress" data-col="progress">' + uploadProgressHtml(item) + '</td>' +
+          '<td class="col-action">' + uploadActionHtml(item) + '</td>' +
         '</tr>'
       );
     }).join('');
 
     var checkAll = $('upCheckAll');
     if (checkAll) {
-      var allChecked = items.length > 0 && items.every(function (it) { return state.upload.selected[it.uid]; });
+      var operable = items.filter(function (it) { return !isUploadBusyItem(it); });
+      var allChecked = operable.length > 0 && operable.every(function (it) { return state.upload.selected[it.uid]; });
       checkAll.checked = allChecked;
-      checkAll.indeterminate = !allChecked && items.some(function (it) { return state.upload.selected[it.uid]; });
+      checkAll.indeterminate = !allChecked && operable.some(function (it) { return state.upload.selected[it.uid]; });
+      checkAll.disabled = operable.length === 0;
     }
     syncUpCount();
     syncUpBatchBtn();
+    syncUploadBusy();
   }
 
   function addUploadFiles(fileList) {
+    if (uploadProgressTimer) return;
     var arr = Array.prototype.slice.call(fileList || []);
     if (!arr.length) return;
     var remain = UPLOAD_MAX - state.upload.items.length;
@@ -3397,6 +3627,7 @@
     arr.forEach(function (file) {
       var ext = fileExt(file.name);
       var isImage = ['png', 'jpg', 'jpeg', 'webp', 'gif'].indexOf(ext) !== -1;
+      var idx = state.upload.items.length;
       var item = {
         uid: uploadUid++,
         name: file.name,
@@ -3406,25 +3637,50 @@
         size: file.size || 0,
         sizeText: formatFileSize(file.size),
         sizeDim: '—',
-        file: file
+        file: file,
+        progress: 0,
+        status: 'uploading',
+        failAt: (idx % 5 === 4) ? (35 + (idx % 4) * 12) : null,
+        progressSpeed: 6 + ((idx * 7) % 11)
       };
       state.upload.items.push(item);
       probeLocalMeta(item);
     });
     renderUploadTable();
+    ensureUploadProgressTimer();
+    syncUploadBusy();
+  }
+
+  function abortUploadAndClose() {
+    stopUploadProgressTimer();
+    state.upload.items = [];
+    state.upload.selected = {};
+    syncUploadBusy();
+    if (UI.closeModal) UI.closeModal('abortUploadModal');
+    UI.closeDrawer('uploadDrawer');
   }
 
   function closeUploadDrawer() {
+    var n = countUploadingItems();
+    if (n > 0) {
+      var text = $('abortUploadText');
+      if (text) text.textContent = '有' + n + '个文件正在上传，确认终止任务并删除上传文件吗？';
+      UI.openModal('abortUploadModal');
+      return;
+    }
+    stopUploadProgressTimer();
     UI.closeDrawer('uploadDrawer');
   }
 
   function openUpload() {
+    stopUploadProgressTimer();
     state.upload.folderId = state.folderId || SYSTEM_FOLDER.id;
     state.upload.creator = CURRENT_USER;
     state.upload.tags = [];
     state.upload.deriveDup = true;
     state.upload.items = [];
     state.upload.selected = {};
+    syncUploadBusy();
     if ($('upDeriveDup')) $('upDeriveDup').checked = true;
     if ($('upFileInput')) $('upFileInput').value = '';
     ['upFolderItem', 'upCreatorItem'].forEach(function (id) {
@@ -3445,6 +3701,12 @@
   $('uploadBtn').addEventListener('click', openUpload);
   $('uploadDrawerClose').addEventListener('click', closeUploadDrawer);
   $('uploadDrawerCancel').addEventListener('click', closeUploadDrawer);
+  if ($('abortUploadOk')) {
+    $('abortUploadOk').addEventListener('click', abortUploadAndClose);
+  }
+  if ($('submitUploadOk')) {
+    $('submitUploadOk').addEventListener('click', commitUploadedItems);
+  }
 
   (function bindUploadZone() {
     var zone = $('upFileZone');
@@ -3476,6 +3738,7 @@
     $('upCheckAll').addEventListener('change', function () {
       var on = $('upCheckAll').checked;
       state.upload.items.forEach(function (it) {
+        if (isUploadBusyItem(it)) return;
         state.upload.selected[it.uid] = on;
       });
       renderUploadTable();
@@ -3491,7 +3754,7 @@
       syncUpBatchBtn();
       var checkAll = $('upCheckAll');
       if (checkAll) {
-        var items = state.upload.items;
+        var items = state.upload.items.filter(function (it) { return !isUploadBusyItem(it); });
         var allChecked = items.length > 0 && items.every(function (it) { return state.upload.selected[it.uid]; });
         checkAll.checked = allChecked;
         checkAll.indeterminate = !allChecked && items.some(function (it) { return state.upload.selected[it.uid]; });
@@ -3510,12 +3773,18 @@
     });
     $('upFileBody').addEventListener('click', function (e) {
       var btn = e.target.closest('[data-up-act]');
-      if (!btn) return;
+      if (!btn || btn.disabled) return;
       var uid = Number(btn.getAttribute('data-uid'));
       var act = btn.getAttribute('data-up-act');
       var idx = state.upload.items.findIndex(function (it) { return it.uid === uid; });
       if (idx < 0) return;
+      var item = state.upload.items[idx];
+      if (act === 'retry') {
+        retryUploadItems([item]);
+        return;
+      }
       if (act === 'delete') {
+        if (!canDeleteItem(item)) return;
         hidePreview();
         state.upload.items.splice(idx, 1);
         delete state.upload.selected[uid];
@@ -3524,13 +3793,25 @@
     });
   }
 
-  if ($('upBatchDeleteBtn')) {
-    $('upBatchDeleteBtn').addEventListener('click', function () {
-      var uids = Object.keys(state.upload.selected).filter(function (k) { return state.upload.selected[k]; }).map(Number);
-      if (!uids.length) {
-        UI.showToast('请先勾选文件');
+  if ($('upBatchRetryBtn')) {
+    $('upBatchRetryBtn').addEventListener('click', function () {
+      var targets = getSelectedUploadItems().filter(canRetryItem);
+      if (!targets.length) {
+        UI.showToast('请先勾选上传失败的素材');
         return;
       }
+      retryUploadItems(targets);
+    });
+  }
+
+  if ($('upBatchDeleteBtn')) {
+    $('upBatchDeleteBtn').addEventListener('click', function () {
+      var targets = getSelectedUploadItems().filter(canDeleteItem);
+      if (!targets.length) {
+        UI.showToast('请先勾选可删除的素材');
+        return;
+      }
+      var uids = targets.map(function (it) { return it.uid; });
       state.upload.items = state.upload.items.filter(function (it) { return uids.indexOf(it.uid) === -1; });
       uids.forEach(function (u) { delete state.upload.selected[u]; });
       renderUploadTable();
@@ -3538,6 +3819,7 @@
   }
 
   $('upSubmit').addEventListener('click', function () {
+    if (hasUploadingItems()) return;
     var ok = true;
     if (!state.upload.folderId) {
       if ($('upFolderItem')) $('upFolderItem').classList.add('is-error');
@@ -3552,44 +3834,13 @@
       ok = false;
     }
     if (!ok) return;
+    openSubmitUploadConfirm();
+  });
 
-    var now = new Date();
-    var newIds = [];
-    var targetFolder = state.upload.folderId;
-    var tags = withoutSystemTags(state.upload.tags).length ? withoutSystemTags(state.upload.tags) : ['英语'];
-    var ready = state.upload.items.slice();
-    ready.forEach(function (item, i) {
-      var id = String(materialSeq++);
-      newIds.push(id);
-      var ext = item.format && item.format !== '—' ? item.format : fileExt(item.name) || 'mp4';
-      var isImage = item.mediaType === '图片' || ['png', 'jpg', 'jpeg', 'webp', 'gif'].indexOf(ext) !== -1;
-      var fullName = item.name.indexOf('.') > 0 ? item.name : (item.name + '.' + ext);
-      ALL_ROWS.unshift({
-        id: id,
-        name: fullName,
-        folderId: targetFolder,
-        type: isImage ? '图片' : '视频',
-        format: ext,
-        size: item.sizeDim && item.sizeDim !== '—' ? item.sizeDim : '1080x1920',
-        durationSec: isImage ? 0 : 12 + i,
-        tags: tags,
-        creator: state.upload.creator,
-        createdAt: formatDateTime(now),
-        createdDate: formatDateYMD(now),
-        createdTs: now.getTime() + i,
-        status: '启用',
-        syncStatus: '未同步',
-        xmpId: '',
-        failReason: '',
-        delivery: [],
-        source: sourceForFolder(targetFolder),
-        ossUrl: buildOssUrl(fullName, now, id, ext)
-      });
-    });
-    closeUploadDrawer();
-    UI.showToast('已提交 ' + newIds.length + ' 个素材，后台开始上传至 OSS（原型）', 'success');
-    applyFilters();
-    pushRows(newIds, { force: true, silent: true });
+  window.addEventListener('beforeunload', function (e) {
+    if (!hasUploadingItems()) return;
+    e.preventDefault();
+    e.returnValue = '';
   });
 
   /* 去掉 HTML 里无效的全部时间快捷，避免落到近7天歧义 */

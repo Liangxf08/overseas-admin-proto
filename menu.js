@@ -112,8 +112,7 @@
         title: '任务中心',
         icon: ICONS.task,
         children: [
-          { key: 'download-tasks', label: '下载任务', href: 'download-tasks.html' },
-          { key: 'batch-tasks', label: '批量任务', href: 'batch-tasks.html' }
+          { key: 'download-tasks', label: '下载任务', href: 'download-tasks.html' }
         ]
       }
     ],

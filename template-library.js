@@ -2765,6 +2765,9 @@
           return;
         }
         if (action === 'download') {
+          if (window.DownloadTaskStore && DownloadTaskStore.createPack) {
+            DownloadTaskStore.createPack({ source: '模板中心', count: ids.length });
+          }
           UI.showToast('下载任务已创建，请到任务中心查看', 'success');
           return;
         }

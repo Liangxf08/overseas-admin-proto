@@ -109,8 +109,7 @@
           id: 'task-center',
           name: '任务中心',
           children: [
-            { id: 'task-export', name: '下载任务' },
-            { id: 'task-batch', name: '批量任务' }
+            { id: 'task-export', name: '下载任务' }
           ]
         }
       ]

@@ -1617,6 +1617,7 @@
   min-height: 32px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   font-size: 14px;
   line-height: 22px;
   color: var(--color-danger-6, #F53F3F);
@@ -1681,6 +1682,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   max-height: 640px;
+  scrollbar-gutter: stable;
 }
 
 .upload-drawer__table {
@@ -1690,20 +1692,26 @@
   border: 0;
 }
 
-/* 48px + calc(40% - 48px) + 15%×4 = 100% */
+/* 48px + calc(37% - 48px) + 12% + 12% + 24% + 15% = 100% */
 .upload-drawer__table col.col-check {
   width: 48px;
 }
 
 .upload-drawer__table col.col-up-size,
-.upload-drawer__table col.col-up-format,
-.upload-drawer__table col.col-up-dim,
+.upload-drawer__table col.col-up-format {
+  width: 12%;
+}
+
+.upload-drawer__table col.col-up-progress {
+  width: 24%;
+}
+
 .upload-drawer__table col.col-up-action {
   width: 15%;
 }
 
 .upload-drawer__table col.col-up-material {
-  width: calc(40% - 48px);
+  width: calc(37% - 48px);
 }
 
 .upload-drawer__table th,
@@ -1739,7 +1747,7 @@
   min-width: 0 !important;
   max-width: none;
   box-shadow: -6px 0 8px rgba(0, 0, 0, 0.04);
-  padding-right: 16px;
+  padding-right: 24px;
 }
 
 .upload-drawer__table td.col-action {
@@ -1766,6 +1774,62 @@
 
 .upload-drawer__table .material-cell {
   max-width: none;
+}
+
+.upload-drawer__table th.col-up-progress,
+.upload-drawer__table td.col-up-progress {
+  padding-right: 24px;
+}
+
+.upload-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.upload-progress__track {
+  flex: 1;
+  min-width: 0;
+  height: 8px;
+  border-radius: var(--border-radius-large, 8px);
+  background: var(--color-fill-3, #E5E6EB);
+  overflow: hidden;
+}
+
+.upload-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary-6, #165DFF);
+  transition: width 0.2s linear;
+}
+
+.upload-progress__text {
+  flex-shrink: 0;
+  min-width: 40px;
+  font-size: 12px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-2, #4E5969);
+}
+
+.upload-drawer__table .action-links {
+  flex-wrap: nowrap;
+}
+
+.drawer--upload.is-uploading .upload-zone,
+.drawer--upload.is-uploading .form-item {
+  pointer-events: none;
+}
+
+.drawer--upload.is-uploading .upload-zone {
+  cursor: not-allowed;
+}
+
+#abortUploadModal,
+#submitUploadModal {
+  z-index: 1100;
 }
 
 .drawer--upload .form-item__control {

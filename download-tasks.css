@@ -1,0 +1,16 @@
+/* 下载任务 · 页面特例 */
+
+.data-table .col-id {
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table .name-cell {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table .col-action {
+  min-width: 168px;
+}

@@ -3079,6 +3079,13 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
+      if (window.DownloadTaskStore && DownloadTaskStore.createReport) {
+        DownloadTaskStore.createReport({
+          reportName: boardName,
+          fileSize: content.length,
+          status: '已完成'
+        });
+      }
       showToast('已导出当前列表');
     } catch (err) {
       showToast('导出失败', 'error');

@@ -7,28 +7,181 @@
   <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
   <link rel="stylesheet" href="product-common.css" />
-  <link rel="stylesheet" href="task-center.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <link rel="stylesheet" href="download-tasks.css" />
 </head>
 <body>
   <div class="app" id="appShell">
     <main class="main" data-main>
       <div class="content-card">
-        <div class="data-panel">
-          <div class="page-empty" role="status">
-            <svg class="page-empty__img" viewBox="0 0 64 41" fill="none" aria-hidden="true">
-              <ellipse cx="32" cy="33" rx="32" ry="7" fill="var(--color-fill-2, #F2F3F5)"/>
-              <path d="M55 12.76 44.854 1.258C44.367.474 43.656 0 42.907 0H21.093c-.749 0-1.46.474-1.947 1.257L9 12.761V22h46v-9.24Z" fill="var(--color-fill-1, #F7F8FA)" stroke="var(--color-border-3, #C9CDD4)"/>
-              <path d="M41.613 15.931c0-1.605.994-2.93 2.227-2.931H55v18.137C55 33.26 53.68 35 52.05 35h-40.1C10.32 35 9 33.259 9 31.137V13h11.16c1.233 0 2.227 1.323 2.227 2.928v.022c0 1.605 1.005 2.901 2.237 2.901h14.752c1.232 0 2.237-1.308 2.237-2.913v-.007Z" fill="var(--color-bg-container, #fff)" stroke="var(--color-border-3, #C9CDD4)"/>
-            </svg>
-            <p class="page-empty__text">暂无数据</p>
+        <div class="filter-bar" id="filterBar">
+          <div class="filter-item filter-item--date" id="dateRangeWrap">
+            <button class="date-range-trigger" type="button" id="dateRangeTrigger">
+              <span class="date-range-trigger__text" id="dateRangeLabel">创建时间：-</span>
+            </button>
+            <div class="date-panel" id="datePanel">
+              <div class="date-panel__shortcuts" id="dateShortcuts">
+                <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
+                <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
+                <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
+                <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
+              </div>
+              <div class="date-panel__calendars">
+                <div class="date-cal" id="dateCalLeft"></div>
+                <div class="date-cal" id="dateCalRight"></div>
+              </div>
+            </div>
           </div>
+
+          <div class="filter-item" id="typeWrap">
+            <button class="select-trigger" type="button" id="typeTrigger">
+              <span class="select-trigger__text" id="typeLabel">任务类型：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="typeClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="typePanel">
+              <button class="single-option" type="button" data-value="">全部</button>
+              <button class="single-option" type="button" data-value="报表下载">报表下载</button>
+              <button class="single-option" type="button" data-value="素材打包">素材打包</button>
+            </div>
+          </div>
+
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="statusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <button class="single-option" type="button" data-value="">全部</button>
+              <button class="single-option" type="button" data-value="待开始">待开始</button>
+              <button class="single-option" type="button" data-value="进行中">进行中</button>
+              <button class="single-option" type="button" data-value="已完成">已完成</button>
+              <button class="single-option" type="button" data-value="已失败">已失败</button>
+              <button class="single-option" type="button" data-value="已取消">已取消</button>
+            </div>
+          </div>
+
+          <div class="filter-item" id="creatorWrap">
+            <button class="select-trigger" type="button" id="creatorTrigger">
+              <span class="select-trigger__text" id="creatorLabel">创建人：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="creatorClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="creatorPanel">
+              <button class="single-option" type="button" data-value="">全部</button>
+              <button class="single-option" type="button" data-value="用户A">用户A</button>
+              <button class="single-option" type="button" data-value="用户B">用户B</button>
+              <button class="single-option" type="button" data-value="用户C">用户C</button>
+              <button class="single-option" type="button" data-value="用户D">用户D</button>
+              <button class="single-option" type="button" data-value="用户E">用户E</button>
+              <button class="single-option" type="button" data-value="用户F">用户F</button>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+            <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
+          </div>
+        </div>
+
+        <div class="data-panel" id="dataPanel">
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="taskTable">
+                <colgroup>
+                  <col data-col-width="88" />
+                  <col data-col-width="320" />
+                  <col data-col-width="112" />
+                  <col data-col-width="104" />
+                  <col data-col-width="104" />
+                  <col data-col-width="180" />
+                  <col data-col-width="180" />
+                  <col data-col-width="168" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>任务名称</th>
+                    <th>类型</th>
+                    <th>状态</th>
+                    <th>创建人</th>
+                    <th>创建时间</th>
+                    <th>更新时间</th>
+                    <th class="col-action">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+              <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+          <div class="pagination" id="pagination"></div>
         </div>
       </div>
     </main>
   </div>
+
+  <div class="modal-mask modal-mask--confirm" id="retryModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="retryTitle">
+      <button class="confirm-modal__close" type="button" data-close="retryModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--warning" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm-2-11a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2Zm4-18a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V15Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="retryTitle">重试确认</h2>
+          <p class="confirm-modal__body">确认重新执行该下载任务吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="retryModal">取消</button>
+        <button class="btn btn--primary" type="button" id="retryOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--confirm" id="cancelModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="cancelTitle">
+      <button class="confirm-modal__close" type="button" data-close="cancelModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--warning" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm-2-11a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v2Zm4-18a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V15Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="cancelTitle">取消确认</h2>
+          <p class="confirm-modal__body">确认立即中断当前任务吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="cancelModal">取消</button>
+        <button class="btn btn--primary" type="button" id="cancelOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-msg" id="pageMsg" role="status"></div>
+
   <script src="product-common.js"></script>
   <script src="menu.js"></script>
   <script src="tool-sidebar.js"></script>
+  <script src="col-resize.js"></script>
+  <script src="download-task-store.js"></script>
   <script>ToolShell.mount('download-tasks');</script>
+  <script src="download-tasks.js"></script>
 </body>
 </html>

@@ -130,6 +130,15 @@
             <section class="cfg-card" id="cardMaterials">
               <h2 class="cfg-card__title">添加素材</h2>
               <div class="cfg-card__form">
+                <div class="form-item">
+                  <label class="form-item__label">类型</label>
+                  <div class="form-item__control">
+                    <div class="seg" id="cfgMaterialTypeSeg" role="radiogroup" aria-label="类型">
+                      <button type="button" class="seg__item is-active" data-value="视频">视频</button>
+                      <button type="button" class="seg__item" data-value="图片">图片</button>
+                    </div>
+                  </div>
+                </div>
                 <div class="form-item" id="cfgMaterialItem">
                   <label class="form-item__label is-required">素材</label>
                   <div class="form-item__control">
@@ -177,7 +186,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="form-item">
+                <div class="form-item" id="cfgTrimItem">
                   <label class="form-item__label">剪辑时长</label>
                   <div class="form-item__control">
                     <div class="form-row-inline">
@@ -213,7 +222,7 @@
             <section class="cfg-card" id="cardTemplates">
               <h2 class="cfg-card__title">添加模板</h2>
               <div class="cfg-card__form">
-                <div class="form-item">
+                <div class="form-item" id="cfgClipItem">
                   <label class="form-item__label">片段拼接</label>
                   <div class="form-item__control">
                     <div class="cfg-subtabs" id="clipTabs" role="tablist" aria-label="片段类型">
@@ -232,7 +241,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="form-item">
+                <div class="form-item" id="cfgLayerItem">
                   <label class="form-item__label">图层叠加</label>
                   <div class="form-item__control">
                     <div class="cfg-subtabs" id="layerTabs" role="tablist" aria-label="图层"></div>
@@ -243,12 +252,8 @@
                       </button>
                       <span class="cfg-card__count" id="layerCount">已选 0/100</span>
                     </div>
-                    <div class="tpl-subform">
-                      <div class="tpl-subform__row">
-                        <label class="tpl-subform__label" for="layerOrderInput">图层顺序</label>
-                        <input class="input input--num" id="layerOrderInput" type="number" step="1" value="1" />
-                      </div>
-                      <div class="tpl-subform__row">
+                    <div class="tpl-subform" id="layerSubform">
+                      <div class="tpl-subform__row" id="layerInsertRow">
                         <label class="tpl-subform__label">插入位置</label>
                         <div class="form-row-inline">
                           <div class="filter-item" id="layerInsertWrap">
@@ -281,7 +286,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="form-item">
+                <div class="form-item" id="cfgAudioItem">
                   <label class="form-item__label">音频替换</label>
                   <div class="form-item__control">
                     <div class="cfg-card__toolbar">
