@@ -1,8 +1,9 @@
-/* 下载任务共享存储：看板报表 / 素材打包 */
+/* 下载任务共享存储：报表下载 / 素材下载 / 模板下载 */
 (function (global) {
   'use strict';
 
-  var KEY = 'overseas-admin-download-tasks-v4';
+  var KEY = 'overseas-admin-download-tasks-v5';
+  var ZIP_TYPES = { '素材下载': true, '模板下载': true };
   var USERS = Array.from({ length: 6 }, function (_, i) {
     return '用户' + String.fromCharCode(65 + i);
   });
@@ -60,13 +61,13 @@
     var updated = partial.updated instanceof Date ? partial.updated : created;
     var status = partial.status || '进行中';
     var name = partial.name || '';
-    var isPack = (partial.type || '') === '素材打包';
+    var isZip = !!ZIP_TYPES[partial.type || ''];
     return {
       id: String(partial.id || seq),
       type: partial.type || '报表下载',
       source: partial.source || '看板',
       name: name,
-      fileName: partial.fileName || (name ? name + (isPack ? '.zip' : '.csv') : ''),
+      fileName: partial.fileName || (name ? name + (isZip ? '.zip' : '.csv') : ''),
       fileSize: partial.fileSize || 0,
       count: partial.count || 0,
       status: status,
@@ -83,14 +84,17 @@
   function buildSeed() {
     var seq = 1001;
     var items = [
-      { type: '素材打包', source: '本地素材', prefix: '素材下载', code: 'k2M9aB', status: '待开始', creator: '用户A', created: minutesAgo(3), count: 12, fileSize: 186 * 1024 * 1024 },
-      { type: '报表下载', source: '看板', prefix: '投放看板', code: 'xY8p1Q', status: '进行中', progress: 46, creator: '用户A', created: minutesAgo(8), updated: minutesAgo(1), fileSize: 428 * 1024 },
-      { type: '素材打包', source: '模板中心', prefix: '素材下载', code: 'n4T7cD', status: '已完成', creator: '用户B', created: minutesAgo(22), updated: minutesAgo(18), count: 8, fileSize: 64 * 1024 * 1024 },
-      { type: '报表下载', source: '看板', prefix: '素材效果', code: 'q9H2eF', status: '已失败', failReason: '导出失败', creator: '用户C', created: minutesAgo(48), updated: minutesAgo(40), fileSize: 1.2 * 1024 * 1024 },
-      { type: '素材打包', source: '本地素材', prefix: '素材下载', code: 'r6W3gH', status: '已取消', creator: '用户A', created: minutesAgo(90), updated: minutesAgo(85), count: 6, fileSize: 48 * 1024 * 1024 },
-      { type: '报表下载', source: '看板', prefix: '收入分析', code: 's1L5jK', status: '已完成', creator: '用户D', created: hoursAgo(6), updated: hoursAgo(5.9), fileSize: 256 * 1024 },
-      { type: '素材打包', source: '模板中心', prefix: '素材下载', code: 't8P4mN', status: '已完成', creator: '用户E', created: hoursAgo(18), updated: hoursAgo(17.8), count: 20, fileSize: 96 * 1024 * 1024 },
-      { type: '报表下载', source: '看板', prefix: '投放看板', code: 'u3C7pQ', status: '已完成', creator: '用户F', created: hoursAgo(30), updated: hoursAgo(29.9), fileSize: 512 * 1024 }
+      { type: '素材下载', source: '本地素材', prefix: '素材下载', code: 'k2M9aB', status: '待开始', creator: '用户A', created: minutesAgo(3), count: 12, fileSize: 186 * 1024 * 1024 },
+      { type: '报表下载', source: '看板', prefix: 'Adjust整体概览', code: 'xY8p1Q', status: '进行中', progress: 46, creator: '用户A', created: minutesAgo(8), updated: minutesAgo(1), fileSize: 428 * 1024 },
+      { type: '模板下载', source: '模板中心', prefix: '模板下载', code: 'n4T7cD', status: '已完成', creator: '用户B', created: minutesAgo(22), updated: minutesAgo(18), count: 8, fileSize: 64 * 1024 * 1024 },
+      { type: '报表下载', source: '看板', prefix: 'TikTok开平看板', code: 'q9H2eF', status: '已失败', failReason: '导出失败', creator: '用户C', created: minutesAgo(48), updated: minutesAgo(40), fileSize: 1.2 * 1024 * 1024 },
+      { type: '素材下载', source: '本地素材', prefix: '素材下载', code: 'r6W3gH', status: '已取消', creator: '用户A', created: minutesAgo(90), updated: minutesAgo(85), count: 6, fileSize: 48 * 1024 * 1024 },
+      { type: '报表下载', source: '看板', prefix: 'TikTok投放看板', code: 's1L5jK', status: '已完成', creator: '用户D', created: hoursAgo(6), updated: hoursAgo(5.9), fileSize: 256 * 1024 },
+      { type: '模板下载', source: '模板中心', prefix: '模板下载', code: 't8P4mN', status: '已完成', creator: '用户E', created: hoursAgo(18), updated: hoursAgo(17.8), count: 20, fileSize: 96 * 1024 * 1024 },
+      { type: '报表下载', source: '看板', prefix: '广告聚合看板', code: 'u3C7pQ', status: '已完成', creator: '用户F', created: hoursAgo(30), updated: hoursAgo(29.9), fileSize: 512 * 1024 },
+      { type: '模板下载', source: '模板中心', prefix: '模板下载', code: 'v5R2wX', status: '进行中', progress: 38, creator: '用户C', created: minutesAgo(15), updated: minutesAgo(2), count: 14, fileSize: 52 * 1024 * 1024 },
+      { type: '模板下载', source: '模板中心', prefix: '模板下载', code: 'w9K6yZ', status: '待开始', creator: '用户D', created: minutesAgo(5), count: 5, fileSize: 18 * 1024 * 1024 },
+      { type: '模板下载', source: '模板中心', prefix: '模板下载', code: 'p3H8bL', status: '已失败', failReason: '打包失败', creator: '用户F', created: hoursAgo(4), updated: hoursAgo(3.8), count: 11, fileSize: 41 * 1024 * 1024 }
     ];
     var rows = items.map(function (item) {
       var created = item.created;
@@ -181,11 +185,13 @@
     opts = opts || {};
     var created = new Date();
     var source = opts.source || '本地素材';
+    var isTemplate = source === '模板中心';
+    var type = isTemplate ? '模板下载' : '素材下载';
     var count = Number(opts.count) || 0;
-    var avgMb = source === '模板中心' ? 3.8 : 8.6;
-    var name = buildTaskName('素材下载', created);
+    var avgMb = isTemplate ? 3.8 : 8.6;
+    var name = buildTaskName(type, created);
     return add({
-      type: '素材打包',
+      type: type,
       source: source,
       name: name,
       fileName: name + '.zip',

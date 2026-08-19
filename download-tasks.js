@@ -183,7 +183,7 @@
   }
 
   function triggerDownload(row) {
-    var name = row.fileName || (row.name + (row.type === '素材打包' ? '.zip' : '.csv'));
+    var name = row.fileName || (row.name + (row.type === '报表下载' ? '.csv' : '.zip'));
     var isZip = /\.zip$/i.test(name);
     var content = isZip
       ? 'PK\x03\x04 prototype zip: ' + name
