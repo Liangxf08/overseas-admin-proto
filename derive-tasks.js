@@ -406,7 +406,7 @@
     var name = (node && node.name) || '';
     if (folderId === 'common_bgm' || name === '通用BGM' ||
         /(^| \/ )BGM( \/ |$)/.test(path) || /(^| \/ )口播( \/ |$)/.test(path)) {
-      return '音频替换';
+      return '音频叠加';
     }
     if (folderId === 'common_sticker' || name === '通用贴纸' ||
         /(^| \/ )贴纸( \/ |$)/.test(path) || /(^| \/ )边框( \/ |$)/.test(path)) {
@@ -495,7 +495,7 @@
     var SPECS = {
       '片段拼接': { type: '视频', formats: ['mp4', 'mov'], names: ['片头拼接', '片尾拼接', '前后拼接', '转场拼接', '片段合集'] },
       '图层叠加': { formats: ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'mov'], names: ['边框贴纸', '角标挂件', '装饰文字', '引导点击', '动态挂件'] },
-      '音频替换': { type: '音频', formats: ['mp3', 'wav', 'm4a'], names: ['BGM替换', '口播替换', '音效混音', '背景音轨', '音频模板'] }
+      '音频叠加': { type: '音频', formats: ['mp3', 'wav', 'm4a'], names: ['BGM替换', '口播替换', '音效混音', '背景音轨', '音频模板'] }
     };
     var tplIds = listAllFolderIds(TPL_CUSTOM);
     var ti = 0;
@@ -536,7 +536,7 @@
     materials: { title: '选择素材', key: 'materials', source: 'material', gridId: 'selMaterials', countId: 'materialCount', clearId: 'clearMaterialsBtn', allLabel: '全部素材' },
     clips: { title: '选择片段', key: 'clips', source: 'template', category: '片段拼接', gridId: 'selClips', countId: 'clipCount', clearId: 'clearClipsBtn', allLabel: '全部模板' },
     layers: { title: '选择图层', key: 'layers', source: 'template', category: '图层叠加', gridId: 'selLayers', countId: 'layerCount', clearId: 'clearLayersBtn', allLabel: '全部模板' },
-    audios: { title: '选择音频', key: 'audios', source: 'template', category: '音频替换', gridId: 'selAudios', countId: 'audioCount', clearId: 'clearAudiosBtn', allLabel: '全部模板' }
+    audios: { title: '选择音频', key: 'audios', source: 'template', category: '音频叠加', gridId: 'selAudios', countId: 'audioCount', clearId: 'clearAudiosBtn', allLabel: '全部模板' }
   };
 
   function makeLayerGroup(index) {
@@ -922,7 +922,7 @@
     ];
     var clipPool = templatesByCategory('片段拼接');
     var layerPool = templatesByCategory('图层叠加');
-    var audioPool = templatesByCategory('音频替换');
+    var audioPool = templatesByCategory('音频叠加');
     var videoPool = MATERIAL_POOL.filter(function (it) { return it.type === '视频'; });
     var i;
     for (i = 0; i < 14; i++) {

@@ -23,13 +23,13 @@
   ];
   var FORM_TAG_TREE = TAG_TREE.filter(function (g) { return g.id !== 'sys'; });
 
-  var CATEGORY_OPTIONS = ['片段拼接', '图层叠加', '音频替换'];
+  var CATEGORY_OPTIONS = ['片段拼接', '图层叠加', '音频叠加'];
 
   /* 合成方式 ↔ 上传支持格式 */
   var UPLOAD_CATEGORY_FORMATS = {
     '片段拼接': ['mp4', 'mov', 'avi', 'mpeg'],
     '图层叠加': ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'mov'],
-    '音频替换': ['mp3', 'wav', 'aac', 'm4a']
+    '音频叠加': ['mp3', 'wav', 'aac', 'm4a']
   };
 
   var FORMAT_TREE = [
@@ -378,7 +378,7 @@
         formats: ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'mov'],
         names: ['边框贴纸', '角标挂件', '装饰文字', '引导点击', '动态挂件']
       },
-      '音频替换': {
+      '音频叠加': {
         type: '音频',
         formats: ['mp3', 'wav', 'aac', 'm4a'],
         names: ['BGM替换', '口播替换', '音效混音', '背景音轨', '音频模板']
@@ -387,7 +387,7 @@
 
     /**
      * 文件夹 → 合成方式
-     * BGM / 口播 / 通用BGM → 音频替换
+     * BGM / 口播 / 通用BGM → 音频叠加
      * 贴纸 / 边框 / 通用贴纸 → 图层叠加
      * 片头 / 通用片头 → 片段拼接
      * 跑量模板 / 其余根目录 → 不限
@@ -399,7 +399,7 @@
       if (folderId === 'scale_tpl' || name === '跑量模板') return '';
       if (folderId === 'common_bgm' || name === '通用BGM' ||
           /(^| \/ )BGM( \/ |$)/.test(path) || /(^| \/ )口播( \/ |$)/.test(path)) {
-        return '音频替换';
+        return '音频叠加';
       }
       if (folderId === 'common_sticker' || name === '通用贴纸' ||
           /(^| \/ )贴纸( \/ |$)/.test(path) || /(^| \/ )边框( \/ |$)/.test(path)) {
