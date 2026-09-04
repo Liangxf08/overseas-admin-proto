@@ -224,6 +224,7 @@
                     <col class="col-check" data-col-width="48" data-col-fixed="true" />
                     <col data-col-width="88" />
                     <col data-col-width="280" />
+                    <col data-col-width="160" />
                     <col data-col-width="104" />
                     <col data-col-width="104" />
                     <col data-col-width="104" />
@@ -238,6 +239,7 @@
                       <th class="col-check is-freeze"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
                       <th class="col-id is-freeze">ID</th>
                       <th class="col-material is-freeze">模板</th>
+                      <th>备注</th>
                       <th>创意人</th>
                       <th>合成方式</th>
                       <th>类型</th>
@@ -315,6 +317,18 @@
               <div class="search-select-panel__list" id="upCreatorList"></div>
             </div>
             <div class="form-item__error">请选择创意人</div>
+          </div>
+        </div>
+
+        <div class="form-item" id="upRemarkItem">
+          <label class="form-item__label">备注</label>
+          <div class="form-item__control">
+            <div class="input-clearable" id="upRemarkWrap">
+              <input class="input" id="upRemark" type="text" placeholder="请输入" autocomplete="off" />
+              <button class="select-clear" type="button" id="upRemarkClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -559,6 +573,17 @@
                   <div class="search-select-panel__list" id="detailCreatorList"></div>
                 </div>
                 <div class="form-item__error">请选择创意人</div>
+              </div>
+            </div>
+            <div class="form-item" id="detailRemarkItem">
+              <label class="form-item__label">备注</label>
+              <div class="form-item__control">
+                <div class="input-clearable" id="detailRemarkWrap">
+                  <input class="input" id="detailRemark" type="text" placeholder="请输入" autocomplete="off" />
+                  <button class="select-clear" type="button" id="detailRemarkClear" aria-label="清除">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
             <div class="form-item" id="detailCategoryItem">

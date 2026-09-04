@@ -38,10 +38,13 @@
       children: [
         {
           id: 'app-mgmt',
-          name: 'APP管理',
+          name: '产品管理',
           children: [
             { id: 'app-apps', name: 'APP应用' },
+            { id: 'mini-game', name: '小游戏' },
             { id: 'app-type', name: '产品类型' },
+            { id: 'mini-series', name: '产品系列' },
+            { id: 'product-group', name: '产品组' },
             { id: 'app-json', name: 'JSON文件' }
           ]
         },
@@ -69,15 +72,6 @@
             { id: 'sdk-boot', name: 'SDK启动配置' }
           ]
         },
-        {
-          id: 'mini-mgmt',
-          name: '小游戏管理',
-          children: [
-            { id: 'mini-game', name: '小游戏' },
-            { id: 'mini-series', name: '产品系列' }
-          ]
-        },
-        { id: 'product-group', name: '产品组管理' },
         {
           id: 'ad-strategy',
           name: '广告策略',

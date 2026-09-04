@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>字段配置 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <link rel="stylesheet" href="ad-strategy.css" />
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-bar" id="filterBar">
+          <div class="filter-item" id="filterNameWrap">
+            <input class="input input-clearable" id="filterName" type="text" placeholder="字段名称" autocomplete="off" />
+            <button class="select-clear" type="button" id="filterNameClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+          </div>
+          <div class="filter-item" id="filterKeyWrap">
+            <input class="input input-clearable" id="filterKey" type="text" placeholder="字段Key" autocomplete="off" />
+            <button class="select-clear" type="button" id="filterKeyClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+          </div>
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="statusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <button class="single-option" type="button" data-value="">全部</button>
+              <button class="single-option" type="button" data-value="启用">启用</button>
+              <button class="single-option" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+            <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
+            <button class="btn btn--success" type="button" id="addBtn">添加</button>
+          </div>
+        </div>
+
+        <div class="data-panel" id="dataPanel">
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="dataTable">
+                <colgroup>
+                  <col data-col-width="200" />
+                  <col data-col-width="180" />
+                  <col data-col-width="112" />
+                  <col data-col-width="280" />
+                  <col data-col-width="80" />
+                  <col data-col-width="180" />
+                  <col data-col-width="140" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>字段名称</th>
+                    <th>字段Key</th>
+                    <th>组件类型</th>
+                    <th>描述</th>
+                    <th>状态</th>
+                    <th>更新时间</th>
+                    <th class="col-action">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+              <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="editModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="editModalTitle">添加字段</div>
+        <button class="modal__close" type="button" data-close="editModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item" id="editKeyItem">
+          <label class="form-item__label is-required">字段Key
+            <span class="form-help" data-tip="SDK 下发使用的唯一标识，提交后不可修改" aria-label="说明" tabindex="0">?</span>
+          </label>
+          <div class="form-item__control">
+            <div class="input-clearable" id="editKeyClearWrap">
+              <input class="input" id="editKey" type="text" placeholder="请输入字段Key" autocomplete="off" maxlength="40" />
+              <button class="select-clear" type="button" id="editKeyClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="form-item__error">请输入字段Key</div>
+          </div>
+        </div>
+        <div class="form-item" id="editNameItem">
+          <label class="form-item__label is-required">字段名称</label>
+          <div class="form-item__control">
+            <div class="input-clearable" id="editNameClearWrap">
+              <input class="input" id="editName" type="text" placeholder="请输入字段名称" autocomplete="off" maxlength="40" />
+              <button class="select-clear" type="button" id="editNameClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="form-item__error">请输入字段名称</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">描述</label>
+          <div class="form-item__control">
+            <input class="input" id="editDesc" type="text" placeholder="请输入描述" autocomplete="off" maxlength="80" />
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">状态</label>
+          <div class="form-item__control">
+            <div class="seg" id="editStatusSeg" role="group" aria-label="状态">
+              <button type="button" class="seg__item is-active" data-value="启用">启用</button>
+              <button type="button" class="seg__item" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-item" id="editTypeItem">
+          <label class="form-item__label is-required">组件类型
+            <span class="form-help" data-tip="策略分流里该字段的录入控件" aria-label="说明" tabindex="0">?</span>
+          </label>
+          <div class="form-item__control">
+            <div class="seg field-type-seg" id="editTypeSeg" role="group" aria-label="组件类型">
+              <button type="button" class="seg__item is-active" data-value="数字输入">数字输入</button>
+              <button type="button" class="seg__item" data-value="文本输入">文本输入</button>
+              <button type="button" class="seg__item" data-value="开关">开关</button>
+              <button type="button" class="seg__item" data-value="下拉选择">下拉选择</button>
+              <button type="button" class="seg__item" data-value="Array">Array</button>
+            </div>
+            <div class="form-item__error">请选择组件类型</div>
+          </div>
+        </div>
+        <div class="form-item" id="editMinItem" hidden>
+          <label class="form-item__label">最小值</label>
+          <div class="form-item__control">
+            <input class="input" id="editMin" type="text" placeholder="请输入" autocomplete="off" />
+            <div class="form-item__error">请输入有效数字</div>
+          </div>
+        </div>
+        <div class="form-item" id="editMaxItem" hidden>
+          <label class="form-item__label">最大值</label>
+          <div class="form-item__control">
+            <input class="input" id="editMax" type="text" placeholder="请输入" autocomplete="off" />
+            <div class="form-item__error">最大值须大于等于最小值</div>
+          </div>
+        </div>
+        <div class="form-item form-item--top" id="editOptionsItem" hidden>
+          <label class="form-item__label is-required">选项</label>
+          <div class="form-item__control">
+            <div class="param-table-wrap">
+              <table class="param-table" id="optionTable">
+                <colgroup>
+                  <col />
+                  <col />
+                  <col class="col-op" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th><span class="req">*</span>选项文案</th>
+                    <th><span class="req">*</span>选项值</th>
+                    <th class="col-op">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="optionBody"></tbody>
+              </table>
+            </div>
+            <button class="param-add" type="button" id="addOptionBtn">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2v8M2 6h8"/></svg>
+              添加选项
+            </button>
+            <div class="form-item__error">请至少添加一个完整选项</div>
+          </div>
+        </div>
+        <div class="form-item form-item--top" id="editChildrenItem" hidden>
+          <label class="form-item__label is-required">子项定义</label>
+          <div class="form-item__control">
+            <div class="param-table-wrap">
+              <table class="param-table" id="childTable">
+                <colgroup>
+                  <col />
+                  <col />
+                  <col style="width:140px" />
+                  <col class="col-op" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th><span class="req">*</span>子项名称</th>
+                    <th><span class="req">*</span>子项Key</th>
+                    <th>组件类型</th>
+                    <th class="col-op">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="childBody"></tbody>
+              </table>
+            </div>
+            <button class="param-add" type="button" id="addChildBtn">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2v8M2 6h8"/></svg>
+              添加子项
+            </button>
+            <div class="form-item__error">请至少添加一个完整子项</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="editModal">取消</button>
+        <button class="btn btn--primary" type="button" id="editSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--confirm" id="deleteModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <button class="confirm-modal__close" type="button" data-close="deleteModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--danger" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm4.955-27.771-4.95 4.95-4.95-4.95a1 1 0 0 0-1.414 0l-1.414 1.414a1 1 0 0 0 0 1.414l4.95 4.95-4.95 4.95a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l4.95-4.95 4.95 4.95a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-4.95-4.95 4.95-4.95a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="deleteTitle">删除确认</h2>
+          <p class="confirm-modal__body">此操作不可撤销，确认删除吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="deleteModal">取消</button>
+        <button class="btn btn--primary" type="button" id="deleteOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="product-common.js"></script>
+  <script src="menu.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script src="col-resize.js"></script>
+  <script src="ad-strategy-data.js"></script>
+  <script>ProductShell.mount('ad-field-config');</script>
+  <script src="ad-field-config.js"></script>
+</body>
+</html>

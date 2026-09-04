@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小游戏 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+  <style>
+    .product-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .product-cell__icon {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      border-radius: 4px;
+      background: var(--color-fill-4, #C9CDD4);
+    }
+    .product-cell__name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .product-cell__icon--img {
+      object-fit: cover;
+      background: transparent;
+    }
+    .upload-box {
+      width: 96px;
+      height: 96px;
+      border: 1px dashed var(--color-border-2, #E5E6EB);
+      border-radius: var(--border-radius-medium, 4px);
+      background: var(--color-fill-1, #F7F8FA);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--color-text-3, #86909C);
+      font-size: 12px;
+      line-height: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .upload-box:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .upload-box.has-file {
+      border-style: solid;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+    .upload-box__plus { width: 20px; height: 20px; flex-shrink: 0; }
+    .upload-box__text { line-height: 20px; }
+    .upload-box__img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+      background: transparent;
+    }
+    .upload-box.has-file .upload-box__plus,
+    .upload-box.has-file .upload-box__text { display: none; }
+    .upload-box.has-file .upload-box__img { display: block; }
+    .upload-box__remove {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .upload-box.has-file:hover .upload-box__remove { display: inline-flex; }
+    .upload-box__remove svg { width: 10px; height: 10px; }
+    .upload-tip {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--color-text-3, #86909C);
+    }
+    .col-name { width: 180px; }
+    .col-platform { width: 100px; }
+    .col-id { width: 140px; }
+    .col-appid { width: 140px; }
+    .col-category { width: 100px; }
+    .col-group { width: 100px; }
+    .col-type { width: 100px; }
+    .col-series { width: 112px; }
+    .col-owner { width: 100px; }
+    .col-status { width: 100px; }
+    .col-time { width: 160px; }
+    .col-action { width: 80px; }
+
+    .data-table .col-check.is-freeze { left: 0; }
+    .data-table .col-name.is-freeze { left: 48px; }
+    .data-table th.col-check.is-freeze { z-index: 5; }
+    .data-table th.col-name.is-freeze { z-index: 5; }
+
+    .single-panel.single-panel--portal {
+      position: fixed;
+      z-index: 1200;
+      right: auto;
+      margin: 0;
+    }
+    #formModal > .modal {
+      overflow: hidden;
+      max-height: calc(100vh - 80px);
+    }
+    #formModal .modal__body {
+      overflow: auto;
+      min-height: 0;
+    }
+    #platformSeg .seg__item:only-child {
+      margin-left: 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-bar">
+          <div class="filter-item">
+            <input class="input" id="filterKeyword" type="text" placeholder="产品名称/ID" autocomplete="off" />
+          </div>
+          <div class="filter-item">
+            <input class="input" id="filterAppId" type="text" placeholder="APPID" autocomplete="off" />
+          </div>
+
+          <div class="filter-item" id="platformWrap">
+            <button class="select-trigger" type="button" id="platformTrigger">
+              <span class="select-trigger__text" id="platformLabel">平台：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="platformClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="platformPanel">
+              <div class="single-option" data-value="TikTok">TikTok</div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="groupWrap">
+            <button class="select-trigger" type="button" id="groupTrigger">
+              <span class="select-trigger__text" id="groupLabel">产品组：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="groupClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel multi-panel--simple" id="groupPanel">
+              <div class="multi-panel__list" id="groupList"></div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="typeWrap">
+            <button class="select-trigger" type="button" id="typeTrigger">
+              <span class="select-trigger__text" id="typeLabel">产品类型：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="typeClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel" id="typePanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input id="typeSearch" type="text" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="typeSelectAll">全选</button>
+                </div>
+                <div class="multi-panel__list" id="typeList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="typeCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="typePanelClear">清空</button>
+                </div>
+                <div class="multi-panel__list" id="typeSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="seriesWrap">
+            <button class="select-trigger" type="button" id="seriesTrigger">
+              <span class="select-trigger__text" id="seriesLabel">产品系列：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="seriesClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel multi-panel--simple" id="seriesPanel">
+              <div class="multi-panel__list" id="seriesList"></div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="ownerWrap">
+            <button class="select-trigger" type="button" id="ownerTrigger">
+              <span class="select-trigger__text" id="ownerLabel">负责人：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="ownerClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="multi-panel" id="ownerPanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input id="ownerSearch" type="text" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="ownerSelectAll">全选</button>
+                </div>
+                <div class="multi-panel__list" id="ownerList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="ownerCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="ownerPanelClear">清空</button>
+                </div>
+                <div class="multi-panel__list" id="ownerSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="statusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <div class="single-option" data-value="启用">启用</div>
+              <div class="single-option" data-value="禁用">禁用</div>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+            <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+            <div class="batch-wrap" id="batchWrap">
+              <button class="btn btn--default btn--dropdown" type="button" id="batchBtn" disabled>
+                批量操作
+                <svg class="btn__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="batch-menu" id="batchMenu" role="menu">
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="group">修改产品组</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="type">修改产品类型</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="series">修改产品系列</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="owner">修改负责人</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="status">修改状态</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-panel">
+          <div class="table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="dataTable">
+              <colgroup>
+                <col class="col-check" data-col-width="48" />
+                <col class="col-name" data-col-width="180" />
+                <col class="col-platform" data-col-width="100" />
+                <col class="col-id" data-col-width="140" />
+                <col class="col-appid" data-col-width="140" />
+                <col class="col-category" data-col-width="100" />
+                <col class="col-group" data-col-width="100" />
+                <col class="col-type" data-col-width="100" />
+                <col class="col-series" data-col-width="112" />
+                <col class="col-owner" data-col-width="100" />
+                <col class="col-status" data-col-width="100" />
+                <col class="col-time" data-col-width="160" />
+                <col class="col-time" data-col-width="160" />
+                <col class="col-action" data-col-width="80" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="col-check is-freeze"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
+                  <th class="col-name is-freeze">产品名称</th>
+                  <th class="col-platform">平台</th>
+                  <th class="col-id">产品ID</th>
+                  <th class="col-appid">APPID</th>
+                  <th class="col-category">类别</th>
+                  <th class="col-group">产品组</th>
+                  <th class="col-type">产品类型</th>
+                  <th class="col-series">产品系列</th>
+                  <th class="col-owner">负责人</th>
+                  <th class="col-status">状态</th>
+                  <th class="col-time">创建时间</th>
+                  <th class="col-time">更新时间</th>
+                  <th class="col-action">操作</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+            <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+          </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status"></div>
+
+  <div class="modal-mask" id="formModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="formModalTitle">编辑产品</div>
+        <button class="modal__close" type="button" id="formModalClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label">平台</div>
+          <div class="form-item__control">
+            <div class="seg is-readonly" id="platformSeg" role="group" aria-label="平台">
+              <button class="seg__item is-active" type="button" data-value="TikTok">TikTok</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">产品名称</div>
+          <div class="form-item__control">
+            <input class="input" id="formName" type="text" disabled />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">APPID</div>
+          <div class="form-item__control">
+            <input class="input" id="formAppId" type="text" disabled />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">Client key</div>
+          <div class="form-item__control">
+            <input class="input" id="formClientKey" type="text" disabled />
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">Client secret</div>
+          <div class="form-item__control">
+            <div class="input-clearable" id="formClientSecretWrap">
+              <input class="input" id="formClientSecret" type="text" placeholder="请输入 Client secret" autocomplete="off" />
+              <button class="select-clear" type="button" id="formClientSecretClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">类别</div>
+          <div class="form-item__control">
+            <input class="input" id="formCategory" type="text" disabled />
+          </div>
+        </div>
+        <div class="form-item" id="formGroupItem">
+          <div class="form-item__label is-required">产品组</div>
+          <div class="form-item__control" id="formGroupWrap">
+            <button class="select-trigger" type="button" id="formGroupTrigger">
+              <span class="select-trigger__text" id="formGroupLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formGroupClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel" id="formGroupPanel"></div>
+            <div class="form-item__error">请选择产品组</div>
+          </div>
+        </div>
+        <div class="form-item" id="formTypeItem">
+          <div class="form-item__label is-required">产品类型</div>
+          <div class="form-item__control" id="formTypeWrap">
+            <button class="select-trigger" type="button" id="formTypeTrigger">
+              <span class="select-trigger__text" id="formTypeLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formTypeClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel single-panel--search" id="formTypePanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="formTypeSearch" placeholder="搜索" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="formTypeList"></div>
+            </div>
+            <div class="form-item__error">请选择产品类型</div>
+          </div>
+        </div>
+        <div class="form-item" id="formSeriesItem">
+          <div class="form-item__label is-required">产品系列</div>
+          <div class="form-item__control" id="formSeriesWrap">
+            <button class="select-trigger" type="button" id="formSeriesTrigger">
+              <span class="select-trigger__text" id="formSeriesLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formSeriesClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel single-panel--search" id="formSeriesPanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="formSeriesSearch" placeholder="搜索" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="formSeriesList"></div>
+            </div>
+            <div class="form-item__error">请选择产品系列</div>
+          </div>
+        </div>
+        <div class="form-item" id="formOwnerItem">
+          <div class="form-item__label is-required">负责人</div>
+          <div class="form-item__control" id="formOwnerWrap">
+            <button class="select-trigger" type="button" id="formOwnerTrigger">
+              <span class="select-trigger__text" id="formOwnerLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              <span class="select-clear" id="formOwnerClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></span>
+            </button>
+            <div class="single-panel single-panel--search" id="formOwnerPanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="formOwnerSearch" placeholder="搜索" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="formOwnerList"></div>
+            </div>
+            <div class="form-item__error">请选择负责人</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">图标</div>
+          <div class="form-item__control">
+            <div class="upload-box" id="iconUploadBox" role="button" tabindex="0" aria-label="上传产品图标">
+              <svg class="upload-box__plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              <span class="upload-box__text">上传图片</span>
+              <img class="upload-box__img" id="iconPreview" alt="" />
+              <button class="upload-box__remove" type="button" id="iconRemoveBtn" aria-label="删除图标">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+              </button>
+            </div>
+            <input type="file" id="iconFileInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden />
+            <div class="upload-tip">请上传小于2M的 jpg 或 png 图片，建议尺寸：512*512</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="statusSeg" role="group" aria-label="状态">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="formCancelBtn">取消</button>
+        <button class="btn btn--primary" type="button" id="formSubmitBtn">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="batchGroupModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改产品组</div>
+        <button class="modal__close" type="button" id="batchGroupClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">产品组</div>
+          <div class="form-item__control" id="batchGroupWrap">
+            <button class="select-trigger" type="button" id="batchGroupTrigger">
+              <span class="select-trigger__text" id="batchGroupLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="batchGroupPanel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchGroupCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchGroupSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="batchTypeModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改产品类型</div>
+        <button class="modal__close" type="button" id="batchTypeClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">产品类型</div>
+          <div class="form-item__control" id="batchTypeWrap">
+            <button class="select-trigger" type="button" id="batchTypeTrigger">
+              <span class="select-trigger__text" id="batchTypeLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="batchTypePanel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchTypeCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchTypeSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="batchSeriesModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改产品系列</div>
+        <button class="modal__close" type="button" id="batchSeriesClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">产品系列</div>
+          <div class="form-item__control" id="batchSeriesWrap">
+            <button class="select-trigger" type="button" id="batchSeriesTrigger">
+              <span class="select-trigger__text" id="batchSeriesLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="batchSeriesPanel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchSeriesCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchSeriesSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="batchOwnerModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改负责人</div>
+        <button class="modal__close" type="button" id="batchOwnerClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">负责人</div>
+          <div class="form-item__control" id="batchOwnerWrap">
+            <button class="select-trigger" type="button" id="batchOwnerTrigger">
+              <span class="select-trigger__text" id="batchOwnerLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="single-panel" id="batchOwnerPanel"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchOwnerCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchOwnerSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="batchStatusModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <div class="modal__title">修改状态</div>
+        <button class="modal__close" type="button" id="batchStatusClose" aria-label="关闭">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l10 10M12 2L2 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label is-required">状态</div>
+          <div class="form-item__control">
+            <div class="seg" id="batchStatusSeg">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="batchStatusCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="batchStatusSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="col-resize.js"></script>
+  <script src="product-common.js"></script>
+  <script src="menu.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script src="mini-games.js"></script>
+</body>
+</html>

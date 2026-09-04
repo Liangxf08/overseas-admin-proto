@@ -134,10 +134,12 @@
 
   var SELECT_LIMIT = 100;
   var LAYER_TAB_MAX = 5;
+  var AUDIO_TAB_MAX = 5;
   var layerGroupSeq = 0;
+  var audioGroupSeq = 0;
   var DERIVE_LIMIT = 1000;
   var SYSTEM_TAG = '衍生';
-  var DEFAULT_NAME = '{原素材名}_衍生';
+  var DEFAULT_NAME = '{原素材名}_{模板名}_YS';
   var DEFAULT_FOLDER_NAME = '{创意人}_{YYYYMMDD}';
   var XMP_FOLDERS = [
     '短剧/竖版',
@@ -259,6 +261,40 @@
   function pick(arr, i) { return arr[i % arr.length]; }
   function stripExt(name) {
     return String(name || '').replace(/\.[^.]+$/, '');
+  }
+
+  function comboTemplateParts(intro, layerItems, outro, audioItems) {
+    var parts = [];
+    if (intro) parts.push(stripExt(intro.name));
+    (layerItems || []).forEach(function (it) {
+      if (it) parts.push(stripExt(it.name));
+    });
+    if (outro) parts.push(stripExt(outro.name));
+    var audios = Array.isArray(audioItems) ? audioItems : (audioItems ? [audioItems] : []);
+    audios.forEach(function (it) {
+      if (it) parts.push(stripExt(it.name));
+    });
+    return parts;
+  }
+
+  function expandNameTpl(tpl, ctx) {
+    ctx = ctx || {};
+    var now = ctx.now || new Date();
+    var ymd = formatDateYMD(now).replace(/-/g, '');
+    var size = ctx.size && ctx.size !== '—' ? ctx.size : '';
+    var duration = (ctx.duration != null && ctx.duration !== '') ? String(ctx.duration) : '';
+    var seq = ctx.seq != null ? Number(ctx.seq) : 0;
+    return String(tpl || DEFAULT_NAME)
+      .replace(/\{原素材名\}/g, ctx.sourceName || '')
+      .replace(/\{模板名\}/g, ctx.templateName || '')
+      .replace(/\{编号\}/g, seq ? String(seq) : '')
+      .replace(/\{序号\}/g, seq ? pad4(seq) : '')
+      .replace(/\{创意人\}/g, ctx.creator || '')
+      .replace(/\{尺寸\}/g, size === '-' ? '' : size)
+      .replace(/\{时长\}/g, duration)
+      .replace(/\{YYYYMMDD\}/g, ymd)
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
   }
   function cloneList(arr) {
     return (arr || []).map(function (x) { return Object.assign({}, x); });
@@ -486,6 +522,7 @@
           category: category,
           creator: pick(USERS, ti + 1),
           tags: [pick(['英语', '竖版', '高消耗'], ti)],
+          remark: (ti % 3 === 0) ? pick(['片头通用', '仅竖版投放', '节日活动', '高消耗配套'], ti) : '',
           source: '本地上传',
           createdAt: formatDateTime(tCreated),
           createdDate: formatDateYMD(tCreated),
@@ -512,6 +549,16 @@
       insertSec: 0,
       insertStart: 0,
       insertEnd: 0,
+      items: []
+    };
+  }
+
+  function makeAudioGroup(index) {
+    audioGroupSeq += 1;
+    return {
+      id: 'ag_' + audioGroupSeq,
+      name: '音轨' + index,
+      order: index,
       items: []
     };
   }
@@ -559,6 +606,33 @@
     return [g];
   }
 
+  function isAudioGroup(x) {
+    return x && typeof x === 'object' && Array.isArray(x.items) && !x.category;
+  }
+
+  function normalizeAudioGroups(audios) {
+    if (!Array.isArray(audios) || !audios.length) return [makeAudioGroup(1)];
+    if (isAudioGroup(audios[0])) {
+      return audios.map(function (g, i) {
+        return {
+          id: g.id || ('ag_' + (i + 1)),
+          name: g.name || ('音轨' + (i + 1)),
+          order: g.order != null ? Number(g.order) : (i + 1),
+          items: Array.isArray(g.items) ? g.items : []
+        };
+      }).slice(0, AUDIO_TAB_MAX);
+    }
+    var g = makeAudioGroup(1);
+    g.items = audios.slice();
+    return [g];
+  }
+
+  function wrapAudioItems(items) {
+    var g = makeAudioGroup(1);
+    g.items = items || [];
+    return [g];
+  }
+
   function allClipItems(cfg) {
     var c = (cfg || {}).clips;
     if (Array.isArray(c)) return c;
@@ -577,6 +651,18 @@
     return layers;
   }
 
+  function allAudioItems(cfg) {
+    var audios = (cfg || {}).audios || [];
+    if (audios[0] && Array.isArray(audios[0].items)) {
+      var out = [];
+      audios.forEach(function (g) {
+        (g.items || []).forEach(function (it) { out.push(it); });
+      });
+      return out;
+    }
+    return audios;
+  }
+
   function clipLen(cfg, key) {
     var c = (cfg || {}).clips;
     if (Array.isArray(c)) return key === 'intro' ? dimLen(c) : 0;
@@ -589,6 +675,10 @@
 
   function layerItemCount(cfg) {
     return dimLen(allLayerItems(cfg || state.cfg));
+  }
+
+  function audioItemCount(cfg) {
+    return dimLen(allAudioItems(cfg || state.cfg));
   }
 
   function snapshotClipGroups(clips) {
@@ -611,13 +701,24 @@
     });
   }
 
+  function snapshotAudioGroups(groups) {
+    return (groups || []).map(function (g) {
+      return {
+        id: g.id,
+        name: g.name,
+        order: g.order,
+        items: snapshotItems(g.items)
+      };
+    });
+  }
+
   function defaultConfig() {
     return {
       materialType: '视频',
       materials: [],
       clips: { intro: [], outro: [] },
       layers: [makeLayerGroup(1)],
-      audios: [],
+      audios: [makeAudioGroup(1)],
       countMode: 'fixed',
       fixedCount: 10,
       md5: true,
@@ -625,6 +726,7 @@
       size: '1080x1920',
       sizeGroup: '竖版(9:16)',
       trim: false,
+      muteOrigin: true,
       trimMode: '剪掉片尾',
       trimSec: 4,
       trimStart: 0,
@@ -718,6 +820,7 @@
         category: it.category || '',
         folderId: it.folderId || '',
         creator: it.creator || '',
+        remark: it.remark || '',
         tags: (it.tags || []).slice(),
         source: it.source || '',
         createdAt: it.createdAt || ''
@@ -742,9 +845,6 @@
     var list = [];
     var i;
     var mats = cfg.materials || [];
-    var clips = allClipItems(cfg);
-    var layers = allLayerItems(cfg);
-    var audios = cfg.audios || [];
     for (i = 0; i < count; i++) {
       var st;
       if (task.status === '已完成') {
@@ -766,19 +866,43 @@
       }
       updated.setSeconds(updated.getSeconds() + i * 3);
       var mat = mats[i % Math.max(1, mats.length)];
-      var clip = clips.length ? clips[i % clips.length] : null;
-      var layer = layers.length ? layers[i % layers.length] : null;
-      var audio = audios.length ? audios[i % audios.length] : null;
-      var parts = [];
-      if (mat) parts.push(stripExt(mat.name));
-      if (clip) parts.push(stripExt(clip.name));
-      if (layer) parts.push(stripExt(layer.name));
-      if (audio) parts.push(stripExt(audio.name));
-      var base = (cfg.nameTpl || '衍生').replace(/\{[^}]+\}/g, '').replace(/_+/g, '_').replace(/^_|_$/g, '') || '衍生';
+      var clipGroups = normalizeClipGroups(cfg.clips);
+      var intros = clipGroups.intro || [];
+      var outros = clipGroups.outro || [];
+      var layerGroups = normalizeLayerGroups(cfg.layers).slice().sort(function (a, b) {
+        return (Number(a.order) || 0) - (Number(b.order) || 0);
+      });
+      var audioGroups = normalizeAudioGroups(cfg.audios).slice().sort(function (a, b) {
+        return (Number(a.order) || 0) - (Number(b.order) || 0);
+      });
+      var intro = intros.length ? intros[i % intros.length] : null;
+      var outro = outros.length ? outros[i % outros.length] : null;
+      var layerPicks = [];
+      layerGroups.forEach(function (g) {
+        var items = g.items || [];
+        if (items.length) layerPicks.push(items[i % items.length]);
+      });
+      var audioPicks = [];
+      audioGroups.forEach(function (g) {
+        var items = g.items || [];
+        if (items.length) audioPicks.push(items[i % items.length]);
+      });
+      var tplParts = comboTemplateParts(intro, layerPicks, outro, audioPicks);
+      var sourceName = mat ? stripExt(mat.name) : '';
+      var creator = cfg.creativeMode === 'custom' ? (cfg.creative || '') : (mat && mat.creator) || '';
+      var derivedName = expandNameTpl(cfg.nameTpl || DEFAULT_NAME, {
+        sourceName: sourceName,
+        templateName: tplParts.join('_'),
+        seq: i + 1,
+        creator: creator,
+        size: mat && mat.size,
+        duration: mat && (mat.type === '视频' || mat.type === '音频') ? mat.durationSec : '',
+        now: updated
+      }) || (sourceName || '衍生');
       list.push({
         id: task.id + '-s' + (i + 1),
-        name: base + '_' + pad4(i + 1),
-        combo: parts.join(' + ') || '—',
+        name: derivedName,
+        combo: tplParts.join(' + ') || '—',
         status: st,
         failReason: st === '已失败' ? FAIL_REASON : '',
         updatedAt: st === '待开始' ? (task.createdAt || formatDateTime(updated)) : formatDateTime(updated)
@@ -818,7 +942,7 @@
         extraLayer.items = pickSlice(layerPool, i + 2, 1);
         cfg.layers.push(extraLayer);
       }
-      cfg.audios = i % 4 === 0 ? [] : pickSlice(audioPool, i, 1 + (i % 2));
+      cfg.audios = wrapAudioItems(i % 4 === 0 ? [] : pickSlice(audioPool, i, 1 + (i % 2)));
       cfg.creative = pick(USERS, i);
       cfg.targetFolder = XMP_FOLDERS[i % XMP_FOLDERS.length];
       cfg.countMode = 'fixed';
@@ -836,7 +960,11 @@
         layerB.insertEnd = 8;
         layerB.items = pickSlice(layerPool, 5, 3);
         cfg.layers = [cfg.layers[0], layerB];
-        cfg.audios = pickSlice(audioPool, 0, 5);
+        var audioA = makeAudioGroup(1);
+        audioA.items = pickSlice(audioPool, 0, 3);
+        var audioB = makeAudioGroup(2);
+        audioB.items = pickSlice(audioPool, 3, 2);
+        cfg.audios = [audioA, audioB];
       }
       var total = deriveTotal(cfg);
       var success = 0;
@@ -905,6 +1033,7 @@
     cfg: defaultConfig(),
     clipTab: 'intro',
     layerTab: 0,
+    audioTab: 0,
     sizeGroup: '竖版(9:16)',
     picker: {
       kind: 'materials',
@@ -1758,6 +1887,7 @@
     if (wrap) wrap.classList.toggle('is-hidden', !on);
   });
   bindSwitch('cfgTrimSwitch', 'trim', function () { syncTrimFields(); });
+  bindSwitch('cfgMuteOriginSwitch', 'muteOrigin');
   bindSwitch('cfgDupSwitch', 'filterDup');
 
   function syncInheritExtras() {
@@ -1805,14 +1935,31 @@
     UI.setSegValue('cfgMaterialTypeSeg', image ? '图片' : '视频');
     var trimItem = $('cfgTrimItem');
     if (trimItem) trimItem.classList.toggle('is-hidden', image);
+    var muteItem = $('cfgMuteOriginItem');
+    if (muteItem) muteItem.classList.toggle('is-hidden', image);
     var clipItem = $('cfgClipItem');
     var audioItem = $('cfgAudioItem');
     if (clipItem) clipItem.classList.toggle('is-hidden', image);
     if (audioItem) audioItem.classList.toggle('is-hidden', image);
     var subform = $('layerSubform');
     if (subform) subform.classList.toggle('is-hidden', image);
-    if (image) setTrimSwitch(false);
-    else syncTrimFields();
+    if (image) {
+      setTrimSwitch(false);
+      setMuteOriginSwitch(false);
+    } else {
+      syncTrimFields();
+      if (state.cfg.muteOrigin == null) setMuteOriginSwitch(true);
+      else setMuteOriginSwitch(!!state.cfg.muteOrigin);
+    }
+  }
+
+  function setMuteOriginSwitch(on) {
+    state.cfg.muteOrigin = !!on;
+    var el = $('cfgMuteOriginSwitch');
+    if (el) {
+      el.classList.toggle('is-on', !!on);
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
   }
 
   function setMaterialType(type) {
@@ -1827,11 +1974,15 @@
     state.cfg.materials = [];
     if (type === '图片') {
       state.cfg.clips = { intro: [], outro: [] };
-      state.cfg.audios = [];
+      state.cfg.audios = [makeAudioGroup(1)];
+      state.audioTab = 0;
+    } else if (prev === '图片') {
+      state.cfg.muteOrigin = true;
     }
     syncPickField('materials');
     syncPickField('clips');
     syncPickField('audios');
+    renderAudioTabs();
     syncDeriveCountInput(true);
     syncMaterialTypeUi();
     updateFissionHint();
@@ -2031,10 +2182,31 @@
     return state.cfg.layers[state.layerTab] || state.cfg.layers[0] || null;
   }
 
+  function ensureAudioGroups() {
+    state.cfg.audios = normalizeAudioGroups(state.cfg.audios);
+    if (state.audioTab == null || state.audioTab < 0 || state.audioTab >= state.cfg.audios.length) {
+      state.audioTab = 0;
+    }
+  }
+
+  function currentAudioGroup() {
+    ensureAudioGroups();
+    return state.cfg.audios[state.audioTab] || state.cfg.audios[0] || null;
+  }
+
   function nextLayerNameIndex() {
     var max = 0;
     (state.cfg.layers || []).forEach(function (g) {
       var m = String(g.name || '').match(/^图层(\d+)$/);
+      if (m) max = Math.max(max, Number(m[1]));
+    });
+    return max + 1;
+  }
+
+  function nextAudioNameIndex() {
+    var max = 0;
+    (state.cfg.audios || []).forEach(function (g) {
+      var m = String(g.name || '').match(/^音轨(\d+)$/);
       if (m) max = Math.max(max, Number(m[1]));
     });
     return max + 1;
@@ -2050,6 +2222,10 @@
       var g = currentLayerGroup();
       return (g && g.items) || [];
     }
+    if (kind === 'audios') {
+      var ag = currentAudioGroup();
+      return (ag && ag.items) || [];
+    }
     return state.cfg[PICK_KINDS[kind].key] || [];
   }
 
@@ -2062,6 +2238,9 @@
     } else if (kind === 'layers') {
       var g = currentLayerGroup();
       if (g) g.items = list;
+    } else if (kind === 'audios') {
+      var ag = currentAudioGroup();
+      if (ag) ag.items = list;
     } else {
       state.cfg[PICK_KINDS[kind].key] = list;
     }
@@ -2343,6 +2522,159 @@
       moveLayerGroup(layerDragFrom, insertAt);
       layerDragFrom = null;
       clearLayerDragOver();
+    });
+  }
+
+  function syncAudioOrders() {
+    (state.cfg.audios || []).forEach(function (g, i) {
+      g.order = i + 1;
+    });
+  }
+
+  function renderAudioTabs() {
+    var host = $('audioTabs');
+    if (!host) return;
+    ensureAudioGroups();
+    var tracks = state.cfg.audios;
+    var canDrag = tracks.length > 1;
+    var html = tracks.map(function (g, i) {
+      var active = i === state.audioTab ? ' is-active' : '';
+      var close = tracks.length > 1
+        ? '<button class="cfg-subtabs__close" type="button" draggable="false" data-audio-remove="' + i + '" aria-label="删除' + escapeHtml(g.name) + '">' +
+          '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>'
+        : '';
+      return '<div class="cfg-subtabs__item' + active + '" role="tab" aria-selected="' + (i === state.audioTab ? 'true' : 'false') + '" data-audio-tab="' + i + '"' +
+        (canDrag ? ' draggable="true" title="拖拽调整叠加顺序"' : '') + '>' +
+        '<span>' + escapeHtml(g.name) + '</span>' + close +
+      '</div>';
+    }).join('');
+    if (tracks.length < AUDIO_TAB_MAX) {
+      html += '<button class="cfg-subtabs__add" type="button" data-audio-add="1" aria-label="添加音轨">' +
+        '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2v8M2 6h8"/></svg></button>';
+    }
+    host.innerHTML = html;
+  }
+
+  function addAudioGroup() {
+    ensureAudioGroups();
+    if (state.cfg.audios.length >= AUDIO_TAB_MAX) {
+      UI.showToast('最多添加 5 层', 'warning');
+      return;
+    }
+    var idx = nextAudioNameIndex();
+    state.cfg.audios.push(makeAudioGroup(idx));
+    state.audioTab = state.cfg.audios.length - 1;
+    syncAudioOrders();
+    renderAudioTabs();
+    syncPickField('audios');
+  }
+
+  function removeAudioGroup(idx) {
+    ensureAudioGroups();
+    if (state.cfg.audios.length <= 1) return;
+    state.cfg.audios.splice(idx, 1);
+    if (idx < state.audioTab) state.audioTab -= 1;
+    if (state.audioTab >= state.cfg.audios.length) state.audioTab = state.cfg.audios.length - 1;
+    if (state.audioTab < 0) state.audioTab = 0;
+    syncAudioOrders();
+    renderAudioTabs();
+    syncPickField('audios');
+  }
+
+  var audioTabsEl = $('audioTabs');
+  if (audioTabsEl) {
+    audioTabsEl.addEventListener('click', function (e) {
+      var close = e.target.closest('[data-audio-remove]');
+      if (close) {
+        e.preventDefault();
+        e.stopPropagation();
+        removeAudioGroup(Number(close.getAttribute('data-audio-remove')));
+        return;
+      }
+      if (e.target.closest('[data-audio-add]')) {
+        addAudioGroup();
+        return;
+      }
+      var tab = e.target.closest('[data-audio-tab]');
+      if (!tab || !audioTabsEl.contains(tab)) return;
+      var idx = Number(tab.getAttribute('data-audio-tab'));
+      if (idx === state.audioTab) return;
+      state.audioTab = idx;
+      renderAudioTabs();
+      syncPickField('audios');
+    });
+
+    var audioDragFrom = null;
+
+    function clearAudioDragOver() {
+      audioTabsEl.querySelectorAll('.is-drag-over-before, .is-drag-over-after').forEach(function (el) {
+        el.classList.remove('is-drag-over-before', 'is-drag-over-after');
+      });
+    }
+
+    function moveAudioGroup(from, insertAt) {
+      ensureAudioGroups();
+      var arr = state.cfg.audios;
+      if (from < 0 || from >= arr.length) return;
+      if (insertAt === from || insertAt === from + 1) return;
+      var item = arr.splice(from, 1)[0];
+      if (insertAt > from) insertAt -= 1;
+      insertAt = Math.max(0, Math.min(insertAt, arr.length));
+      arr.splice(insertAt, 0, item);
+      state.audioTab = insertAt;
+      syncAudioOrders();
+      renderAudioTabs();
+      syncPickField('audios');
+    }
+
+    audioTabsEl.addEventListener('dragstart', function (e) {
+      if (e.target.closest('[data-audio-remove], [data-audio-add]')) {
+        e.preventDefault();
+        return;
+      }
+      var tab = e.target.closest('[data-audio-tab]');
+      if (!tab || tab.getAttribute('draggable') !== 'true') {
+        e.preventDefault();
+        return;
+      }
+      audioDragFrom = Number(tab.getAttribute('data-audio-tab'));
+      tab.classList.add('is-dragging');
+      try {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(audioDragFrom));
+      } catch (err) { /* ignore */ }
+    });
+    audioTabsEl.addEventListener('dragend', function () {
+      audioDragFrom = null;
+      audioTabsEl.querySelectorAll('.is-dragging').forEach(function (el) {
+        el.classList.remove('is-dragging');
+      });
+      clearAudioDragOver();
+    });
+    audioTabsEl.addEventListener('dragover', function (e) {
+      if (audioDragFrom == null) return;
+      var tab = e.target.closest('[data-audio-tab]');
+      if (!tab || !audioTabsEl.contains(tab)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      var rect = tab.getBoundingClientRect();
+      var after = e.clientX > rect.left + rect.width / 2;
+      clearAudioDragOver();
+      tab.classList.add(after ? 'is-drag-over-after' : 'is-drag-over-before');
+    });
+    audioTabsEl.addEventListener('drop', function (e) {
+      e.preventDefault();
+      var tab = e.target.closest('[data-audio-tab]');
+      if (!tab || audioDragFrom == null) {
+        clearAudioDragOver();
+        return;
+      }
+      var rect = tab.getBoundingClientRect();
+      var idx = Number(tab.getAttribute('data-audio-tab'));
+      var insertAt = e.clientX > rect.left + rect.width / 2 ? idx + 1 : idx;
+      moveAudioGroup(audioDragFrom, insertAt);
+      audioDragFrom = null;
+      clearAudioDragOver();
     });
   }
 
@@ -2657,6 +2989,18 @@
     }).join('') + '</div>';
   }
 
+  function pickRemarkHtml(it) {
+    var v = it && it.remark ? String(it.remark).trim() : '';
+    if (!v) return '';
+    return '<span class="cell-remark" title="' + escapeHtml(v) + '">' + escapeHtml(v) + '</span>';
+  }
+
+  function pickSizeText(it) {
+    var s = it && it.size ? String(it.size).trim() : '';
+    if (!s || s === '—') return '-';
+    return s;
+  }
+
   function pickXmpHtml(it) {
     if (state.picker.kind !== 'materials') return '—';
     var n = Number(String(it.id).replace(/\D/g, '')) || 0;
@@ -2740,6 +3084,7 @@
       '<td>' + ph + '</td>' +
       '<td>' + ph + '</td>' +
       '<td>' + ph + '</td>' +
+      '<td>' + ph + '</td>' +
       '<td class="col-duration">' + ph + '</td>' +
       '<td>' + ph + '</td>' +
       '<td>' + ph + '</td>' +
@@ -2751,7 +3096,7 @@
     var checked = draft.indexOf(it.id) !== -1 ? ' checked' : '';
     var isAudio = it.type === '音频';
     var playIcon = it.type === '视频' ? PLAY_ICON : '';
-    var durationText = (it.type === '视频' || isAudio) ? String(it.durationSec || 0) : '—';
+    var durationText = (it.type === '视频' || isAudio) ? String(it.durationSec || 0) : '-';
     var nameNoExt = stripExt(it.name);
     var thumbInner = isAudio
       ? AUDIO_ICON
@@ -2771,11 +3116,12 @@
           '</div>' +
         '</div>' +
       '</div></td>' +
+      '<td>' + pickRemarkHtml(it) + '</td>' +
       '<td class="col-tags"><div class="tag-cell">' + pickTagsHtml(it) + '</div></td>' +
       '<td>' + escapeHtml(it.creator || '—') + '</td>' +
       '<td>' + escapeHtml(it.type || '—') + '</td>' +
       '<td>' + escapeHtml(it.format || '—') + '</td>' +
-      '<td>' + escapeHtml(it.size && it.size !== '—' ? it.size : '—') + '</td>' +
+      '<td>' + escapeHtml(pickSizeText(it)) + '</td>' +
       '<td class="col-duration">' + escapeHtml(durationText) + '</td>' +
       '<td>' + escapeHtml(it.source || sourceForFolder(it.folderId) || '—') + '</td>' +
       '<td>' + pickXmpHtml(it) + '</td>' +
@@ -2947,6 +3293,8 @@
     if (durationWrap) durationWrap.classList.toggle('is-hidden', image);
     var nameInput = $('pickNameInput');
     if (nameInput) nameInput.placeholder = isMaterial ? '素材名称' : '模板名称';
+    var nameTh = document.querySelector('#pickListTable th.col-material');
+    if (nameTh) nameTh.textContent = isMaterial ? '素材' : '模板';
     var showSubLabel = $('pickShowSubLabel');
     if (showSubLabel) showSubLabel.textContent = isMaterial ? '显示子文件夹素材' : '显示子文件夹模板';
   }
@@ -3241,15 +3589,22 @@
   function fillConfigForm(cfg) {
     state.cfg = Object.assign(defaultConfig(), cfg || {});
     state.cfg.tags = (state.cfg.tags || []).filter(function (t) { return t !== SYSTEM_TAG; });
-    ['materials', 'audios'].forEach(function (k) {
+    ['materials'].forEach(function (k) {
       if (!Array.isArray(state.cfg[k])) state.cfg[k] = [];
     });
     state.cfg.clips = normalizeClipGroups(state.cfg.clips);
     state.cfg.layers = normalizeLayerGroups(state.cfg.layers);
+    state.cfg.audios = normalizeAudioGroups(state.cfg.audios);
     state.cfg.materialType = state.cfg.materialType === '图片' ? '图片' : '视频';
-    if (state.cfg.materialType === '图片') state.cfg.trim = false;
+    if (state.cfg.materialType === '图片') {
+      state.cfg.trim = false;
+      state.cfg.muteOrigin = false;
+    } else if (state.cfg.muteOrigin == null) {
+      state.cfg.muteOrigin = true;
+    }
     state.clipTab = 'intro';
     state.layerTab = 0;
+    state.audioTab = 0;
     state.sizeGroup = state.cfg.sizeGroup || '竖版(9:16)';
     $('cfgNameInput').value = state.cfg.nameTpl || DEFAULT_NAME;
     var folderNameInput = $('cfgFolderNameInput');
@@ -3261,8 +3616,8 @@
     state.cfg.countMode = 'fixed';
     syncDeriveCountInput(true);
 
-    ['cfgMd5Switch', 'cfgSizeSwitch', 'cfgTrimSwitch', 'cfgDupSwitch'].forEach(function (id) {
-      var key = id === 'cfgMd5Switch' ? 'md5' : id === 'cfgSizeSwitch' ? 'resize' : id === 'cfgTrimSwitch' ? 'trim' : 'filterDup';
+    ['cfgMd5Switch', 'cfgSizeSwitch', 'cfgTrimSwitch', 'cfgMuteOriginSwitch', 'cfgDupSwitch'].forEach(function (id) {
+      var key = id === 'cfgMd5Switch' ? 'md5' : id === 'cfgSizeSwitch' ? 'resize' : id === 'cfgTrimSwitch' ? 'trim' : id === 'cfgMuteOriginSwitch' ? 'muteOrigin' : 'filterDup';
       var el = $(id);
       var on = !!state.cfg[key];
       el.classList.toggle('is-on', on);
@@ -3283,6 +3638,7 @@
     syncClipTabs();
     renderLayerTabs();
     syncLayerFields();
+    renderAudioTabs();
     syncAllPickFields();
     if (cfgLocalFolderApi) cfgLocalFolderApi.syncLabel();
     if (cfgCreativeApi) cfgCreativeApi.syncLabel();
@@ -3343,7 +3699,7 @@
         if (!firstAnchor) firstAnchor = $('cardTemplates');
         ok = false;
       }
-    } else if (!clipCount(state.cfg) && !layerItemCount(state.cfg) && !dimLen(state.cfg.audios)) {
+    } else if (!clipCount(state.cfg) && !layerItemCount(state.cfg) && !audioItemCount(state.cfg)) {
       UI.showToast('请至少选择片段、图层或音频中的一类模板', 'warning');
       if (!firstAnchor) firstAnchor = $('cardTemplates');
       ok = false;
@@ -3388,15 +3744,16 @@
     readLayerFields();
     if (isImageType()) {
       state.cfg.trim = false;
+      state.cfg.muteOrigin = false;
       state.cfg.clips = { intro: [], outro: [] };
-      state.cfg.audios = [];
+      state.cfg.audios = [makeAudioGroup(1)];
     }
     return {
       materialType: isImageType() ? '图片' : '视频',
       materials: snapshotItems(state.cfg.materials),
       clips: snapshotClipGroups(state.cfg.clips),
       layers: snapshotLayerGroups(state.cfg.layers),
-      audios: snapshotItems(state.cfg.audios),
+      audios: snapshotAudioGroups(state.cfg.audios),
       countMode: state.cfg.countMode,
       fixedCount: state.cfg.fixedCount,
       md5: !!state.cfg.md5,
@@ -3404,6 +3761,7 @@
       size: state.cfg.size,
       sizeGroup: state.cfg.sizeGroup,
       trim: !!state.cfg.trim,
+      muteOrigin: isImageType() ? false : state.cfg.muteOrigin !== false,
       trimMode: state.cfg.trimMode,
       trimSec: state.cfg.trimSec,
       trimStart: state.cfg.trimStart,
@@ -3447,6 +3805,7 @@
         parts.push((cfg.trimMode || '剪掉片尾') + (cfg.trimSec || 0) + '秒');
       }
     }
+    if (cfg.materialType !== '图片' && cfg.muteOrigin !== false) parts.push('关闭原声');
     return parts.length ? parts.join('、') : '—';
   }
   function detailComposeOps(cfg) {
@@ -3455,7 +3814,7 @@
     }
     return '片段拼接' + clipCount(cfg) +
       '、图层叠加' + layerItemCount(cfg) +
-      '、音频替换' + dimLen(cfg.audios);
+      '、音频叠加' + audioItemCount(cfg);
   }
   function detailInherit(mode, customText) {
     if (mode !== 'custom') return '原有值';

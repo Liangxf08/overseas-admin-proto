@@ -1745,6 +1745,12 @@
     }).join('') + '</div>';
   }
 
+  function sizeCellText(v) {
+    var s = v == null ? '' : String(v).trim();
+    if (!s || s === '—') return '-';
+    return s;
+  }
+
   function gridMoreBtnHtml(attr, id) {
     return (
       '<button class="grid-card__more" type="button" ' + attr + '="' + escapeHtml(id) + '"' +
@@ -1824,7 +1830,7 @@
       var row = entry.row;
       var checked = state.selected[row.id] ? ' checked' : '';
       var playIcon = row.type === '视频' ? PLAY_ICON : '';
-      var durationText = row.type === '视频' ? String(row.durationSec || 0) : '—';
+      var durationText = row.type === '视频' ? String(row.durationSec || 0) : '-';
       var nameNoExt = stripExt(row.name);
       var oss = row.ossUrl || buildOssUrl(row.name, new Date(row.createdTs || Date.now()), row.id, row.format);
       return (
@@ -1846,7 +1852,7 @@
           '<td>' + escapeHtml(row.creator) + '</td>' +
           '<td>' + escapeHtml(row.type) + '</td>' +
           '<td>' + escapeHtml(row.format) + '</td>' +
-          '<td>' + escapeHtml(row.size) + '</td>' +
+          '<td>' + escapeHtml(sizeCellText(row.size)) + '</td>' +
           '<td class="col-duration">' + escapeHtml(durationText) + '</td>' +
           '<td>' + escapeHtml(rowSource(row)) + '</td>' +
           '<td>' + xmpTag(syncXmpYesNo(row)) + '</td>' +
@@ -2114,9 +2120,9 @@
     if ($('detailFileSize')) $('detailFileSize').textContent = mockFileSizeText(row);
     if ($('detailType')) $('detailType').textContent = row.type || '—';
     if ($('detailFormat')) $('detailFormat').textContent = row.format || '—';
-    if ($('detailDim')) $('detailDim').textContent = row.size || '—';
+    if ($('detailDim')) $('detailDim').textContent = sizeCellText(row.size);
     if ($('detailDuration')) {
-      $('detailDuration').textContent = row.type === '视频' ? (String(row.durationSec || 0) + ' 秒') : '—';
+      $('detailDuration').textContent = row.type === '视频' ? (String(row.durationSec || 0) + ' 秒') : '-';
     }
     var play = $('detailPreviewPlay');
     if (play) play.hidden = row.type !== '视频';

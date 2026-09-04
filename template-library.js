@@ -445,6 +445,7 @@
         if (i % 5 === 0) tags.push('16-30s');
         if (i % 6 === 0) tags.push('副玩法');
         if (!tags.length) tags.push(pick(['竖版', '品牌'], i));
+        var remark = (i % 3 === 0) ? pick(['片头通用', '仅竖版投放', '节日活动', '高消耗配套'], i) : '';
         var sync = pick(syncCycle, i);
         var delivery = [];
         if (i % 2 === 0) delivery.push('tt');
@@ -462,6 +463,7 @@
           category: category,
           tags: tags,
           creator: pick(USERS, i + 2),
+          remark: remark,
           createdAt: formatDateTime(created),
           createdDate: formatDateYMD(created),
           createdTs: created.getTime(),
@@ -511,11 +513,13 @@
       folderId: '',
       creator: CURRENT_USER,
       deriveDup: true,
+      remark: '',
       items: [],
       selected: {},
       uploading: false
     },
     nameEditId: null,
+    quickEditKind: null,
     deleteIds: [],
     batchTagIds: [],
     batchTags: [],
@@ -525,7 +529,8 @@
       format: '',
       folderId: '',
       category: '片段拼接',
-      creator: ''
+      creator: '',
+      remark: ''
     },
     folderModal: {
       mode: 'create', /* create | rename */
@@ -1689,6 +1694,20 @@
     return escapeHtml(row.category || '—');
   }
 
+  function sizeCellText(v) {
+    var s = v == null ? '' : String(v).trim();
+    if (!s || s === '—') return '-';
+    return s;
+  }
+
+  function remarkCellHtml(row) {
+    var v = row && row.remark ? String(row.remark).trim() : '';
+    return '<div class="remark-cell">' +
+      '<span class="cell-remark"' + (v ? ' title="' + escapeHtml(v) + '"' : '') + '>' + escapeHtml(v) + '</span>' +
+      cellEditBtnHtml('remark') +
+    '</div>';
+  }
+
   function gridMoreBtnHtml(attr, id) {
     return (
       '<button class="grid-card__more" type="button" ' + attr + '="' + escapeHtml(id) + '"' +
@@ -1759,6 +1778,7 @@
                 '<span class="folder-cell__name" title="' + escapeHtml(folder.name) + '">' + escapeHtml(folder.name) + '</span>' +
               '</div>' +
             '</div></td>' +
+            '<td class="col-remark"></td>' +
             '<td>' + PH + '</td>' +
             '<td>' + PH + '</td>' +
             '<td>' + PH + '</td>' +
@@ -1773,7 +1793,7 @@
       var row = entry.row;
       var checked = state.selected[row.id] ? ' checked' : '';
       var isAudio = row.type === '音频';
-      var durationText = (row.type === '视频' || isAudio) ? String(row.durationSec || 0) : '—';
+      var durationText = (row.type === '视频' || isAudio) ? String(row.durationSec || 0) : '-';
       var nameNoExt = stripExt(row.name);
       var oss = row.ossUrl || buildOssUrl(row.name, new Date(row.createdTs || Date.now()), row.id, row.format);
       return (
@@ -1793,11 +1813,12 @@
               '</div>' +
             '</div>' +
           '</div></td>' +
+          '<td class="col-remark">' + remarkCellHtml(row) + '</td>' +
           '<td>' + escapeHtml(row.creator) + '</td>' +
           '<td>' + categoryText(row) + '</td>' +
           '<td>' + escapeHtml(row.type) + '</td>' +
           '<td>' + escapeHtml(row.format) + '</td>' +
-          '<td>' + escapeHtml(row.size) + '</td>' +
+          '<td>' + escapeHtml(sizeCellText(row.size)) + '</td>' +
           '<td class="col-duration">' + escapeHtml(durationText) + '</td>' +
           '<td>' + escapeHtml(row.createdAt) + '</td>' +
           '<td class="col-action"><span class="action-links">' +
@@ -2059,17 +2080,19 @@
     state.detail.folderId = row.folderId || SYSTEM_FOLDER.id;
     state.detail.category = row.category || '片段拼接';
     state.detail.creator = row.creator || '';
+    state.detail.remark = row.remark || '';
 
     if ($('detailId')) $('detailId').textContent = row.id;
+    if ($('detailRemark')) $('detailRemark').value = state.detail.remark;
     if ($('detailName')) $('detailName').value = state.detail.nameBase;
     if ($('detailCreatedAt')) $('detailCreatedAt').textContent = row.createdAt || '—';
     if ($('detailSource')) $('detailSource').textContent = row.source || '本地上传';
     if ($('detailFileSize')) $('detailFileSize').textContent = mockFileSizeText(row);
     if ($('detailType')) $('detailType').textContent = row.type || '—';
     if ($('detailFormat')) $('detailFormat').textContent = row.format || '—';
-    if ($('detailDim')) $('detailDim').textContent = row.size || '—';
+    if ($('detailDim')) $('detailDim').textContent = sizeCellText(row.size);
     if ($('detailDuration')) {
-      $('detailDuration').textContent = (row.type === '视频' || row.type === '音频') ? (String(row.durationSec || 0) + ' 秒') : '—';
+      $('detailDuration').textContent = (row.type === '视频' || row.type === '音频') ? (String(row.durationSec || 0) + ' 秒') : '-';
     }
     var previewMedia = $('detailPreviewMedia');
     var play = $('detailPreviewPlay');
@@ -2087,6 +2110,7 @@
 
     if (detailFolderSelect && detailFolderSelect.syncLabel) detailFolderSelect.syncLabel();
     if (detailCreatorSelect && detailCreatorSelect.syncLabel) detailCreatorSelect.syncLabel();
+    if (detailRemarkClear && detailRemarkClear.sync) detailRemarkClear.sync();
     if ($('detailCategory')) $('detailCategory').textContent = state.detail.category || '—';
 
     UI.openDrawer('detailDrawer');
@@ -2126,6 +2150,7 @@
     row.folderId = state.detail.folderId;
     row.category = state.detail.category || '片段拼接';
     row.creator = state.detail.creator;
+    row.remark = (($('detailRemark') && $('detailRemark').value) || '').trim();
     closeDetailDrawer();
     renderAll();
     UI.showToast('保存成功', 'success');
@@ -2914,16 +2939,25 @@
     pop.classList.remove('is-open');
     pop.setAttribute('aria-hidden', 'true');
     state.nameEditId = null;
+    state.quickEditKind = null;
   }
 
-  function startQuickNameEdit(row, btn) {
+  function startQuickNameEdit(row, btn, kind) {
     if (!row || !btn) return;
     hidePreview();
     var pop = $('nameEditPop');
     var input = $('nameEditInput');
     if (!pop || !input) return;
+    var editKind = kind || 'name';
     state.nameEditId = row.id;
-    input.value = stripExt(row.name);
+    state.quickEditKind = editKind;
+    if (editKind === 'remark') {
+      input.value = row.remark || '';
+      input.placeholder = '请输入';
+    } else {
+      input.value = stripExt(row.name);
+      input.placeholder = '请输入模板名称';
+    }
     pop.classList.add('is-open');
     pop.setAttribute('aria-hidden', 'false');
 
@@ -2952,6 +2986,13 @@
       return;
     }
     var v = (input.value || '').trim();
+    if (state.quickEditKind === 'remark') {
+      row.remark = v;
+      closeNameEditPop();
+      renderAll();
+      UI.showToast('修改成功', 'success');
+      return;
+    }
     if (!v) {
       UI.showToast('请输入素材名称', 'error');
       input.focus();
@@ -3005,7 +3046,7 @@
   }
   document.addEventListener('click', function (e) {
     if (!$('nameEditPop') || !$('nameEditPop').classList.contains('is-open')) return;
-    if (e.target.closest('#nameEditPop') || e.target.closest('[data-quick="name"]')) return;
+    if (e.target.closest('#nameEditPop') || e.target.closest('[data-quick="name"], [data-quick="remark"]')) return;
     closeNameEditPop();
   });
 
@@ -3036,7 +3077,8 @@
       var qRow = qTr ? findRow(qTr.getAttribute('data-id')) : null;
       if (!qRow) return;
       var kind = quick.getAttribute('data-quick');
-      if (kind === 'name') startQuickNameEdit(qRow, quick);
+      if (kind === 'name') startQuickNameEdit(qRow, quick, 'name');
+      else if (kind === 'remark') startQuickNameEdit(qRow, quick, 'remark');
       return;
     }
     var thumb = e.target.closest('[data-oss]');
@@ -3442,6 +3484,18 @@
     }
   });
 
+  var upRemarkClear = null;
+  var detailRemarkClear = null;
+  if (UI.bindInputClearable) {
+    upRemarkClear = UI.bindInputClearable({ wrapId: 'upRemarkWrap', clearId: 'upRemarkClear' });
+    detailRemarkClear = UI.bindInputClearable({ wrapId: 'detailRemarkWrap', clearId: 'detailRemarkClear' });
+  }
+  if ($('upRemark')) {
+    $('upRemark').addEventListener('input', function () {
+      state.upload.remark = $('upRemark').value || '';
+    });
+  }
+
   function syncUpCategorySeg() {
     syncCategorySeg('upCategorySeg', state.upload.category);
   }
@@ -3732,11 +3786,14 @@
     state.upload.category = '片段拼接';
     state.upload.folderId = state.folderId || SYSTEM_FOLDER.id;
     state.upload.creator = CURRENT_USER;
+    state.upload.remark = '';
     state.upload.deriveDup = true;
     state.upload.items = [];
     state.upload.selected = {};
     syncUploadBusy();
     if ($('upDeriveDup')) $('upDeriveDup').checked = true;
+    if ($('upRemark')) $('upRemark').value = '';
+    if (upRemarkClear && upRemarkClear.sync) upRemarkClear.sync();
     if ($('upFileInput')) $('upFileInput').value = '';
     ['upFolderItem', 'upCreatorItem'].forEach(function (id) {
       var el = $(id);
@@ -3894,6 +3951,7 @@
         category: category,
         tags: [],
         creator: state.upload.creator,
+        remark: (($('upRemark') && $('upRemark').value) || '').trim(),
         createdAt: formatDateTime(now),
         createdDate: formatDateYMD(now),
         createdTs: now.getTime() + i,

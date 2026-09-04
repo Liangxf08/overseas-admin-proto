@@ -25,6 +25,7 @@
     task: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
     system: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
     shield: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    ad: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l6 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M16.5 8.5a4.5 4.5 0 0 1 0 7"/><path d="M19 6a8 8 0 0 1 0 12"/></svg>',
     menu: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
     user: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
     role: '<svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
@@ -57,10 +58,15 @@
     product: [
       {
         key: 'app',
-        title: 'APP管理',
+        title: '产品管理',
         icon: ICONS.product,
         children: [
-          { key: 'app-apps', label: 'APP应用', href: 'app-apps.html' }
+          { key: 'app-apps', label: 'APP应用', href: 'app-apps.html' },
+          { key: 'mini-games', label: '小游戏', href: 'mini-games.html' },
+          { key: 'product-types', label: '产品类型', href: 'product-types.html' },
+          { key: 'product-series', label: '产品系列', href: 'product-series.html' },
+          { key: 'product-groups', label: '产品组', href: 'product-groups.html' },
+          { key: 'json-files', label: 'JSON文件', href: 'json-files.html' }
         ]
       },
       {
@@ -87,6 +93,17 @@
           { key: 'platform-config', label: '平台配置', href: 'platform-config.html' },
           { key: 'plugin-config', label: '插件配置', href: 'plugin-config.html' },
           { key: 'developer-account', label: '开发者账号', href: 'developer-account.html' }
+        ]
+      },
+      {
+        key: 'ad-strategy-dir',
+        title: '广告策略',
+        icon: ICONS.ad,
+        children: [
+          { key: 'ad-field-config', label: '字段配置', href: 'ad-field-config.html' },
+          { key: 'ad-scene', label: '场景管理', href: 'ad-scene.html' },
+          { key: 'ad-agg-app', label: '聚合应用', href: 'ad-agg-app.html' },
+          { key: 'ad-strategy', label: '广告策略', href: 'ad-strategy.html' }
         ]
       },
       {
@@ -144,11 +161,20 @@
     dashboard: { module: 'board', header: '看板' },
 
     'app-apps': { module: 'product', header: '产品' },
+    'mini-games': { module: 'product', header: '产品' },
+    'product-types': { module: 'product', header: '产品' },
+    'product-series': { module: 'product', header: '产品' },
+    'product-groups': { module: 'product', header: '产品' },
+    'json-files': { module: 'product', header: '产品' },
     'feedback-tickets': { module: 'product', header: '产品' },
     'app-user-query': { module: 'product', header: '产品' },
     'platform-config': { module: 'product', header: '产品' },
     'plugin-config': { module: 'product', header: '产品' },
     'developer-account': { module: 'product', header: '产品' },
+    'ad-field-config': { module: 'product', header: '产品' },
+    'ad-scene': { module: 'product', header: '产品' },
+    'ad-agg-app': { module: 'product', header: '产品' },
+    'ad-strategy': { module: 'product', header: '产品' },
     'tiktok-accounts': { module: 'product', header: '产品' },
     'tiktok-grant': { module: 'product', header: '产品' },
 

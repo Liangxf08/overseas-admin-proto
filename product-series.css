@@ -1,0 +1,22 @@
+/* 产品系列 · 页面特例 */
+
+#filterNameWrap .input {
+  padding-right: 32px;
+}
+
+.data-table .col-id { width: 100px; }
+.data-table .col-name { width: 240px; }
+.data-table .col-remark { width: 240px; }
+.data-table .col-count { width: 112px; }
+.data-table .col-status { width: 100px; }
+.data-table .col-time { width: 180px; }
+.data-table .col-action { width: 120px; }
+
+.link--danger {
+  color: var(--color-danger-6, #F53F3F);
+}
+
+.link--danger:hover {
+  color: var(--color-danger-5, #F76560);
+  opacity: 1;
+}

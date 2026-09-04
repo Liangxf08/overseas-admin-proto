@@ -998,8 +998,27 @@
 }
 
 .lib-content .data-table tbody tr:hover td.col-material.is-freeze,
-.lib-content .data-table tbody tr:hover td.col-tags {
+.lib-content .data-table tbody tr:hover td.col-tags,
+.lib-content .data-table tbody tr:hover td.col-remark {
   overflow: visible;
+}
+
+.remark-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.data-table .cell-remark {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table .cell-remark:not(:empty) {
+  flex: 1;
 }
 
 .tag-cell {

@@ -215,6 +215,12 @@
                     </div>
                   </div>
                 </div>
+                <div class="form-item" id="cfgMuteOriginItem">
+                  <label class="form-item__label">关闭原声</label>
+                  <div class="form-item__control">
+                    <button class="switch is-on" type="button" id="cfgMuteOriginSwitch" aria-label="关闭原声" aria-pressed="true"></button>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -287,8 +293,9 @@
                   </div>
                 </div>
                 <div class="form-item" id="cfgAudioItem">
-                  <label class="form-item__label">音频替换</label>
+                  <label class="form-item__label">音频叠加</label>
                   <div class="form-item__control">
+                    <div class="cfg-subtabs" id="audioTabs" role="tablist" aria-label="音轨"></div>
                     <div class="cfg-card__toolbar">
                       <button class="btn btn--primary cfg-add-btn" type="button" id="addAudioBtn">添加音频</button>
                       <button class="btn btn--default btn--icon" type="button" id="clearAudiosBtn" aria-label="清空已选音频" disabled>
@@ -381,6 +388,7 @@
                     <div class="meta-tags" id="cfgNameTags" data-target="cfgNameInput">
                       <button class="meta-tag" type="button" data-token="_" data-repeat="1">下划线</button>
                       <button class="meta-tag" type="button" data-token="{原素材名}">原素材名</button>
+                      <button class="meta-tag" type="button" data-token="{模板名}">模板名</button>
                       <button class="meta-tag" type="button" data-token="{编号}">编号</button>
                       <button class="meta-tag" type="button" data-token="{序号}">序号</button>
                       <button class="meta-tag" type="button" data-token="{创意人}">创意人</button>
@@ -747,6 +755,7 @@
                     <col class="col-check" data-col-width="48" data-col-fixed="true" />
                     <col data-col-width="88" />
                     <col class="col-material" data-col-width="280" />
+                    <col data-col-width="160" />
                     <col data-col-width="200" />
                     <col data-col-width="104" />
                     <col data-col-width="104" />
@@ -762,6 +771,7 @@
                       <th class="col-check is-freeze"><span class="cell-check"><input type="checkbox" id="pickListCheckAll" aria-label="全选" /></span></th>
                       <th class="col-id is-freeze">ID</th>
                       <th class="col-material is-freeze">素材</th>
+                      <th>备注</th>
                       <th>标签</th>
                       <th>创意人</th>
                       <th>类型</th>

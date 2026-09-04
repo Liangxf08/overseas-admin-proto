@@ -838,6 +838,13 @@
   z-index: 2;
 }
 
+#pickListView .cell-remark {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 #pickListTable col.col-material,
 #pickListTable th.col-material,
 #pickListTable td.col-material {
