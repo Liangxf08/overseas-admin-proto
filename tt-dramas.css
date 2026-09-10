@@ -116,15 +116,3 @@
   overflow: auto;
   min-height: 0;
 }
-
-#importModal > .modal {
-  overflow: hidden;
-  max-height: calc(100vh - 80px);
-}
-
-#importModal .modal__body {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-}

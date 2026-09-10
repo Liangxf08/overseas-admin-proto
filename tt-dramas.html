@@ -61,7 +61,6 @@
           <div class="filter-actions">
             <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
             <button class="btn btn--success" type="button" id="addBtn">添加</button>
-            <button class="btn btn--default" type="button" id="importBtn">导入</button>
           </div>
         </div>
 
@@ -196,53 +195,6 @@
       <div class="modal__footer">
         <button class="btn btn--default" type="button" data-close="editModal">取消</button>
         <button class="btn btn--primary" type="button" id="editSubmit">提交</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-mask" id="importModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
-      <div class="modal__header">
-        <h2 class="modal__title" id="importTitle">导入</h2>
-        <button class="modal__close" type="button" data-close="importModal" aria-label="关闭">
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
-        </button>
-      </div>
-      <div class="modal__body">
-        <div class="import-actions">
-          <button class="btn btn--primary" type="button" id="uploadBtn">上传文件</button>
-          <button class="link" type="button" id="downloadTemplateBtn">下载模板</button>
-          <input type="file" id="importFile" accept=".csv,.xls,text/csv,application/vnd.ms-excel" hidden />
-        </div>
-        <div class="import-alert" id="importAlert" role="alert">
-          <svg class="import-alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/>
-          </svg>
-          <span id="importAlertText"></span>
-        </div>
-        <div class="import-table-shell">
-          <div class="import-table-wrap">
-            <table class="import-table" id="importTable">
-              <thead>
-                <tr>
-                  <th>平台</th>
-                  <th>小程序</th>
-                  <th>剧目名称</th>
-                  <th>中文名称</th>
-                  <th>备注</th>
-                  <th>状态</th>
-                  <th class="col-error">错误信息</th>
-                </tr>
-              </thead>
-              <tbody id="importBody"></tbody>
-            </table>
-          </div>
-          <div class="import-empty" id="importEmpty">暂无数据</div>
-        </div>
-      </div>
-      <div class="modal__footer">
-        <button class="btn btn--default" type="button" data-close="importModal">取消</button>
-        <button class="btn btn--primary" type="button" id="importConfirm">确定</button>
       </div>
     </div>
   </div>
