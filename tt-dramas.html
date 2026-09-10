@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TT短剧 - 海外中台</title>
+  <title>短剧 - 海外中台</title>
   <link rel="icon" href="assets/logo.png" type="image/png" />
   <link rel="stylesheet" href="design-tokens.css" />
   <link rel="stylesheet" href="product-common.css" />
@@ -15,12 +15,6 @@
     <main class="main" data-main>
       <div class="content-card">
         <div class="filter-bar" id="filterBar">
-          <div class="filter-item" id="filterMiniWrap">
-            <input class="input" id="filterMini" type="text" placeholder="小程序名称" autocomplete="off" />
-            <button class="select-clear" type="button" id="filterMiniClear" aria-label="清除">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-            </button>
-          </div>
           <div class="filter-item" id="filterTitleWrap">
             <input class="input" id="filterTitle" type="text" placeholder="剧目名称" autocomplete="off" />
             <button class="select-clear" type="button" id="filterTitleClear" aria-label="清除">
@@ -32,6 +26,37 @@
             <button class="select-clear" type="button" id="filterZhClear" aria-label="清除">
               <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
             </button>
+          </div>
+          <div class="filter-item" id="platformWrap">
+            <button class="select-trigger" type="button" id="platformTrigger">
+              <span class="select-trigger__text" id="platformLabel">平台：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="platformClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="platformPanel">
+              <div class="single-option" data-value="TikTok">TikTok</div>
+            </div>
+          </div>
+          <div class="filter-item" id="filterMiniWrap">
+            <input class="input" id="filterMini" type="text" placeholder="小程序" autocomplete="off" />
+            <button class="select-clear" type="button" id="filterMiniClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+          </div>
+          <div class="filter-item" id="statusWrap">
+            <button class="select-trigger" type="button" id="statusTrigger">
+              <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="statusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="statusPanel">
+              <div class="single-option" data-value="启用">启用</div>
+              <div class="single-option" data-value="禁用">禁用</div>
+            </div>
           </div>
           <div class="filter-actions">
             <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
@@ -45,20 +70,24 @@
             <div class="table-wrap">
               <table class="data-table" id="dataTable">
                 <colgroup>
-                  <col class="col-mini" data-col-width="120" />
                   <col class="col-title" data-col-width="200" />
                   <col class="col-zh" data-col-width="200" />
+                  <col class="col-platform" data-col-width="100" />
+                  <col class="col-mini" data-col-width="120" />
                   <col class="col-remark" data-col-width="160" />
+                  <col class="col-status" data-col-width="100" />
                   <col class="col-time" data-col-width="160" />
                   <col class="col-time" data-col-width="160" />
                   <col class="col-action" data-col-width="80" />
                 </colgroup>
                 <thead>
                   <tr>
-                    <th>小程序名称</th>
                     <th>剧目名称</th>
                     <th>中文名称</th>
+                    <th>平台</th>
+                    <th>小程序</th>
                     <th>备注</th>
+                    <th>状态</th>
                     <th>创建时间</th>
                     <th>更新时间</th>
                     <th class="col-action">操作</th>
@@ -78,14 +107,22 @@
   <div class="modal-mask" id="editModal" aria-hidden="true">
     <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
       <div class="modal__header">
-        <div class="modal__title" id="editModalTitle">添加TT短剧</div>
+        <div class="modal__title" id="editModalTitle">添加短剧</div>
         <button class="modal__close" type="button" data-close="editModal" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
       <div class="modal__body">
+        <div class="form-item">
+          <label class="form-item__label">平台</label>
+          <div class="form-item__control">
+            <div class="seg" id="platformSeg" role="group" aria-label="平台">
+              <button class="seg__item is-active" type="button" data-value="TikTok">TikTok</button>
+            </div>
+          </div>
+        </div>
         <div class="form-item" id="editMiniItem">
-          <label class="form-item__label is-required">小程序名称</label>
+          <label class="form-item__label is-required">小程序</label>
           <div class="form-item__control">
             <div class="input-clearable" id="editMiniWrap">
               <input class="input" id="editMini" type="text" placeholder="请输入" autocomplete="off" />
@@ -93,7 +130,7 @@
                 <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
               </button>
             </div>
-            <div class="form-item__error">请输入小程序名称</div>
+            <div class="form-item__error">请输入小程序</div>
           </div>
         </div>
         <div class="form-item" id="editTitleItem">
@@ -131,6 +168,30 @@
             </div>
           </div>
         </div>
+        <div class="form-item">
+          <label class="form-item__label">图标</label>
+          <div class="form-item__control">
+            <div class="upload-box" id="iconUploadBox" role="button" tabindex="0" aria-label="上传剧目图标">
+              <svg class="upload-box__plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              <span class="upload-box__text">上传图片</span>
+              <img class="upload-box__img" id="iconPreview" alt="" />
+              <button class="upload-box__remove" type="button" id="iconRemoveBtn" aria-label="删除图标">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+              </button>
+            </div>
+            <input type="file" id="iconFileInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden />
+            <div class="upload-tip">请上传小于2M的 jpg 或 png 图片，建议尺寸：512*512</div>
+          </div>
+        </div>
+        <div class="form-item">
+          <label class="form-item__label">状态</label>
+          <div class="form-item__control">
+            <div class="seg" id="statusSeg" role="group" aria-label="状态">
+              <button class="seg__item is-active" type="button" data-value="启用">启用</button>
+              <button class="seg__item" type="button" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal__footer">
         <button class="btn btn--default" type="button" data-close="editModal">取消</button>
@@ -164,10 +225,12 @@
             <table class="import-table" id="importTable">
               <thead>
                 <tr>
-                  <th>小程序名称</th>
+                  <th>平台</th>
+                  <th>小程序</th>
                   <th>剧目名称</th>
                   <th>中文名称</th>
                   <th>备注</th>
+                  <th>状态</th>
                   <th class="col-error">错误信息</th>
                 </tr>
               </thead>

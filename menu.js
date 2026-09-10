@@ -63,7 +63,7 @@
         children: [
           { key: 'app-apps', label: 'APP应用', href: 'app-apps.html' },
           { key: 'mini-games', label: '小游戏', href: 'mini-games.html' },
-          { key: 'tt-dramas', label: 'TT短剧', href: 'tt-dramas.html' },
+          { key: 'tt-dramas', label: '短剧', href: 'tt-dramas.html' },
           { key: 'product-types', label: '产品类型', href: 'product-types.html' },
           { key: 'product-series', label: '产品系列', href: 'product-series.html' },
           { key: 'product-groups', label: '产品组', href: 'product-groups.html' },

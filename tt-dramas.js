@@ -1,4 +1,4 @@
-/* TT短剧 */
+/* 短剧 */
 (function () {
   'use strict';
 
@@ -71,20 +71,24 @@
       miniName: item[0],
       title: item[1],
       zhName: item[2],
+      platform: 'TikTok',
       remark: '',
+      status: i % 9 === 3 ? '禁用' : '启用',
+      icon: '',
       createdAt: formatDateTime(created),
       updatedAt: formatDateTime(updated)
     };
   });
 
   var state = {
-    draft: { miniName: '', title: '', zhName: '' },
+    draft: { miniName: '', title: '', zhName: '', platform: '', status: '' },
     applied: null,
     page: 1,
     pageSize: 20,
     paginationBound: false,
     editMode: 'add',
     editId: null,
+    formIcon: '',
     importRows: []
   };
 
@@ -94,7 +98,9 @@
     state.applied = {
       miniName: (state.draft.miniName || '').trim(),
       title: (state.draft.title || '').trim(),
-      zhName: (state.draft.zhName || '').trim()
+      zhName: (state.draft.zhName || '').trim(),
+      platform: state.draft.platform || '',
+      status: state.draft.status || ''
     };
     state.page = 1;
   }
@@ -107,6 +113,8 @@
         if (f.miniName && String(row.miniName).toLowerCase().indexOf(f.miniName.toLowerCase()) === -1) return false;
         if (f.title && String(row.title).toLowerCase().indexOf(f.title.toLowerCase()) === -1) return false;
         if (f.zhName && String(row.zhName).toLowerCase().indexOf(f.zhName.toLowerCase()) === -1) return false;
+        if (f.platform && row.platform !== f.platform) return false;
+        if (f.status && row.status !== f.status) return false;
         return true;
       });
     return list.sort(function (a, b) {
@@ -143,10 +151,30 @@
     onClear: function () { state.draft.zhName = ''; }
   });
 
+  UI.bindSingleSelect({
+    wrapId: 'platformWrap',
+    triggerId: 'platformTrigger',
+    panelId: 'platformPanel',
+    labelId: 'platformLabel',
+    clearId: 'platformClear',
+    prefix: '平台：',
+    getValue: function () { return state.draft.platform; },
+    onChange: function (v) { state.draft.platform = v || ''; }
+  });
+  UI.bindSingleSelect({
+    wrapId: 'statusWrap',
+    triggerId: 'statusTrigger',
+    panelId: 'statusPanel',
+    labelId: 'statusLabel',
+    clearId: 'statusClear',
+    prefix: '状态：',
+    getValue: function () { return state.draft.status; },
+    onChange: function (v) { state.draft.status = v || ''; }
+  });
+
   ['editMini', 'editTitle', 'editZh', 'editRemark'].forEach(function (id) {
-    var wrapId = id + 'Wrap';
     clearApis[id] = UI.bindInputClearable({
-      wrapId: wrapId,
+      wrapId: id + 'Wrap',
       onClear: function () {
         if (id === 'editMini') clearItemError('editMiniItem');
         if (id === 'editTitle') clearItemError('editTitleItem');
@@ -154,6 +182,9 @@
       }
     });
   });
+
+  UI.bindSeg('platformSeg');
+  UI.bindSeg('statusSeg');
 
   function on(id, event, fn) {
     var el = $(id);
@@ -191,6 +222,15 @@
     if (err && msg) err.textContent = msg;
   }
 
+  function titleCell(row) {
+    return '<span class="product-cell">' +
+      (row.icon
+        ? '<img class="product-cell__icon product-cell__icon--img" src="' + escapeHtml(row.icon) + '" alt="" />'
+        : '<span class="product-cell__icon" aria-hidden="true"></span>') +
+      '<span class="product-cell__name">' + escapeHtml(row.title) + '</span>' +
+    '</span>';
+  }
+
   function renderTable() {
     if (!state.applied) applyFilters();
     var rows = getFilteredRows();
@@ -209,10 +249,12 @@
       if (empty) empty.hidden = true;
       body.innerHTML = pageRows.map(function (row) {
         return '<tr data-id="' + escapeHtml(row.id) + '">' +
-          '<td title="' + escapeHtml(row.miniName) + '">' + escapeHtml(row.miniName) + '</td>' +
-          '<td title="' + escapeHtml(row.title) + '">' + escapeHtml(row.title) + '</td>' +
+          '<td title="' + escapeHtml(row.title) + '">' + titleCell(row) + '</td>' +
           '<td title="' + escapeHtml(row.zhName) + '">' + escapeHtml(row.zhName) + '</td>' +
+          '<td>' + escapeHtml(row.platform || 'TikTok') + '</td>' +
+          '<td title="' + escapeHtml(row.miniName) + '">' + escapeHtml(row.miniName) + '</td>' +
           '<td title="' + escapeHtml(row.remark || '') + '">' + escapeHtml(row.remark || '') + '</td>' +
+          '<td>' + UI.statusTag(row.status || '启用') + '</td>' +
           '<td title="' + escapeHtml(formatDisplayTime(row.createdAt)) + '">' + escapeHtml(formatDisplayTime(row.createdAt)) + '</td>' +
           '<td title="' + escapeHtml(formatDisplayTime(row.updatedAt)) + '">' + escapeHtml(formatDisplayTime(row.updatedAt)) + '</td>' +
           '<td class="col-action"><span class="action-links">' +
@@ -255,16 +297,39 @@
     });
   }
 
+  function syncIconPreview() {
+    var box = $('iconUploadBox');
+    var preview = $('iconPreview');
+    if (!box || !preview) return;
+    if (state.formIcon) {
+      box.classList.add('has-file');
+      preview.src = state.formIcon;
+    } else {
+      box.classList.remove('has-file');
+      preview.removeAttribute('src');
+    }
+  }
+
+  function fillForm(row) {
+    UI.setSegValue('platformSeg', (row && row.platform) || 'TikTok');
+    UI.setSegValue('statusSeg', (row && row.status) || '启用');
+    $('editMini').value = row ? (row.miniName || '') : '';
+    $('editTitle').value = row ? (row.title || '') : '';
+    $('editZh').value = row ? (row.zhName || '') : '';
+    $('editRemark').value = row ? (row.remark || '') : '';
+    state.formIcon = row ? (row.icon || '') : '';
+    var fileInput = $('iconFileInput');
+    if (fileInput) fileInput.value = '';
+    syncIconPreview();
+    syncClearables();
+  }
+
   function openAdd() {
     state.editMode = 'add';
     state.editId = null;
     clearEditErrors();
-    $('editModalTitle').textContent = '添加TT短剧';
-    $('editMini').value = '';
-    $('editTitle').value = '';
-    $('editZh').value = '';
-    $('editRemark').value = '';
-    syncClearables();
+    $('editModalTitle').textContent = '添加短剧';
+    fillForm(null);
     UI.openModal('editModal');
   }
 
@@ -272,12 +337,8 @@
     state.editMode = 'edit';
     state.editId = row.id;
     clearEditErrors();
-    $('editModalTitle').textContent = '编辑TT短剧';
-    $('editMini').value = row.miniName || '';
-    $('editTitle').value = row.title || '';
-    $('editZh').value = row.zhName || '';
-    $('editRemark').value = row.remark || '';
-    syncClearables();
+    $('editModalTitle').textContent = '编辑短剧';
+    fillForm(row);
     UI.openModal('editModal');
   }
 
@@ -287,10 +348,12 @@
     var title = ($('editTitle').value || '').trim();
     var zhName = ($('editZh').value || '').trim();
     var remark = ($('editRemark').value || '').trim();
+    var platform = UI.getSegValue('platformSeg') || 'TikTok';
+    var status = UI.getSegValue('statusSeg') || '启用';
     var hasError = false;
 
     if (!miniName) {
-      setItemError('editMiniItem', '请输入小程序名称');
+      setItemError('editMiniItem', '请输入小程序');
       hasError = true;
     }
     if (!title) {
@@ -319,7 +382,10 @@
         miniName: miniName,
         title: title,
         zhName: zhName,
+        platform: platform,
         remark: remark,
+        status: status,
+        icon: state.formIcon || '',
         createdAt: now,
         updatedAt: now
       });
@@ -330,7 +396,10 @@
       row.miniName = miniName;
       row.title = title;
       row.zhName = zhName;
+      row.platform = platform;
       row.remark = remark;
+      row.status = status;
+      row.icon = state.formIcon || '';
       row.updatedAt = now;
       UI.showToast('提交成功', 'success');
     }
@@ -338,6 +407,55 @@
     applyFilters();
     renderTable();
   }
+
+  (function bindIconUpload() {
+    var box = $('iconUploadBox');
+    var input = $('iconFileInput');
+    var removeBtn = $('iconRemoveBtn');
+    if (!box || !input) return;
+
+    function pick() { input.click(); }
+
+    box.addEventListener('click', function (e) {
+      if (e.target.closest('#iconRemoveBtn')) return;
+      pick();
+    });
+    box.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        pick();
+      }
+    });
+    if (removeBtn) {
+      removeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        state.formIcon = '';
+        input.value = '';
+        syncIconPreview();
+      });
+    }
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      if (!/\.jpe?g$|\.png$/i.test(file.name) && file.type !== 'image/jpeg' && file.type !== 'image/png') {
+        UI.showToast('请上传 jpg 或 png 图片', 'error');
+        input.value = '';
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        UI.showToast('图片需小于 2M', 'error');
+        input.value = '';
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        state.formIcon = String(e.target.result || '');
+        syncIconPreview();
+      };
+      reader.readAsDataURL(file);
+    });
+  })();
 
   function showImportAlert(text) {
     $('importAlertText').textContent = text;
@@ -360,10 +478,12 @@
     empty.hidden = true;
     body.innerHTML = state.importRows.map(function (row) {
       return '<tr>' +
+        '<td>' + escapeHtml(row.platform || '-') + '</td>' +
         '<td title="' + escapeHtml(row.miniName) + '">' + escapeHtml(row.miniName || '-') + '</td>' +
         '<td title="' + escapeHtml(row.title) + '">' + escapeHtml(row.title || '-') + '</td>' +
         '<td title="' + escapeHtml(row.zhName) + '">' + escapeHtml(row.zhName || '-') + '</td>' +
         '<td title="' + escapeHtml(row.remark || '') + '">' + escapeHtml(row.remark || '') + '</td>' +
+        '<td>' + escapeHtml(row.status || '-') + '</td>' +
         '<td class="col-error">' + escapeHtml(row.error || '') + '</td>' +
       '</tr>';
     }).join('');
@@ -378,9 +498,9 @@
   }
 
   function downloadTemplate() {
-    var colW = '210';
-    var headers = ['小程序名称', '剧目名称', '中文名称', '备注'];
-    var sample = ['Vivid Minis', 'Three Beauties One Savior', '三美唯一的救世主', ''];
+    var colW = '180';
+    var headers = ['平台', '小程序', '剧目名称', '中文名称', '备注', '状态'];
+    var sample = ['TikTok', 'Vivid Minis', 'Three Beauties One Savior', '三美唯一的救世主', '', '启用'];
     var emptyRows = '';
     var i;
     for (i = 0; i < 20; i++) {
@@ -426,7 +546,7 @@
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'TT短剧导入模板.xls';
+    a.download = '短剧导入模板.xls';
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -463,13 +583,15 @@
   }
 
   function mapHeaderIndex(headers) {
-    var map = { miniName: -1, title: -1, zhName: -1, remark: -1 };
+    var map = { platform: -1, miniName: -1, title: -1, zhName: -1, remark: -1, status: -1 };
     headers.forEach(function (h, i) {
       var key = normalizeHeader(h);
-      if (key === '小程序名称' || key === 'mininame' || key === 'miniprogram') map.miniName = i;
+      if (key === '平台' || key === 'platform') map.platform = i;
+      else if (key === '小程序' || key === '小程序名称' || key === 'mininame' || key === 'miniprogram') map.miniName = i;
       else if (key === '剧目名称' || key === 'title' || key === 'name') map.title = i;
       else if (key === '中文名称' || key === 'zhname' || key === 'cnname') map.zhName = i;
       else if (key === '备注' || key === 'remark') map.remark = i;
+      else if (key === '状态' || key === 'status') map.status = i;
     });
     return map;
   }
@@ -479,15 +601,24 @@
     return String(cols[index] == null ? '' : cols[index]).trim();
   }
 
+  function normalizeStatus(v) {
+    if (!v) return '启用';
+    if (v === '启用' || v === '禁用') return v;
+    return '';
+  }
+
   function validateImportRow(row, titleSet) {
     var errors = [];
-    if (!row.miniName) errors.push('小程序名称不能为空');
+    if (!row.platform) errors.push('平台不能为空');
+    else if (row.platform !== 'TikTok') errors.push('平台仅支持：TikTok');
+    if (!row.miniName) errors.push('小程序不能为空');
     if (!row.title) errors.push('剧目名称不能为空');
     else if (titleSet.has(row.title.toLowerCase())) errors.push('剧目名称在文件中重复');
     else if (ALL_ROWS.some(function (r) { return String(r.title).toLowerCase() === row.title.toLowerCase(); })) {
       errors.push('剧目名称已存在');
     }
     if (!row.zhName) errors.push('中文名称不能为空');
+    if (!row.status) errors.push('状态仅支持：启用、禁用');
     if (row.title) titleSet.add(row.title.toLowerCase());
     return errors.join('；');
   }
@@ -495,21 +626,24 @@
   function buildImportRows(headers, dataLines, splitLine) {
     var col = mapHeaderIndex(headers);
     if (col.miniName < 0 || col.title < 0 || col.zhName < 0) {
-      return { error: '表头不正确，需包含：小程序名称、剧目名称、中文名称' };
+      return { error: '表头不正确，需包含：小程序、剧目名称、中文名称' };
     }
     var titleSet = new Set();
     var rows = [];
     var i;
     for (i = 0; i < dataLines.length; i++) {
       var cols = splitLine(dataLines[i]);
+      var statusRaw = cell(cols, col.status);
       var row = {
+        platform: cell(cols, col.platform) || 'TikTok',
         miniName: cell(cols, col.miniName),
         title: cell(cols, col.title),
         zhName: cell(cols, col.zhName),
         remark: cell(cols, col.remark),
+        status: normalizeStatus(statusRaw),
         error: ''
       };
-      if (!row.miniName && !row.title && !row.zhName && !row.remark) continue;
+      if (!row.miniName && !row.title && !row.zhName && !row.remark && !statusRaw && !cell(cols, col.platform)) continue;
       row.error = validateImportRow(row, titleSet);
       rows.push(row);
     }
@@ -610,7 +744,10 @@
         miniName: item.miniName,
         title: item.title,
         zhName: item.zhName,
+        platform: item.platform || 'TikTok',
         remark: item.remark,
+        status: item.status || '启用',
+        icon: '',
         createdAt: now,
         updatedAt: now
       });

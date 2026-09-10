@@ -1,4 +1,4 @@
-/* TT短剧 · 页面特例 */
+/* 短剧 · 页面特例 */
 
 #filterMiniWrap .input,
 #filterTitleWrap .input,
@@ -6,12 +6,116 @@
   padding-right: 32px;
 }
 
-.data-table .col-mini { width: 120px; }
+.product-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+.product-cell__icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--color-fill-4, #C9CDD4);
+}
+.product-cell__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-cell__icon--img {
+  object-fit: cover;
+  background: transparent;
+}
+
+.upload-box {
+  width: 96px;
+  height: 96px;
+  border: 1px dashed var(--color-border-2, #E5E6EB);
+  border-radius: var(--border-radius-medium, 4px);
+  background: var(--color-fill-1, #F7F8FA);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--color-text-3, #86909C);
+  font-size: 12px;
+  line-height: 20px;
+  overflow: hidden;
+  position: relative;
+}
+.upload-box:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.upload-box.has-file {
+  border-style: solid;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+.upload-box__plus { width: 20px; height: 20px; flex-shrink: 0; }
+.upload-box__text { line-height: 20px; }
+.upload-box__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  background: transparent;
+}
+.upload-box.has-file .upload-box__plus,
+.upload-box.has-file .upload-box__text { display: none; }
+.upload-box.has-file .upload-box__img { display: block; }
+.upload-box__remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.upload-box.has-file:hover .upload-box__remove { display: inline-flex; }
+.upload-box__remove svg { width: 10px; height: 10px; }
+.upload-tip {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--color-text-3, #86909C);
+}
+
 .data-table .col-title { width: 200px; }
 .data-table .col-zh { width: 200px; }
+.data-table .col-platform { width: 100px; }
+.data-table .col-mini { width: 120px; }
 .data-table .col-remark { width: 160px; }
+.data-table .col-status { width: 100px; }
 .data-table .col-time { width: 160px; }
 .data-table .col-action { width: 80px; }
+
+#platformSeg .seg__item:only-child {
+  margin-left: 0;
+  border-radius: 4px;
+}
+
+#editModal > .modal {
+  overflow: hidden;
+  max-height: calc(100vh - 80px);
+}
+#editModal .modal__body {
+  overflow: auto;
+  min-height: 0;
+}
 
 #importModal > .modal {
   overflow: hidden;
