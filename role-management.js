@@ -42,6 +42,7 @@
           children: [
             { id: 'app-apps', name: 'APP应用' },
             { id: 'mini-game', name: '小游戏' },
+            { id: 'tt-drama', name: 'TT短剧' },
             { id: 'app-type', name: '产品类型' },
             { id: 'mini-series', name: '产品系列' },
             { id: 'product-group', name: '产品组' },

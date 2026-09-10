@@ -10,9 +10,9 @@
 
 .col-name,
 .col-id,
-.col-product,
-.col-appid { width: 18%; }
+.col-product { width: 18%; }
 
+.col-type { width: 10%; }
 .col-optimizer { width: 9%; }
 .col-status { width: 7%; }
 
@@ -33,4 +33,11 @@ th.col-action {
 
 .data-table tbody tr:hover td.col-action {
   background: var(--color-gray-hover, #F5F7FA);
+}
+
+#editProductWrap .select-trigger__text,
+#batchProductWrap .select-trigger__text,
+#editProductPanel .single-option,
+#batchProductPanel .single-option {
+  gap: 8px;
 }

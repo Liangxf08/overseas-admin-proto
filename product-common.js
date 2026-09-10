@@ -1025,7 +1025,7 @@
   /**
    * 日期时间选择器（定版）
    * 左月历 + 右 HH:mm:ss；面板挂 body + fixed 定位（适配弹窗 transform）
-   * 值格式：YYYY-MM-DD HH:mm:ss
+   * 值格式：YYYY-MM-DD HH:mm:ss；cfg.dateOnly 时仅日期 YYYY-MM-DD（无时间列）
    *
    * DOM：.datetime-trigger-wrap > .select-trigger + .select-clear + .datetime-panel
    *      .datetime-panel__main > .date-cal + .time-panel(.time-panel__display + .time-col[data-unit=h|m|s])
@@ -1043,7 +1043,8 @@
     var clearBtn = cfg.clearId ? $(cfg.clearId) : null;
     if (!wrap || !trigger || !panel || !label || !cal) return null;
 
-    var placeholder = cfg.placeholder != null ? cfg.placeholder : '请选择日期时间';
+    var dateOnly = !!cfg.dateOnly;
+    var placeholder = cfg.placeholder != null ? cfg.placeholder : (dateOnly ? '请选择日期' : '请选择日期时间');
     var value = '';
     var timeParts = { h: 0, m: 0, s: 0 };
     var viewMonth = null;
@@ -1069,6 +1070,7 @@
 
     function composeValue(dateObj) {
       if (!dateObj) return '';
+      if (dateOnly) return formatDateYMD(dateObj);
       return formatDateYMD(dateObj) + ' ' + formatHMS(timeParts.h, timeParts.m, timeParts.s);
     }
 
@@ -1096,6 +1098,7 @@
     function setValue(str, silent) {
       value = str ? String(str) : '';
       var dt = parseDateTime(value);
+      if (dateOnly && dt) value = formatDateYMD(dt);
       if (dt) {
         timeParts = { h: dt.getHours(), m: dt.getMinutes(), s: dt.getSeconds() };
         viewMonth = new Date(dt.getFullYear(), dt.getMonth(), 1);
@@ -1221,7 +1224,7 @@
       trigger.classList.add('is-open');
       wrap.classList.add('is-panel-open');
       renderCalendar();
-      renderTimeCols();
+      if (!dateOnly) renderTimeCols();
       positionPanel();
       requestAnimationFrame(positionPanel);
     }
@@ -1267,6 +1270,7 @@
       var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
       setFromDate(d);
       renderCalendar();
+      if (dateOnly) closePanel();
     });
 
     panel.querySelectorAll('.time-col').forEach(function (col) {

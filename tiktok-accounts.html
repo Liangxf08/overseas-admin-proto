@@ -18,6 +18,19 @@
             <div class="filter-item">
               <input class="input" id="accountKeyword" type="text" placeholder="账户名称/ID" autocomplete="off" />
             </div>
+            <div class="filter-item" id="assetTypeWrap">
+              <button class="select-trigger" type="button" id="assetTypeTrigger">
+                <span class="select-trigger__text" id="assetTypeLabel">资产类型：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="assetTypeClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="assetTypePanel">
+                <div class="single-option" data-value="小游戏">小游戏</div>
+                <div class="single-option" data-value="短剧">短剧</div>
+              </div>
+            </div>
             <div class="filter-item" id="optimizerWrap">
               <button class="select-trigger" type="button" id="optimizerTrigger">
                 <span class="select-trigger__text" id="optimizerLabel">优化师：<span class="muted">请选择</span></span>
@@ -80,8 +93,8 @@
                   <col class="col-check" />
                   <col class="col-name" />
                   <col class="col-id" />
+                  <col class="col-type" />
                   <col class="col-product" />
-                  <col class="col-appid" />
                   <col class="col-optimizer" />
                   <col class="col-status" />
                   <col class="col-action" />
@@ -91,8 +104,8 @@
                     <th class="col-check"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
                     <th class="col-name">账户名称</th>
                     <th class="col-id">账户ID</th>
+                    <th class="col-type">资产类型</th>
                     <th class="col-product">产品名称</th>
-                    <th class="col-appid">APPID</th>
                     <th class="col-optimizer">优化师</th>
                     <th class="col-status">状态</th>
                     <th class="col-action">操作</th>
@@ -138,9 +151,10 @@
             <table class="import-table" id="importTable">
               <thead>
                 <tr>
-                  <th style="width:28%">账户ID</th>
-                  <th style="width:28%">产品名称</th>
-                  <th style="width:16%">优化师</th>
+                  <th style="width:22%">账户ID</th>
+                  <th style="width:14%">资产类型</th>
+                  <th style="width:24%">产品名称</th>
+                  <th style="width:14%">优化师</th>
                   <th class="col-error">错误信息</th>
                 </tr>
               </thead>
@@ -180,21 +194,11 @@
           </div>
         </div>
         <div class="form-item">
-          <div class="form-item__label">优化师</div>
-          <div class="form-item__control" id="editOptimizerWrap">
-            <button class="select-trigger" type="button" id="editOptimizerTrigger">
-              <span class="select-trigger__text" id="editOptimizerLabel"><span class="muted">请选择</span></span>
-              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-            </button>
-            <button type="button" class="select-clear" id="editOptimizerClear" aria-label="清除" tabindex="-1">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
-            </button>
-            <div class="single-panel single-panel--search" id="editOptimizerPanel">
-              <div class="single-panel__search">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
-                <input type="text" id="editOptimizerSearch" placeholder="搜索优化师" autocomplete="off" />
-              </div>
-              <div class="single-panel__list" id="editOptimizerList"></div>
+          <div class="form-item__label">资产类型</div>
+          <div class="form-item__control">
+            <div class="seg" id="editAssetTypeSeg" role="group" aria-label="资产类型">
+              <button type="button" class="seg__item is-active" data-value="小游戏">小游戏</button>
+              <button type="button" class="seg__item" data-value="短剧">短剧</button>
             </div>
           </div>
         </div>
@@ -214,6 +218,25 @@
                 <input type="text" id="editProductSearch" placeholder="搜索产品" autocomplete="off" />
               </div>
               <div class="single-panel__list" id="editProductList"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">优化师</div>
+          <div class="form-item__control" id="editOptimizerWrap">
+            <button class="select-trigger" type="button" id="editOptimizerTrigger">
+              <span class="select-trigger__text" id="editOptimizerLabel"><span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button type="button" class="select-clear" id="editOptimizerClear" aria-label="清除" tabindex="-1">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel single-panel--search" id="editOptimizerPanel">
+              <div class="single-panel__search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+                <input type="text" id="editOptimizerSearch" placeholder="搜索优化师" autocomplete="off" />
+              </div>
+              <div class="single-panel__list" id="editOptimizerList"></div>
             </div>
           </div>
         </div>
@@ -244,6 +267,15 @@
         </button>
       </div>
       <div class="modal__body">
+        <div class="form-item">
+          <div class="form-item__label">资产类型</div>
+          <div class="form-item__control">
+            <div class="seg" id="batchAssetTypeSeg" role="group" aria-label="资产类型">
+              <button type="button" class="seg__item is-active" data-value="小游戏">小游戏</button>
+              <button type="button" class="seg__item" data-value="短剧">短剧</button>
+            </div>
+          </div>
+        </div>
         <div class="form-item">
           <div class="form-item__label">产品名称</div>
           <div class="form-item__control" id="batchProductWrap">
@@ -350,13 +382,29 @@
       let optimizerMulti = null;
       let batchMenuApi = null;
 
-      const PRODUCTS = [
-        'Color Water Sort Master',
-        'Tile Match Journey',
-        'Wonder Puzzle',
-        'Star Merge',
-        'Ocean Match',
-        'Pixel Farm'
+      const GAME_PRODUCTS = [
+        'Fun Overload', 'Mind Block', 'Brainy Find', 'Life Story', 'Brain Mix', 'Flow Mix',
+        'Life Choice', 'Life Path', 'Brainy Breakout', 'Mind Escape', 'Flow Master', 'Brainy Win',
+        'Path Flow', 'Wukong Out', 'Help Wukong', 'Draw Rescue Wukong', 'Save Wukong', 'Tidy Hotpot',
+        'Food Sort', 'Hotpot Master', 'Hyper Desh', 'Sort Coin', 'Sort Coin Master', 'Piggy Coin Sort',
+        'Sand Ball Drop', 'Ball Sand', 'Ball Run', 'Brain Queen', 'Brain Power Queen', 'Eye Track',
+        '言葉を探す', '文字の宝探し！', '文字の奥に小文字', '文字の中に文字!', 'Count Sprint', 'Digit Merge',
+        'Diamond Match', 'Diamond ASMR', 'Gems Color Puzzle', 'Brain Power King', 'Word Dig',
+        'Cute Gun Bump', 'Word Player', 'Card Group', 'Dual Gun Clash', 'Card Assort', 'Tile Stack!',
+        'Sort Stack', 'Mad Moto', 'Color Tetris'
+      ];
+      const DRAMA_PRODUCTS = [
+        'Three Beauties One Savior', 'Tackled Into You', 'Dissecting the Don: Deal with the Devil',
+        'The Lone Lamb Rules the Wolves', 'Retired Hero：Delivery of Justice', 'All In：The Don\'s Collateral Bride',
+        'Called Her Fat. Made Them Kneel', 'Dragonless：Born to Reign', 'No Mercy：The Husband\'s Reckoning',
+        'They Mocked the Wrong Mother', 'Rejected Luna, Destined Queen: Season 1',
+        'Rejected Luna, Destined Queen：Final Season', 'Neon Hidden Cards', 'His Hidden Devotion',
+        'Above the Ashes', 'Day Four Calamity’s Nemesis', 'Customer Service Marvin', 'The Mountain Wolf Cub',
+        'Heist for My Daughter Season 1', 'Heist for My Daughter：Final Season', 'Never Yours, Mr. Weston',
+        'When the Golden Boy Breaks', 'The King of Stray Dogs', 'Tomorrows Headlines', 'CLEANER',
+        'Little Genius, Big Trouble', 'Ava\'s Monster Notebook', 'Spin Cycle Queens', 'The Substitute Maid',
+        'The Ironwife From Dirt Farm to Empire', 'The Maid Heiress', 'The curse of the red moon',
+        'The Playboy\'s Decoy', 'The Billionaire Beneath the Hoodie', 'A Rose for the Exiled King'
       ];
       const PLATFORM_ICONS = {
         TikTok: 'assets/TikTok.png',
@@ -376,16 +424,29 @@
       let pageSize = 50;
       let selectedIds = new Set();
       let selectedOptimizers = [];
+      let filterAssetType = '';
       let filterStatus = '';
       let importRows = [];
       let editingId = null;
       let editOptimizer = '';
       let editProduct = '';
+      let editAssetType = '小游戏';
       let editStatus = '启用';
       let batchProduct = '';
+      let batchAssetType = '小游戏';
       let batchOptimizer = '';
       let batchStatus = '启用';
       const FORM_MODAL_IDS = ['editModal', 'batchProductModal', 'batchOptimizerModal', 'batchStatusModal'];
+
+      function getProductOptions(assetType) {
+        return assetType === '短剧' ? DRAMA_PRODUCTS : GAME_PRODUCTS;
+      }
+
+      function syncProductForAssetType(assetType, currentProduct) {
+        const opts = getProductOptions(assetType);
+        if (currentProduct && opts.indexOf(currentProduct) !== -1) return currentProduct;
+        return '';
+      }
 
       function padId(n, len) {
         const base = String(7000000000000000000n + BigInt(n));
@@ -395,14 +456,17 @@
       function buildData() {
         const rows = [];
         for (let i = 0; i < 58; i++) {
-          const product = PRODUCTS[i % PRODUCTS.length];
+          const isDrama = i % 3 === 0;
+          const assetType = isDrama ? '短剧' : '小游戏';
+          const products = getProductOptions(assetType);
+          const product = products[i % products.length];
           const prefix = ACCOUNT_PREFIXES[i % ACCOUNT_PREFIXES.length];
           rows.push({
             id: 'acc_' + (i + 1),
-            accountName: prefix + '_minigame_' + String(i + 1).padStart(3, '0'),
+            accountName: prefix + (isDrama ? '_drama_' : '_minigame_') + String(i + 1).padStart(3, '0'),
             accountId: padId(i * 137 + 8295792517141, 19),
+            assetType: assetType,
             productName: product,
-            appId: padId(i * 211 + 5955854953662482, 19),
             optimizer: OPTIMIZERS[i % OPTIMIZERS.length],
             status: i % 11 === 0 ? '禁用' : '启用'
           });
@@ -419,6 +483,7 @@
             if (!nameHit && !idHit) return false;
           }
           if (selectedOptimizers.length && selectedOptimizers.indexOf(row.optimizer) === -1) return false;
+          if (filterAssetType && row.assetType !== filterAssetType) return false;
           if (filterStatus && row.status !== filterStatus) return false;
           return true;
         });
@@ -465,8 +530,8 @@
                 '<span class="cell-id__text" title="' + escapeHtml(row.accountId) + '">' + escapeHtml(row.accountId) + '</span>' +
               '</span>' +
             '</td>' +
+            '<td class="col-type">' + escapeHtml(row.assetType || '-') + '</td>' +
             '<td class="col-product" title="' + escapeHtml(row.productName) + '">' + escapeHtml(row.productName) + '</td>' +
-            '<td class="col-appid" title="' + escapeHtml(row.appId) + '">' + escapeHtml(row.appId) + '</td>' +
             '<td class="col-optimizer">' + escapeHtml(row.optimizer) + '</td>' +
             '<td class="col-status">' + UI.statusTag(row.status) + '</td>' +
             '<td class="col-action"><button class="link" type="button" data-edit="' + escapeHtml(row.id) + '">编辑</button></td>' +
@@ -525,6 +590,7 @@
         body.innerHTML = importRows.map(function (row) {
           return '<tr>' +
             '<td title="' + escapeHtml(row.accountId) + '">' + escapeHtml(row.accountId || '-') + '</td>' +
+            '<td>' + escapeHtml(row.assetType || '-') + '</td>' +
             '<td title="' + escapeHtml(row.productName) + '">' + escapeHtml(row.productName || '-') + '</td>' +
             '<td>' + escapeHtml(row.optimizer || '-') + '</td>' +
             '<td class="col-error">' + escapeHtml(row.error || '') + '</td>' +
@@ -535,7 +601,8 @@
       /** SpreadsheetML 模板：微软雅黑 10pt、列宽 30、无边框无填充；账户ID 文本格式 */
       function downloadTemplate() {
         const sampleId = '7658218295792517141';
-        const sampleProduct = 'Color Water Sort Master';
+        const sampleAssetType = '小游戏';
+        const sampleProduct = 'Fun Overload';
         const sampleOptimizer = '用户A';
         // Excel 列宽 30 ≈ SpreadsheetML ss:Width 210
         const colW = '210';
@@ -544,6 +611,7 @@
           emptyRows +=
             '<Row>' +
             '<Cell ss:StyleID="sText"><Data ss:Type="String"></Data></Cell>' +
+            '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
             '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
             '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
             '</Row>';
@@ -584,13 +652,16 @@
           '<Column ss:StyleID="sText" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
           '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
           '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
+          '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
           '<Row>' +
           '<Cell ss:StyleID="sText"><Data ss:Type="String">账户ID</Data></Cell>' +
+          '<Cell ss:StyleID="sCell"><Data ss:Type="String">资产类型</Data></Cell>' +
           '<Cell ss:StyleID="sCell"><Data ss:Type="String">产品名称</Data></Cell>' +
           '<Cell ss:StyleID="sCell"><Data ss:Type="String">优化师</Data></Cell>' +
           '</Row>' +
           '<Row>' +
           '<Cell ss:StyleID="sText"><Data ss:Type="String">' + sampleId + '</Data></Cell>' +
+          '<Cell ss:StyleID="sCell"><Data ss:Type="String">' + sampleAssetType + '</Data></Cell>' +
           '<Cell ss:StyleID="sCell"><Data ss:Type="String">' + sampleProduct + '</Data></Cell>' +
           '<Cell ss:StyleID="sCell"><Data ss:Type="String">' + sampleOptimizer + '</Data></Cell>' +
           '</Row>' +
@@ -665,14 +736,21 @@
       }
 
       function mapHeaderIndex(headers) {
-        const map = { accountId: -1, productName: -1, optimizer: -1 };
+        const map = { accountId: -1, assetType: -1, productName: -1, optimizer: -1 };
         headers.forEach(function (h, i) {
           const key = normalizeHeader(h);
           if (key === '账户id' || key === 'accountid' || key === 'account_id') map.accountId = i;
+          else if (key === '资产类型' || key === 'assettype' || key === 'asset_type') map.assetType = i;
           else if (key === '产品名称' || key === 'productname' || key === 'product_name' || key === '产品名') map.productName = i;
           else if (key === '优化师' || key === 'optimizer') map.optimizer = i;
         });
         return map;
+      }
+
+      function normalizeAssetType(raw) {
+        const v = String(raw == null ? '' : raw).trim();
+        if (v === '小游戏' || v === '短剧') return v;
+        return v;
       }
 
       function validateImportRow(row, index, idSet) {
@@ -689,14 +767,25 @@
           errors.push('不存在账户ID');
         }
         if (row.accountId) idSet.add(row.accountId);
+        if (!row.assetType) {
+          errors.push('资产类型不能为空');
+        } else if (row.assetType !== '小游戏' && row.assetType !== '短剧') {
+          errors.push('资产类型仅支持：小游戏、短剧');
+        }
+        if (row.productName && (row.assetType === '小游戏' || row.assetType === '短剧')) {
+          const opts = getProductOptions(row.assetType);
+          if (opts.indexOf(row.productName) === -1) {
+            errors.push('产品名称与资产类型不匹配');
+          }
+        }
         void index;
         return errors.join('；');
       }
 
       function buildImportRows(headers, dataLines, splitLine) {
         const col = mapHeaderIndex(headers);
-        if (col.accountId < 0 || col.productName < 0 || col.optimizer < 0) {
-          return { error: '表头不正确，需包含：账户ID、产品名称、优化师' };
+        if (col.accountId < 0 || col.assetType < 0 || col.productName < 0 || col.optimizer < 0) {
+          return { error: '表头不正确，需包含：账户ID、资产类型、产品名称、优化师' };
         }
         const idSet = new Set();
         const rows = [];
@@ -704,6 +793,7 @@
           const cols = splitLine(dataLines[i]);
           const row = {
             accountId: normalizeAccountId(cols[col.accountId]),
+            assetType: normalizeAssetType(cols[col.assetType]),
             productName: String(cols[col.productName] == null ? '' : cols[col.productName]).trim(),
             optimizer: String(cols[col.optimizer] == null ? '' : cols[col.optimizer]).trim(),
             error: ''
@@ -874,6 +964,10 @@
           const existing = allRows.find(function (r) { return r.accountId === row.accountId; });
           if (!existing) return;
           let changed = false;
+          if (row.assetType) {
+            existing.assetType = row.assetType;
+            changed = true;
+          }
           if (row.productName) {
             existing.productName = row.productName;
             changed = true;
@@ -900,9 +994,9 @@
 
       function exportCsv() {
         const bom = '\uFEFF';
-        const header = '账户名称,账户ID,产品名称,APPID,优化师,状态\n';
+        const header = '账户名称,账户ID,资产类型,产品名称,优化师,状态\n';
         const lines = filteredRows.map(function (r) {
-          return [r.accountName, r.accountId, r.productName, r.appId, r.optimizer, r.status]
+          return [r.accountName, r.accountId, r.assetType, r.productName, r.optimizer, r.status]
             .map(function (v) {
               const s = String(v == null ? '' : v);
               return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
@@ -1010,6 +1104,7 @@
             if (!nameHit && !idHit) return false;
           }
           if (selectedOptimizers.length && selectedOptimizers.indexOf(row.optimizer) === -1) return false;
+          if (filterAssetType && row.assetType !== filterAssetType) return false;
           if (filterStatus && row.status !== filterStatus) return false;
           return true;
         });
@@ -1025,27 +1120,31 @@
         if (!row) return;
         editingId = row.id;
         editOptimizer = row.optimizer || '';
-        editProduct = row.productName || '';
+        editAssetType = row.assetType === '短剧' ? '短剧' : '小游戏';
+        editProduct = syncProductForAssetType(editAssetType, row.productName || '');
         editStatus = row.status || '启用';
         document.getElementById('editAccountName').value = row.accountName;
         document.getElementById('editAccountId').value = row.accountId;
+        setSegValue('editAssetTypeSeg', editAssetType);
         setSelectLabel('editOptimizerLabel', editOptimizer, 'editOptimizerWrap');
         setSelectLabel('editProductLabel', editProduct, 'editProductWrap', PRODUCT_PLATFORM_ICON);
         setSegValue('editStatusSeg', editStatus);
         document.getElementById('editOptimizerSearch').value = '';
         document.getElementById('editProductSearch').value = '';
         renderSearchList('editOptimizerList', OPTIMIZERS, editOptimizer, '');
-        renderSearchList('editProductList', PRODUCTS, editProduct, '', PRODUCT_PLATFORM_ICON);
+        renderSearchList('editProductList', getProductOptions(editAssetType), editProduct, '', PRODUCT_PLATFORM_ICON);
         closePanels();
         openFormModal('editModal');
       }
 
       function saveEditModal() {
         if (!editingId) return;
+        editAssetType = getSegValue('editAssetTypeSeg') || editAssetType;
         editStatus = getSegValue('editStatusSeg') || editStatus;
         const row = allRows.find(function (r) { return r.id === editingId; });
         if (!row) return;
         row.optimizer = editOptimizer || '';
+        row.assetType = editAssetType || '小游戏';
         row.productName = editProduct || '';
         row.status = editStatus;
         closeFormModal('editModal');
@@ -1055,10 +1154,12 @@
       }
 
       function openBatchProductModal() {
+        batchAssetType = '小游戏';
         batchProduct = '';
+        setSegValue('batchAssetTypeSeg', batchAssetType);
         setSelectLabel('batchProductLabel', '', 'batchProductWrap', PRODUCT_PLATFORM_ICON);
         document.getElementById('batchProductSearch').value = '';
-        renderSearchList('batchProductList', PRODUCTS, batchProduct, '', PRODUCT_PLATFORM_ICON);
+        renderSearchList('batchProductList', getProductOptions(batchAssetType), batchProduct, '', PRODUCT_PLATFORM_ICON);
         closePanels();
         openFormModal('batchProductModal');
       }
@@ -1095,7 +1196,10 @@
       }
 
       function saveBatchProduct() {
-        if (applyBatchUpdate(function (row) { row.productName = batchProduct || ''; }, '批量修改产品成功')) {
+        if (applyBatchUpdate(function (row) {
+          row.assetType = batchAssetType || '小游戏';
+          row.productName = batchProduct || '';
+        }, '批量修改产品成功')) {
           closeFormModal('batchProductModal');
         }
       }
@@ -1171,6 +1275,17 @@
         });
 
         UI.bindSingleSelect({
+          wrapId: 'assetTypeWrap',
+          triggerId: 'assetTypeTrigger',
+          panelId: 'assetTypePanel',
+          labelId: 'assetTypeLabel',
+          clearId: 'assetTypeClear',
+          prefix: '资产类型：',
+          getValue: function () { return filterAssetType; },
+          onChange: function (v) { filterAssetType = v || ''; }
+        });
+
+        UI.bindSingleSelect({
           wrapId: 'statusWrap',
           triggerId: 'statusTrigger',
           panelId: 'statusPanel',
@@ -1242,7 +1357,7 @@
           labelId: 'editProductLabel',
           clearId: 'editProductClear',
           iconSrc: PRODUCT_PLATFORM_ICON,
-          getOptions: function () { return PRODUCTS; },
+          getOptions: function () { return getProductOptions(editAssetType); },
           getValue: function () { return editProduct; },
           setValue: function (v) { editProduct = v; }
         });
@@ -1255,7 +1370,7 @@
           labelId: 'batchProductLabel',
           clearId: 'batchProductClear',
           iconSrc: PRODUCT_PLATFORM_ICON,
-          getOptions: function () { return PRODUCTS; },
+          getOptions: function () { return getProductOptions(batchAssetType); },
           getValue: function () { return batchProduct; },
           setValue: function (v) { batchProduct = v; }
         });
@@ -1270,6 +1385,20 @@
           getOptions: function () { return OPTIMIZERS; },
           getValue: function () { return batchOptimizer; },
           setValue: function (v) { batchOptimizer = v; }
+        });
+        UI.bindSeg('editAssetTypeSeg', function (v) {
+          editAssetType = v || '小游戏';
+          editProduct = syncProductForAssetType(editAssetType, editProduct);
+          setSelectLabel('editProductLabel', editProduct, 'editProductWrap', PRODUCT_PLATFORM_ICON);
+          document.getElementById('editProductSearch').value = '';
+          renderSearchList('editProductList', getProductOptions(editAssetType), editProduct, '', PRODUCT_PLATFORM_ICON);
+        });
+        UI.bindSeg('batchAssetTypeSeg', function (v) {
+          batchAssetType = v || '小游戏';
+          batchProduct = syncProductForAssetType(batchAssetType, batchProduct);
+          setSelectLabel('batchProductLabel', batchProduct, 'batchProductWrap', PRODUCT_PLATFORM_ICON);
+          document.getElementById('batchProductSearch').value = '';
+          renderSearchList('batchProductList', getProductOptions(batchAssetType), batchProduct, '', PRODUCT_PLATFORM_ICON);
         });
         UI.bindSeg('editStatusSeg', function (v) { editStatus = v; });
         UI.bindSeg('batchStatusSeg', function (v) { batchStatus = v; });

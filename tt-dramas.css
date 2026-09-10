@@ -1,0 +1,26 @@
+/* TT短剧 · 页面特例 */
+
+#filterMiniWrap .input,
+#filterTitleWrap .input,
+#filterZhWrap .input {
+  padding-right: 32px;
+}
+
+.data-table .col-mini { width: 120px; }
+.data-table .col-title { width: 200px; }
+.data-table .col-zh { width: 200px; }
+.data-table .col-remark { width: 160px; }
+.data-table .col-time { width: 160px; }
+.data-table .col-action { width: 80px; }
+
+#importModal > .modal {
+  overflow: hidden;
+  max-height: calc(100vh - 80px);
+}
+
+#importModal .modal__body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}

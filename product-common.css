@@ -3001,6 +3001,14 @@ body.drawer-open { overflow: hidden; }
   box-sizing: border-box;
 }
 
+.datetime-panel--date-only .datetime-panel__main {
+  width: 308px;
+}
+
+.datetime-panel--date-only .time-panel {
+  display: none;
+}
+
 /* 高度跟随左侧日期面板，右侧绝对铺满 */
 .time-panel {
   position: absolute;
