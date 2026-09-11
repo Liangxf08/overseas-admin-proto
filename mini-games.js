@@ -1,4 +1,4 @@
-/* 小游戏 */
+/* 小游戏 · bizType v20260911c */
 (function () {
   'use strict';
 
