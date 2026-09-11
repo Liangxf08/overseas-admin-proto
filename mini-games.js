@@ -10,7 +10,7 @@
   var escapeHtml = UI.escapeHtml;
   var COPY_ICON = UI.COPY_ICON;
 
-  var GROUPS = ['奇异果', '苹果组', '无花果', '坚果组', '硕果组', '外部联运'];
+  var GROUPS = ['奇异果', '苹果组', '无花果', '坚果组', '硕果组', '外部联运', '其他'];
   var TYPES = ['分类', '塔防', '益智', '逆袭', '难度', '消除', '找茬', '其他'];
   var SERIES = ['Jam系列', 'Sort系列', 'Match系列', 'ASMR系列', 'Word系列', 'unknown'];
   var CATEGORIES = ['动作', '匹配', '解谜', '竞速', '角色扮演', '射击', '模拟', '体育', '策略', '派对', '桌面', '其它'];
@@ -119,6 +119,7 @@
       name: item[1],
       platform: 'TikTok',
       appId: makeAppId(item[0]),
+      bizType: '小游戏',
       group: item[2],
       category: inferCategory(item[1]),
       type: TYPES[i % TYPES.length],
@@ -133,10 +134,30 @@
     };
   });
 
+  rows.unshift({
+    id: '44761001',
+    name: 'Vivid Minis',
+    platform: 'TikTok',
+    appId: makeAppId('44761001'),
+    bizType: '短剧',
+    group: '其他',
+    category: '',
+    type: '其他',
+    series: 'unknown',
+    owner: OWNERS[0],
+    status: '启用',
+    clientKey: 'ck_44761001',
+    clientSecret: 'cs_44761001',
+    icon: '',
+    createdAt: '2026-09-10 10:00:00',
+    updatedAt: '2026-09-10 10:00:00'
+  });
+
   var state = {
     keyword: '',
     appIdKw: '',
     platform: '',
+    bizType: '',
     groups: [],
     types: [],
     series: [],
@@ -189,6 +210,7 @@
         if (kw && String(r.name).toLowerCase().indexOf(kw) === -1 && String(r.id).toLowerCase().indexOf(kw) === -1) return false;
         if (appKw && String(r.appId).toLowerCase().indexOf(appKw) === -1) return false;
         if (state.platform && r.platform !== state.platform) return false;
+        if (state.bizType && r.bizType !== state.bizType) return false;
         if (state.groups.length && state.groups.indexOf(r.group) === -1) return false;
         if (state.types.length && state.types.indexOf(r.type) === -1) return false;
         if (state.series.length && state.series.indexOf(r.series) === -1) return false;
@@ -246,7 +268,8 @@
             '<td class="col-platform">' + platformCell(r.platform) + '</td>' +
             '<td class="col-id">' + idCell(r.id, '复制产品ID') + '</td>' +
             '<td class="col-appid">' + idCell(r.appId, '复制APPID') + '</td>' +
-            '<td>' + escapeHtml(r.category) + '</td>' +
+            '<td class="col-biz">' + escapeHtml(r.bizType || '-') + '</td>' +
+            '<td>' + escapeHtml(r.category || '-') + '</td>' +
             '<td>' + escapeHtml(r.group) + '</td>' +
             '<td>' + escapeHtml(r.type) + '</td>' +
             '<td>' + escapeHtml(r.series) + '</td>' +
@@ -386,7 +409,8 @@
     UI.$('formAppId').value = row.appId || '';
     UI.$('formClientKey').value = row.clientKey || '';
     UI.$('formClientSecret').value = row.clientSecret || '';
-    UI.$('formCategory').value = row.category || '';
+    UI.$('formBizType').value = row.bizType || '';
+    UI.$('formCategory').value = row.category || '-';
     state.formGroup = row.group || '';
     state.formType = row.type || '';
     state.formSeries = row.series || '';
@@ -547,6 +571,13 @@
       prefix: '平台：',
       getValue: function () { return state.platform; },
       onChange: function (v) { state.platform = v; }
+    }),
+    bizType: bindFilterSingle({
+      wrapId: 'bizTypeWrap', triggerId: 'bizTypeTrigger', panelId: 'bizTypePanel',
+      labelId: 'bizTypeLabel', clearId: 'bizTypeClear',
+      prefix: '业务类型：',
+      getValue: function () { return state.bizType; },
+      onChange: function (v) { state.bizType = v; }
     }),
     status: bindFilterSingle({
       wrapId: 'statusWrap', triggerId: 'statusTrigger', panelId: 'statusPanel',
@@ -838,6 +869,7 @@
     state.keyword = '';
     state.appIdKw = '';
     state.platform = '';
+    state.bizType = '';
     state.groups = [];
     state.types = [];
     state.series = [];
@@ -850,6 +882,7 @@
       if (api && api.render) api.render();
     });
     filterSingles.platform.syncLabel('');
+    filterSingles.bizType.syncLabel('');
     filterSingles.status.syncLabel('');
     renderTable();
   }

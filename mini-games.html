@@ -99,6 +99,7 @@
     .col-platform { width: 100px; }
     .col-id { width: 140px; }
     .col-appid { width: 140px; }
+    .col-biz { width: 100px; }
     .col-category { width: 100px; }
     .col-group { width: 100px; }
     .col-type { width: 100px; }
@@ -155,6 +156,20 @@
             </button>
             <div class="single-panel" id="platformPanel">
               <div class="single-option" data-value="TikTok">TikTok</div>
+            </div>
+          </div>
+
+          <div class="filter-item" id="bizTypeWrap">
+            <button class="select-trigger" type="button" id="bizTypeTrigger">
+              <span class="select-trigger__text" id="bizTypeLabel">业务类型：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="bizTypeClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="bizTypePanel">
+              <div class="single-option" data-value="小游戏">小游戏</div>
+              <div class="single-option" data-value="短剧">短剧</div>
             </div>
           </div>
 
@@ -285,6 +300,7 @@
                 <col class="col-platform" data-col-width="100" />
                 <col class="col-id" data-col-width="140" />
                 <col class="col-appid" data-col-width="140" />
+                <col class="col-biz" data-col-width="100" />
                 <col class="col-category" data-col-width="100" />
                 <col class="col-group" data-col-width="100" />
                 <col class="col-type" data-col-width="100" />
@@ -302,6 +318,7 @@
                   <th class="col-platform">平台</th>
                   <th class="col-id">产品ID</th>
                   <th class="col-appid">APPID</th>
+                  <th class="col-biz">业务类型</th>
                   <th class="col-category">类别</th>
                   <th class="col-group">产品组</th>
                   <th class="col-type">产品类型</th>
@@ -369,6 +386,12 @@
               <input class="input" id="formClientSecret" type="text" placeholder="请输入 Client secret" autocomplete="off" />
               <button class="select-clear" type="button" id="formClientSecretClear" aria-label="清除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg></button>
             </div>
+          </div>
+        </div>
+        <div class="form-item">
+          <div class="form-item__label">业务类型</div>
+          <div class="form-item__control">
+            <input class="input" id="formBizType" type="text" disabled />
           </div>
         </div>
         <div class="form-item">
