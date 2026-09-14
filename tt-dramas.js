@@ -10,96 +10,98 @@
   var $ = UI.$;
   var escapeHtml = UI.escapeHtml;
 
+  var DRAMA_LIST_API = 'tt-dramas-data.json';
+
   var SEED = [
-    ['Vivid Minis', 'Three Beauties One Savior', '三美唯一的救世主'],
-    ['Vivid Minis', 'Tackled Into You', '擒你入怀'],
-    ['Vivid Minis', 'Dissecting the Don: Deal with the Devil', '与魔鬼的交易'],
-    ['Vivid Minis', 'The Lone Lamb Rules the Wolves', '孤羊镇群狼'],
-    ['Vivid Minis', 'Retired Hero：Delivery of Justice', '退隐英雄：正义速递'],
-    ['Vivid Minis', 'All In：The Don\'s Collateral Bride', '孤注一掷'],
-    ['Vivid Minis', 'Called Her Fat. Made Them Kneel', '胖妻归来，全员下跪'],
-    ['Vivid Minis', 'Dragonless：Born to Reign', '失格之龙：生而为王'],
-    ['Vivid Minis', 'No Mercy：The Husband\'s Reckoning', '绝不原谅'],
-    ['Vivid Minis', 'They Mocked the Wrong Mother', '他们嘲笑错了妈妈'],
-    ['Vivid Minis', 'Rejected Luna, Destined Queen: Season 1', '被拒的露娜：命定女王：第一季'],
-    ['Vivid Minis', 'Rejected Luna, Destined Queen：Final Season', '被拒的露娜：命定女王：最终季'],
-    ['Vivid Minis', 'Neon Hidden Cards', '霓虹底牌'],
-    ['Vivid Minis', 'His Hidden Devotion', '挚爱'],
-    ['Vivid Minis', 'Above the Ashes', '灰烬之上'],
-    ['Vivid Minis', 'Day Four Calamity’s Nemesis', '天灾宿敌'],
-    ['Vivid Minis', 'Customer Service Marvin', '客服马文'],
-    ['Vivid Minis', 'The Mountain Wolf Cub', '山中狼崽'],
-    ['Vivid Minis', 'Heist for My Daughter Season 1', '魔城夺女：第一季'],
-    ['Vivid Minis', 'Heist for My Daughter：Final Season', '魔城夺女：最终季'],
-    ['Vivid Minis', 'Never Yours, Mr. Weston', '韦斯顿先生，你永远得不到我'],
-    ['Vivid Minis', 'When the Golden Boy Breaks', '骄子坠落'],
-    ['Vivid Minis', 'The King of Stray Dogs', '流浪狗王'],
-    ['Vivid Minis', 'Tomorrows Headlines', '明日头条'],
-    ['Vivid Minis', 'CLEANER', '清洁工'],
-    ['Vivid Minis', 'Little Genius, Big Trouble', '小天才，大麻烦'],
-    ['Vivid Minis', 'Ava\'s Monster Notebook', '艾娃的怪物笔记本'],
-    ['Vivid Minis', 'Spin Cycle Queens', '洗衣女王们'],
-    ['Vivid Minis', 'The Substitute Maid', '代班女佣'],
-    ['Vivid Minis', 'The Ironwife From Dirt Farm to Empire', '铁娘子：从农场到帝国'],
-    ['Vivid Minis', 'The Maid Heiress', '女佣千金'],
-    ['Vivid Minis', 'The curse of the red moon', '红月诅咒：最后的猩红公主'],
-    ['Vivid Minis', 'The Playboy\'s Decoy', '花花公子的替身未婚妻'],
-    ['Vivid Minis', 'The Billionaire Beneath the Hoodie', '卫衣之下的亿万富翁'],
-    ['Vivid Minis', 'A Rose for the Exiled King', '玫瑰陨落之夜']
+    { id: '10001', title: 'Three Beauties One Savior', language: '英语', cover: '', createdAt: '2026-04-01 09:00:00', updatedAt: '2026-04-05 09:00:00' },
+    { id: '10002', title: 'Tackled Into You', language: '英语', cover: '', createdAt: '2026-04-13 10:11:07', updatedAt: '2026-04-13 10:11:07' },
+    { id: '10003', title: 'Dissecting the Don: Deal with the Devil', language: '英语', cover: '', createdAt: '2026-04-25 11:22:14', updatedAt: '2026-04-25 11:22:14' },
+    { id: '10004', title: 'The Lone Lamb Rules the Wolves', language: '英语', cover: '', createdAt: '2026-05-07 12:33:21', updatedAt: '2026-05-11 12:33:21' },
+    { id: '10005', title: 'Retired Hero：Delivery of Justice', language: '英语', cover: '', createdAt: '2026-05-19 13:44:28', updatedAt: '2026-05-19 13:44:28' },
+    { id: '10006', title: 'All In：The Don\'s Collateral Bride', language: '英语', cover: '', createdAt: '2026-05-31 14:55:35', updatedAt: '2026-05-31 14:55:35' },
+    { id: '10007', title: 'Called Her Fat. Made Them Kneel', language: '英语', cover: '', createdAt: '2026-06-12 09:06:42', updatedAt: '2026-06-16 09:06:42' },
+    { id: '10008', title: 'Dragonless：Born to Reign', language: '英语', cover: '', createdAt: '2026-06-24 10:17:49', updatedAt: '2026-06-24 10:17:49' },
+    { id: '10009', title: 'No Mercy：The Husband\'s Reckoning', language: '英语', cover: '', createdAt: '2026-07-06 11:28:56', updatedAt: '2026-07-06 11:28:56' },
+    { id: '10010', title: 'They Mocked the Wrong Mother', language: '英语', cover: '', createdAt: '2026-07-18 12:39:03', updatedAt: '2026-07-22 12:39:03' },
+    { id: '10011', title: 'Rejected Luna, Destined Queen: Season 1', language: '英语', cover: '', createdAt: '2026-07-30 13:50:10', updatedAt: '2026-07-30 13:50:10' },
+    { id: '10012', title: 'Rejected Luna, Destined Queen：Final Season', language: '英语', cover: '', createdAt: '2026-08-11 14:01:17', updatedAt: '2026-08-11 14:01:17' },
+    { id: '10013', title: 'Neon Hidden Cards', language: '英语', cover: '', createdAt: '2026-08-23 09:12:24', updatedAt: '2026-08-27 09:12:24' },
+    { id: '10014', title: 'His Hidden Devotion', language: '英语', cover: '', createdAt: '2026-09-04 10:23:31', updatedAt: '2026-09-04 10:23:31' },
+    { id: '10015', title: 'Above the Ashes', language: '英语', cover: '', createdAt: '2026-09-16 11:34:38', updatedAt: '2026-09-16 11:34:38' },
+    { id: '10016', title: 'Day Four Calamity’s Nemesis', language: '英语', cover: '', createdAt: '2026-09-28 12:45:45', updatedAt: '2026-10-02 12:45:45' },
+    { id: '10017', title: 'Customer Service Marvin', language: '英语', cover: '', createdAt: '2026-10-10 13:56:52', updatedAt: '2026-10-10 13:56:52' },
+    { id: '10018', title: 'The Mountain Wolf Cub', language: '英语', cover: '', createdAt: '2026-10-22 14:07:59', updatedAt: '2026-10-22 14:07:59' },
+    { id: '10019', title: 'Heist for My Daughter Season 1', language: '英语', cover: '', createdAt: '2026-11-03 09:18:06', updatedAt: '2026-11-07 09:18:06' },
+    { id: '10020', title: 'Heist for My Daughter：Final Season', language: '英语', cover: '', createdAt: '2026-11-15 10:29:13', updatedAt: '2026-11-15 10:29:13' },
+    { id: '10021', title: 'Never Yours, Mr. Weston', language: '英语', cover: '', createdAt: '2026-11-27 11:40:20', updatedAt: '2026-11-27 11:40:20' },
+    { id: '10022', title: 'When the Golden Boy Breaks', language: '英语', cover: '', createdAt: '2026-12-09 12:51:27', updatedAt: '2026-12-13 12:51:27' },
+    { id: '10023', title: 'The King of Stray Dogs', language: '英语', cover: '', createdAt: '2026-12-21 13:02:34', updatedAt: '2026-12-21 13:02:34' },
+    { id: '10024', title: 'Tomorrows Headlines', language: '英语', cover: '', createdAt: '2027-01-02 14:13:41', updatedAt: '2027-01-02 14:13:41' },
+    { id: '10025', title: 'CLEANER', language: '英语', cover: '', createdAt: '2027-01-14 09:24:48', updatedAt: '2027-01-18 09:24:48' },
+    { id: '10026', title: 'Little Genius, Big Trouble', language: '英语', cover: '', createdAt: '2027-01-26 10:35:55', updatedAt: '2027-01-26 10:35:55' },
+    { id: '10027', title: 'Ava\'s Monster Notebook', language: '英语', cover: '', createdAt: '2027-02-07 11:46:02', updatedAt: '2027-02-07 11:46:02' },
+    { id: '10028', title: 'Spin Cycle Queens', language: '英语', cover: '', createdAt: '2027-02-19 12:57:09', updatedAt: '2027-02-23 12:57:09' },
+    { id: '10029', title: 'The Substitute Maid', language: '英语', cover: '', createdAt: '2027-03-03 13:08:16', updatedAt: '2027-03-03 13:08:16' },
+    { id: '10030', title: 'The Ironwife From Dirt Farm to Empire', language: '英语', cover: '', createdAt: '2027-03-15 14:19:23', updatedAt: '2027-03-15 14:19:23' },
+    { id: '10031', title: 'The Maid Heiress', language: '英语', cover: '', createdAt: '2027-03-27 09:30:30', updatedAt: '2027-03-31 09:30:30' },
+    { id: '10032', title: 'The curse of the red moon', language: '英语', cover: '', createdAt: '2027-04-08 10:41:37', updatedAt: '2027-04-08 10:41:37' },
+    { id: '10033', title: 'The Playboy\'s Decoy', language: '英语', cover: '', createdAt: '2027-04-20 11:52:44', updatedAt: '2027-04-20 11:52:44' },
+    { id: '10034', title: 'The Billionaire Beneath the Hoodie', language: '英语', cover: '', createdAt: '2027-05-02 12:03:51', updatedAt: '2027-05-06 12:03:51' },
+    { id: '10035', title: 'A Rose for the Exiled King', language: '英语', cover: '', createdAt: '2027-05-14 13:14:58', updatedAt: '2027-05-14 13:14:58' }
   ];
 
-  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+  var ALL_ROWS = normalizeRows(SEED);
 
-  function formatDateTime(d) {
-    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) +
-      ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
-  }
+  var state = {
+    draft: { title: '', language: '' },
+    applied: null,
+    page: 1,
+    pageSize: 20,
+    paginationBound: false,
+    syncing: false
+  };
 
   function formatDisplayTime(str) {
     if (!str) return '-';
     return String(str).replace('T', ' ').slice(0, 19);
   }
 
-  var ALL_ROWS = SEED.map(function (item, i) {
-    var created = new Date(2026, 3, 1, 10, 0, 0);
-    created.setDate(created.getDate() + i * 12);
-    created.setHours(9 + (i % 6), (i * 11) % 60, (i * 7) % 60, 0);
-    var updated = new Date(created.getTime());
-    if (i % 3 === 0) updated.setDate(updated.getDate() + 4);
-    return {
-      id: 'tt-' + (i + 1),
-      miniName: item[0],
-      title: item[1],
-      zhName: item[2],
-      platform: 'TikTok',
-      remark: '',
-      status: i % 9 === 3 ? '禁用' : '启用',
-      icon: '',
-      createdAt: formatDateTime(created),
-      updatedAt: formatDateTime(updated)
-    };
-  });
+  function normalizeRows(list) {
+    if (!Array.isArray(list)) return [];
+    return list.map(function (item, i) {
+      return {
+        id: String(item.id != null ? item.id : i + 1),
+        title: item.title || item.name || '',
+        language: item.language || item.lang || '英语',
+        cover: item.cover || item.coverUrl || item.icon || '',
+        createdAt: item.createdAt || item.createTime || item.created_at || '',
+        updatedAt: item.updatedAt || item.updateTime || item.updated_at || ''
+      };
+    });
+  }
 
-  var state = {
-    draft: { miniName: '', title: '', zhName: '', platform: '', status: '' },
-    applied: null,
-    page: 1,
-    pageSize: 20,
-    paginationBound: false,
-    editMode: 'add',
-    editId: null,
-    formIcon: ''
-  };
-
-  var clearApis = {};
+  function fetchDramaList() {
+    return fetch(DRAMA_LIST_API, { cache: 'no-store' }).then(function (res) {
+      if (!res.ok) throw new Error('sync failed');
+      return res.json();
+    }).then(function (payload) {
+      var list = Array.isArray(payload) ? payload : (payload && (payload.data || payload.list || payload.records));
+      var rows = normalizeRows(list);
+      if (!rows.length) throw new Error('empty');
+      return rows;
+    }).catch(function () {
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve(normalizeRows(SEED));
+        }, 300);
+      });
+    });
+  }
 
   function applyFilters() {
     state.applied = {
-      miniName: (state.draft.miniName || '').trim(),
       title: (state.draft.title || '').trim(),
-      zhName: (state.draft.zhName || '').trim(),
-      platform: state.draft.platform || '',
-      status: state.draft.status || ''
+      language: state.draft.language || ''
     };
     state.page = 1;
   }
@@ -109,11 +111,8 @@
     var list = !f
       ? ALL_ROWS.slice()
       : ALL_ROWS.filter(function (row) {
-        if (f.miniName && String(row.miniName).toLowerCase().indexOf(f.miniName.toLowerCase()) === -1) return false;
         if (f.title && String(row.title).toLowerCase().indexOf(f.title.toLowerCase()) === -1) return false;
-        if (f.zhName && String(row.zhName).toLowerCase().indexOf(f.zhName.toLowerCase()) === -1) return false;
-        if (f.platform && row.platform !== f.platform) return false;
-        if (f.status && row.status !== f.status) return false;
+        if (f.language && row.language !== f.language) return false;
         return true;
       });
     return list.sort(function (a, b) {
@@ -121,69 +120,21 @@
     });
   }
 
-  function findRow(id) {
-    return ALL_ROWS.find(function (r) { return r.id === String(id); });
-  }
-
-  function nextId() {
-    var max = 0;
-    ALL_ROWS.forEach(function (r) {
-      var n = parseInt(String(r.id).replace(/^tt-/, ''), 10);
-      if (isFinite(n) && n > max) max = n;
-    });
-    return 'tt-' + (max + 1);
-  }
-
-  UI.bindInputClearable({
-    wrapId: 'filterMiniWrap',
-    clearId: 'filterMiniClear',
-    onClear: function () { state.draft.miniName = ''; }
-  });
   UI.bindInputClearable({
     wrapId: 'filterTitleWrap',
     clearId: 'filterTitleClear',
     onClear: function () { state.draft.title = ''; }
   });
-  UI.bindInputClearable({
-    wrapId: 'filterZhWrap',
-    clearId: 'filterZhClear',
-    onClear: function () { state.draft.zhName = ''; }
-  });
-
   UI.bindSingleSelect({
-    wrapId: 'platformWrap',
-    triggerId: 'platformTrigger',
-    panelId: 'platformPanel',
-    labelId: 'platformLabel',
-    clearId: 'platformClear',
-    prefix: '平台：',
-    getValue: function () { return state.draft.platform; },
-    onChange: function (v) { state.draft.platform = v || ''; }
+    wrapId: 'langWrap',
+    triggerId: 'langTrigger',
+    panelId: 'langPanel',
+    labelId: 'langLabel',
+    clearId: 'langClear',
+    prefix: '语种：',
+    getValue: function () { return state.draft.language; },
+    onChange: function (v) { state.draft.language = v || ''; }
   });
-  UI.bindSingleSelect({
-    wrapId: 'statusWrap',
-    triggerId: 'statusTrigger',
-    panelId: 'statusPanel',
-    labelId: 'statusLabel',
-    clearId: 'statusClear',
-    prefix: '状态：',
-    getValue: function () { return state.draft.status; },
-    onChange: function (v) { state.draft.status = v || ''; }
-  });
-
-  ['editMini', 'editTitle', 'editZh', 'editRemark'].forEach(function (id) {
-    clearApis[id] = UI.bindInputClearable({
-      wrapId: id + 'Wrap',
-      onClear: function () {
-        if (id === 'editMini') clearItemError('editMiniItem');
-        if (id === 'editTitle') clearItemError('editTitleItem');
-        if (id === 'editZh') clearItemError('editZhItem');
-      }
-    });
-  });
-
-  UI.bindSeg('platformSeg');
-  UI.bindSeg('statusSeg');
 
   function on(id, event, fn) {
     var el = $(id);
@@ -191,40 +142,19 @@
     el.addEventListener(event, fn);
   }
 
-  on('filterMini', 'input', function () { state.draft.miniName = this.value || ''; });
   on('filterTitle', 'input', function () { state.draft.title = this.value || ''; });
-  on('filterZh', 'input', function () { state.draft.zhName = this.value || ''; });
-  ['filterMini', 'filterTitle', 'filterZh'].forEach(function (id) {
-    on(id, 'keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        applyFilters();
-        renderTable();
-      }
-    });
+  on('filterTitle', 'keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      applyFilters();
+      renderTable();
+    }
   });
-
-  function clearItemError(id) {
-    var el = $(id);
-    if (el) el.classList.remove('is-error');
-  }
-
-  function clearEditErrors() {
-    ['editMiniItem', 'editTitleItem', 'editZhItem'].forEach(clearItemError);
-  }
-
-  function setItemError(id, msg) {
-    var el = $(id);
-    if (!el) return;
-    el.classList.add('is-error');
-    var err = el.querySelector('.form-item__error');
-    if (err && msg) err.textContent = msg;
-  }
 
   function titleCell(row) {
     return '<span class="product-cell">' +
-      (row.icon
-        ? '<img class="product-cell__icon product-cell__icon--img" src="' + escapeHtml(row.icon) + '" alt="" />'
+      (row.cover
+        ? '<img class="product-cell__icon product-cell__icon--img" src="' + escapeHtml(row.cover) + '" alt="" />'
         : '<span class="product-cell__icon" aria-hidden="true"></span>') +
       '<span class="product-cell__name">' + escapeHtml(row.title) + '</span>' +
     '</span>';
@@ -248,17 +178,11 @@
       if (empty) empty.hidden = true;
       body.innerHTML = pageRows.map(function (row) {
         return '<tr data-id="' + escapeHtml(row.id) + '">' +
+          '<td title="' + escapeHtml(row.id) + '">' + escapeHtml(row.id) + '</td>' +
           '<td title="' + escapeHtml(row.title) + '">' + titleCell(row) + '</td>' +
-          '<td title="' + escapeHtml(row.zhName) + '">' + escapeHtml(row.zhName) + '</td>' +
-          '<td>' + escapeHtml(row.platform || 'TikTok') + '</td>' +
-          '<td title="' + escapeHtml(row.miniName) + '">' + escapeHtml(row.miniName) + '</td>' +
-          '<td title="' + escapeHtml(row.remark || '') + '">' + escapeHtml(row.remark || '') + '</td>' +
-          '<td>' + UI.statusTag(row.status || '启用') + '</td>' +
+          '<td>' + escapeHtml(row.language || '英语') + '</td>' +
           '<td title="' + escapeHtml(formatDisplayTime(row.createdAt)) + '">' + escapeHtml(formatDisplayTime(row.createdAt)) + '</td>' +
           '<td title="' + escapeHtml(formatDisplayTime(row.updatedAt)) + '">' + escapeHtml(formatDisplayTime(row.updatedAt)) + '</td>' +
-          '<td class="col-action"><span class="action-links">' +
-            '<button class="link" type="button" data-action="edit">编辑</button>' +
-          '</span></td>' +
         '</tr>';
       }).join('');
     }
@@ -290,203 +214,35 @@
     if (window.ColResize) ColResize.refresh($('dataTable'));
   }
 
-  function syncClearables() {
-    Object.keys(clearApis).forEach(function (key) {
-      if (clearApis[key] && clearApis[key].sync) clearApis[key].sync();
+  function setSyncing(on) {
+    state.syncing = !!on;
+    var btn = $('syncBtn');
+    if (!btn) return;
+    btn.disabled = state.syncing;
+    btn.textContent = state.syncing ? '同步中...' : '同步';
+  }
+
+  function syncList() {
+    if (state.syncing) return;
+    setSyncing(true);
+    fetchDramaList().then(function (rows) {
+      ALL_ROWS = rows;
+      applyFilters();
+      renderTable();
+      UI.showToast('同步成功', 'success');
+    }).catch(function () {
+      UI.showToast('同步失败', 'error');
+    }).then(function () {
+      setSyncing(false);
     });
   }
-
-  function syncIconPreview() {
-    var box = $('iconUploadBox');
-    var preview = $('iconPreview');
-    if (!box || !preview) return;
-    if (state.formIcon) {
-      box.classList.add('has-file');
-      preview.src = state.formIcon;
-    } else {
-      box.classList.remove('has-file');
-      preview.removeAttribute('src');
-    }
-  }
-
-  function fillForm(row) {
-    UI.setSegValue('platformSeg', (row && row.platform) || 'TikTok');
-    UI.setSegValue('statusSeg', (row && row.status) || '启用');
-    $('editMini').value = row ? (row.miniName || '') : '';
-    $('editTitle').value = row ? (row.title || '') : '';
-    $('editZh').value = row ? (row.zhName || '') : '';
-    $('editRemark').value = row ? (row.remark || '') : '';
-    state.formIcon = row ? (row.icon || '') : '';
-    var fileInput = $('iconFileInput');
-    if (fileInput) fileInput.value = '';
-    syncIconPreview();
-    syncClearables();
-  }
-
-  function openAdd() {
-    state.editMode = 'add';
-    state.editId = null;
-    clearEditErrors();
-    $('editModalTitle').textContent = '添加短剧';
-    fillForm(null);
-    UI.openModal('editModal');
-  }
-
-  function openEdit(row) {
-    state.editMode = 'edit';
-    state.editId = row.id;
-    clearEditErrors();
-    $('editModalTitle').textContent = '编辑短剧';
-    fillForm(row);
-    UI.openModal('editModal');
-  }
-
-  function submitEdit() {
-    clearEditErrors();
-    var miniName = ($('editMini').value || '').trim();
-    var title = ($('editTitle').value || '').trim();
-    var zhName = ($('editZh').value || '').trim();
-    var remark = ($('editRemark').value || '').trim();
-    var platform = UI.getSegValue('platformSeg') || 'TikTok';
-    var status = UI.getSegValue('statusSeg') || '启用';
-    var hasError = false;
-
-    if (!miniName) {
-      setItemError('editMiniItem', '请输入小程序');
-      hasError = true;
-    }
-    if (!title) {
-      setItemError('editTitleItem', '请输入剧目名称');
-      hasError = true;
-    }
-    if (!zhName) {
-      setItemError('editZhItem', '请输入中文名称');
-      hasError = true;
-    }
-    if (hasError) return;
-
-    var duplicated = ALL_ROWS.some(function (r) {
-      if (state.editMode === 'edit' && r.id === state.editId) return false;
-      return String(r.title).toLowerCase() === title.toLowerCase();
-    });
-    if (duplicated) {
-      setItemError('editTitleItem', '剧目名称已存在');
-      return;
-    }
-
-    var now = formatDateTime(new Date());
-    if (state.editMode === 'add') {
-      ALL_ROWS.unshift({
-        id: nextId(),
-        miniName: miniName,
-        title: title,
-        zhName: zhName,
-        platform: platform,
-        remark: remark,
-        status: status,
-        icon: state.formIcon || '',
-        createdAt: now,
-        updatedAt: now
-      });
-      UI.showToast('添加成功', 'success');
-    } else {
-      var row = findRow(state.editId);
-      if (!row) return;
-      row.miniName = miniName;
-      row.title = title;
-      row.zhName = zhName;
-      row.platform = platform;
-      row.remark = remark;
-      row.status = status;
-      row.icon = state.formIcon || '';
-      row.updatedAt = now;
-      UI.showToast('提交成功', 'success');
-    }
-    UI.closeModal('editModal');
-    applyFilters();
-    renderTable();
-  }
-
-  (function bindIconUpload() {
-    var box = $('iconUploadBox');
-    var input = $('iconFileInput');
-    var removeBtn = $('iconRemoveBtn');
-    if (!box || !input) return;
-
-    function pick() { input.click(); }
-
-    box.addEventListener('click', function (e) {
-      if (e.target.closest('#iconRemoveBtn')) return;
-      pick();
-    });
-    box.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        pick();
-      }
-    });
-    if (removeBtn) {
-      removeBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        state.formIcon = '';
-        input.value = '';
-        syncIconPreview();
-      });
-    }
-    input.addEventListener('change', function () {
-      var file = input.files && input.files[0];
-      if (!file) return;
-      if (!/\.jpe?g$|\.png$/i.test(file.name) && file.type !== 'image/jpeg' && file.type !== 'image/png') {
-        UI.showToast('请上传 jpg 或 png 图片', 'error');
-        input.value = '';
-        return;
-      }
-      if (file.size > 2 * 1024 * 1024) {
-        UI.showToast('图片需小于 2M', 'error');
-        input.value = '';
-        return;
-      }
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        state.formIcon = String(e.target.result || '');
-        syncIconPreview();
-      };
-      reader.readAsDataURL(file);
-    });
-  })();
 
   try {
     on('queryBtn', 'click', function () {
       applyFilters();
       renderTable();
     });
-    on('addBtn', 'click', openAdd);
-
-    on('tableBody', 'click', function (e) {
-      var btn = e.target.closest('[data-action]');
-      if (!btn) return;
-      var tr = btn.closest('tr[data-id]');
-      if (!tr) return;
-      var row = findRow(tr.getAttribute('data-id'));
-      if (row && btn.getAttribute('data-action') === 'edit') openEdit(row);
-    });
-
-    document.querySelectorAll('[data-close="editModal"]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        UI.closeModal('editModal');
-      });
-    });
-    on('editSubmit', 'click', submitEdit);
-    on('editMini', 'input', function () { clearItemError('editMiniItem'); });
-    on('editTitle', 'input', function () { clearItemError('editTitleItem'); });
-    on('editZh', 'input', function () { clearItemError('editZhItem'); });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      var editModal = $('editModal');
-      if (editModal && editModal.classList.contains('is-open')) UI.closeModal('editModal');
-    });
+    on('syncBtn', 'click', syncList);
   } finally {
     applyFilters();
     renderTable();
