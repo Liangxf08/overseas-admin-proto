@@ -115,12 +115,12 @@
           <label class="form-item__label is-required">权重</label>
           <div class="form-item__control">
             <div class="input-clearable" id="editWeightWrap">
-              <input class="input" id="editWeight" type="text" inputmode="numeric" placeholder="请输入" autocomplete="off" />
+              <input class="input" id="editWeight" type="text" inputmode="numeric" maxlength="3" placeholder="0-100" autocomplete="off" />
               <button class="select-clear" type="button" id="editWeightClear" aria-label="清除">
                 <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
               </button>
             </div>
-            <div class="form-item__error">请输入权重</div>
+            <div class="form-item__error">请输入 0-100 的整数</div>
           </div>
         </div>
         <div class="form-item">

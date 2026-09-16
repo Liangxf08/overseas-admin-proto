@@ -281,8 +281,27 @@
     if (window.ColResize) ColResize.refresh($('dataTable'));
   }
 
-  function isValidWeight(text) {
-    return /^\d+$/.test(text);
+  function sanitizeWeightInput(raw) {
+    var m = String(raw == null ? '' : raw).match(/\d+/);
+    if (!m) return '';
+    var n = parseInt(m[0], 10);
+    if (!isFinite(n)) return '';
+    if (n > 100) return '100';
+    return String(n);
+  }
+
+  function applyWeightInputLimit(input) {
+    if (!input) return;
+    var next = sanitizeWeightInput(input.value);
+    if (input.value !== next) input.value = next;
+  }
+
+  function parseWeight(text) {
+    var s = (text || '').trim();
+    if (s === '' || !/^\d+$/.test(s)) return null;
+    var n = parseInt(s, 10);
+    if (!isFinite(n) || n < 0 || n > 100) return null;
+    return n;
   }
 
   function closeWeightEdit(restore) {
@@ -310,18 +329,18 @@
       return;
     }
     var text = (input.value || '').trim();
-    if (!isValidWeight(text)) {
+    var weight = parseWeight(text);
+    if (weight === null) {
       if (fromBlur) {
         closeWeightEdit(true);
-        UI.showToast('请输入非负整数', 'warning');
+        UI.showToast('请输入 0-100 的整数', 'warning');
         return;
       }
-      UI.showToast('请输入非负整数', 'warning');
+      UI.showToast('请输入 0-100 的整数', 'warning');
       input.focus();
       input.select();
       return;
     }
-    var weight = parseInt(text, 10);
     if (weight === row.weight) {
       closeWeightEdit(true);
       return;
@@ -350,11 +369,15 @@
     input.className = 'input weight-cell__input';
     input.type = 'text';
     input.inputMode = 'numeric';
+    input.maxLength = 3;
     input.setAttribute('aria-label', '权重');
     input.value = String(row.weight);
     td.appendChild(input);
     input.focus();
     input.select();
+    input.addEventListener('input', function () {
+      applyWeightInputLimit(input);
+    });
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -430,9 +453,9 @@
       setItemError('editUrlItem', true, '请输入有效的 http(s) 链接');
       hasError = true;
     }
-    var weight = parseInt(weightText, 10);
-    if (weightText === '' || !/^\d+$/.test(weightText) || !isFinite(weight)) {
-      setItemError('editWeightItem', true, '请输入非负整数');
+    var weight = parseWeight(weightText);
+    if (weight === null) {
+      setItemError('editWeightItem', true, '请输入 0-100 的整数');
       hasError = true;
     }
     if (hasError) return;
@@ -478,7 +501,10 @@
   $('addBtn').addEventListener('click', openAdd);
   $('editSubmit').addEventListener('click', submitEdit);
   $('editUrl').addEventListener('input', function () { setItemError('editUrlItem', false); });
-  $('editWeight').addEventListener('input', function () { setItemError('editWeightItem', false); });
+  $('editWeight').addEventListener('input', function () {
+    applyWeightInputLimit(this);
+    setItemError('editWeightItem', false);
+  });
 
   $('tableBody').addEventListener('click', function (e) {
     var weightBtn = e.target.closest('[data-action="edit-weight"]');
