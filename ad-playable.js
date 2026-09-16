@@ -10,19 +10,18 @@
   var escapeHtml = UI.escapeHtml;
   var PRODUCTS = Store.PRODUCTS || [];
 
-  var EDIT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
   var PLATFORM_ICONS = {
     Android: 'assets/Android.png',
     iOS: 'assets/iOS.png'
   };
 
   var ALL_ROWS = [
-    { id: '100001', productId: 'ywvt69aoqfdgyti2', url: 'https://playable.example.com/hotpot-match-3d', weight: 100, status: '启用', updatedAt: '2026-09-12 14:20:08' },
-    { id: '100002', productId: 'yw1abauttjsdlfid', url: 'https://playable.example.com/pixel-bounce-jam', weight: 80, status: '启用', updatedAt: '2026-09-10 11:06:41' },
-    { id: '100003', productId: 'ywdazzlejewel001a', url: 'https://playable.example.com/dazzle-jewel', weight: 60, status: '启用', updatedAt: '2026-09-08 16:42:19' },
-    { id: '100004', productId: 'ywbrainsortcard02', url: 'https://playable.example.com/brain-sort-card', weight: 40, status: '禁用', updatedAt: '2026-09-03 09:18:55' },
-    { id: '100005', productId: 'ywtilesort3d0003x', url: 'https://playable.example.com/tile-sort-3d', weight: 90, status: '启用', updatedAt: '2026-08-28 19:03:12' },
-    { id: '100006', productId: 'ywcaptainwave08xx', url: 'https://playable.example.com/captain-wave', weight: 20, status: '禁用', updatedAt: '2026-08-21 10:27:33' }
+    { id: '100001', productId: 'ywvt69aoqfdgyti2', url: 'https://playable.example.com/hotpot-match-3d', status: '启用', updatedAt: '2026-09-12 14:20:08' },
+    { id: '100002', productId: 'yw1abauttjsdlfid', url: 'https://playable.example.com/pixel-bounce-jam', status: '启用', updatedAt: '2026-09-10 11:06:41' },
+    { id: '100003', productId: 'ywdazzlejewel001a', url: 'https://playable.example.com/dazzle-jewel', status: '启用', updatedAt: '2026-09-08 16:42:19' },
+    { id: '100004', productId: 'ywbrainsortcard02', url: 'https://playable.example.com/brain-sort-card', status: '禁用', updatedAt: '2026-09-03 09:18:55' },
+    { id: '100005', productId: 'ywtilesort3d0003x', url: 'https://playable.example.com/tile-sort-3d', status: '启用', updatedAt: '2026-08-28 19:03:12' },
+    { id: '100006', productId: 'ywcaptainwave08xx', url: 'https://playable.example.com/captain-wave', status: '禁用', updatedAt: '2026-08-21 10:27:33' }
   ];
 
   var state = {
@@ -34,8 +33,7 @@
     editMode: 'add',
     editId: null,
     editProductId: '',
-    editStatus: '启用',
-    weightEditId: null
+    editStatus: '启用'
   };
 
   function applyFilters() {
@@ -166,11 +164,6 @@
     clearId: 'editUrlClear',
     onClear: function () { setItemError('editUrlItem', false); }
   });
-  var editWeightClear = UI.bindInputClearable({
-    wrapId: 'editWeightWrap',
-    clearId: 'editWeightClear',
-    onClear: function () { setItemError('editWeightItem', false); }
-  });
 
   $('filterProduct').addEventListener('input', function () {
     state.draft.product = this.value || '';
@@ -194,7 +187,7 @@
   }
 
   function clearEditErrors() {
-    ['editProductItem', 'editUrlItem', 'editWeightItem'].forEach(function (id) {
+    ['editProductItem', 'editUrlItem'].forEach(function (id) {
       setItemError(id, false);
     });
   }
@@ -209,7 +202,6 @@
   }
 
   function renderTable() {
-    closeWeightEdit(true);
     if (!state.applied) applyFilters();
     var rows = getFilteredRows();
     var total = rows.length;
@@ -236,14 +228,6 @@
             '<a class="playable-link" href="' + escapeHtml(row.url) + '" target="_blank" rel="noopener noreferrer">' +
               escapeHtml(row.url) +
             '</a>' +
-          '</td>' +
-          '<td class="col-weight weight-cell">' +
-            '<span class="weight-cell__inner">' +
-              '<span class="weight-cell__value">' + escapeHtml(String(row.weight)) + '</span>' +
-              '<button class="cell-edit-btn" type="button" data-action="edit-weight" aria-label="编辑权重" title="编辑">' +
-                EDIT_SVG +
-              '</button>' +
-            '</span>' +
           '</td>' +
           '<td>' + UI.statusTag(row.status) + '</td>' +
           '<td title="' + escapeHtml(row.updatedAt) + '">' + escapeHtml(row.updatedAt) + '</td>' +
@@ -281,121 +265,7 @@
     if (window.ColResize) ColResize.refresh($('dataTable'));
   }
 
-  function sanitizeWeightInput(raw) {
-    var m = String(raw == null ? '' : raw).match(/\d+/);
-    if (!m) return '';
-    var n = parseInt(m[0], 10);
-    if (!isFinite(n)) return '';
-    if (n > 100) return '100';
-    return String(n);
-  }
-
-  function applyWeightInputLimit(input) {
-    if (!input) return;
-    var next = sanitizeWeightInput(input.value);
-    if (input.value !== next) input.value = next;
-  }
-
-  function parseWeight(text) {
-    var s = (text || '').trim();
-    if (s === '' || !/^\d+$/.test(s)) return null;
-    var n = parseInt(s, 10);
-    if (!isFinite(n) || n < 0 || n > 100) return null;
-    return n;
-  }
-
-  function closeWeightEdit(restore) {
-    var id = state.weightEditId;
-    var td = document.querySelector('.weight-cell.is-editing');
-    state.weightEditId = null;
-    if (!td) return;
-    var input = td.querySelector('.weight-cell__input');
-    var row = findRow(id);
-    if (restore && row) {
-      var valueEl = td.querySelector('.weight-cell__value');
-      if (valueEl) valueEl.textContent = String(row.weight);
-    }
-    if (input) input.remove();
-    td.classList.remove('is-editing');
-  }
-
-  function commitWeightEdit(fromBlur) {
-    var td = document.querySelector('.weight-cell.is-editing');
-    var input = td && td.querySelector('.weight-cell__input');
-    var id = state.weightEditId;
-    var row = findRow(id);
-    if (!td || !input || !row) {
-      closeWeightEdit(true);
-      return;
-    }
-    var text = (input.value || '').trim();
-    var weight = parseWeight(text);
-    if (weight === null) {
-      if (fromBlur) {
-        closeWeightEdit(true);
-        UI.showToast('请输入 0-100 的整数', 'warning');
-        return;
-      }
-      UI.showToast('请输入 0-100 的整数', 'warning');
-      input.focus();
-      input.select();
-      return;
-    }
-    if (weight === row.weight) {
-      closeWeightEdit(true);
-      return;
-    }
-    row.weight = weight;
-    row.updatedAt = Store.nowText();
-    var valueEl = td.querySelector('.weight-cell__value');
-    if (valueEl) valueEl.textContent = String(weight);
-    var tr = td.parentNode;
-    var timeTd = tr && tr.children[6];
-    if (timeTd) {
-      timeTd.textContent = row.updatedAt;
-      timeTd.title = row.updatedAt;
-    }
-    closeWeightEdit(false);
-    UI.showToast('提交成功', 'success');
-  }
-
-  function startWeightEdit(td, row) {
-    if (!td || !row) return;
-    if (state.weightEditId && state.weightEditId !== row.id) commitWeightEdit();
-    if (td.classList.contains('is-editing')) return;
-    state.weightEditId = row.id;
-    td.classList.add('is-editing');
-    var input = document.createElement('input');
-    input.className = 'input weight-cell__input';
-    input.type = 'text';
-    input.inputMode = 'numeric';
-    input.maxLength = 3;
-    input.setAttribute('aria-label', '权重');
-    input.value = String(row.weight);
-    td.appendChild(input);
-    input.focus();
-    input.select();
-    input.addEventListener('input', function () {
-      applyWeightInputLimit(input);
-    });
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        commitWeightEdit(false);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        closeWeightEdit(true);
-      }
-    });
-    input.addEventListener('blur', function () {
-      setTimeout(function () {
-        if (state.weightEditId === row.id) commitWeightEdit(true);
-      }, 0);
-    });
-  }
-
   function openAdd() {
-    closeWeightEdit(true);
     state.editMode = 'add';
     state.editId = null;
     state.editProductId = '';
@@ -403,17 +273,14 @@
     clearEditErrors();
     $('editModalTitle').textContent = '添加试玩广告';
     $('editUrl').value = '';
-    $('editWeight').value = '';
     UI.setSegValue('editStatusSeg', '启用');
     fillProductPanel();
     if (editProductSelect && editProductSelect.syncLabel) editProductSelect.syncLabel('');
     if (editUrlClear) editUrlClear.sync();
-    if (editWeightClear) editWeightClear.sync();
     UI.openModal('editModal');
   }
 
   function openEdit(row) {
-    closeWeightEdit(true);
     state.editMode = 'edit';
     state.editId = row.id;
     state.editProductId = row.productId;
@@ -421,12 +288,10 @@
     clearEditErrors();
     $('editModalTitle').textContent = '编辑试玩广告';
     $('editUrl').value = row.url || '';
-    $('editWeight').value = String(row.weight);
     UI.setSegValue('editStatusSeg', state.editStatus);
     fillProductPanel();
     if (editProductSelect && editProductSelect.syncLabel) editProductSelect.syncLabel(state.editProductId);
     if (editUrlClear) editUrlClear.sync();
-    if (editWeightClear) editWeightClear.sync();
     UI.openModal('editModal');
   }
 
@@ -438,7 +303,6 @@
     clearEditErrors();
     var productId = state.editProductId || '';
     var url = ($('editUrl').value || '').trim();
-    var weightText = ($('editWeight').value || '').trim();
     var status = state.editStatus || '启用';
     var hasError = false;
 
@@ -453,11 +317,6 @@
       setItemError('editUrlItem', true, '请输入有效的 http(s) 链接');
       hasError = true;
     }
-    var weight = parseWeight(weightText);
-    if (weight === null) {
-      setItemError('editWeightItem', true, '请输入 0-100 的整数');
-      hasError = true;
-    }
     if (hasError) return;
 
     var now = Store.nowText();
@@ -466,7 +325,6 @@
         id: nextId(),
         productId: productId,
         url: url,
-        weight: weight,
         status: status,
         updatedAt: now
       });
@@ -476,7 +334,6 @@
       if (!row) return;
       row.productId = productId;
       row.url = url;
-      row.weight = weight;
       row.status = status;
       row.updatedAt = now;
       UI.showToast('提交成功', 'success');
@@ -501,22 +358,8 @@
   $('addBtn').addEventListener('click', openAdd);
   $('editSubmit').addEventListener('click', submitEdit);
   $('editUrl').addEventListener('input', function () { setItemError('editUrlItem', false); });
-  $('editWeight').addEventListener('input', function () {
-    applyWeightInputLimit(this);
-    setItemError('editWeightItem', false);
-  });
 
   $('tableBody').addEventListener('click', function (e) {
-    var weightBtn = e.target.closest('[data-action="edit-weight"]');
-    if (weightBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      var weightTd = weightBtn.closest('.weight-cell');
-      var weightTr = weightBtn.closest('tr[data-id]');
-      var weightRow = weightTr ? findRow(weightTr.getAttribute('data-id')) : null;
-      if (weightTd && weightRow) startWeightEdit(weightTd, weightRow);
-      return;
-    }
     var btn = e.target.closest('[data-action="edit"]');
     if (!btn) return;
     var tr = btn.closest('tr[data-id]');

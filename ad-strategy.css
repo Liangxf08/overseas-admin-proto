@@ -33,64 +33,6 @@
   white-space: nowrap;
 }
 
-.data-table th.col-weight,
-.data-table td.col-weight {
-  text-align: left;
-  font-variant-numeric: tabular-nums;
-}
-
-.weight-cell__inner {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
-}
-
-.weight-cell__value {
-  min-width: 0;
-}
-
-.weight-cell .cell-edit-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: var(--border-radius-medium, 4px);
-  background: transparent;
-  color: var(--color-text-3, #86909C);
-  cursor: pointer;
-}
-
-.weight-cell .cell-edit-btn svg {
-  width: 14px;
-  height: 14px;
-}
-
-.weight-cell .cell-edit-btn:hover {
-  color: var(--color-primary, #165DFF);
-  background: var(--color-gray-hover, #F5F7FA);
-}
-
-.weight-cell:hover:not(.is-editing) .cell-edit-btn {
-  display: inline-flex;
-}
-
-.weight-cell.is-editing .weight-cell__inner {
-  display: none;
-}
-
-.weight-cell__input {
-  width: 72px;
-  height: 28px;
-  padding: 0 8px;
-}
-
-
 .data-table .col-action { width: 200px; }
 
 .data-table th.col-num,
