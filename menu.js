@@ -101,10 +101,11 @@
         title: '广告策略',
         icon: ICONS.ad,
         children: [
-          { key: 'ad-field-config', label: '字段配置', href: 'ad-field-config.html' },
-          { key: 'ad-scene', label: '场景管理', href: 'ad-scene.html' },
+          { key: 'ad-playable', label: '试玩广告', href: 'ad-playable.html' },
+          { key: 'ad-strategy', label: '广告策略', href: 'ad-strategy.html' },
           { key: 'ad-agg-app', label: '聚合应用', href: 'ad-agg-app.html' },
-          { key: 'ad-strategy', label: '广告策略', href: 'ad-strategy.html' }
+          { key: 'ad-scene', label: '场景管理', href: 'ad-scene.html' },
+          { key: 'ad-field-config', label: '字段配置', href: 'ad-field-config.html' }
         ]
       },
       {
@@ -173,10 +174,11 @@
     'platform-config': { module: 'product', header: '产品' },
     'plugin-config': { module: 'product', header: '产品' },
     'developer-account': { module: 'product', header: '产品' },
-    'ad-field-config': { module: 'product', header: '产品' },
-    'ad-scene': { module: 'product', header: '产品' },
-    'ad-agg-app': { module: 'product', header: '产品' },
+    'ad-playable': { module: 'product', header: '产品' },
     'ad-strategy': { module: 'product', header: '产品' },
+    'ad-agg-app': { module: 'product', header: '产品' },
+    'ad-scene': { module: 'product', header: '产品' },
+    'ad-field-config': { module: 'product', header: '产品' },
     'tiktok-accounts': { module: 'product', header: '产品' },
     'tiktok-grant': { module: 'product', header: '产品' },
 

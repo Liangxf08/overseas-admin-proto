@@ -1,4 +1,95 @@
-/* 广告策略目录 · 四页共用特例 */
+/* 广告策略目录 · 共用特例 */
+
+.empty-page-tip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  color: var(--color-text-3, #86909C);
+  font-size: 14px;
+}
+
+.playable-link {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  color: var(--color-link-6, var(--color-primary));
+}
+.playable-link:hover { opacity: 0.85; }
+
+#editProductWrap .select-trigger__text,
+#editProductPanel .single-option {
+  gap: 8px;
+}
+
+#editProductPanel .single-option .select-option-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table th.col-weight,
+.data-table td.col-weight {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-cell__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.weight-cell__value {
+  min-width: 0;
+}
+
+.weight-cell .cell-edit-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--border-radius-medium, 4px);
+  background: transparent;
+  color: var(--color-text-3, #86909C);
+  cursor: pointer;
+}
+
+.weight-cell .cell-edit-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.weight-cell .cell-edit-btn:hover {
+  color: var(--color-primary, #165DFF);
+  background: var(--color-gray-hover, #F5F7FA);
+}
+
+.weight-cell:hover:not(.is-editing) .cell-edit-btn {
+  display: inline-flex;
+}
+
+.weight-cell.is-editing .weight-cell__inner {
+  display: none;
+}
+
+.weight-cell__input {
+  width: 72px;
+  height: 28px;
+  padding: 0 8px;
+}
+
 
 .data-table .col-action { width: 200px; }
 
@@ -61,9 +152,17 @@
   margin-top: 0;
 }
 
+.field-type-seg {
+  flex-wrap: nowrap;
+}
+
 .field-type-seg .seg__item {
   min-width: 72px;
   padding: 0 10px;
+}
+
+.param-table select.input {
+  cursor: pointer;
 }
 
 .param-table th .req {
@@ -86,6 +185,141 @@
 
 .form-item--top .form-item__label {
   align-self: flex-start;
+}
+
+#editModal .form-divider {
+  height: 1px;
+  margin: 4px 0 20px;
+  background: var(--color-border-2, #E5E6EB);
+}
+
+#editModal .form-item[hidden] {
+  display: none !important;
+}
+
+#editModal .array-block[hidden] {
+  display: none !important;
+}
+
+#editModal .array-block {
+  position: relative;
+  margin: 0 0 20px;
+}
+
+#editModal .array-block .param-table-wrap {
+  max-height: 360px;
+  overflow: auto;
+}
+
+#editModal .array-block .form-item__error {
+  position: static;
+  display: none;
+  margin-top: 8px;
+}
+
+#editModal .array-block.is-error .form-item__error {
+  display: block;
+}
+
+.array-table .child-config {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.array-table .child-config .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.array-table .array-empty {
+  height: 48px;
+  text-align: center;
+  color: var(--color-text-3, #86909C);
+}
+
+.array-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.array-add-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.child-opt-btn {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border-2, #E5E6EB);
+  border-radius: var(--border-radius-medium, 4px);
+  background: #fff;
+  color: var(--color-primary, #165DFF);
+  font-size: 14px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.child-opt-btn:hover {
+  border-color: var(--color-primary, #165DFF);
+}
+
+#childOptionsModal {
+  z-index: 1100;
+}
+
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-row .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.option-row.is-dragging {
+  opacity: 0.45;
+}
+
+.option-row.is-drop-target {
+  outline: 1px dashed var(--color-primary, #165DFF);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-medium, 4px);
+}
+
+.option-drag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--color-text-3, #86909C);
+  cursor: grab;
+  user-select: none;
+}
+
+.option-drag:hover { color: var(--color-primary, #165DFF); }
+.option-drag:active { cursor: grabbing; }
+.option-drag svg {
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.option-row .link--danger {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .form-item__hint {

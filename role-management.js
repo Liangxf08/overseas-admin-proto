@@ -77,10 +77,11 @@
           id: 'ad-strategy',
           name: '广告策略',
           children: [
-            { id: 'ad-field', name: '字段配置' },
-            { id: 'ad-scene', name: '场景管理' },
+            { id: 'ad-playable', name: '试玩广告' },
+            { id: 'ad-policy', name: '广告策略' },
             { id: 'ad-agg', name: '聚合应用' },
-            { id: 'ad-policy', name: '广告策略' }
+            { id: 'ad-scene', name: '场景管理' },
+            { id: 'ad-field', name: '字段配置' }
           ]
         }
       ]
