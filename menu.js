@@ -114,7 +114,8 @@
         icon: ICONS.asset,
         children: [
           { key: 'tiktok-accounts', label: 'Tiktok账户', href: 'tiktok-accounts.html' },
-          { key: 'tiktok-grant', label: 'TikTok赠款', href: 'tiktok-grant.html' }
+          { key: 'tiktok-grant', label: 'TikTok赠款', href: 'tiktok-grant.html' },
+          { key: 'tiktok-transactions', label: 'TikTok交易', href: 'tiktok-transactions.html' }
         ]
       }
     ],
@@ -181,6 +182,7 @@
     'ad-field-config': { module: 'product', header: '产品' },
     'tiktok-accounts': { module: 'product', header: '产品' },
     'tiktok-grant': { module: 'product', header: '产品' },
+    'tiktok-transactions': { module: 'product', header: '产品' },
 
     'material-library': { module: 'material', header: '素材' },
     'template-library': { module: 'material', header: '素材' },

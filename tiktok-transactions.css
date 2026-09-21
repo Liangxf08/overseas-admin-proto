@@ -1,0 +1,33 @@
+/* TikTok 交易 · 页内特例（公共壳见 product-common） */
+
+td.col-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+td.col-num.is-negative {
+  color: var(--color-danger-6, #F53F3F);
+}
+
+th.col-num {
+  text-align: right;
+}
+
+th.col-num .th-sort {
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.summary-row td {
+  background: var(--color-fill-1, #F7F8FA);
+  font-weight: 600;
+}
+
+.data-table tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--color-fill-1, #F7F8FA);
+  font-weight: 600;
+  border-top: 1px solid var(--color-border-2, #E5E6EB);
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TikTok交易 - 海外中台</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <link rel="stylesheet" href="product-common.css" />
+  <link rel="stylesheet" href="tiktok-transactions.css" />
+  <link rel="stylesheet" href="col-resize.css" />
+</head>
+<body>
+  <div class="app" id="appShell">
+    <main class="main" data-main>
+      <div class="content-card">
+        <div class="filter-bar" id="filterBar">
+          <div class="filter-item filter-item--date" id="dateRangeWrap">
+            <button class="date-range-trigger" type="button" id="dateRangeTrigger">
+              <span class="date-range-trigger__text" id="dateRangeLabel">日期：-</span>
+            </button>
+            <div class="date-panel" id="datePanel">
+              <div class="date-panel__shortcuts" id="dateShortcuts">
+                <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
+                <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
+                <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
+                <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
+              </div>
+              <div class="date-panel__calendars">
+                <div class="date-cal" id="dateCalLeft"></div>
+                <div class="date-cal" id="dateCalRight"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item">
+            <div class="input-clearable" id="accountKeywordWrap">
+              <input class="input" id="accountKeyword" type="text" placeholder="账户名称/ID" autocomplete="off" />
+              <button class="select-clear" type="button" id="accountKeywordClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-item" id="typeWrap">
+            <button class="select-trigger" type="button" id="typeTrigger">
+              <span class="select-trigger__text" id="typeLabel">交易类型：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <div class="multi-panel" id="typePanel">
+              <div class="multi-panel__left">
+                <div class="multi-panel__search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                  <input type="text" id="typeSearch" placeholder="搜索" autocomplete="off" />
+                </div>
+                <div class="multi-panel__toolbar">
+                  <button class="multi-panel__link" type="button" id="typeSelectAll">全选</button>
+                </div>
+                <div class="multi-panel__list" id="typeList"></div>
+              </div>
+              <div class="multi-panel__right">
+                <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                  <span id="typeCount">已选择 0 项</span>
+                  <button class="multi-panel__link" type="button" id="typeClear">清空</button>
+                </div>
+                <div class="multi-panel__list" id="typeSelected"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button class="btn btn--default" type="button" id="resetBtn">重置</button>
+            <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
+            <button class="btn btn--default" type="button" id="exportBtn">导出</button>
+          </div>
+        </div>
+
+        <div class="data-panel" id="dataPanel">
+          <div class="table-shell">
+            <div class="table-wrap">
+              <table class="data-table" id="txnTable">
+                <colgroup>
+                  <col data-col-width="200" />
+                  <col data-col-width="200" />
+                  <col data-col-width="180" />
+                  <col data-col-width="112" />
+                  <col data-col-width="120" />
+                  <col data-col-width="180" />
+                  <col data-col-width="120" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>账户名称</th>
+                    <th>账户ID</th>
+                    <th>交易类型</th>
+                    <th class="col-num"><span class="th-sort" data-key="amount">金额<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
+                    <th>账单类型</th>
+                    <th><span class="th-sort" data-key="create_time">交易时间<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
+                    <th>交易时区</th>
+                  </tr>
+                </thead>
+                <tbody id="txnBody"></tbody>
+                <tfoot id="txnFoot"></tfoot>
+              </table>
+              <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
+            </div>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="page-msg page-msg--success" id="pageMsg" role="status" aria-live="polite"></div>
+
+  <script src="product-common.js"></script>
+  <script src="menu.js"></script>
+  <script src="product-sidebar.js"></script>
+  <script src="tiktok-transactions.js"></script>
+  <script src="col-resize.js"></script>
+</body>
+</html>
