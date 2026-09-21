@@ -9,11 +9,15 @@
 .col-metric { width: 10%; }
 
 #detailTable .col-datetime {
-  width: 15%;
   text-align: left;
   padding-left: 12px;
   padding-right: 12px;
   box-sizing: border-box;
+}
+
+#detailTable .empty-row td {
+  text-align: center;
+  color: var(--color-text-3, #86909C);
 }
 
 #detailTable th.col-datetime .th-sort {
@@ -103,7 +107,7 @@ th.col-action {
 }
 
 .drawer-filter .filter-item {
-  width: 160px;
+  width: 200px;
 }
 
 /* 赠款详情：Body 不整体滚，表格区域框高、表内滚动 */

@@ -2484,6 +2484,50 @@ th.col-action { z-index: 3; background: var(--color-fill-1, #F7F8FA); }
 .drawer-mask.is-open .drawer,
 .drawer.is-open { transform: translateX(0); }
 
+/* 抽屉可拉伸宽度（opt-in：.drawer--resizable） */
+.drawer__resize {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 6;
+  user-select: none;
+  touch-action: none;
+}
+
+.drawer__resize::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.drawer__resize:hover::after,
+.drawer__resize.is-active::after,
+.drawer.is-resizing .drawer__resize::after {
+  background: var(--color-primary, #165DFF);
+}
+
+.drawer.is-resizing {
+  transition: none;
+}
+
+body.is-drawer-resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.is-drawer-resizing * {
+  cursor: col-resize !important;
+}
+
 .drawer__header {
   display: flex;
   align-items: center;

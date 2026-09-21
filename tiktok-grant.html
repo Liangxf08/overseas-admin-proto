@@ -112,7 +112,7 @@
   </div>
 
   <div class="drawer-mask" id="detailDrawer" aria-hidden="true">
-    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <aside class="drawer drawer--resizable" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
       <div class="drawer__header">
         <h2 class="drawer__title" id="drawerTitle">赠款详情</h2>
         <button class="drawer__close" type="button" id="drawerClose" aria-label="关闭">
@@ -122,33 +122,66 @@
       <div class="drawer__body">
         <div class="drawer__meta" id="drawerMeta"></div>
         <div class="drawer-filter">
-          <div class="filter-item" id="detailTypeWrap">
-            <button class="select-trigger" type="button" id="detailTypeTrigger">
-              <span class="select-trigger__text" id="detailTypeLabel">All</span>
+          <div class="filter-item" id="detailStatusWrap">
+            <button class="select-trigger" type="button" id="detailStatusTrigger">
+              <span class="select-trigger__text" id="detailStatusLabel">状态：<span class="muted">请选择</span></span>
               <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
             </button>
-            <input type="hidden" id="detailTypeFilter" value="All" />
-            <div class="single-panel" id="detailTypePanel">
-              <button class="single-option is-active" type="button" data-value="All">All</button>
-              <button class="single-option" type="button" data-value="免费">免费</button>
-              <button class="single-option" type="button" data-value="可分配">可分配</button>
-              <button class="single-option" type="button" data-value="附条件">附条件</button>
+            <button class="select-clear" type="button" id="detailStatusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="detailStatusPanel">
+              <button class="single-option is-active" type="button" data-value="">全部</button>
+              <button class="single-option" type="button" data-value="可兑换">可兑换</button>
+              <button class="single-option" type="button" data-value="已使用">已使用</button>
+            </div>
+          </div>
+          <div class="filter-item" id="detailPeriodWrap">
+            <button class="select-trigger" type="button" id="detailPeriodTrigger">
+              <span class="select-trigger__text" id="detailPeriodLabel">有效周期：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="detailPeriodClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="detailPeriodPanel">
+              <button class="single-option is-active" type="button" data-value="">全部</button>
+              <button class="single-option" type="button" data-value="季度">季度</button>
+              <button class="single-option" type="button" data-value="半年度">半年度</button>
+              <button class="single-option" type="button" data-value="年度">年度</button>
+              <button class="single-option" type="button" data-value="长期">长期</button>
             </div>
           </div>
         </div>
         <div class="table-shell">
           <div class="table-wrap">
             <table class="data-table" id="detailTable">
+              <colgroup>
+                <col data-col-width="140" />
+                <col data-col-width="180" />
+                <col data-col-width="100" />
+                <col data-col-width="88" />
+                <col data-col-width="112" />
+                <col data-col-width="112" />
+                <col data-col-width="112" />
+                <col data-col-width="180" />
+                <col data-col-width="180" />
+                <col data-col-width="100" />
+                <col data-col-width="100" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th style="width:15%">优惠券名</th>
-                  <th style="width:15%">优惠券码</th>
-                  <th style="width:10%">类型</th>
+                  <th>优惠券名</th>
+                  <th>优惠券码</th>
+                  <th>状态</th>
+                  <th>类型</th>
                   <th class="col-metric col-num"><span class="th-sort" data-key="total_balance">总金额<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
                   <th class="col-metric col-num"><span class="th-sort" data-key="used_balance">已使用<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
                   <th class="col-metric col-num"><span class="th-sort" data-key="valid_balance">未使用<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
                   <th class="col-datetime"><span class="th-sort" data-key="issue_time">兑换日期<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
                   <th class="col-datetime"><span class="th-sort" data-key="valid_end_time">失效日期<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
+                  <th class="col-num"><span class="th-sort" data-key="valid_months">有效月份<span class="th-sort__icons"><button type="button" class="th-sort__dir asc" data-sort-dir="asc" aria-label="升序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 1L9 7H1Z" fill="currentColor"/></svg></button><button type="button" class="th-sort__dir desc" data-sort-dir="desc" aria-label="降序"><svg viewBox="0 0 10 8" aria-hidden="true"><path d="M5 7L1 1h8Z" fill="currentColor"/></svg></button></span></span></th>
+                  <th>有效周期</th>
                 </tr>
               </thead>
               <tbody id="detailBody"></tbody>
@@ -174,8 +207,10 @@
       const copyText = UI.copyText;
       const closePanels = UI.closePanels;
       let optimizerMulti = null;
-      let detailType = 'All';
-      let detailTypeSelect = null;
+      let detailStatus = '';
+      let detailPeriod = '';
+      let detailStatusSelect = null;
+      let detailPeriodSelect = null;
       let mainThSort = null;
       let detailThSort = null;
 
@@ -191,10 +226,64 @@
         return num(v).toFixed(2);
       }
 
+      function pad2(n) {
+        return n < 10 ? '0' + n : String(n);
+      }
+
+      function parseCouponDate(str) {
+        if (!str) return null;
+        const d = new Date(String(str).replace(/-/g, '/'));
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+
+      function formatDateTime(d, endOfDay) {
+        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())
+          + ' ' + (endOfDay ? '23:59:59' : '10:00:00');
+      }
+
+      function addDays(dateStr, days) {
+        const d = parseCouponDate(dateStr);
+        if (!d) return dateStr;
+        d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+        return formatDateTime(d, true);
+      }
+
+      function calcValidMonths(issueTime, endTime) {
+        const start = parseCouponDate(issueTime);
+        const end = parseCouponDate(endTime);
+        if (!start || !end) return 0;
+        const days = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
+        return Math.round(days / 30);
+      }
+
+      function calcValidPeriod(months) {
+        if (months <= 3) return '季度';
+        if (months <= 6) return '半年度';
+        if (months <= 12) return '年度';
+        return '长期';
+      }
+
+      function enrichCoupon(c) {
+        const months = calcValidMonths(c.issue_time, c.valid_end_time);
+        c.valid_months = months;
+        c.valid_period = calcValidPeriod(months);
+        c.coupon_status = num(c.valid_balance) > 0 ? '可兑换' : '已使用';
+        return c;
+      }
+
+      function couponStatusTag(status) {
+        const cls = status === '可兑换' ? 'tag tag--enabled' : 'tag tag--ignored';
+        return `<span class="${cls}">${escapeHtml(status)}</span>`;
+      }
+
       const typeNames = ['免费', '附条件', '可分配'];
+      const PERIOD_DAYS = [90, 150, 270, 450, 60, 180, 360, 730];
       const baseCoupons = Array.from({ length: 28 }, (_, i) => {
         const total = 1000 + i * 450.25;
-        const used = total * ((i % 7) + 1) / 10;
+        let used = total * ((i % 7) + 1) / 10;
+        if (i % 7 === 2) used = 0;
+        if (i % 5 === 4) used = total;
+        const issueTime = `2026-0${(i % 6) + 1}-${String((i % 27) + 1).padStart(2, '0')} 10:00:00`;
         return {
           coupon_activity_name: i === 0 ? '勇往Q5' : `赠款活动_${String(i + 1).padStart(2, '0')}`,
           coupon_code: i === 0 ? 'GKCGPMPGFFAGKPDJ' : `TTGRANT${String(1000 + i)}`,
@@ -202,8 +291,8 @@
           total_balance: Number(total.toFixed(2)),
           used_balance: Number(used.toFixed(2)),
           valid_balance: Number((total - used).toFixed(2)),
-          issue_time: `2026-0${(i % 6) + 1}-${String((i % 27) + 1).padStart(2, '0')} 10:00:00`,
-          valid_end_time: `2026-1${(i % 2)}-${String((i % 27) + 1).padStart(2, '0')} 23:59:59`,
+          issue_time: issueTime,
+          valid_end_time: addDays(issueTime, PERIOD_DAYS[i % PERIOD_DAYS.length]),
         };
       });
       baseCoupons[0].total_balance = 50000;
@@ -217,18 +306,25 @@
       baseCoupons[1].total_balance = 10000;
       baseCoupons[1].used_balance = 4799.5;
       baseCoupons[1].valid_balance = 5200.5;
+      baseCoupons[1].issue_time = '2026-04-01 10:00:00';
+      baseCoupons[1].valid_end_time = addDays(baseCoupons[1].issue_time, 150);
       baseCoupons[2].coupon_activity_name = '充值返赠';
       baseCoupons[2].coupon_code = 'TTRECHARGECOND01';
       baseCoupons[2].ad_credit_type_name = '附条件';
       baseCoupons[2].total_balance = 3000;
       baseCoupons[2].used_balance = 0;
       baseCoupons[2].valid_balance = 3000;
+      baseCoupons[2].issue_time = '2026-01-15 10:00:00';
+      baseCoupons[2].valid_end_time = addDays(baseCoupons[2].issue_time, 360);
       baseCoupons[3].coupon_activity_name = '可分配额度包';
       baseCoupons[3].coupon_code = 'TTALLOCATABLE01';
       baseCoupons[3].ad_credit_type_name = '可分配';
       baseCoupons[3].total_balance = 8000;
-      baseCoupons[3].used_balance = 1200;
-      baseCoupons[3].valid_balance = 6800;
+      baseCoupons[3].used_balance = 8000;
+      baseCoupons[3].valid_balance = 0;
+      baseCoupons[3].issue_time = '2025-03-01 10:00:00';
+      baseCoupons[3].valid_end_time = addDays(baseCoupons[3].issue_time, 450);
+      baseCoupons.forEach(enrichCoupon);
 
       const today = (() => {
         const d = new Date();
@@ -465,7 +561,7 @@
         return UI.sortRowsBySpecs(rows, specs, (a, b, key) => {
           const av = a[key];
           const bv = b[key];
-          if (typeof av === 'number' || typeof bv === 'number' || key.indexOf('balance') !== -1) {
+          if (typeof av === 'number' || typeof bv === 'number' || key.indexOf('balance') !== -1 || key === 'valid_months') {
             return num(av) - num(bv);
           }
           return String(av).localeCompare(String(bv), 'zh');
@@ -473,9 +569,9 @@
       }
 
       function renderDetailTable() {
-        const type = detailType;
         let rows = (currentDetailRow && currentDetailRow.coupons) ? currentDetailRow.coupons.slice() : [];
-        if (type && type !== 'All') rows = rows.filter((c) => c.ad_credit_type_name === type);
+        if (detailStatus) rows = rows.filter((c) => c.coupon_status === detailStatus);
+        if (detailPeriod) rows = rows.filter((c) => c.valid_period === detailPeriod);
         detailRows = applyDetailSort(rows);
         const total = detailRows.length;
         const start = (detailPage - 1) * detailPageSize;
@@ -483,19 +579,22 @@
         const body = document.getElementById('detailBody');
         const foot = document.getElementById('detailFoot');
         if (!total) {
-          body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#86909C">暂无优惠券明细</td></tr>';
+          body.innerHTML = '<tr class="empty-row"><td colspan="11">暂无优惠券明细</td></tr>';
           foot.innerHTML = '';
         } else {
           body.innerHTML = pageRows.map((c) => `
             <tr>
               <td title="${escapeHtml(c.coupon_activity_name)}">${escapeHtml(c.coupon_activity_name)}</td>
               <td title="${escapeHtml(c.coupon_code)}">${escapeHtml(c.coupon_code)}</td>
+              <td>${couponStatusTag(c.coupon_status)}</td>
               <td>${escapeHtml(c.ad_credit_type_name)}</td>
               <td class="col-num">${formatNum(c.total_balance)}</td>
               <td class="col-num">${formatNum(c.used_balance)}</td>
               <td class="col-num">${formatNum(c.valid_balance)}</td>
               <td class="col-datetime" title="${escapeHtml(c.issue_time)}">${escapeHtml(c.issue_time)}</td>
               <td class="col-datetime" title="${escapeHtml(c.valid_end_time)}">${escapeHtml(c.valid_end_time)}</td>
+              <td class="col-num">${escapeHtml(String(c.valid_months))}</td>
+              <td>${escapeHtml(c.valid_period)}</td>
             </tr>
           `).join('');
           foot.innerHTML = `
@@ -503,11 +602,14 @@
               <td>汇总</td>
               <td>-</td>
               <td>-</td>
+              <td>-</td>
               <td class="col-num">${formatNum(sumField(detailRows, 'total_balance'))}</td>
               <td class="col-num">${formatNum(sumField(detailRows, 'used_balance'))}</td>
               <td class="col-num">${formatNum(sumField(detailRows, 'valid_balance'))}</td>
               <td class="col-datetime">-</td>
               <td class="col-datetime">-</td>
+              <td class="col-num">-</td>
+              <td>-</td>
             </tr>
           `;
         }
@@ -522,10 +624,11 @@
         );
       }
 
-      function setDetailType(value) {
-        detailType = value || 'All';
-        document.getElementById('detailTypeFilter').value = detailType;
-        if (detailTypeSelect) detailTypeSelect.syncLabel(detailType);
+      function resetDetailFilters() {
+        detailStatus = '';
+        detailPeriod = '';
+        if (detailStatusSelect) detailStatusSelect.syncLabel('');
+        if (detailPeriodSelect) detailPeriodSelect.syncLabel('');
       }
 
       function openDrawer(row) {
@@ -533,7 +636,7 @@
         detailSort = { specs: [], key: '', dir: '' };
         detailPage = 1;
         detailPageSize = 20;
-        setDetailType('All');
+        resetDetailFilters();
         document.getElementById('drawerMeta').innerHTML =
           `账户名称：<strong>${escapeHtml(row.account_name)}</strong>　账户ID：<strong>${escapeHtml(row.account_id)}</strong>　优化师：<strong>${escapeHtml(row.optimizer)}</strong>`;
         renderDetailTable();
@@ -575,16 +678,31 @@
           setSelected: function (v) { selectedOptimizers = v; }
         });
 
-        detailTypeSelect = UI.bindSingleSelect({
-          wrapId: 'detailTypeWrap',
-          triggerId: 'detailTypeTrigger',
-          panelId: 'detailTypePanel',
-          labelId: 'detailTypeLabel',
-          prefix: '',
-          getValue: function () { return detailType; },
+        detailStatusSelect = UI.bindSingleSelect({
+          wrapId: 'detailStatusWrap',
+          triggerId: 'detailStatusTrigger',
+          panelId: 'detailStatusPanel',
+          labelId: 'detailStatusLabel',
+          clearId: 'detailStatusClear',
+          prefix: '状态：',
+          getValue: function () { return detailStatus; },
           onChange: function (v) {
-            detailType = v || 'All';
-            document.getElementById('detailTypeFilter').value = detailType;
+            detailStatus = v || '';
+            detailPage = 1;
+            renderDetailTable();
+          }
+        });
+
+        detailPeriodSelect = UI.bindSingleSelect({
+          wrapId: 'detailPeriodWrap',
+          triggerId: 'detailPeriodTrigger',
+          panelId: 'detailPeriodPanel',
+          labelId: 'detailPeriodLabel',
+          clearId: 'detailPeriodClear',
+          prefix: '有效周期：',
+          getValue: function () { return detailPeriod; },
+          onChange: function (v) {
+            detailPeriod = v || '';
             detailPage = 1;
             renderDetailTable();
           }

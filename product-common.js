@@ -223,6 +223,95 @@
     }
   }
 
+  function bindDrawerResize(drawer) {
+    if (!drawer || drawer.getAttribute('data-resize-bound') === '1') return;
+    drawer.setAttribute('data-resize-bound', '1');
+
+    var handle = drawer.querySelector('.drawer__resize');
+    if (!handle) {
+      handle = document.createElement('div');
+      handle.className = 'drawer__resize';
+      handle.setAttribute('role', 'separator');
+      handle.setAttribute('aria-orientation', 'vertical');
+      handle.setAttribute('aria-label', '调整抽屉宽度');
+      drawer.insertBefore(handle, drawer.firstChild);
+    }
+
+    var storageKey = 'oa-drawer-width:' + ((drawer.parentElement && drawer.parentElement.id) || drawer.id || '');
+
+    function maxWidth() {
+      return Math.max(320, window.innerWidth - 32);
+    }
+
+    function minWidth() {
+      return Math.min(480, maxWidth());
+    }
+
+    function clamp(w) {
+      return Math.round(Math.min(maxWidth(), Math.max(minWidth(), w)));
+    }
+
+    function applyWidth(w) {
+      drawer.style.width = clamp(w) + 'px';
+    }
+
+    function syncTables() {
+      if (!global.ColResize || !global.ColResize.syncTableWidth) return;
+      drawer.querySelectorAll('table.data-table').forEach(function (table) {
+        global.ColResize.syncTableWidth(table);
+      });
+    }
+
+    var saved = 0;
+    try {
+      saved = parseFloat(sessionStorage.getItem(storageKey) || '');
+    } catch (err) {}
+    if (saved > 0) applyWidth(saved);
+
+    handle.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var startX = e.clientX;
+      var startW = drawer.getBoundingClientRect().width;
+      drawer.classList.add('is-resizing');
+      document.body.classList.add('is-drawer-resizing');
+      handle.classList.add('is-active');
+      try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+
+      function onMove(ev) {
+        applyWidth(startW + (startX - ev.clientX));
+        syncTables();
+      }
+
+      function onUp(ev) {
+        handle.removeEventListener('pointermove', onMove);
+        handle.removeEventListener('pointerup', onUp);
+        handle.removeEventListener('pointercancel', onUp);
+        try { handle.releasePointerCapture(ev.pointerId); } catch (err) {}
+        drawer.classList.remove('is-resizing');
+        document.body.classList.remove('is-drawer-resizing');
+        handle.classList.remove('is-active');
+        var w = Math.round(drawer.getBoundingClientRect().width);
+        try { sessionStorage.setItem(storageKey, String(w)); } catch (err) {}
+        syncTables();
+      }
+
+      handle.addEventListener('pointermove', onMove);
+      handle.addEventListener('pointerup', onUp);
+      handle.addEventListener('pointercancel', onUp);
+    });
+
+    window.addEventListener('resize', function () {
+      var w = drawer.getBoundingClientRect().width;
+      if (!w) return;
+      applyWidth(w);
+      if (drawer.classList.contains('is-open') || (drawer.parentElement && drawer.parentElement.classList.contains('is-open'))) {
+        syncTables();
+      }
+    });
+  }
+
   function openDrawer(maskId, drawerId) {
     var mask = $(maskId);
     var drawer = drawerId ? $(drawerId) : (mask && mask.querySelector('.drawer'));
@@ -232,6 +321,7 @@
     }
     if (drawer) drawer.classList.add('is-open');
     document.body.classList.add('modal-open', 'drawer-open');
+    if (drawer && drawer.classList.contains('drawer--resizable')) bindDrawerResize(drawer);
     requestAnimationFrame(function () {
       var root = drawer || mask;
       if (global.ColResize && root) global.ColResize.initAll(root);
@@ -1570,6 +1660,7 @@
     openModal: openModal,
     closeModal: closeModal,
     openDrawer: openDrawer,
+    bindDrawerResize: bindDrawerResize,
     enableColumnResize: enableColumnResize,
     initColumnResizeAll: initColumnResizeAll,
     closeDrawer: closeDrawer,
