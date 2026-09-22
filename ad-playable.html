@@ -39,6 +39,17 @@
             <button class="btn btn--default" type="button" id="resetBtn">重置</button>
             <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
             <button class="btn btn--success" type="button" id="addBtn">添加</button>
+            <button class="btn btn--success" type="button" id="importBtn">导入</button>
+            <div class="batch-wrap" id="batchWrap">
+              <button class="btn btn--default btn--dropdown" type="button" id="batchBtn" disabled>
+                批量操作
+                <svg class="btn__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="batch-menu" id="batchMenu" role="menu">
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="status">修改状态</button>
+                <button class="batch-menu__item" type="button" role="menuitem" data-batch="delete">批量删除</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -47,16 +58,22 @@
             <div class="table-wrap">
               <table class="data-table" id="dataTable">
                 <colgroup>
+                  <col class="col-check" data-col-width="48" />
                   <col data-col-width="100" />
                   <col data-col-width="220" />
                   <col data-col-width="90" />
                   <col data-col-width="280" />
                   <col data-col-width="100" />
                   <col data-col-width="180" />
-                  <col data-col-width="120" />
+                  <col data-col-width="140" />
                 </colgroup>
                 <thead>
                   <tr>
+                    <th class="col-check">
+                      <label class="cell-check">
+                        <input type="checkbox" id="checkAll" aria-label="全选" />
+                      </label>
+                    </th>
                     <th>ID</th>
                     <th>产品</th>
                     <th>平台</th>
@@ -122,6 +139,105 @@
       <div class="modal__footer">
         <button class="btn btn--default" type="button" data-close="editModal">取消</button>
         <button class="btn btn--primary" type="button" id="editSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="batchStatusModal" aria-hidden="true">
+    <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchStatusTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="batchStatusTitle">修改状态</div>
+        <button class="modal__close" type="button" data-close="batchStatusModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-item">
+          <label class="form-item__label">状态</label>
+          <div class="form-item__control">
+            <div class="seg" id="batchStatusSeg" role="group" aria-label="状态">
+              <button type="button" class="seg__item is-active" data-value="启用">启用</button>
+              <button type="button" class="seg__item" data-value="禁用">禁用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="batchStatusModal">取消</button>
+        <button class="btn btn--primary" type="button" id="batchStatusSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="importModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="importTitle">导入</div>
+        <button class="modal__close" type="button" data-close="importModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="import-actions">
+          <button class="btn btn--primary" type="button" id="uploadBtn">上传文件</button>
+          <button class="link" type="button" id="downloadTemplateBtn">下载模板</button>
+          <input type="file" id="importFile" accept=".csv,.xls,text/csv,application/vnd.ms-excel" hidden />
+        </div>
+        <div class="import-alert" id="importAlert" role="alert">
+          <svg class="import-alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/>
+          </svg>
+          <span id="importAlertText"></span>
+        </div>
+        <div class="import-table-shell">
+          <div class="import-table-wrap">
+            <table class="import-table" id="importTable">
+              <colgroup>
+                <col style="width:22%" />
+                <col style="width:12%" />
+                <col style="width:30%" />
+                <col style="width:10%" />
+                <col style="width:26%" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>产品名称</th>
+                  <th>平台</th>
+                  <th>试玩链接</th>
+                  <th>状态</th>
+                  <th class="col-error">错误信息</th>
+                </tr>
+              </thead>
+              <tbody id="importBody"></tbody>
+            </table>
+          </div>
+          <div class="import-empty" id="importEmpty">暂无数据</div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="importModal">取消</button>
+        <button class="btn btn--primary" type="button" id="importSubmit">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--confirm" id="deleteModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+      <button class="confirm-modal__close" type="button" data-close="deleteModal" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--danger" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm4.955-27.771-4.95 4.95-4.95-4.95a1 1 0 0 0-1.414 0l-1.414 1.414a1 1 0 0 0 0 1.414l4.95 4.95-4.95 4.95a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l4.95-4.95 4.95 4.95a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-4.95-4.95 4.95-4.95a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="deleteTitle">删除确认</h2>
+          <p class="confirm-modal__body" id="deleteBody">此操作不可撤销，确认删除吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" data-close="deleteModal">取消</button>
+        <button class="btn btn--primary" type="button" id="deleteOk">确认</button>
       </div>
     </div>
   </div>
