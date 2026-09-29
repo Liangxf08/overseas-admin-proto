@@ -15,12 +15,6 @@
     <main class="main" data-main>
       <div class="content-card">
         <div class="filter-bar" id="filterBar">
-          <div class="filter-item" id="filterNameWrap">
-            <input class="input input-clearable" id="filterName" type="text" placeholder="策略名称" autocomplete="off" />
-            <button class="select-clear" type="button" id="filterNameClear" aria-label="清除">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-            </button>
-          </div>
           <div class="filter-item" id="productWrap">
             <button class="select-trigger" type="button" id="productTrigger">
               <span class="select-trigger__text" id="productLabel">产品：<span class="muted">请选择</span></span>
@@ -41,18 +35,25 @@
             </button>
             <div class="single-panel" id="scenePanel"></div>
           </div>
-          <div class="filter-item" id="statusWrap">
-            <button class="select-trigger" type="button" id="statusTrigger">
-              <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
-              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+          <div class="filter-item filter-item--date" id="dateRangeWrap">
+            <button class="date-range-trigger" type="button" id="dateRangeTrigger">
+              <span class="date-range-trigger__text" id="dateRangeLabel">日期：-</span>
             </button>
-            <button class="select-clear" type="button" id="statusClear" aria-label="清除">
-              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-            </button>
-            <div class="single-panel" id="statusPanel">
-              <button class="single-option" type="button" data-value="">全部</button>
-              <button class="single-option" type="button" data-value="启用">启用</button>
-              <button class="single-option" type="button" data-value="禁用">禁用</button>
+            <div class="date-panel" id="datePanel">
+              <div class="date-panel__shortcuts" id="dateShortcuts">
+                <button class="date-shortcut" type="button" data-shortcut="today">今天</button>
+                <button class="date-shortcut" type="button" data-shortcut="yesterday">昨天</button>
+                <button class="date-shortcut is-active" type="button" data-shortcut="last7">近7天</button>
+                <button class="date-shortcut" type="button" data-shortcut="last30">近30天</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisWeek">本周</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastWeek">上周</button>
+                <button class="date-shortcut" type="button" data-shortcut="thisMonth">本月</button>
+                <button class="date-shortcut" type="button" data-shortcut="lastMonth">上月</button>
+              </div>
+              <div class="date-panel__calendars">
+                <div class="date-cal" id="dateCalLeft"></div>
+                <div class="date-cal" id="dateCalRight"></div>
+              </div>
             </div>
           </div>
           <div class="filter-actions">
@@ -62,34 +63,34 @@
           </div>
         </div>
 
-        <div class="data-panel" id="dataPanel">
+        <div class="data-panel has-toolbar" id="dataPanel">
+          <div class="board-table-toolbar" id="dataToolbar">
+            <span class="tooltip-wrap" data-tip="刷新">
+              <button class="board-icon-btn" type="button" id="refreshBtn" aria-label="刷新">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M38.837 18C36.463 12.136 30.715 8 24 8 15.163 8 8 15.163 8 24s7.163 16 16 16c7.455 0 13.72-5.1 15.496-12M40 8v10H30"/></svg>
+              </button>
+            </span>
+            <span class="tooltip-wrap" data-tip="全屏" id="fullscreenTip">
+              <button class="board-icon-btn" type="button" id="fullscreenBtn" aria-label="全屏">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M42 17V9a1 1 0 0 0-1-1h-8M6 17V9a1 1 0 0 1 1-1h8m27 23v8a1 1 0 0 1-1 1h-8M6 31v8a1 1 0 0 0 1 1h8"/></svg>
+              </button>
+            </span>
+            <span class="tooltip-wrap" data-tip="自定义列">
+              <button class="board-icon-btn" type="button" id="metricsBtn" aria-label="自定义列">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" aria-hidden="true"><path d="M7 7H20V20H7z"/><path d="M28 7H41V20H28z"/><path d="M7 28H20V41H7z"/><path d="M28 28H41V41H28z"/></svg>
+              </button>
+            </span>
+            <span class="tooltip-wrap" data-tip="下载">
+              <button class="board-icon-btn" type="button" id="exportBtn" aria-label="下载">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="m33.072 22.071-9.07 9.071-9.072-9.07M24 5v26m16 4v6H8v-6"/></svg>
+              </button>
+            </span>
+          </div>
           <div class="table-shell">
             <div class="table-wrap">
               <table class="data-table" id="dataTable">
-                <colgroup>
-                  <col data-col-width="200" />
-                  <col data-col-width="180" />
-                  <col data-col-width="140" />
-                  <col data-col-width="200" />
-                  <col data-col-width="180" />
-                  <col data-col-width="80" />
-                  <col data-col-width="80" />
-                  <col data-col-width="180" />
-                  <col data-col-width="160" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>策略名称</th>
-                    <th>产品</th>
-                    <th>场景</th>
-                    <th>定向用户</th>
-                    <th>策略分流</th>
-                    <th class="col-num">优先级</th>
-                    <th>状态</th>
-                    <th>更新时间</th>
-                    <th class="col-action">操作</th>
-                  </tr>
-                </thead>
+                <colgroup id="tableColgroup"></colgroup>
+                <thead id="tableHead"></thead>
                 <tbody id="tableBody"></tbody>
               </table>
               <div class="empty-tip" id="emptyTip" hidden>暂无数据</div>
@@ -102,34 +103,24 @@
   </div>
 
   <div class="drawer-mask" id="editDrawer" aria-hidden="true">
-    <aside class="drawer drawer--form" role="dialog" aria-modal="true" aria-labelledby="editDrawerTitle">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="editDrawerTitle">
       <div class="drawer__header">
-        <h2 class="drawer__title" id="editDrawerTitle">添加策略</h2>
+        <div class="drawer__title" id="editDrawerTitle">添加策略</div>
         <button class="drawer__close" type="button" data-close="editDrawer" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
       <div class="drawer__body">
-        <div class="form-section">
-          <div class="form-section__title">基础信息</div>
-          <div class="form-item" id="editNameItem">
-            <label class="form-item__label is-required">策略名称</label>
-            <div class="form-item__control">
-              <div class="input-clearable" id="editNameClearWrap">
-                <input class="input" id="editName" type="text" placeholder="请输入" autocomplete="off" maxlength="40" />
-                <button class="select-clear" type="button" id="editNameClear" aria-label="清除">
-                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-                </button>
-              </div>
-              <div class="form-item__error">请输入策略名称</div>
-            </div>
-          </div>
+        <div class="edit-basic">
           <div class="form-item" id="editProductItem">
             <label class="form-item__label is-required">产品</label>
             <div class="form-item__control" id="editProductWrap">
               <button class="select-trigger" type="button" id="editProductTrigger">
                 <span class="select-trigger__text" id="editProductLabel"><span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="editProductClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
               </button>
               <div class="single-panel" id="editProductPanel"></div>
               <div class="form-item__error">请选择产品</div>
@@ -142,112 +133,102 @@
                 <span class="select-trigger__text" id="editSceneLabel"><span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
               </button>
+              <button class="select-clear" type="button" id="editSceneClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
               <div class="single-panel" id="editScenePanel"></div>
               <div class="form-item__error">请选择场景</div>
             </div>
           </div>
-          <div class="form-item" id="editPriorityItem">
-            <label class="form-item__label is-required">优先级
-              <span class="form-help" data-tip="数值越小优先级越高；同一产品场景命中多条时取最高优先级" aria-label="说明" tabindex="0">?</span>
-            </label>
+          <div class="form-item" id="editVersionItem">
+            <label class="form-item__label">APP版本</label>
             <div class="form-item__control">
-              <input class="input" id="editPriority" type="text" placeholder="请输入整数" autocomplete="off" />
-              <div class="form-item__error">请输入优先级</div>
+              <div class="scene-field-select" id="editVersionWrap">
+                  <button class="select-trigger" type="button" id="editVersionTrigger">
+                    <span class="select-trigger__text" id="editVersionLabel"><span class="muted">请选择</span></span>
+                    <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <button class="select-clear" type="button" id="editVersionClear" aria-label="清除">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                  </button>
+                  <div class="multi-panel" id="editVersionPanel">
+                    <div class="multi-panel__left">
+                      <div class="multi-panel__search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                        <input id="editVersionSearch" type="text" placeholder="搜索" autocomplete="off" />
+                      </div>
+                      <div class="multi-panel__toolbar">
+                        <button class="multi-panel__link" type="button" id="editVersionSelectAll">全选</button>
+                      </div>
+                      <div class="multi-panel__list" id="editVersionList"></div>
+                    </div>
+                    <div class="multi-panel__right">
+                      <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                        <span id="editVersionCount">已选择 0 项</span>
+                        <button class="multi-panel__link" type="button" id="editVersionPanelClear">清空</button>
+                      </div>
+                      <div class="multi-panel__list" id="editVersionSelected"></div>
+                    </div>
+                  </div>
+                </div>
             </div>
           </div>
-          <div class="form-item">
-            <label class="form-item__label">状态</label>
-            <div class="form-item__control">
-              <div class="seg" id="editStatusSeg" role="group" aria-label="状态">
-                <button type="button" class="seg__item is-active" data-value="启用">启用</button>
-                <button type="button" class="seg__item" data-value="禁用">禁用</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section__title">定向用户</div>
-          <div class="form-item">
+          <div class="form-item" id="editCountryItem">
             <label class="form-item__label">国家地区</label>
-            <div class="form-item__control" id="editCountryWrap">
-              <button class="select-trigger" type="button" id="editCountryTrigger">
-                <span class="select-trigger__text" id="editCountryLabel"><span class="muted">请选择</span></span>
-                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-              </button>
-              <button class="select-clear" type="button" id="editCountryClear" aria-label="清除">
-                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-              </button>
-              <div class="multi-panel" id="editCountryPanel">
-                <div class="multi-panel__left">
-                  <div class="multi-panel__search">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                    <input type="text" id="editCountrySearch" placeholder="搜索" autocomplete="off" />
+            <div class="form-item__control">
+              <div class="scene-field-select" id="editCountryWrap">
+                  <button class="select-trigger" type="button" id="editCountryTrigger">
+                    <span class="select-trigger__text" id="editCountryLabel"><span class="muted">请选择</span></span>
+                    <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <button class="select-clear" type="button" id="editCountryClear" aria-label="清除">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                  </button>
+                  <div class="multi-panel" id="editCountryPanel">
+                    <div class="multi-panel__left">
+                      <div class="multi-panel__search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                        <input id="editCountrySearch" type="text" placeholder="搜索" autocomplete="off" />
+                      </div>
+                      <div class="multi-panel__toolbar">
+                        <button class="multi-panel__link" type="button" id="editCountrySelectAll">全选</button>
+                      </div>
+                      <div class="multi-panel__list" id="editCountryList"></div>
+                    </div>
+                    <div class="multi-panel__right">
+                      <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                        <span id="editCountryCount">已选择 0 项</span>
+                        <button class="multi-panel__link" type="button" id="editCountryPanelClear">清空</button>
+                      </div>
+                      <div class="multi-panel__list" id="editCountrySelected"></div>
+                    </div>
                   </div>
-                  <div class="multi-panel__toolbar">
-                    <button class="multi-panel__link" type="button" id="editCountrySelectAll">全选</button>
-                  </div>
-                  <div class="multi-panel__list" id="editCountryList"></div>
                 </div>
-                <div class="multi-panel__right">
-                  <div class="multi-panel__toolbar multi-panel__toolbar--right">
-                    <span id="editCountryCount">已选择 0 项</span>
-                    <button class="multi-panel__link" type="button" id="editCountryPanelClear">清空</button>
-                  </div>
-                  <div class="multi-panel__list" id="editCountrySelected"></div>
-                </div>
-              </div>
-              <div class="form-item__hint">不选表示全部国家地区</div>
             </div>
           </div>
-          <div class="form-item">
-            <label class="form-item__label">渠道</label>
-            <div class="form-item__control" id="editChannelWrap">
-              <button class="select-trigger" type="button" id="editChannelTrigger">
-                <span class="select-trigger__text" id="editChannelLabel"><span class="muted">请选择</span></span>
-                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-              </button>
-              <button class="select-clear" type="button" id="editChannelClear" aria-label="清除">
-                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-              </button>
-              <div class="multi-panel multi-panel--simple" id="editChannelPanel">
-                <div class="multi-panel__list" id="editChannelList"></div>
-              </div>
-              <div class="form-item__hint">不选表示全部渠道</div>
-            </div>
-          </div>
-          <div class="form-item">
+          <div class="form-item" id="editUserTypeItem">
             <label class="form-item__label">用户类型</label>
             <div class="form-item__control">
-              <div class="seg" id="editUserTypeSeg" role="group" aria-label="用户类型">
-                <button type="button" class="seg__item is-active" data-value="全部">全部</button>
+              <div class="seg" id="editUserTypeSeg" role="radiogroup" aria-label="用户类型">
+                <button type="button" class="seg__item is-active" data-value="全用户">全用户</button>
                 <button type="button" class="seg__item" data-value="新用户">新用户</button>
                 <button type="button" class="seg__item" data-value="老用户">老用户</button>
               </div>
             </div>
           </div>
-          <div class="form-item">
-            <label class="form-item__label">APP版本</label>
-            <div class="form-item__control">
-              <input class="input" id="editVersions" type="text" placeholder="多个版本用英文逗号分隔，留空表示全部" autocomplete="off" />
-            </div>
-          </div>
         </div>
 
-        <div class="form-section">
-          <div class="form-section__title">策略分流</div>
-          <div class="form-item form-item--top" id="editSplitItem">
-            <label class="form-item__label is-required">分流组</label>
-            <div class="form-item__control">
-              <div class="split-list" id="splitList"></div>
-              <button class="split-add" type="button" id="splitAdd">
-                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2v8M2 6h8"/></svg>
-                添加分流组
-              </button>
-              <div class="split-sum" id="splitSum">流量合计需为 100%，当前 0%</div>
-              <div class="form-item__error">请完善分流配置</div>
-            </div>
+        <div class="form-section" id="editSplitItem">
+          <div class="form-section__title form-section__title--row">
+            <span>条件配置</span>
+            <label class="ab-switch">
+              <span class="ab-switch__text">AB测试</span>
+              <button class="switch" type="button" id="editAbSwitch" aria-label="AB测试" aria-pressed="false"></button>
+            </label>
           </div>
+          <div class="form-item__error form-item__error--static" id="editSplitError">请配置分流组</div>
+          <div class="split-list" id="splitList"></div>
+          <div class="split-sum" id="splitSum" hidden>流量合计需为 100%，当前 0%</div>
         </div>
       </div>
       <div class="drawer__footer">
@@ -255,6 +236,35 @@
         <button class="btn btn--primary" type="button" id="editSubmit">提交</button>
       </div>
     </aside>
+  </div>
+
+  <div class="modal-mask" id="arrayModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="arrayModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="arrayModalTitle">配置数组子字段</div>
+        <button class="modal__close" type="button" data-close="arrayModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="array-toolbar">
+          <button class="btn btn--primary" type="button" id="arrayImportBtn">导入</button>
+          <button class="link" type="button" id="arrayTemplate">模板下载</button>
+          <input id="arrayFile" type="file" accept=".csv,text/csv" hidden />
+        </div>
+        <div class="array-table-shell">
+          <table class="array-table">
+            <thead id="arrayHead"></thead>
+            <tbody id="arrayBody"></tbody>
+          </table>
+        </div>
+        <button class="link array-add" type="button" id="arrayAdd">+ 添加</button>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="arrayModal">取消</button>
+        <button class="btn btn--primary" type="button" id="arraySubmit">提交</button>
+      </div>
+    </div>
   </div>
 
   <div class="modal-mask modal-mask--confirm" id="deleteModal" aria-hidden="true">
@@ -277,6 +287,44 @@
       </div>
     </div>
   </div>
+
+  <div class="modal-mask" id="metricModal" aria-hidden="true">
+    <div class="modal metric-modal" role="dialog" aria-modal="true" aria-labelledby="metricModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="metricModalTitle">自定义列</div>
+        <button class="modal__close" type="button" data-close="metricModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body metric-modal__body">
+        <div class="metric-layout">
+          <div class="metric-main">
+            <div class="metric-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+              <input type="text" id="metricSearch" placeholder="搜索" autocomplete="off" />
+            </div>
+            <div class="metric-picker">
+              <nav class="metric-cats" id="metricCatList" aria-label="列分组"></nav>
+              <div class="metric-options" id="metricOptions"></div>
+            </div>
+          </div>
+          <div class="metric-selected">
+            <div class="metric-selected__head">
+              <span id="metricSelectedCount">已选 0 列</span>
+              <button class="btn btn--text" type="button" id="metricClear">清空</button>
+            </div>
+            <div class="metric-selected__list" id="metricSelectedList"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="metricModal">取消</button>
+        <button class="btn btn--primary" type="button" id="metricSubmit">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-msg" id="pageMsg" role="status" aria-live="polite"></div>
 
   <script src="product-common.js"></script>
   <script src="menu.js"></script>

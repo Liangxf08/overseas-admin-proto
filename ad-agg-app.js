@@ -8,48 +8,41 @@
 
   var $ = UI.$;
   var escapeHtml = UI.escapeHtml;
-  var COPY_ICON = UI.COPY_ICON;
   var ALL_ROWS = Store.apps();
   var SCENE_POOL = Store.scenes();
 
   var state = {
-    draft: { name: '', platform: '', status: '' },
+    draft: { name: '', packageName: '', platform: '' },
     applied: null,
     page: 1,
     pageSize: 20,
     paginationBound: false,
+    editId: null,
     editProductId: '',
-    editSceneIds: [],
-    editStatus: '启用',
-    transferAppId: null,
-    selectedIds: [],
-    availChecked: {},
-    selectedChecked: {},
-    availKw: '',
-    selectedKw: '',
-    deleteId: null
+    editSceneOn: {}
   };
 
   function applyFilters() {
     state.applied = {
       name: (state.draft.name || '').trim(),
-      platform: state.draft.platform || '',
-      status: state.draft.status || ''
+      packageName: (state.draft.packageName || '').trim().toLowerCase(),
+      platform: state.draft.platform || ''
     };
     state.page = 1;
   }
 
   function getFilteredRows() {
     var f = state.applied;
-    var rows = ALL_ROWS.slice().sort(Store.byUpdatedDesc);
+    var rows = ALL_ROWS.slice();
     if (!f) return rows;
     return rows.filter(function (row) {
-      var product = Store.productById(row.productId);
-      var name = product ? product.name : '';
-      var platform = product ? product.platform : '';
+      var product = Store.productById(row.productId) || {};
+      var name = product.name || '';
+      var platform = product.platform || '';
+      var pkg = (product.packageName || '').toLowerCase();
       if (f.name && name.indexOf(f.name) === -1 && row.productId.indexOf(f.name) === -1) return false;
+      if (f.packageName && pkg.indexOf(f.packageName) === -1) return false;
       if (f.platform && platform !== f.platform) return false;
-      if (f.status && row.status !== f.status) return false;
       return true;
     });
   }
@@ -64,79 +57,90 @@
     return Store.PRODUCTS.filter(function (p) { return !used[p.id]; });
   }
 
-  function sceneTagsHtml(ids) {
-    var names = (ids || []).map(Store.sceneName);
-    if (!names.length) return '-';
-    var max = 3;
-    var shown = names.slice(0, max);
-    var extra = names.length - shown.length;
-    var html = '<div class="cell-tags">' + shown.map(function (n) {
-      return '<span class="tag tag--info">' + escapeHtml(n) + '</span>';
-    }).join('');
-    if (extra > 0) html += '<span class="cell-more">等 ' + extra + ' 项</span>';
-    html += '</div>';
-    return html;
+  function enabledSceneCount(row) {
+    return (row.sceneIds || []).length;
   }
 
   var platformFilter = UI.bindSingleSelect({
-    wrapId: 'platformWrap', triggerId: 'platformTrigger', panelId: 'platformPanel',
-    labelId: 'platformLabel', clearId: 'platformClear', prefix: '平台：',
+    wrapId: 'platformWrap',
+    triggerId: 'platformTrigger',
+    panelId: 'platformPanel',
+    labelId: 'platformLabel',
+    clearId: 'platformClear',
+    prefix: '平台：',
     getValue: function () { return state.draft.platform; },
     onChange: function (v) { state.draft.platform = v || ''; }
   });
 
-  var statusFilter = UI.bindSingleSelect({
-    wrapId: 'statusWrap', triggerId: 'statusTrigger', panelId: 'statusPanel',
-    labelId: 'statusLabel', clearId: 'statusClear', prefix: '状态：',
-    getValue: function () { return state.draft.status; },
-    onChange: function (v) { state.draft.status = v || ''; }
-  });
+  var PLATFORM_ICONS = {
+    Android: 'assets/Android.png',
+    iOS: 'assets/iOS.png'
+  };
+
+  function platformIconHtml(platform) {
+    var src = platform && PLATFORM_ICONS[platform];
+    if (!src) return '';
+    return '<span class="select-option-icon"><img src="' + src + '" alt="" /></span>';
+  }
+
+  function syncEditProductLabel(value) {
+    var label = $('editProductLabel');
+    var wrap = $('editProductWrap');
+    var panel = $('editProductPanel');
+    if (!label) return;
+    if (!value) {
+      label.innerHTML = '<span class="muted">请选择产品名称</span>';
+      if (wrap) wrap.classList.remove('has-value');
+    } else {
+      var p = Store.productById(value);
+      label.innerHTML = platformIconHtml(p && p.platform) +
+        '<span class="select-option-text">' + escapeHtml(p ? p.name : value) + '</span>';
+      if (wrap) wrap.classList.add('has-value');
+    }
+    if (panel) {
+      panel.querySelectorAll('.single-option').forEach(function (opt) {
+        opt.classList.toggle('is-active', (opt.getAttribute('data-value') || '') === String(value || ''));
+      });
+    }
+  }
 
   function fillProductPanel() {
     var items = unusedProducts();
-    $('editProductPanel').innerHTML = items.map(function (p) {
-      return '<button class="single-option" type="button" data-value="' + escapeHtml(p.id) + '">' +
-        escapeHtml(p.name) + '（' + escapeHtml(p.platform) + '）</button>';
-    }).join('');
+    $('editProductPanel').innerHTML = items.length
+      ? items.map(function (p) {
+          return '<button class="single-option" type="button" data-value="' + escapeHtml(p.id) + '">' +
+            platformIconHtml(p.platform) +
+            '<span class="select-option-text">' + escapeHtml(p.name) + '</span>' +
+          '</button>';
+        }).join('')
+      : '<div class="single-option is-disabled" style="cursor:default;color:var(--color-text-3)">暂无可选产品</div>';
   }
 
   var editProductSelect = UI.bindSingleSelect({
-    wrapId: 'editProductWrap', triggerId: 'editProductTrigger', panelId: 'editProductPanel',
+    wrapId: 'editProductWrap',
+    triggerId: 'editProductTrigger',
+    panelId: 'editProductPanel',
     labelId: 'editProductLabel',
+    clearId: 'editProductClear',
     getValue: function () { return state.editProductId; },
-    formatValue: function (id) {
-      var p = Store.productById(id);
-      return p ? p.name : id;
-    },
-    onChange: function (v) { state.editProductId = v || ''; }
+    onChange: function (v) {
+      state.editProductId = v || '';
+      if (v) setItemError('editProductItem', false);
+      setTimeout(function () { syncEditProductLabel(v || ''); }, 0);
+    }
   });
+  if (editProductSelect) {
+    editProductSelect.syncLabel = function (v) {
+      var val = (v !== undefined && v !== null) ? v : (state.editProductId || '');
+      syncEditProductLabel(val);
+    };
+  }
 
-  var sceneMulti = UI.bindMultiSelect({
-    wrapId: 'editSceneWrap',
-    triggerId: 'editSceneTrigger',
-    panelId: 'editScenePanel',
-    labelId: 'editSceneLabel',
-    listId: 'editSceneList',
-    selectedId: 'editSceneSelected',
-    searchId: 'editSceneSearch',
-    countId: 'editSceneCount',
-    selectAllId: 'editSceneSelectAll',
-    clearId: 'editSceneClear',
-    getOptions: function () { return SCENE_POOL.map(function (s) { return s.id; }); },
-    getLabel: function (id) { return Store.sceneName(id); },
-    getSelected: function () { return state.editSceneIds; },
-    setSelected: function (arr) { state.editSceneIds = arr || []; }
-  });
-
-  $('editScenePanelClear').addEventListener('click', function () {
-    state.editSceneIds = [];
-    if (sceneMulti && sceneMulti.render) sceneMulti.render();
-  });
-
-  UI.bindSeg('editStatusSeg', function (v) { state.editStatus = v || '启用'; });
   UI.bindInputClearable({ wrapId: 'filterNameWrap', clearId: 'filterNameClear' });
+  UI.bindInputClearable({ wrapId: 'filterPackageWrap', clearId: 'filterPackageClear' });
 
   $('filterName').addEventListener('input', function () { state.draft.name = this.value || ''; });
+  $('filterPackage').addEventListener('input', function () { state.draft.packageName = this.value || ''; });
 
   function setItemError(id, on, msg) {
     var el = $(id);
@@ -146,6 +150,33 @@
       var err = el.querySelector('.form-item__error');
       if (err) err.textContent = msg;
     }
+  }
+
+  function setProductDisabled(disabled) {
+    var trigger = $('editProductTrigger');
+    var clear = $('editProductClear');
+    trigger.disabled = !!disabled;
+    trigger.classList.toggle('is-disabled', !!disabled);
+    if (clear) clear.hidden = !!disabled;
+    $('editProductWrap').classList.toggle('is-readonly', !!disabled);
+  }
+
+  function renderSceneTable() {
+    $('editSceneBody').innerHTML = SCENE_POOL.map(function (s) {
+      var on = !!state.editSceneOn[s.id];
+      var type = s.sceneType || '-';
+      var adOn = s.adSwitch === true;
+      return '<tr data-scene-id="' + escapeHtml(s.id) + '">' +
+        '<td class="col-switch"><button class="switch' + (on ? ' is-on' : '') + '" type="button" data-scene-switch="' + escapeHtml(s.id) + '" aria-label="场景开关" aria-pressed="' + (on ? 'true' : 'false') + '"></button></td>' +
+        '<td class="col-name" title="' + escapeHtml(s.name) + '">' + escapeHtml(s.name) + '</td>' +
+        '<td class="col-type" title="' + escapeHtml(type) + '">' + escapeHtml(type) + '</td>' +
+        '<td class="col-ad"><span class="tag tag--' + (adOn ? 'enabled' : 'disabled') + '">' + (adOn ? '开' : '关') + '</span></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function collectEnabledSceneIds() {
+    return SCENE_POOL.filter(function (s) { return state.editSceneOn[s.id]; }).map(function (s) { return s.id; });
   }
 
   function renderTable() {
@@ -166,20 +197,16 @@
       if (empty) empty.hidden = true;
       body.innerHTML = pageRows.map(function (row) {
         var product = Store.productById(row.productId) || {};
+        var on = row.status !== '禁用';
         return '<tr data-id="' + escapeHtml(row.id) + '">' +
+          '<td><button class="switch' + (on ? ' is-on' : '') + '" type="button" data-action="toggle" aria-label="策略开关" aria-pressed="' + (on ? 'true' : 'false') + '"></button></td>' +
           '<td title="' + escapeHtml(product.name || '') + '">' + escapeHtml(product.name || '-') + '</td>' +
+          '<td title="' + escapeHtml(row.productId) + '">' + escapeHtml(row.productId) + '</td>' +
           '<td>' + escapeHtml(product.platform || '-') + '</td>' +
-          '<td><span class="cell-id">' +
-            '<button class="copy-btn" type="button" data-copy="' + escapeHtml(row.productId) + '" title="复制产品ID" aria-label="复制">' + COPY_ICON + '</button>' +
-            '<span class="cell-id__text" title="' + escapeHtml(row.productId) + '">' + escapeHtml(row.productId) + '</span>' +
-          '</span></td>' +
-          '<td>' + sceneTagsHtml(row.sceneIds) + '</td>' +
-          '<td>' + UI.statusTag(row.status) + '</td>' +
-          '<td>' + escapeHtml(row.updatedAt) + '</td>' +
-          '<td class="col-action"><span class="action-links">' +
-            '<button class="link" type="button" data-action="scenes">关联场景</button>' +
-            '<button class="link link--danger" type="button" data-action="delete">删除</button>' +
-          '</span></td>' +
+          '<td title="' + escapeHtml(product.packageName || '') + '">' + escapeHtml(product.packageName || '-') + '</td>' +
+          '<td>' + enabledSceneCount(row) + '</td>' +
+          '<td>' + escapeHtml(row.updatedAt || '-') + '</td>' +
+          '<td class="col-action"><button class="link" type="button" data-action="scenes">场景管理</button></td>' +
         '</tr>';
       }).join('');
     }
@@ -210,237 +237,104 @@
       UI.showToast('暂无可添加的产品', 'warning');
       return;
     }
+    state.editId = null;
     state.editProductId = '';
-    state.editSceneIds = [];
-    state.editStatus = '启用';
+    state.editSceneOn = {};
+    SCENE_POOL.forEach(function (s) { state.editSceneOn[s.id] = true; });
     setItemError('editProductItem', false);
-    setItemError('editSceneItem', false);
+    setProductDisabled(false);
     fillProductPanel();
     if (editProductSelect && editProductSelect.syncLabel) editProductSelect.syncLabel('');
-    if (sceneMulti && sceneMulti.render) sceneMulti.render();
-    UI.setSegValue('editStatusSeg', '启用');
+    $('editModalTitle').textContent = '添加应用';
+    renderSceneTable();
     UI.openModal('editModal');
   }
 
-  function submitAdd() {
+  function openScenes(row) {
+    var product = Store.productById(row.productId);
+    state.editId = row.id;
+    state.editProductId = row.productId;
+    state.editSceneOn = {};
+    SCENE_POOL.forEach(function (s) {
+      state.editSceneOn[s.id] = (row.sceneIds || []).indexOf(s.id) !== -1;
+    });
     setItemError('editProductItem', false);
-    setItemError('editSceneItem', false);
-    var ok = true;
-    if (!state.editProductId) {
-      setItemError('editProductItem', true, '请选择产品');
-      ok = false;
+    setProductDisabled(true);
+    fillProductPanel();
+    if (editProductSelect && editProductSelect.syncLabel) editProductSelect.syncLabel(row.productId);
+    $('editModalTitle').textContent = '场景管理' + (product ? ' · ' + product.name : '');
+    renderSceneTable();
+    UI.openModal('editModal');
+  }
+
+  function submitEdit() {
+    setItemError('editProductItem', false);
+    if (!state.editId && !state.editProductId) {
+      setItemError('editProductItem', true, '请选择产品名称');
+      return;
     }
-    if (!state.editSceneIds.length) {
-      setItemError('editSceneItem', true, '请选择关联场景');
-      ok = false;
+    var sceneIds = collectEnabledSceneIds();
+    if (state.editId) {
+      var row = findRow(state.editId);
+      if (!row) return;
+      row.sceneIds = sceneIds;
+      Store.touch(row);
+    } else {
+      ALL_ROWS.unshift(Store.touch({
+        id: UI.uid('a'),
+        productId: state.editProductId,
+        sceneIds: sceneIds,
+        status: '启用'
+      }));
     }
-    if (!ok) return;
-    ALL_ROWS.unshift(Store.touch({
-      id: UI.uid('a'),
-      productId: state.editProductId,
-      sceneIds: state.editSceneIds.slice(),
-      status: state.editStatus || '启用'
-    }));
     Store.saveApps(ALL_ROWS);
     UI.closeModal('editModal');
     UI.showToast('提交成功', 'success');
     renderTable();
   }
 
-  function getSceneById(id) {
-    return SCENE_POOL.find(function (s) { return s.id === id; });
-  }
-
-  function renderTransfer() {
-    var selectedSet = {};
-    state.selectedIds.forEach(function (id) { selectedSet[id] = true; });
-    var availAll = SCENE_POOL.filter(function (s) { return !selectedSet[s.id]; });
-    var selectedAll = state.selectedIds.map(getSceneById).filter(Boolean);
-
-    var availKw = (state.availKw || '').trim().toLowerCase();
-    var selectedKw = (state.selectedKw || '').trim().toLowerCase();
-    var availVisible = availAll.filter(function (s) {
-      return !availKw || s.name.toLowerCase().indexOf(availKw) !== -1;
-    });
-    var selectedVisible = selectedAll.filter(function (s) {
-      return !selectedKw || s.name.toLowerCase().indexOf(selectedKw) !== -1;
-    });
-
-    var availCheckedCount = availVisible.filter(function (s) { return state.availChecked[s.id]; }).length;
-    var selectedCheckedCount = selectedVisible.filter(function (s) { return state.selectedChecked[s.id]; }).length;
-
-    $('availCount').textContent = availCheckedCount + ' / ' + availAll.length;
-    $('selectedCount').textContent = selectedCheckedCount + ' / ' + selectedAll.length;
-
-    var availAllBox = $('availCheckAll');
-    availAllBox.checked = availVisible.length > 0 && availCheckedCount === availVisible.length;
-    availAllBox.indeterminate = availCheckedCount > 0 && availCheckedCount < availVisible.length;
-
-    var selectedAllBox = $('selectedCheckAll');
-    selectedAllBox.checked = selectedVisible.length > 0 && selectedCheckedCount === selectedVisible.length;
-    selectedAllBox.indeterminate = selectedCheckedCount > 0 && selectedCheckedCount < selectedVisible.length;
-
-    function listHtml(list, checkedMap, emptyText) {
-      if (!list.length) return '<div class="transfer__empty">' + emptyText + '</div>';
-      return list.map(function (s) {
-        return '<label class="transfer__item">' +
-          '<input type="checkbox" value="' + escapeHtml(s.id) + '"' + (checkedMap[s.id] ? ' checked' : '') + ' />' +
-          '<span title="' + escapeHtml(s.name) + '">' + escapeHtml(s.name) + '</span>' +
-        '</label>';
-      }).join('');
-    }
-
-    $('availList').innerHTML = listHtml(availVisible, state.availChecked, '暂无数据');
-    $('selectedList').innerHTML = listHtml(selectedVisible, state.selectedChecked, '暂无已选');
-    $('moveToSelected').disabled = availCheckedCount === 0;
-    $('moveToAvail').disabled = selectedCheckedCount === 0;
-  }
-
-  function openScenes(row) {
-    var product = Store.productById(row.productId);
-    $('sceneModalTitle').textContent = '关联场景' + (product ? ' · ' + product.name : '');
-    state.transferAppId = row.id;
-    state.selectedIds = (row.sceneIds || []).slice();
-    state.availChecked = {};
-    state.selectedChecked = {};
-    state.availKw = '';
-    state.selectedKw = '';
-    $('availSearch').value = '';
-    $('selectedSearch').value = '';
-    renderTransfer();
-    UI.openModal('sceneModal');
-  }
-
-  function submitScenes() {
-    var row = findRow(state.transferAppId);
-    if (!row) return;
-    if (!state.selectedIds.length) {
-      UI.showToast('请至少关联一个场景', 'error');
-      return;
-    }
-    row.sceneIds = state.selectedIds.slice();
+  function toggleStrategy(row) {
+    row.status = row.status === '禁用' ? '启用' : '禁用';
     Store.touch(row);
     Store.saveApps(ALL_ROWS);
-    UI.closeModal('sceneModal');
-    UI.showToast('提交成功', 'success');
-    renderTable();
-  }
-
-  $('availList').addEventListener('change', function (e) {
-    var input = e.target.closest('input[type="checkbox"]');
-    if (!input) return;
-    if (input.checked) state.availChecked[input.value] = true;
-    else delete state.availChecked[input.value];
-    renderTransfer();
-  });
-  $('selectedList').addEventListener('change', function (e) {
-    var input = e.target.closest('input[type="checkbox"]');
-    if (!input) return;
-    if (input.checked) state.selectedChecked[input.value] = true;
-    else delete state.selectedChecked[input.value];
-    renderTransfer();
-  });
-  $('availCheckAll').addEventListener('change', function () {
-    var checked = this.checked;
-    var selectedSet = {};
-    state.selectedIds.forEach(function (id) { selectedSet[id] = true; });
-    var kw = (state.availKw || '').trim().toLowerCase();
-    SCENE_POOL.forEach(function (s) {
-      if (selectedSet[s.id]) return;
-      if (kw && s.name.toLowerCase().indexOf(kw) === -1) return;
-      if (checked) state.availChecked[s.id] = true;
-      else delete state.availChecked[s.id];
-    });
-    renderTransfer();
-  });
-  $('selectedCheckAll').addEventListener('change', function () {
-    var checked = this.checked;
-    var kw = (state.selectedKw || '').trim().toLowerCase();
-    state.selectedIds.forEach(function (id) {
-      var s = getSceneById(id);
-      if (!s) return;
-      if (kw && s.name.toLowerCase().indexOf(kw) === -1) return;
-      if (checked) state.selectedChecked[id] = true;
-      else delete state.selectedChecked[id];
-    });
-    renderTransfer();
-  });
-  $('availSearch').addEventListener('input', function () { state.availKw = this.value || ''; renderTransfer(); });
-  $('selectedSearch').addEventListener('input', function () { state.selectedKw = this.value || ''; renderTransfer(); });
-  $('moveToSelected').addEventListener('click', function () {
-    Object.keys(state.availChecked).forEach(function (id) {
-      if (!state.availChecked[id]) return;
-      if (state.selectedIds.indexOf(id) === -1) state.selectedIds.push(id);
-      delete state.availChecked[id];
-    });
-    renderTransfer();
-  });
-  $('moveToAvail').addEventListener('click', function () {
-    var moving = Object.keys(state.selectedChecked).filter(function (id) { return state.selectedChecked[id]; });
-    state.selectedIds = state.selectedIds.filter(function (id) { return moving.indexOf(id) === -1; });
-    moving.forEach(function (id) { delete state.selectedChecked[id]; });
-    renderTransfer();
-  });
-
-  function openDelete(row) {
-    if (Store.productUsedByPolicies(row.productId).length) {
-      UI.showToast('该应用下存在广告策略，请先删除策略。', 'error');
-      return;
-    }
-    state.deleteId = row.id;
-    UI.openModal('deleteModal');
-  }
-
-  function confirmDelete() {
-    var id = state.deleteId;
-    if (!id) return;
-    var idx = ALL_ROWS.findIndex(function (r) { return r.id === id; });
-    if (idx !== -1) ALL_ROWS.splice(idx, 1);
-    Store.saveApps(ALL_ROWS);
-    state.deleteId = null;
-    UI.closeModal('deleteModal');
-    UI.showToast('删除成功', 'success');
     renderTable();
   }
 
   $('queryBtn').addEventListener('click', function () { applyFilters(); renderTable(); });
   $('resetBtn').addEventListener('click', function () {
-    state.draft = { name: '', platform: '', status: '' };
+    state.draft = { name: '', packageName: '', platform: '' };
     $('filterName').value = '';
+    $('filterPackage').value = '';
     if (platformFilter && platformFilter.syncLabel) platformFilter.syncLabel('');
-    if (statusFilter && statusFilter.syncLabel) statusFilter.syncLabel('');
     applyFilters();
     renderTable();
   });
   $('addBtn').addEventListener('click', openAdd);
-  $('editSubmit').addEventListener('click', submitAdd);
-  $('sceneSubmit').addEventListener('click', submitScenes);
-  $('deleteOk').addEventListener('click', confirmDelete);
+  $('editSubmit').addEventListener('click', submitEdit);
+
+  $('editSceneBody').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-scene-switch]');
+    if (!btn) return;
+    var id = btn.getAttribute('data-scene-switch');
+    state.editSceneOn[id] = !state.editSceneOn[id];
+    btn.classList.toggle('is-on', !!state.editSceneOn[id]);
+    btn.setAttribute('aria-pressed', state.editSceneOn[id] ? 'true' : 'false');
+  });
 
   $('tableBody').addEventListener('click', function (e) {
-    var copyBtn = e.target.closest('.copy-btn');
-    if (copyBtn) {
-      UI.copyText(copyBtn.getAttribute('data-copy') || '');
-      return;
-    }
     var btn = e.target.closest('[data-action]');
     if (!btn) return;
     var tr = btn.closest('tr[data-id]');
     if (!tr) return;
     var row = findRow(tr.getAttribute('data-id'));
     if (!row) return;
-    if (btn.getAttribute('data-action') === 'scenes') openScenes(row);
-    else if (btn.getAttribute('data-action') === 'delete') openDelete(row);
+    var action = btn.getAttribute('data-action');
+    if (action === 'toggle') toggleStrategy(row);
+    else if (action === 'scenes') openScenes(row);
   });
 
   document.querySelectorAll('[data-close="editModal"]').forEach(function (btn) {
     btn.addEventListener('click', function () { UI.closeModal('editModal'); });
-  });
-  document.querySelectorAll('[data-close="sceneModal"]').forEach(function (btn) {
-    btn.addEventListener('click', function () { UI.closeModal('sceneModal'); });
-  });
-  document.querySelectorAll('[data-close="deleteModal"]').forEach(function (btn) {
-    btn.addEventListener('click', function () { UI.closeModal('deleteModal'); });
   });
 
   renderTable();

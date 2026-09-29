@@ -9,12 +9,12 @@
   var $ = UI.$;
   var escapeHtml = UI.escapeHtml;
   var KEY_RE = /^[a-z][a-z0-9_]*$/;
-  var CHILD_TYPES = Store.CHILD_COMPONENT_TYPES || ['数字输入', '文本输入', '开关'];
+  var CHILD_TYPES = Store.CHILD_COMPONENT_TYPES || ['数字输入', '文本输入', '开关', '下拉选择'];
 
   var ALL_ROWS = Store.fields();
 
   var state = {
-    draft: { name: '', key: '', status: '' },
+    draft: { keyword: '', status: '' },
     applied: null,
     page: 1,
     pageSize: 20,
@@ -23,15 +23,18 @@
     editId: null,
     editComponentType: '数字输入',
     editStatus: '启用',
+    editSelectMode: '单选',
     editOptions: [],
     editChildren: [],
+    optionDragIndex: null,
+    childOptionsIndex: null,
+    childOptionsDraft: [],
     deleteId: null
   };
 
   function applyFilters() {
     state.applied = {
-      name: (state.draft.name || '').trim(),
-      key: (state.draft.key || '').trim(),
+      keyword: (state.draft.keyword || '').trim(),
       status: state.draft.status || ''
     };
     state.page = 1;
@@ -42,8 +45,12 @@
     var rows = ALL_ROWS.slice().sort(Store.byUpdatedDesc);
     if (!f) return rows;
     return rows.filter(function (row) {
-      if (f.name && row.name.indexOf(f.name) === -1) return false;
-      if (f.key && String(row.key).indexOf(f.key) === -1) return false;
+      if (f.keyword) {
+        var kw = f.keyword.toLowerCase();
+        var nameHit = String(row.name || '').toLowerCase().indexOf(kw) !== -1;
+        var keyHit = String(row.key || '').toLowerCase().indexOf(kw) !== -1;
+        if (!nameHit && !keyHit) return false;
+      }
       if (f.status && row.status !== f.status) return false;
       return true;
     });
@@ -64,20 +71,21 @@
   UI.bindSeg('editTypeSeg', function (v) {
     state.editComponentType = v || '数字输入';
     if (v === '下拉选择' && !state.editOptions.length) state.editOptions = [{ label: '', value: '' }];
+    if (v === '下拉选择' && !state.editSelectMode) state.editSelectMode = '单选';
     if (v === 'Array' && !state.editChildren.length) {
-      state.editChildren = [{ name: '', key: '', componentType: '数字输入' }];
+      state.editChildren = [emptyChild()];
     }
     syncTypeUi();
   });
 
-  UI.bindInputClearable({ wrapId: 'filterNameWrap', clearId: 'filterNameClear' });
-  UI.bindInputClearable({ wrapId: 'filterKeyWrap', clearId: 'filterKeyClear' });
+  UI.bindSeg('editSelectModeSeg', function (v) { state.editSelectMode = v || '单选'; });
+
+  UI.bindInputClearable({ wrapId: 'filterKeywordWrap', clearId: 'filterKeywordClear' });
   UI.bindInputClearable({ wrapId: 'editNameClearWrap', clearId: 'editNameClear' });
   UI.bindInputClearable({ wrapId: 'editKeyClearWrap', clearId: 'editKeyClear' });
-  UI.bindFormHelp();
+  UI.bindInputClearable({ wrapId: 'editDescClearWrap', clearId: 'editDescClear' });
 
-  $('filterName').addEventListener('input', function () { state.draft.name = this.value || ''; });
-  $('filterKey').addEventListener('input', function () { state.draft.key = this.value || ''; });
+  $('filterKeyword').addEventListener('input', function () { state.draft.keyword = this.value || ''; });
 
   function setItemError(id, on, msg) {
     var el = $(id);
@@ -90,7 +98,7 @@
   }
 
   function clearEditErrors() {
-    ['editNameItem', 'editKeyItem', 'editTypeItem', 'editMinItem', 'editMaxItem', 'editOptionsItem', 'editChildrenItem'].forEach(function (id) {
+    ['editNameItem', 'editKeyItem', 'editTypeItem', 'editMinItem', 'editMaxItem', 'editMaxLenItem', 'editMaxRowsItem', 'editOptionsItem', 'editChildrenItem'].forEach(function (id) {
       setItemError(id, false);
     });
   }
@@ -107,24 +115,37 @@
     var type = state.editComponentType;
     $('editMinItem').hidden = type !== '数字输入';
     $('editMaxItem').hidden = type !== '数字输入';
+    $('editPlaceholderItem').hidden = type !== '文本输入';
+    $('editMaxLenItem').hidden = type !== '文本输入';
+    $('editOnValueItem').hidden = type !== '开关';
+    $('editOffValueItem').hidden = type !== '开关';
+    $('editSelectModeItem').hidden = type !== '下拉选择';
     $('editOptionsItem').hidden = type !== '下拉选择';
+    $('editMaxRowsItem').hidden = type !== 'Array';
     $('editChildrenItem').hidden = type !== 'Array';
-    if (type === '下拉选择') renderOptions();
+    if (type === '下拉选择') {
+      UI.setSegValue('editSelectModeSeg', state.editSelectMode || '单选');
+      renderOptions();
+    }
     if (type === 'Array') renderChildren();
   }
 
+  var DRAG_SVG = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">' +
+    '<circle cx="5" cy="4" r="1.2"/><circle cx="11" cy="4" r="1.2"/>' +
+    '<circle cx="5" cy="8" r="1.2"/><circle cx="11" cy="8" r="1.2"/>' +
+    '<circle cx="5" cy="12" r="1.2"/><circle cx="11" cy="12" r="1.2"/>' +
+    '</svg>';
+
   function renderOptions() {
-    var body = $('optionBody');
+    var list = $('optionList');
     if (!state.editOptions.length) state.editOptions = [{ label: '', value: '' }];
-    body.innerHTML = state.editOptions.map(function (row, i) {
-      var del = state.editOptions.length > 1
-        ? '<button class="link link--danger" type="button" data-opt-del="' + i + '">删除</button>'
-        : '-';
-      return '<tr>' +
-        '<td><input class="input" data-opt-label="' + i + '" value="' + escapeHtml(row.label || '') + '" placeholder="请输入" /></td>' +
-        '<td><input class="input" data-opt-value="' + i + '" value="' + escapeHtml(row.value || '') + '" placeholder="请输入" /></td>' +
-        '<td class="col-op">' + del + '</td>' +
-      '</tr>';
+    list.innerHTML = state.editOptions.map(function (row, i) {
+      return '<div class="option-row" data-opt-row="' + i + '">' +
+        '<span class="option-drag" draggable="true" title="拖拽排序" data-opt-drag="' + i + '">' + DRAG_SVG + '</span>' +
+        '<input class="input" data-opt-value="' + i + '" value="' + escapeHtml(row.value || '') + '" placeholder="选项值" autocomplete="off" />' +
+        '<input class="input" data-opt-label="' + i + '" value="' + escapeHtml(row.label || '') + '" placeholder="选项名" autocomplete="off" />' +
+        '<button class="link link--danger" type="button" data-opt-del="' + i + '">删除</button>' +
+      '</div>';
     }).join('');
   }
 
@@ -137,23 +158,89 @@
     });
   }
 
+  function emptyChild() {
+    return {
+      name: '',
+      key: nextChildKey(),
+      componentType: '数字输入',
+      min: null,
+      max: null,
+      placeholder: '',
+      maxLength: null,
+      onValue: '',
+      offValue: '',
+      options: []
+    };
+  }
+
+  function nextChildKey() {
+    var max = 0;
+    state.editChildren.forEach(function (c) {
+      var m = String(c.key || '').match(/^row_(\d+)$/);
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    return 'row_' + (max + 1);
+  }
+
+  function normalizeChild(row) {
+    var c = row || {};
+    return {
+      name: c.name || '',
+      key: c.key || '',
+      componentType: c.componentType || '数字输入',
+      min: c.min == null ? null : c.min,
+      max: c.max == null ? null : c.max,
+      placeholder: c.placeholder || '',
+      maxLength: c.maxLength == null ? null : c.maxLength,
+      onValue: c.onValue || '',
+      offValue: c.offValue || '',
+      options: Store.clone(c.options && c.options.length ? c.options : [])
+    };
+  }
+
+  function childOptionCount(row) {
+    return (row.options || []).filter(function (o) { return o.label && o.value; }).length;
+  }
+
+  function renderChildConfig(row, i) {
+    var t = row.componentType || '数字输入';
+    if (t === '数字输入') {
+      return '<div class="child-config">' +
+        '<input class="input" data-child-min="' + i + '" value="' + escapeHtml(row.min == null ? '' : String(row.min)) + '" placeholder="最小值" autocomplete="off" />' +
+        '<input class="input" data-child-max="' + i + '" value="' + escapeHtml(row.max == null ? '' : String(row.max)) + '" placeholder="最大值" autocomplete="off" />' +
+      '</div>';
+    }
+    if (t === '文本输入') {
+      return '<div class="child-config">' +
+        '<input class="input" data-child-placeholder="' + i + '" value="' + escapeHtml(row.placeholder || '') + '" placeholder="占位文本" autocomplete="off" />' +
+        '<input class="input" data-child-maxlen="' + i + '" value="' + escapeHtml(row.maxLength == null ? '' : String(row.maxLength)) + '" placeholder="最大长度" autocomplete="off" />' +
+      '</div>';
+    }
+    if (t === '开关') {
+      return '<div class="child-config">' +
+        '<input class="input" data-child-on="' + i + '" value="' + escapeHtml(row.onValue || '') + '" placeholder="开启值" autocomplete="off" />' +
+        '<input class="input" data-child-off="' + i + '" value="' + escapeHtml(row.offValue || '') + '" placeholder="关闭值" autocomplete="off" />' +
+      '</div>';
+    }
+    return '<button class="child-opt-btn" type="button" data-child-opts="' + i + '">配置可选项 (' + childOptionCount(row) + ')</button>';
+  }
+
   function renderChildren() {
     var body = $('childBody');
     if (!state.editChildren.length) {
-      state.editChildren = [{ name: '', key: '', componentType: '数字输入' }];
+      body.innerHTML = '<tr><td colspan="5" class="array-empty">暂无子字段</td></tr>';
+      return;
     }
     body.innerHTML = state.editChildren.map(function (row, i) {
       var typeOpts = CHILD_TYPES.map(function (t) {
         return '<option value="' + escapeHtml(t) + '"' + (row.componentType === t ? ' selected' : '') + '>' + escapeHtml(t) + '</option>';
       }).join('');
-      var del = state.editChildren.length > 1
-        ? '<button class="link link--danger" type="button" data-child-del="' + i + '">删除</button>'
-        : '-';
-      return '<tr>' +
-        '<td><input class="input" data-child-name="' + i + '" value="' + escapeHtml(row.name || '') + '" placeholder="请输入" /></td>' +
-        '<td><input class="input" data-child-key="' + i + '" value="' + escapeHtml(row.key || '') + '" placeholder="请输入" /></td>' +
+      return '<tr data-child-row="' + i + '">' +
+        '<td><input class="input" data-child-key="' + i + '" value="' + escapeHtml(row.key || '') + '" placeholder="子字段Key" autocomplete="off" /></td>' +
+        '<td><input class="input" data-child-name="' + i + '" value="' + escapeHtml(row.name || '') + '" placeholder="子字段名称" autocomplete="off" /></td>' +
         '<td><select class="input" data-child-type="' + i + '">' + typeOpts + '</select></td>' +
-        '<td class="col-op">' + del + '</td>' +
+        '<td>' + renderChildConfig(row, i) + '</td>' +
+        '<td class="col-op"><button class="link link--danger" type="button" data-child-del="' + i + '">删除</button></td>' +
       '</tr>';
     }).join('');
   }
@@ -163,27 +250,106 @@
       var nameEl = document.querySelector('[data-child-name="' + i + '"]');
       var keyEl = document.querySelector('[data-child-key="' + i + '"]');
       var typeEl = document.querySelector('[data-child-type="' + i + '"]');
+      var minEl = document.querySelector('[data-child-min="' + i + '"]');
+      var maxEl = document.querySelector('[data-child-max="' + i + '"]');
+      var phEl = document.querySelector('[data-child-placeholder="' + i + '"]');
+      var lenEl = document.querySelector('[data-child-maxlen="' + i + '"]');
+      var onEl = document.querySelector('[data-child-on="' + i + '"]');
+      var offEl = document.querySelector('[data-child-off="' + i + '"]');
       if (nameEl) row.name = (nameEl.value || '').trim();
       if (keyEl) row.key = (keyEl.value || '').trim();
       if (typeEl) row.componentType = typeEl.value || '数字输入';
+      if (minEl) {
+        var minRes = parseNumber(minEl.value);
+        row.min = minRes.empty || minRes.error ? null : minRes.value;
+      }
+      if (maxEl) {
+        var maxRes = parseNumber(maxEl.value);
+        row.max = maxRes.empty || maxRes.error ? null : maxRes.value;
+      }
+      if (phEl) row.placeholder = (phEl.value || '').trim();
+      if (lenEl) {
+        var lenRes = parseNumber(lenEl.value);
+        row.maxLength = lenRes.empty || lenRes.error ? null : lenRes.value;
+      }
+      if (onEl) row.onValue = (onEl.value || '').trim();
+      if (offEl) row.offValue = (offEl.value || '').trim();
     });
   }
 
-  $('optionBody').addEventListener('click', function (e) {
+  $('optionList').addEventListener('click', function (e) {
     var btn = e.target.closest('[data-opt-del]');
     if (!btn) return;
     collectOptions();
     var i = Number(btn.getAttribute('data-opt-del'));
     if (state.editOptions.length > 1) state.editOptions.splice(i, 1);
+    else state.editOptions = [{ label: '', value: '' }];
     renderOptions();
   });
 
+  $('optionList').addEventListener('dragstart', function (e) {
+    var handle = e.target.closest('[data-opt-drag]');
+    if (!handle) { e.preventDefault(); return; }
+    collectOptions();
+    state.optionDragIndex = Number(handle.getAttribute('data-opt-drag'));
+    var row = handle.closest('[data-opt-row]');
+    if (row) row.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(state.optionDragIndex));
+  });
+  $('optionList').addEventListener('dragover', function (e) {
+    if (state.optionDragIndex == null) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    var row = e.target.closest('[data-opt-row]');
+    if (!row) return;
+    $('optionList').querySelectorAll('.option-row').forEach(function (el) {
+      el.classList.toggle('is-drop-target', el === row);
+    });
+  });
+  $('optionList').addEventListener('drop', function (e) {
+    e.preventDefault();
+    var row = e.target.closest('[data-opt-row]');
+    var from = state.optionDragIndex;
+    state.optionDragIndex = null;
+    $('optionList').querySelectorAll('.option-row').forEach(function (el) {
+      el.classList.remove('is-dragging', 'is-drop-target');
+    });
+    if (!row || from == null) return;
+    collectOptions();
+    var to = Number(row.getAttribute('data-opt-row'));
+    if (to === from) return;
+    var item = state.editOptions.splice(from, 1)[0];
+    state.editOptions.splice(to, 0, item);
+    renderOptions();
+  });
+  $('optionList').addEventListener('dragend', function () {
+    state.optionDragIndex = null;
+    $('optionList').querySelectorAll('.option-row').forEach(function (el) {
+      el.classList.remove('is-dragging', 'is-drop-target');
+    });
+  });
+
   $('childBody').addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-child-del]');
-    if (!btn) return;
+    var del = e.target.closest('[data-child-del]');
+    if (del) {
+      collectChildren();
+      var i = Number(del.getAttribute('data-child-del'));
+      state.editChildren.splice(i, 1);
+      renderChildren();
+      return;
+    }
+    var opts = e.target.closest('[data-child-opts]');
+    if (opts) {
+      collectChildren();
+      openChildOptions(Number(opts.getAttribute('data-child-opts')));
+    }
+  });
+
+  $('childBody').addEventListener('change', function (e) {
+    var sel = e.target.closest('[data-child-type]');
+    if (!sel) return;
     collectChildren();
-    var i = Number(btn.getAttribute('data-child-del'));
-    if (state.editChildren.length > 1) state.editChildren.splice(i, 1);
     renderChildren();
   });
 
@@ -195,7 +361,66 @@
 
   $('addChildBtn').addEventListener('click', function () {
     collectChildren();
-    state.editChildren.push({ name: '', key: '', componentType: '数字输入' });
+    state.editChildren.push(emptyChild());
+    renderChildren();
+  });
+
+  function renderChildOptions() {
+    var list = $('childOptionList');
+    if (!state.childOptionsDraft.length) state.childOptionsDraft = [{ label: '', value: '' }];
+    list.innerHTML = state.childOptionsDraft.map(function (row, i) {
+      return '<div class="option-row" data-child-opt-row="' + i + '">' +
+        '<input class="input" data-child-opt-value="' + i + '" value="' + escapeHtml(row.value || '') + '" placeholder="选项值" autocomplete="off" />' +
+        '<input class="input" data-child-opt-label="' + i + '" value="' + escapeHtml(row.label || '') + '" placeholder="选项名" autocomplete="off" />' +
+        '<button class="link link--danger" type="button" data-child-opt-del="' + i + '">删除</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function collectChildOptionsDraft() {
+    state.childOptionsDraft.forEach(function (row, i) {
+      var labelEl = document.querySelector('[data-child-opt-label="' + i + '"]');
+      var valueEl = document.querySelector('[data-child-opt-value="' + i + '"]');
+      if (labelEl) row.label = (labelEl.value || '').trim();
+      if (valueEl) row.value = (valueEl.value || '').trim();
+    });
+  }
+
+  function openChildOptions(index) {
+    var row = state.editChildren[index];
+    if (!row) return;
+    state.childOptionsIndex = index;
+    state.childOptionsDraft = Store.clone(row.options && row.options.length ? row.options : [{ label: '', value: '' }]);
+    setItemError('childOptionsItem', false);
+    renderChildOptions();
+    UI.openModal('childOptionsModal');
+  }
+
+  $('childOptionList').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-child-opt-del]');
+    if (!btn) return;
+    collectChildOptionsDraft();
+    var i = Number(btn.getAttribute('data-child-opt-del'));
+    if (state.childOptionsDraft.length > 1) state.childOptionsDraft.splice(i, 1);
+    else state.childOptionsDraft = [{ label: '', value: '' }];
+    renderChildOptions();
+  });
+
+  $('addChildOptionBtn').addEventListener('click', function () {
+    collectChildOptionsDraft();
+    state.childOptionsDraft.push({ label: '', value: '' });
+    renderChildOptions();
+  });
+
+  $('childOptionsSubmit').addEventListener('click', function () {
+    collectChildOptionsDraft();
+    var options = state.childOptionsDraft.filter(function (o) { return o.label && o.value; });
+    var idx = state.childOptionsIndex;
+    if (idx != null && state.editChildren[idx]) {
+      state.editChildren[idx].options = options;
+    }
+    state.childOptionsIndex = null;
+    UI.closeModal('childOptionsModal');
     renderChildren();
   });
 
@@ -219,7 +444,7 @@
         var desc = row.desc || '';
         return '<tr data-id="' + escapeHtml(row.id) + '">' +
           '<td title="' + escapeHtml(row.name) + '">' + escapeHtml(row.name) + '</td>' +
-          '<td class="code-cell" title="' + escapeHtml(row.key) + '">' + escapeHtml(row.key) + '</td>' +
+          '<td title="' + escapeHtml(row.key) + '">' + escapeHtml(row.key) + '</td>' +
           '<td>' + escapeHtml(row.componentType || '-') + '</td>' +
           '<td title="' + escapeHtml(desc) + '"><span class="cell-ellipsis">' + escapeHtml(desc || '-') + '</span></td>' +
           '<td>' + UI.statusTag(row.status) + '</td>' +
@@ -259,12 +484,20 @@
     $('editDesc').value = '';
     $('editMin').value = '';
     $('editMax').value = '';
+    $('editPlaceholder').value = '';
+    $('editMaxLen').value = '';
+    $('editOnValue').value = '';
+    $('editOffValue').value = '';
+    $('editMaxRows').value = '';
     state.editComponentType = '数字输入';
     state.editStatus = '启用';
+    state.editSelectMode = '单选';
     state.editOptions = [{ label: '', value: '' }];
-    state.editChildren = [{ name: '', key: '', componentType: '数字输入' }];
+    state.editChildren = [];
+    state.editChildren = [emptyChild()];
     UI.setSegValue('editStatusSeg', '启用');
     UI.setSegValue('editTypeSeg', '数字输入');
+    UI.setSegValue('editSelectModeSeg', '单选');
     $('editKey').disabled = false;
     $('editKey').readOnly = false;
     syncTypeUi();
@@ -283,8 +516,9 @@
     state.editId = row.id;
     state.editComponentType = row.componentType || '数字输入';
     state.editStatus = row.status || '启用';
+    state.editSelectMode = row.selectMode || '单选';
     state.editOptions = Store.clone(row.options && row.options.length ? row.options : [{ label: '', value: '' }]);
-    state.editChildren = Store.clone(row.children && row.children.length ? row.children : [{ name: '', key: '', componentType: '数字输入' }]);
+    state.editChildren = Store.clone(row.children && row.children.length ? row.children : [emptyChild()]).map(normalizeChild);
     clearEditErrors();
     $('editModalTitle').textContent = '编辑字段';
     $('editName').value = row.name;
@@ -294,8 +528,14 @@
     $('editDesc').value = row.desc || '';
     $('editMin').value = row.min == null ? '' : String(row.min);
     $('editMax').value = row.max == null ? '' : String(row.max);
+    $('editPlaceholder').value = row.placeholder || '';
+    $('editMaxLen').value = row.maxLength == null ? '' : String(row.maxLength);
+    $('editOnValue').value = row.onValue || '';
+    $('editOffValue').value = row.offValue || '';
+    $('editMaxRows').value = row.maxRows == null ? '' : String(row.maxRows);
     UI.setSegValue('editStatusSeg', state.editStatus);
     UI.setSegValue('editTypeSeg', state.editComponentType);
+    UI.setSegValue('editSelectModeSeg', state.editSelectMode);
     syncTypeUi();
     UI.openModal('editModal');
   }
@@ -347,6 +587,18 @@
       }
     }
 
+    var placeholder = ($('editPlaceholder').value || '').trim();
+    var maxLenVal = null;
+    if (type === '文本输入') {
+      var maxLenRes = parseNumber($('editMaxLen').value);
+      if (maxLenRes.error || (!maxLenRes.empty && (maxLenRes.value < 0 || maxLenRes.value % 1 !== 0))) {
+        setItemError('editMaxLenItem', true, '请输入有效整数');
+        ok = false;
+      } else if (!maxLenRes.empty) maxLenVal = maxLenRes.value;
+    }
+    var onValue = ($('editOnValue').value || '').trim();
+    var offValue = ($('editOffValue').value || '').trim();
+
     var options = [];
     if (type === '下拉选择') {
       options = state.editOptions.filter(function (o) { return o.label && o.value; });
@@ -356,16 +608,25 @@
       }
     }
 
+    var maxRowsVal = null;
+    if (type === 'Array') {
+      var maxRowsRes = parseNumber($('editMaxRows').value);
+      if (maxRowsRes.error || (!maxRowsRes.empty && (maxRowsRes.value < 1 || maxRowsRes.value % 1 !== 0))) {
+        setItemError('editMaxRowsItem', true, '请输入大于 0 的整数');
+        ok = false;
+      } else if (!maxRowsRes.empty) maxRowsVal = maxRowsRes.value;
+    }
+
     var children = [];
     if (type === 'Array') {
       children = state.editChildren.filter(function (c) { return c.name && c.key; });
       if (!children.length) {
-        setItemError('editChildrenItem', true, '请至少添加一个完整子项');
+        setItemError('editChildrenItem', true, '请至少添加一个完整子字段');
         ok = false;
       }
       var badKey = children.some(function (c) { return !KEY_RE.test(c.key); });
       if (children.length && badKey) {
-        setItemError('editChildrenItem', true, '子项Key仅支持小写字母开头的字母、数字、下划线');
+        setItemError('editChildrenItem', true, '子字段Key仅支持小写字母开头的字母、数字、下划线');
         ok = false;
       }
     }
@@ -394,7 +655,13 @@
       desc: desc,
       min: type === '数字输入' ? minVal : null,
       max: type === '数字输入' ? maxVal : null,
+      placeholder: type === '文本输入' ? placeholder : '',
+      maxLength: type === '文本输入' ? maxLenVal : null,
+      onValue: type === '开关' ? onValue : '',
+      offValue: type === '开关' ? offValue : '',
+      selectMode: type === '下拉选择' ? (state.editSelectMode || '单选') : '',
       options: type === '下拉选择' ? options : [],
+      maxRows: type === 'Array' ? maxRowsVal : null,
       children: type === 'Array' ? children : [],
       status: state.editStatus || '启用'
     };
@@ -439,9 +706,8 @@
 
   $('queryBtn').addEventListener('click', function () { applyFilters(); renderTable(); });
   $('resetBtn').addEventListener('click', function () {
-    state.draft = { name: '', key: '', status: '' };
-    $('filterName').value = '';
-    $('filterKey').value = '';
+    state.draft = { keyword: '', status: '' };
+    $('filterKeyword').value = '';
     if (statusFilter && statusFilter.syncLabel) statusFilter.syncLabel('');
     applyFilters();
     renderTable();
@@ -463,6 +729,12 @@
 
   document.querySelectorAll('[data-close="editModal"]').forEach(function (btn) {
     btn.addEventListener('click', function () { UI.closeModal('editModal'); });
+  });
+  document.querySelectorAll('[data-close="childOptionsModal"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.childOptionsIndex = null;
+      UI.closeModal('childOptionsModal');
+    });
   });
   document.querySelectorAll('[data-close="deleteModal"]').forEach(function (btn) {
     btn.addEventListener('click', function () { UI.closeModal('deleteModal'); });
