@@ -15,7 +15,8 @@
 
   var BOARD_TYPES = ['Adjust', '双端 SDK', 'APP 新用户', '广告聚合', 'IS Cohort', 'MAX Cohort', 'SDK 初始化', 'TikTok 开平'];
 
-  var ALL_DIMENSIONS = ['日期', '按周', '按月', '平台', '产品', '国家地区', '渠道', '优化师', '账户'];
+  var DATE_GRAINS = ['按日', '按年', '按月', '按周'];
+  var ALL_DIMENSIONS = DATE_GRAINS.concat(['平台', '产品', '国家地区', '渠道', '优化师', '账户']);
 
   var ALL_FILTERS = [
     { key: 'date', label: '日期', locked: true },
@@ -220,7 +221,7 @@
     return item.defaultChecked;
   }).map(function (item) { return item.key; });
   var DEMO_FILTERS = ['date', 'compare', 'product', 'channel'];
-  var DEMO_DIMENSIONS = ['日期'];
+  var DEMO_DIMENSIONS = ['按日'];
   var DIM_COL_WIDTH = 120;
   var METRIC_COL_WIDTH = 112;
 
@@ -1455,7 +1456,7 @@
   }
 
   function genRows() {
-    var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
+    var dims = state.dimSelected.length ? state.dimSelected : ['按日'];
     var metrics = (state.draft && state.draft.metrics) || [];
     var days = getRangeDays();
     var showCompare = isCompareEnabled();
@@ -1471,15 +1472,11 @@
         row._cmpOffset = cmpOffset;
       }
       dims.forEach(function (d) {
-        if (d === '日期') row[d] = formatDate(day);
-        else if (d === '按周') {
-          var dow = (day.getDay() + 6) % 7;
-          var weekStart = addDays(day, -dow);
-          var weekEnd = addDays(weekStart, 6);
-          row[d] = formatDate(weekStart) + ' ~ ' + formatDate(weekEnd);
-        } else if (d === '按月') {
-          row[d] = day.getFullYear() + '-' + pad(day.getMonth() + 1);
-        } else if (d === '平台') row[d] = PLATFORMS[(i % 2) + 1];
+        if (d === '按日') row[d] = formatDate(day);
+        else if (d === '按周') row[d] = weekLabelOf(day);
+        else if (d === '按月') row[d] = monthLabelOf(day);
+        else if (d === '按年') row[d] = String(day.getFullYear());
+        else if (d === '平台') row[d] = PLATFORMS[(i % 2) + 1];
         else if (d === '产品') row[d] = productOptionLabel(PRODUCT_OPTIONS[i % PRODUCT_OPTIONS.length]);
         else if (d === '国家地区') row[d] = COUNTRIES[i % COUNTRIES.length];
         else if (d === '优化师') row[d] = OPTIMIZERS[i % OPTIMIZERS.length];
@@ -1516,7 +1513,7 @@
       if (!isFinite(bd)) return -1;
       return ad - bd;
     }
-    if (key === '日期' || (/^\d{4}-\d{2}-\d{2}$/.test(String(av)) && /^\d{4}-\d{2}-\d{2}$/.test(String(bv)))) {
+    if (key === '按日' || key === '按周' || key === '按月' || key === '按年' || (/^\d{4}-\d{2}-\d{2}$/.test(String(av)) && /^\d{4}-\d{2}-\d{2}$/.test(String(bv)))) {
       return String(av).localeCompare(String(bv));
     }
     if (METRIC_META[key] || typeof av === 'number' || typeof bv === 'number') {
@@ -1528,7 +1525,7 @@
   }
 
   function getDefaultSortKey(cols) {
-    if (cols.indexOf('日期') >= 0) return '日期';
+    if (cols.indexOf('按日') >= 0) return '按日';
     return cols[0] || '';
   }
 
@@ -1593,7 +1590,7 @@
 
   function renderTable() {
     captureAppliedQuery();
-    var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
+    var dims = state.dimSelected.length ? state.dimSelected : ['按日'];
     var metrics = (state.draft && state.draft.metrics) || [];
     var showCompare = isCompareEnabled();
     var displayCols = buildDisplayCols(dims, metrics, showCompare);
@@ -1685,32 +1682,21 @@
 
       var totals = {};
       metrics.forEach(function (m) {
-        var meta = METRIC_META[m] || { type: 'decimal', digits: 2, aggregate: 'sum' };
-        var sum = 0;
-        var cmpSum = 0;
-        var n = 0;
-        var cn = 0;
+        var curVals = [];
+        var cmpVals = [];
         rows.forEach(function (r) {
-          var v = Number(r[m]);
-          if (isFinite(v)) {
-            sum += v;
-            n += 1;
-          }
-          var cv = Number(r['__cmp_' + m]);
-          if (isFinite(cv)) {
-            cmpSum += cv;
-            cn += 1;
-          }
+          curVals.push(r[m]);
+          cmpVals.push(r['__cmp_' + m]);
         });
-        if (!n) {
+        var raw = aggregateMetric(m, curVals);
+        if (!isFinite(raw)) {
           totals[m] = '—';
           totals['__delta_' + m] = '—';
           return;
         }
-        var raw = meta.aggregate === 'avg' ? (sum / n) : sum;
         totals[m] = formatMetricValue(m, raw);
-        if (showCompare && cn) {
-          var cmpRaw = meta.aggregate === 'avg' ? (cmpSum / cn) : cmpSum;
+        var cmpRaw = aggregateMetric(m, cmpVals);
+        if (showCompare && isFinite(cmpRaw)) {
           var dlt = Math.abs(cmpRaw) < 1e-9 ? NaN : ((raw - cmpRaw) / Math.abs(cmpRaw)) * 100;
           totals['__delta_' + m] = formatDelta(dlt);
           totals['__deltaNum_' + m] = dlt;
@@ -1753,7 +1739,7 @@
         getPage: function () { return state.page; },
         getPageSize: function () { return state.pageSize; },
         getTotal: function () {
-          var dims2 = state.dimSelected.length ? state.dimSelected : ['日期'];
+          var dims2 = state.dimSelected.length ? state.dimSelected : ['按日'];
           var metrics2 = (state.draft && state.draft.metrics) || [];
           var keys = buildDisplayCols(dims2, metrics2, isCompareEnabled()).map(function (c) { return c.key; });
           return applySort(genRows(), keys).length;
@@ -1774,17 +1760,43 @@
     if (state.viewMode === 'chart') renderChart();
   }
 
+  function dateGrainsIn(dims) {
+    return DATE_GRAINS.filter(function (name) { return (dims || []).indexOf(name) >= 0; });
+  }
+
+  function chartDateGrain(dims) {
+    var grains = dateGrainsIn(dims);
+    return grains.length === 1 ? grains[0] : '按日';
+  }
+
   function breakDimOf(dims) {
     dims = dims || [];
     for (var i = 0; i < dims.length; i++) {
-      if (dims[i] !== '日期') return dims[i];
+      if (DATE_GRAINS.indexOf(dims[i]) < 0) return dims[i];
     }
     return '';
   }
 
+  function appliedChartDims() {
+    return (state.applied && state.applied.dims) || [];
+  }
+
   function appliedChartReady() {
-    var dims = (state.applied && state.applied.dims) || [];
-    return dims.length > 0 && dims.length <= 2 && dims.indexOf('日期') >= 0;
+    var dims = appliedChartDims();
+    var grains = dateGrainsIn(dims);
+    if (grains.length > 1) return false;
+    if (dims.length > 2) return false;
+    if (dims.length === 2 && !grains.length) return false;
+    return true;
+  }
+
+  function chartDimHintText() {
+    var dims = appliedChartDims();
+    var grains = dateGrainsIn(dims);
+    if (grains.length > 1) return '折线图只能选择一个日期维度（按日、按年、按月、按周）';
+    if (dims.length > 2) return '图表最多支持两个维度';
+    if (dims.length === 2 && !grains.length) return '两个维度时，其中一个必须为按日、按年、按月或按周';
+    return '图表最多支持两个维度';
   }
 
   function daysBetween(start, end) {
@@ -1807,7 +1819,7 @@
   function showChartDimHint() {
     hideChartTip();
     var host = $('chartPlots');
-    if (host) host.innerHTML = '<div class="board-chart__empty">图表最多支持两个维度，且其中一个必须为日期</div>';
+    if (host) host.innerHTML = '<div class="board-chart__empty">' + chartDimHintText() + '</div>';
     var title = $('chartLegendDim');
     var list = $('chartLegendList');
     var searchWrap = document.querySelector('.board-chart__legend-search');
@@ -1880,6 +1892,34 @@
 
   function monthLabelOf(day) {
     return day.getFullYear() + '-' + pad(day.getMonth() + 1);
+  }
+
+  function chartBuckets(days, grain) {
+    if (!grain || grain === '按日') {
+      return days.map(function (day, index) {
+        return {
+          label: pad(day.getMonth() + 1) + '-' + pad(day.getDate()),
+          title: formatDate(day),
+          dayIndexes: [index]
+        };
+      });
+    }
+    var groups = [];
+    var seen = {};
+    days.forEach(function (day, index) {
+      var key = grain === '按周' ? weekLabelOf(day) : grain === '按月' ? monthLabelOf(day) : String(day.getFullYear());
+      if (!seen[key]) {
+        var label = key;
+        if (grain === '按周') {
+          var start = key.split(' ~ ')[0];
+          label = start.slice(5);
+        }
+        seen[key] = { label: label, title: key, dayIndexes: [] };
+        groups.push(seen[key]);
+      }
+      seen[key].dayIndexes.push(index);
+    });
+    return groups;
   }
 
   function getChartBreakNames(breakDim, days) {
@@ -2005,6 +2045,7 @@
   function buildChartModel() {
     var applied = state.applied || {};
     var days = daysBetween(applied.dateStart, applied.dateEnd);
+    var buckets = chartBuckets(days, chartDateGrain(applied.dims));
     var breakDim = breakDimOf(applied.dims);
     var packed = filterChartEntries(breakDim, getChartBreakNames(breakDim, days));
     var names = packed.entries;
@@ -2028,7 +2069,7 @@
         hiddenLegend: true
       });
     }
-    var scope = (breakDim || '日期') + '|' + (packed.filtered ? names.map(function (entry) {
+    var scope = (breakDim || chartDateGrain(applied.dims)) + '|' + (packed.filtered ? names.map(function (entry) {
       return typeof entry === 'string' ? entry : entry.key;
     }).join('\u0001') : '*');
     syncChartSeriesVisibility(series, scope, packed.filtered);
@@ -2042,14 +2083,16 @@
           platform: s.platform,
           color: s.color,
           hiddenLegend: !!s.hiddenLegend,
-          values: days.map(function (day, dayIndex) {
-            if (!pointBelongs(breakDim, day, s.name)) return null;
-            return genChartPoint(metric, dayIndex, s.index, days.length);
+          values: buckets.map(function (bucket) {
+            var daily = bucket.dayIndexes.map(function (dayIndex) {
+              return genChartPoint(metric, dayIndex, s.index, days.length);
+            });
+            return aggregateMetric(metric, daily);
           })
         };
       });
     });
-    return { days: days, breakDim: breakDim, series: series, metrics: metrics, metricSeries: metricSeries };
+    return { days: buckets, breakDim: breakDim, series: series, metrics: metrics, metricSeries: metricSeries };
   }
 
   function formatAxisTick(metric, value) {
@@ -2168,7 +2211,7 @@
       var lines = (model.metricSeries[metric] || []).filter(function (line) {
         return !!state.chartSeriesOn[line.key];
       });
-      var summaryValues = chartSummaryValues(metric, lines);
+      var summaryValues = chartSummaryValues(lines);
       var summary = aggregateMetric(metric, summaryValues);
       var delta = chartDelta(metric, summaryValues, model.days.length);
       var deltaHtml = '';
@@ -2189,26 +2232,14 @@
     });
   }
 
-  function chartSummaryValues(metric, lines) {
-    if (!lines.length) return [];
-    if (lines.length === 1) return lines[0].values;
-    var meta = METRIC_META[metric] || {};
-    var useAvg = meta.aggregate === 'avg' || meta.type === 'percent';
-    var count = lines[0].values.length;
-    var out = [];
-    for (var d = 0; d < count; d++) {
-      var sum = 0;
-      var n = 0;
-      lines.forEach(function (line) {
-        var v = line.values[d];
-        if (isFinite(v)) {
-          sum += v;
-          n += 1;
-        }
+  function chartSummaryValues(lines) {
+    var values = [];
+    lines.forEach(function (line) {
+      (line.values || []).forEach(function (v) {
+        if (isFinite(v)) values.push(v);
       });
-      out.push(n ? (useAvg ? sum / n : sum) : null);
-    }
-    return out;
+    });
+    return values;
   }
 
   function chartSvg(metric, days, lines, width, height) {
@@ -2235,7 +2266,7 @@
     days.forEach(function (day, i) {
       if (i % labelStep !== 0 && i !== days.length - 1) return;
       var x = days.length <= 1 ? inset.l + plotW / 2 : inset.l + plotW * i / (days.length - 1);
-      var text = pad(day.getMonth() + 1) + '-' + pad(day.getDate());
+      var text = day.label || (pad(day.getMonth() + 1) + '-' + pad(day.getDate()));
       var anchor = i === 0 ? 'start' : (i === days.length - 1 ? 'end' : 'middle');
       labels += '<text x="' + x + '" y="' + (height - 8) + '" text-anchor="' + anchor + '" fill="#86909C" font-size="12">' + text + '</text>';
     });
@@ -2313,7 +2344,8 @@
         guide.appendChild(dot);
       });
       svg.appendChild(guide);
-      showChartTip(e.clientX, e.clientY, formatDate(days[index]), lines.map(function (line) {
+      var bucket = days[index] || {};
+      showChartTip(e.clientX, e.clientY, bucket.title || bucket.label || '', lines.map(function (line) {
         return {
           name: line.platform ? (line.platform + ' ' + line.name) : (line.name || metricDisplayName(metric)),
           color: line.color,
@@ -3689,7 +3721,7 @@
 
   function exportCurrentBoardList() {
     try {
-      var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
+      var dims = state.dimSelected.length ? state.dimSelected : ['按日'];
       var metrics = (state.draft && state.draft.metrics) || [];
       var showCompare = isCompareEnabled();
       var displayCols = buildDisplayCols(dims, metrics, showCompare);
