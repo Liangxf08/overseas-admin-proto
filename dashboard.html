@@ -113,6 +113,18 @@
 
             <div class="board-data" id="boardData">
               <div class="board-table-toolbar">
+                <div class="board-view-toggle" role="group" aria-label="视图切换">
+                  <span class="tooltip-wrap" data-tip="表格">
+                    <button class="board-view-toggle__btn is-active" type="button" id="tableViewBtn" aria-label="表格" aria-pressed="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="1.2"/><path d="M4 10h16M4 14.5h16M10 10v9M15.5 10v9"/></svg>
+                    </button>
+                  </span>
+                  <span class="tooltip-wrap" data-tip="折线图" id="chartViewTip">
+                    <button class="board-view-toggle__btn" type="button" id="chartViewBtn" aria-label="折线图" aria-pressed="false">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M7 15.5l3.2-4.2 2.8 2.6L17 8"/></svg>
+                    </button>
+                  </span>
+                </div>
                 <span class="tooltip-wrap" data-tip="刷新">
                   <button class="board-icon-btn" type="button" id="refreshBtn" aria-label="刷新">
                     <svg class="arco-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M38.837 18C36.463 12.136 30.715 8 24 8 15.163 8 8 15.163 8 24s7.163 16 16 16c7.455 0 13.72-5.1 15.496-12M40 8v10H30"/></svg>
@@ -135,7 +147,7 @@
                 </span>
               </div>
 
-              <div class="table-shell">
+              <div class="table-shell" id="tableShell">
                 <div class="table-wrap">
                   <table class="data-table" id="dataTable">
                     <colgroup id="tableColgroup"></colgroup>
@@ -145,6 +157,43 @@
                   </table>
                   <div class="empty-tip" id="tableEmpty" hidden>暂无数据</div>
                 </div>
+              </div>
+              <div class="board-chart" id="boardChart" hidden>
+                <div class="board-chart__main">
+                  <div class="board-chart__bar">
+                    <div class="filter-item" id="chartMetricWrap">
+                      <button class="select-trigger" type="button" id="chartMetricTrigger">
+                        <span class="select-trigger__text" id="chartMetricLabel">指标：<span class="muted">请选择</span></span>
+                        <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                      </button>
+                      <div class="multi-panel" id="chartMetricPanel">
+                        <div class="multi-panel__left">
+                          <div class="multi-panel__search">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                            <input type="text" id="chartMetricSearch" placeholder="搜索" autocomplete="off" />
+                          </div>
+                          <div class="multi-panel__list" id="chartMetricList"></div>
+                        </div>
+                        <div class="multi-panel__right">
+                          <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                            <span id="chartMetricCount">已选择 0 项</span>
+                            <button class="multi-panel__link" type="button" id="chartMetricClear">清空</button>
+                          </div>
+                          <div class="multi-panel__list" id="chartMetricSelected"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="board-chart__plots" id="chartPlots"></div>
+                </div>
+                <aside class="board-chart__legend">
+                  <div class="board-chart__legend-title" id="chartLegendDim"></div>
+                  <div class="board-chart__legend-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="chartLegendSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="board-chart__legend-list" id="chartLegendList"></div>
+                </aside>
               </div>
               <div class="pagination" id="pagination"></div>
             </div>

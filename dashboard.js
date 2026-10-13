@@ -47,10 +47,6 @@
       });
     }
 
-    /* 示例分组 · 冻结指标演示 */
-    add('示例分组', '冻结指标', '此列为示例冻结指标，不可取消勾选或移出冻结区', { defaultChecked: true, defaultFrozen: true });
-    add('示例分组', '示例指标');
-
     /* 核心概览 · 默认全选 */
     add('核心概览', '总收入', '计算公式：广告收入+内购收入', { defaultChecked: true });
     add('核心概览', '花费', '投放广告花费的金额', { defaultChecked: true });
@@ -242,7 +238,7 @@
     boardFormSourceId: null,
     addTargetFolderId: 'mine',
     addBoardType: '',
-    metricCat: '示例分组',
+    metricCat: '核心概览',
     metricDraft: [],
     metricFrozenCount: 0,
     metricAnchorLock: false,
@@ -265,8 +261,17 @@
     sortKey: null,
     sortDir: 'desc',
     sortInteractive: false,
-    colWidths: {}
+    colWidths: {},
+    viewMode: 'table',
+    chartMetrics: [],
+    chartMetricsReady: false,
+    chartSeriesOn: {},
+    chartSeriesScope: '',
+    chartLegendKw: ''
   };
+
+  var chartMetricUI = null;
+  var CHART_COLORS = ['#4080FF', '#FF7D00', '#4CD263', '#A871E3', '#F7BA1E', '#14C9C9', '#F979B7', '#55C5FD', '#9FDB1D', '#E865DF'];
 
   var store = {
     folders: [
@@ -324,8 +329,8 @@
       dimensions: (extra.dimensions || DEMO_DIMENSIONS).slice(),
       filters: (extra.filters || DEMO_FILTERS).slice(),
       metrics: (extra.metrics || DEMO_METRICS).slice(),
-      lockedMetric: extra.lockedMetric || '冻结指标',
-      frozenMetricCount: extra.frozenMetricCount != null ? extra.frozenMetricCount : 1,
+      lockedMetric: extra.lockedMetric || '',
+      frozenMetricCount: extra.frozenMetricCount != null ? extra.frozenMetricCount : 0,
       sharedUsers: (extra.sharedUsers || []).slice(),
       updatedAt: extra.updatedAt || '2026-08-06 12:47:01'
     };
@@ -800,6 +805,14 @@
     state.sortKey = null;
     state.sortDir = 'desc';
     state.sortInteractive = false;
+    state.viewMode = 'table';
+    state.chartMetrics = [];
+    state.chartMetricsReady = false;
+    state.chartSeriesOn = {};
+    state.chartSeriesScope = '';
+    state.chartLegendKw = '';
+    var legendSearch = $('chartLegendSearch');
+    if (legendSearch) legendSearch.value = '';
 
     setBoardVisible(true);
 
@@ -833,6 +846,7 @@
     renderDynamicFilters();
     syncDimLabel();
     renderTable();
+    syncChartViewToggle();
     renderTree();
   }
 
@@ -1567,7 +1581,18 @@
       escapeHtml(label) + icons + '</span>';
   }
 
+  function captureAppliedQuery() {
+    state.applied = {
+      dims: (state.dimSelected || []).slice(),
+      dateStart: state.dateStart ? new Date(state.dateStart.getTime()) : null,
+      dateEnd: state.dateEnd ? new Date(state.dateEnd.getTime()) : null,
+      compareOn: isCompareEnabled(),
+      filters: cloneFilterValues(state.filterValues)
+    };
+  }
+
   function renderTable() {
+    captureAppliedQuery();
     var dims = state.dimSelected.length ? state.dimSelected : ['日期'];
     var metrics = (state.draft && state.draft.metrics) || [];
     var showCompare = isCompareEnabled();
@@ -1746,6 +1771,582 @@
     }
 
     bindBoardTableColResize(widthList);
+    if (state.viewMode === 'chart') renderChart();
+  }
+
+  function breakDimOf(dims) {
+    dims = dims || [];
+    for (var i = 0; i < dims.length; i++) {
+      if (dims[i] !== '日期') return dims[i];
+    }
+    return '';
+  }
+
+  function appliedChartReady() {
+    var dims = (state.applied && state.applied.dims) || [];
+    return dims.length > 0 && dims.length <= 2 && dims.indexOf('日期') >= 0;
+  }
+
+  function daysBetween(start, end) {
+    var s = start ? startOfDay(start) : addDays(startOfDay(new Date()), -6);
+    var e = end ? startOfDay(end) : startOfDay(new Date());
+    if (e.getTime() < s.getTime()) {
+      var tmp = s;
+      s = e;
+      e = tmp;
+    }
+    var days = [];
+    var cur = new Date(s.getTime());
+    while (cur.getTime() <= e.getTime()) {
+      days.push(new Date(cur.getTime()));
+      cur = addDays(cur, 1);
+    }
+    return days.length ? days : [startOfDay(new Date())];
+  }
+
+  function showChartDimHint() {
+    hideChartTip();
+    var host = $('chartPlots');
+    if (host) host.innerHTML = '<div class="board-chart__empty">图表最多支持两个维度，且其中一个必须为日期</div>';
+    var title = $('chartLegendDim');
+    var list = $('chartLegendList');
+    var searchWrap = document.querySelector('.board-chart__legend-search');
+    if (title) title.textContent = '';
+    if (list) list.innerHTML = '';
+    if (searchWrap) searchWrap.hidden = true;
+    state._chartModel = null;
+  }
+
+  function syncChartViewToggle() {
+    var chartBtn = $('chartViewBtn');
+    var tableBtn = $('tableViewBtn');
+    var tip = $('chartViewTip');
+    var chart = state.viewMode === 'chart';
+    if (chartBtn) {
+      chartBtn.disabled = false;
+      chartBtn.classList.toggle('is-active', chart);
+      chartBtn.setAttribute('aria-pressed', chart ? 'true' : 'false');
+    }
+    if (tableBtn) {
+      tableBtn.classList.toggle('is-active', !chart);
+      tableBtn.setAttribute('aria-pressed', chart ? 'false' : 'true');
+    }
+    if (tip) tip.setAttribute('data-tip', '折线图');
+    var shell = $('tableShell');
+    var pager = $('pagination');
+    var box = $('boardChart');
+    if (shell) shell.hidden = chart;
+    if (pager) pager.hidden = chart;
+    if (box) box.hidden = !chart;
+    if (!chart) hideChartTip();
+    if (!chart && window.ColResize && $('dataTable')) {
+      requestAnimationFrame(function () {
+        try { ColResize.refresh($('dataTable')); } catch (err) { /* ignore */ }
+      });
+    }
+  }
+
+  function setBoardViewMode(mode) {
+    if (state.viewMode === mode) return;
+    state.viewMode = mode;
+    syncChartViewToggle();
+    if (mode === 'chart') renderChart();
+  }
+
+  function metricDisplayName(key) {
+    var item = COLUMN_MAP[key];
+    return item ? item.name : key;
+  }
+
+  function ensureChartMetrics() {
+    var pool = (state.draft && state.draft.metrics) ? state.draft.metrics.slice() : [];
+    if (!state.chartMetricsReady) {
+      state.chartMetrics = pool.slice(0, 2);
+      state.chartMetricsReady = true;
+      return;
+    }
+    var prev = state.chartMetrics || [];
+    var next = prev.filter(function (key) { return pool.indexOf(key) >= 0; }).slice(0, 2);
+    if (!next.length && prev.length && pool.length) next = pool.slice(0, 2);
+    state.chartMetrics = next;
+  }
+
+  function weekLabelOf(day) {
+    var dow = (day.getDay() + 6) % 7;
+    var weekStart = addDays(day, -dow);
+    var weekEnd = addDays(weekStart, 6);
+    return formatDate(weekStart) + ' ~ ' + formatDate(weekEnd);
+  }
+
+  function monthLabelOf(day) {
+    return day.getFullYear() + '-' + pad(day.getMonth() + 1);
+  }
+
+  function getChartBreakNames(breakDim, days) {
+    if (!breakDim) return [];
+    if (breakDim === '平台') return ['Android', 'iOS'];
+    if (breakDim === '产品') {
+      return PRODUCT_CATALOG.map(function (item) {
+        return {
+          key: item.product + '@@' + item.platform,
+          name: item.product,
+          platform: item.platform
+        };
+      });
+    }
+    if (breakDim === '国家地区') return COUNTRIES.slice();
+    if (breakDim === '渠道') return CHANNELS.slice();
+    if (breakDim === '优化师') return OPTIMIZERS.slice();
+    if (breakDim === '账户') {
+      return Array.from({ length: 8 }, function (_, i) { return 'ACC' + (1000 + i); });
+    }
+    if (breakDim === '按周') {
+      var weeks = [];
+      var seenWeek = {};
+      days.forEach(function (day) {
+        var label = weekLabelOf(day);
+        if (seenWeek[label]) return;
+        seenWeek[label] = 1;
+        weeks.push(label);
+      });
+      return weeks;
+    }
+    if (breakDim === '按月') {
+      var months = [];
+      var seenMonth = {};
+      days.forEach(function (day) {
+        var label = monthLabelOf(day);
+        if (seenMonth[label]) return;
+        seenMonth[label] = 1;
+        months.push(label);
+      });
+      return months;
+    }
+    return [breakDim];
+  }
+
+  var CHART_DIM_FILTER = {
+    '平台': 'platform',
+    '产品': 'product',
+    '国家地区': 'country',
+    '渠道': 'channel'
+  };
+
+  function appliedDimFilterValues(dim) {
+    var key = CHART_DIM_FILTER[dim];
+    var filters = (state.applied && state.applied.filters) || {};
+    if (!key) return null;
+    var value = filters[key];
+    if (key === 'platform') {
+      if (!value || value === '全部') return null;
+      return [value];
+    }
+    if (!Array.isArray(value) || !value.length) return null;
+    return value.slice();
+  }
+
+  function filterChartEntries(dim, entries) {
+    var selected = appliedDimFilterValues(dim);
+    if (!selected) return { entries: entries, filtered: false };
+    var set = {};
+    selected.forEach(function (value) { set[String(value)] = 1; });
+    return {
+      filtered: true,
+      entries: entries.filter(function (entry) {
+        var key = typeof entry === 'string' ? entry : entry.key;
+        return !!set[String(key)];
+      })
+    };
+  }
+
+  function genChartPoint(metric, dayIndex, seriesIndex, dayCount) {
+    var base = genMetricRaw(metric, seriesIndex * 5 + 2, seriesIndex % 7);
+    var t = dayCount <= 1 ? 0 : dayIndex / (dayCount - 1);
+    var wave = 0.62 + 0.38 * Math.sin(t * Math.PI * 1.6 + seriesIndex * 0.95);
+    var value = base * wave;
+    var meta = METRIC_META[metric] || {};
+    if (meta.type === 'int') return Math.max(0, Math.round(value));
+    if (meta.type === 'percent') return Math.max(0, Math.min(160, value));
+    return Math.max(0, value);
+  }
+
+  function pointBelongs(breakDim, day, name) {
+    if (breakDim === '按周') return weekLabelOf(day) === name;
+    if (breakDim === '按月') return monthLabelOf(day) === name;
+    return true;
+  }
+
+  function aggregateMetric(metric, values) {
+    var meta = METRIC_META[metric] || { aggregate: 'sum' };
+    var nums = [];
+    values.forEach(function (v) {
+      if (isFinite(v)) nums.push(v);
+    });
+    if (!nums.length) return NaN;
+    var sum = nums.reduce(function (acc, n) { return acc + n; }, 0);
+    return meta.aggregate === 'avg' ? sum / nums.length : sum;
+  }
+
+  function syncChartSeriesVisibility(series, scope, filtered) {
+    if (state.chartSeriesScope !== scope) {
+      state.chartSeriesScope = scope;
+      state.chartSeriesOn = {};
+      var breaks = series.filter(function (s) { return !s.hiddenLegend; });
+      breaks.forEach(function (s, i) {
+        state.chartSeriesOn[s.key] = !!filtered || breaks.length <= 6 || i < 5;
+      });
+    }
+    series.forEach(function (s) {
+      if (s.hiddenLegend) state.chartSeriesOn[s.key] = true;
+      else if (state.chartSeriesOn[s.key] == null) state.chartSeriesOn[s.key] = false;
+    });
+  }
+
+  function buildChartModel() {
+    var applied = state.applied || {};
+    var days = daysBetween(applied.dateStart, applied.dateEnd);
+    var breakDim = breakDimOf(applied.dims);
+    var packed = filterChartEntries(breakDim, getChartBreakNames(breakDim, days));
+    var names = packed.entries;
+    var series = names.map(function (entry, index) {
+      var item = typeof entry === 'string' ? { key: entry, name: entry } : entry;
+      return {
+        key: item.key,
+        name: item.name,
+        platform: item.platform || '',
+        index: index,
+        color: CHART_COLORS[index % CHART_COLORS.length]
+      };
+    });
+    if (!series.length && !breakDim) {
+      series.push({
+        key: '__trend',
+        name: '',
+        platform: '',
+        index: 0,
+        color: CHART_COLORS[0],
+        hiddenLegend: true
+      });
+    }
+    var scope = (breakDim || '日期') + '|' + (packed.filtered ? names.map(function (entry) {
+      return typeof entry === 'string' ? entry : entry.key;
+    }).join('\u0001') : '*');
+    syncChartSeriesVisibility(series, scope, packed.filtered);
+    var metrics = (state.chartMetrics || []).slice(0, 2);
+    var metricSeries = {};
+    metrics.forEach(function (metric) {
+      metricSeries[metric] = series.map(function (s) {
+        return {
+          key: s.key,
+          name: s.name,
+          platform: s.platform,
+          color: s.color,
+          hiddenLegend: !!s.hiddenLegend,
+          values: days.map(function (day, dayIndex) {
+            if (!pointBelongs(breakDim, day, s.name)) return null;
+            return genChartPoint(metric, dayIndex, s.index, days.length);
+          })
+        };
+      });
+    });
+    return { days: days, breakDim: breakDim, series: series, metrics: metrics, metricSeries: metricSeries };
+  }
+
+  function formatAxisTick(metric, value) {
+    var meta = METRIC_META[metric] || {};
+    if (!isFinite(value)) return '';
+    if (Math.abs(value) < 1e-6) return meta.type === 'percent' ? '0%' : '0';
+    if (meta.type === 'percent') {
+      var pct = Math.abs(value - Math.round(value)) < 0.05 ? String(Math.round(value)) : formatPlainNumber(value, 1);
+      return pct + '%';
+    }
+    var abs = Math.abs(value);
+    if (abs >= 100000000) return formatPlainNumber(value / 100000000, 1) + '亿';
+    if (abs >= 10000) return formatPlainNumber(value / 10000, abs >= 100000 ? 0 : 1) + '万';
+    if (meta.type === 'int' || abs >= 100 || Math.abs(value - Math.round(value)) < 0.05) return String(Math.round(value));
+    return formatPlainNumber(value, 1);
+  }
+
+  function niceChartMax(max) {
+    if (!isFinite(max) || max <= 0) return 1;
+    var pow = Math.pow(10, Math.floor(Math.log10(max)));
+    var n = max / pow;
+    var nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+    return nice * pow;
+  }
+
+  function chartDelta(metric, values, dayCount) {
+    if (!state.applied || !state.applied.compareOn) return null;
+    var cur = aggregateMetric(metric, values);
+    var cmp = aggregateMetric(metric, values.map(function (_, i) {
+      return genChartPoint(metric, i + 40, 1, dayCount);
+    }));
+    if (!isFinite(cur) || !isFinite(cmp) || Math.abs(cmp) < 1e-9) return NaN;
+    return ((cur - cmp) / Math.abs(cmp)) * 100;
+  }
+
+  function hideChartTip() {
+    var tip = $('chartTip');
+    if (!tip) return;
+    tip.hidden = true;
+  }
+
+  function ensureChartTip() {
+    var tip = $('chartTip');
+    if (tip) return tip;
+    tip = document.createElement('div');
+    tip.id = 'chartTip';
+    tip.className = 'chart-tip';
+    tip.hidden = true;
+    document.body.appendChild(tip);
+    return tip;
+  }
+
+  function showChartTip(clientX, clientY, title, rows) {
+    var tip = ensureChartTip();
+    tip.innerHTML = '<div class="chart-tip__title">' + escapeHtml(title) + '</div>' + rows.map(function (row) {
+      return '<div class="chart-tip__row"><span class="chart-tip__name"><i class="chart-tip__dot" style="background:' + row.color + '"></i><span>' +
+        escapeHtml(row.name) + '</span></span><span class="chart-tip__val">' + escapeHtml(row.value) + '</span></div>';
+    }).join('');
+    tip.hidden = false;
+    var rect = tip.getBoundingClientRect();
+    var left = clientX + 12;
+    var top = clientY + 12;
+    if (left + rect.width > window.innerWidth - 8) left = clientX - rect.width - 12;
+    if (top + rect.height > window.innerHeight - 8) top = clientY - rect.height - 12;
+    if (left < 8) left = 8;
+    if (top < 8) top = 8;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+
+  function renderChartLegend(model) {
+    var title = $('chartLegendDim');
+    var list = $('chartLegendList');
+    if (title) title.textContent = model.breakDim || '';
+    var searchWrap = document.querySelector('.board-chart__legend-search');
+    if (!list) return;
+    var kw = (state.chartLegendKw || '').trim().toLowerCase();
+    var legendSeries = model.series.filter(function (s) { return !s.hiddenLegend; });
+    var rows = legendSeries.filter(function (s) {
+      if (!kw) return true;
+      return String(s.name).toLowerCase().indexOf(kw) >= 0 || String(s.platform || '').toLowerCase().indexOf(kw) >= 0;
+    });
+    if (searchWrap) searchWrap.hidden = !legendSeries.length && !model.breakDim;
+    if (!legendSeries.length) {
+      list.innerHTML = model.breakDim ? '<div class="chart-legend__empty">暂无数据</div>' : '';
+      return;
+    }
+    if (!rows.length) {
+      list.innerHTML = '<div class="chart-legend__empty">暂无匹配</div>';
+      return;
+    }
+    list.innerHTML = rows.map(function (s) {
+      var on = !!state.chartSeriesOn[s.key];
+      var icon = '';
+      if (s.platform && PLATFORM_ICONS[s.platform]) {
+        icon = '<span class="select-option-icon"><img src="' + PLATFORM_ICONS[s.platform] + '" alt="" /></span>';
+      }
+      return '<button type="button" class="chart-legend__item' + (on ? ' is-on' : '') + '" data-series="' + escapeHtml(s.key) + '" title="' + escapeHtml(s.name) + '">' +
+        '<span class="chart-legend__check" style="--legend-color:' + s.color + '"></span>' +
+        icon +
+        '<span class="chart-legend__name">' + escapeHtml(s.name) + '</span>' +
+      '</button>';
+    }).join('');
+  }
+
+  function renderChartPlots(model) {
+    var host = $('chartPlots');
+    if (!host) return;
+    if (!model.metrics.length) {
+      host.innerHTML = '<div class="board-chart__empty">请选择指标</div>';
+      return;
+    }
+    var width = Math.max(host.clientWidth - 8, 360);
+    var height = 200;
+    host.innerHTML = model.metrics.map(function (metric) {
+      var lines = (model.metricSeries[metric] || []).filter(function (line) {
+        return !!state.chartSeriesOn[line.key];
+      });
+      var summaryValues = chartSummaryValues(metric, lines);
+      var summary = aggregateMetric(metric, summaryValues);
+      var delta = chartDelta(metric, summaryValues, model.days.length);
+      var deltaHtml = '';
+      if (delta != null) {
+        deltaHtml = '<span class="' + deltaClassName(delta) + '">' + escapeHtml(formatDelta(delta)) + '</span>';
+      }
+      return '<section class="board-chart__plot" data-metric="' + escapeHtml(metric) + '">' +
+        '<div class="board-chart__plot-head">' +
+          '<span class="board-chart__plot-name">' + escapeHtml(metricDisplayName(metric)) + '</span>' +
+          '<span class="board-chart__plot-value">' + escapeHtml(formatMetricValue(metric, summary)) + '</span>' +
+          deltaHtml +
+        '</div>' +
+        chartSvg(metric, model.days, lines, width, height) +
+      '</section>';
+    }).join('');
+    Array.prototype.forEach.call(host.querySelectorAll('.board-chart__svg'), function (svg) {
+      bindChartHover(svg, model);
+    });
+  }
+
+  function chartSummaryValues(metric, lines) {
+    if (!lines.length) return [];
+    if (lines.length === 1) return lines[0].values;
+    var meta = METRIC_META[metric] || {};
+    var useAvg = meta.aggregate === 'avg' || meta.type === 'percent';
+    var count = lines[0].values.length;
+    var out = [];
+    for (var d = 0; d < count; d++) {
+      var sum = 0;
+      var n = 0;
+      lines.forEach(function (line) {
+        var v = line.values[d];
+        if (isFinite(v)) {
+          sum += v;
+          n += 1;
+        }
+      });
+      out.push(n ? (useAvg ? sum / n : sum) : null);
+    }
+    return out;
+  }
+
+  function chartSvg(metric, days, lines, width, height) {
+    var inset = { l: 52, r: 12, t: 12, b: 28 };
+    var plotW = Math.max(width - inset.l - inset.r, 40);
+    var plotH = Math.max(height - inset.t - inset.b, 40);
+    var max = 0;
+    lines.forEach(function (line) {
+      line.values.forEach(function (v) {
+        if (isFinite(v) && v > max) max = v;
+      });
+    });
+    var yMax = niceChartMax(max);
+    var ticks = 4;
+    var grid = '';
+    for (var t = 0; t <= ticks; t++) {
+      var val = yMax * (ticks - t) / ticks;
+      var y = inset.t + plotH * t / ticks;
+      grid += '<line x1="' + inset.l + '" y1="' + y + '" x2="' + (inset.l + plotW) + '" y2="' + y + '" stroke="#E5E6EB" stroke-width="1"/>';
+      grid += '<text x="' + (inset.l - 8) + '" y="' + (y + 4) + '" text-anchor="end" fill="#86909C" font-size="12">' + escapeHtml(formatAxisTick(metric, val)) + '</text>';
+    }
+    var labelStep = days.length <= 8 ? 1 : Math.ceil(days.length / 7);
+    var labels = '';
+    days.forEach(function (day, i) {
+      if (i % labelStep !== 0 && i !== days.length - 1) return;
+      var x = days.length <= 1 ? inset.l + plotW / 2 : inset.l + plotW * i / (days.length - 1);
+      var text = pad(day.getMonth() + 1) + '-' + pad(day.getDate());
+      var anchor = i === 0 ? 'start' : (i === days.length - 1 ? 'end' : 'middle');
+      labels += '<text x="' + x + '" y="' + (height - 8) + '" text-anchor="' + anchor + '" fill="#86909C" font-size="12">' + text + '</text>';
+    });
+    function xAt(i) {
+      if (days.length <= 1) return inset.l + plotW / 2;
+      return inset.l + plotW * i / (days.length - 1);
+    }
+    function yAt(v) {
+      return inset.t + plotH * (1 - v / yMax);
+    }
+    var paths = lines.map(function (line) {
+      var segs = [];
+      var cur = [];
+      line.values.forEach(function (v, i) {
+        if (!isFinite(v)) {
+          if (cur.length) segs.push(cur);
+          cur = [];
+          return;
+        }
+        cur.push(i);
+      });
+      if (cur.length) segs.push(cur);
+      return segs.map(function (seg) {
+        if (seg.length < 2) return '';
+        var d = seg.map(function (i, idx) {
+          return (idx === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yAt(line.values[i]).toFixed(1);
+        }).join(' ');
+        return '<path d="' + d + '" fill="none" stroke="' + line.color + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>';
+      }).join('');
+    }).join('');
+    return '<svg class="board-chart__svg" viewBox="0 0 ' + width + ' ' + height + '" data-chart-metric="' + escapeHtml(metric) + '" data-ymax="' + yMax + '" data-pad="' + inset.l + ',' + inset.r + ',' + inset.t + ',' + inset.b + '">' +
+      grid + paths + labels +
+      '<rect class="board-chart__hit" x="' + inset.l + '" y="' + inset.t + '" width="' + plotW + '" height="' + plotH + '" fill="transparent"></rect>' +
+    '</svg>';
+  }
+
+  function bindChartHover(svg, model) {
+    var metric = svg.getAttribute('data-chart-metric');
+    var pad = (svg.getAttribute('data-pad') || '52,12,12,28').split(',').map(Number);
+    var guide = null;
+    svg.addEventListener('mousemove', function (e) {
+      var rect = svg.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / Math.max(rect.width, 1)) * (svg.viewBox.baseVal.width || rect.width);
+      var plotL = pad[0];
+      var plotR = (svg.viewBox.baseVal.width || rect.width) - pad[1];
+      var plotW = Math.max(plotR - plotL, 1);
+      var days = model.days;
+      var ratio = Math.min(1, Math.max(0, (x - plotL) / plotW));
+      var index = days.length <= 1 ? 0 : Math.round(ratio * (days.length - 1));
+      var lines = (model.metricSeries[metric] || []).filter(function (line) {
+        return !!state.chartSeriesOn[line.key] && isFinite(line.values[index]);
+      });
+      if (guide) guide.remove();
+      var xPos = days.length <= 1 ? plotL + plotW / 2 : plotL + plotW * index / (days.length - 1);
+      var yMax = Number(svg.getAttribute('data-ymax')) || 1;
+      var plotT = pad[2];
+      var plotH = (svg.viewBox.baseVal.height || rect.height) - pad[2] - pad[3];
+      guide = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      guide.setAttribute('pointer-events', 'none');
+      var rule = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      rule.setAttribute('x1', xPos);
+      rule.setAttribute('x2', xPos);
+      rule.setAttribute('y1', plotT);
+      rule.setAttribute('y2', plotT + plotH);
+      rule.setAttribute('stroke', '#C9CDD4');
+      rule.setAttribute('stroke-dasharray', '3 3');
+      guide.appendChild(rule);
+      lines.forEach(function (line) {
+        var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        var y = plotT + plotH * (1 - line.values[index] / yMax);
+        dot.setAttribute('cx', xPos);
+        dot.setAttribute('cy', y);
+        dot.setAttribute('r', 3.5);
+        dot.setAttribute('fill', line.color);
+        guide.appendChild(dot);
+      });
+      svg.appendChild(guide);
+      showChartTip(e.clientX, e.clientY, formatDate(days[index]), lines.map(function (line) {
+        return {
+          name: line.platform ? (line.platform + ' ' + line.name) : (line.name || metricDisplayName(metric)),
+          color: line.color,
+          value: formatMetricValue(metric, line.values[index])
+        };
+      }));
+    });
+    svg.addEventListener('mouseleave', function () {
+      if (guide) guide.remove();
+      guide = null;
+      hideChartTip();
+    });
+  }
+
+  function renderChart() {
+    if (state.viewMode !== 'chart') return;
+    if (!appliedChartReady()) {
+      showChartDimHint();
+      return;
+    }
+    ensureChartMetrics();
+    if (chartMetricUI) chartMetricUI.syncLabel();
+    var host = $('chartPlots');
+    if (host && host.clientWidth < 40) {
+      state._chartLayoutTries = (state._chartLayoutTries || 0) + 1;
+      if (state._chartLayoutTries < 8) requestAnimationFrame(renderChart);
+      return;
+    }
+    state._chartLayoutTries = 0;
+    var model = buildChartModel();
+    state._chartModel = model;
+    renderChartPlots(model);
+    renderChartLegend(model);
   }
 
   function getColWidthPx(col) {
@@ -2364,7 +2965,7 @@
     var seen = {};
     var list = [];
     (draft || []).forEach(function (key) {
-      if (!key || seen[key]) return;
+      if (!key || seen[key] || !COLUMN_MAP[key]) return;
       seen[key] = true;
       list.push(key);
     });
@@ -2374,7 +2975,7 @@
         seen[item.key] = true;
       }
     });
-    if (board && board.lockedMetric && !seen[board.lockedMetric]) {
+    if (board && board.lockedMetric && COLUMN_MAP[board.lockedMetric] && !seen[board.lockedMetric]) {
       list.unshift(board.lockedMetric);
     }
     var locked = [];
@@ -3019,6 +3620,54 @@
   $('resetBtn').addEventListener('click', resetFilters);
   $('queryBtn').addEventListener('click', queryTable);
   $('refreshBtn').addEventListener('click', function () { queryTable(); });
+  $('chartViewBtn').addEventListener('click', function () {
+    setBoardViewMode('chart');
+  });
+  $('tableViewBtn').addEventListener('click', function () {
+    setBoardViewMode('table');
+  });
+  $('chartLegendList').addEventListener('click', function (e) {
+    var item = e.target.closest('[data-series]');
+    if (!item || !state._chartModel) return;
+    var key = item.getAttribute('data-series');
+    state.chartSeriesOn[key] = !state.chartSeriesOn[key];
+    renderChartPlots(state._chartModel);
+    renderChartLegend(state._chartModel);
+  });
+  $('chartLegendSearch').addEventListener('input', function () {
+    state.chartLegendKw = this.value || '';
+    if (state._chartModel) renderChartLegend(state._chartModel);
+  });
+  $('chartPlots').addEventListener('scroll', hideChartTip);
+  window.addEventListener('resize', function () {
+    if (state.viewMode === 'chart') renderChart();
+  });
+  chartMetricUI = UI.bindMultiSelect({
+    wrapId: 'chartMetricWrap',
+    triggerId: 'chartMetricTrigger',
+    panelId: 'chartMetricPanel',
+    labelId: 'chartMetricLabel',
+    listId: 'chartMetricList',
+    selectedId: 'chartMetricSelected',
+    searchId: 'chartMetricSearch',
+    countId: 'chartMetricCount',
+    clearId: 'chartMetricClear',
+    prefix: '指标：',
+    getOptions: function () {
+      return (state.draft && state.draft.metrics) ? state.draft.metrics.slice() : [];
+    },
+    getLabel: function (key) { return metricDisplayName(key); },
+    getSelected: function () { return state.chartMetrics || []; },
+    setSelected: function (arr) {
+      if (arr.length > 2) {
+        showToast('最多选择 2 个指标', 'warning');
+        return;
+      }
+      state.chartMetrics = arr.slice();
+      state.chartMetricsReady = true;
+      if (state.viewMode === 'chart') renderChart();
+    }
+  });
 
   function setBoardFullscreen(on) {
     var panel = $('boardData');
@@ -3031,7 +3680,9 @@
     var label = enable ? '退出全屏' : '全屏';
     if (btn) btn.setAttribute('aria-label', label);
     if (tip) tip.setAttribute('data-tip', label);
-    if (window.ColResize && $('dataTable')) {
+    if (state.viewMode === 'chart') {
+      requestAnimationFrame(renderChart);
+    } else if (window.ColResize && $('dataTable')) {
       try { ColResize.refresh($('dataTable')); } catch (err) { /* ignore */ }
     }
   }
@@ -3204,6 +3855,7 @@
     setSelected: function (arr) {
       state.dimSelected = arr;
       syncDimLabel();
+      syncChartViewToggle();
     }
   });
 
@@ -3211,6 +3863,7 @@
     e.stopPropagation();
     state.dimSelected = [];
     syncDimLabel();
+    syncChartViewToggle();
     UI.closePanels();
   });
 
