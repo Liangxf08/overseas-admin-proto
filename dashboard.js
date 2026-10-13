@@ -15,7 +15,7 @@
 
   var BOARD_TYPES = ['Adjust', '双端 SDK', 'APP 新用户', '广告聚合', 'IS Cohort', 'MAX Cohort', 'SDK 初始化', 'TikTok 开平'];
 
-  var DATE_GRAINS = ['按日', '按年', '按月', '按周'];
+  var DATE_GRAINS = ['按日', '按周', '按月', '按年'];
   var ALL_DIMENSIONS = DATE_GRAINS.concat(['平台', '产品', '国家地区', '渠道', '优化师', '账户']);
 
   var ALL_FILTERS = [
@@ -1793,9 +1793,9 @@
   function chartDimHintText() {
     var dims = appliedChartDims();
     var grains = dateGrainsIn(dims);
-    if (grains.length > 1) return '折线图只能选择一个日期维度（按日、按年、按月、按周）';
+    if (grains.length > 1) return '折线图只能选择一个日期维度（按日、按周、按月、按年）';
     if (dims.length > 2) return '图表最多支持两个维度';
-    if (dims.length === 2 && !grains.length) return '两个维度时，其中一个必须为按日、按年、按月或按周';
+    if (dims.length === 2 && !grains.length) return '两个维度时，其中一个必须为按日、按周、按月或按年';
     return '图表最多支持两个维度';
   }
 
