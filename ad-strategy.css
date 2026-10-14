@@ -595,6 +595,11 @@
   flex-direction: column;
 }
 
+#editModal .array-block .param-table.array-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 #editModal .array-block .param-table-wrap {
   flex: 0 1 auto;
   min-height: 0;
@@ -626,6 +631,16 @@
 .array-table .child-config .input {
   flex: 1;
   min-width: 0;
+}
+
+.array-table .child-op {
+  position: relative;
+  width: 120px;
+  flex: 0 0 120px;
+}
+
+.array-table .child-op .select-trigger {
+  width: 100%;
 }
 
 .array-table .array-empty {
@@ -850,6 +865,30 @@
   width: 100%;
 }
 
+.number-op {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.field-op-select {
+  position: relative;
+  width: 100%;
+}
+
+.number-op .split-select--op {
+  width: 120px;
+  flex: 0 0 120px;
+}
+
+.split-compare__cell .number-op .input {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+
 .split-compare__cell .seg {
   width: auto;
 }
@@ -913,7 +952,7 @@
   font-weight: 600;
 }
 
-.array-table tr:last-child td {
+.array-table-shell .array-table tr:last-child td {
   border-bottom: none;
 }
 

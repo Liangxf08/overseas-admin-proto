@@ -146,6 +146,7 @@
       r.onValue = r.onValue || '';
       r.offValue = r.offValue || '';
       r.selectMode = r.componentType === '下拉选择' ? (r.selectMode || '单选') : '';
+      r.numberOp = r.componentType === '数字输入' && (r.numberOp === 'gte' || r.numberOp === 'lte' || r.numberOp === 'eq') ? r.numberOp : (r.componentType === '数字输入' ? 'gte' : '');
       r.maxRows = r.componentType === 'Array' && r.maxRows != null ? r.maxRows : null;
       r.children = (r.children || []).map(function (child) {
         var c = clone(child);
@@ -161,6 +162,7 @@
         c.offValue = c.offValue || '';
         c.options = clone(c.options || []);
         c.selectMode = c.componentType === '下拉选择' ? (c.selectMode || '单选') : '';
+        c.numberOp = c.componentType === '数字输入' && (c.numberOp === 'gte' || c.numberOp === 'lte' || c.numberOp === 'eq') ? c.numberOp : (c.componentType === '数字输入' ? 'gte' : '');
         return c;
       });
       return r;
@@ -563,6 +565,29 @@
     return changed;
   }
 
+  function normalizeFieldNumberOps(fields) {
+    var changed = false;
+    (fields || []).forEach(function (field) {
+      var next = field.componentType === '数字输入'
+        ? ((field.numberOp === 'gte' || field.numberOp === 'lte' || field.numberOp === 'eq') ? field.numberOp : 'gte')
+        : '';
+      if (field.numberOp !== next) {
+        field.numberOp = next;
+        changed = true;
+      }
+      (field.children || []).forEach(function (child) {
+        var childOp = child.componentType === '数字输入'
+          ? ((child.numberOp === 'gte' || child.numberOp === 'lte' || child.numberOp === 'eq') ? child.numberOp : 'gte')
+          : '';
+        if (child.numberOp !== childOp) {
+          child.numberOp = childOp;
+          changed = true;
+        }
+      });
+    });
+    return changed;
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(KEY);
@@ -631,6 +656,7 @@
         data._dedupeTargetingV1 = true;
         data._scenesNormalized = true;
       }
+      if (normalizeFieldNumberOps(data.fields)) data._scenesNormalized = true;
       return data;
     } catch (e) {
       return seed();

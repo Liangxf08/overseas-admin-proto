@@ -159,6 +159,22 @@
             <div class="form-item__error">请输入有效数字</div>
           </div>
         </div>
+        <div class="form-item" id="editOpItem">
+          <label class="form-item__label">运算符</label>
+          <div class="form-item__control">
+            <div class="field-op-select" id="editOpWrap">
+              <button class="select-trigger" type="button" id="editOpTrigger">
+                <span class="select-trigger__text" id="editOpLabel">大于等于</span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="single-panel" id="editOpPanel">
+                <button class="single-option is-active" type="button" data-value="gte">大于等于</button>
+                <button class="single-option" type="button" data-value="lte">小于等于</button>
+                <button class="single-option" type="button" data-value="eq">等于</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="form-item" id="editPlaceholderItem" hidden>
           <label class="form-item__label">占位文本</label>
           <div class="form-item__control">

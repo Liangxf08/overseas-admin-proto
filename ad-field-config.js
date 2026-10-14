@@ -10,6 +10,11 @@
   var escapeHtml = UI.escapeHtml;
   var KEY_RE = /^[a-z][a-z0-9_]*$/;
   var CHILD_TYPES = Store.CHILD_COMPONENT_TYPES || ['数字输入', '文本输入', '开关', '下拉选择'];
+  var NUMBER_OP_LABEL = { gte: '大于等于', lte: '小于等于', eq: '等于' };
+
+  function normalizeNumberOp(op) {
+    return NUMBER_OP_LABEL[op] ? op : 'gte';
+  }
 
   var ALL_ROWS = Store.fields();
 
@@ -24,6 +29,7 @@
     editComponentType: '数字输入',
     editStatus: '启用',
     editSelectMode: '单选',
+    editNumberOp: 'gte',
     editOptions: [],
     editChildren: [],
     optionDragIndex: null,
@@ -66,6 +72,70 @@
     getValue: function () { return state.draft.status; },
     onChange: function (v) { state.draft.status = v || ''; }
   });
+
+  var opSelect = UI.bindSingleSelect({
+    wrapId: 'editOpWrap',
+    triggerId: 'editOpTrigger',
+    panelId: 'editOpPanel',
+    labelId: 'editOpLabel',
+    getValue: function () { return state.editNumberOp; },
+    formatValue: function (v) { return NUMBER_OP_LABEL[v] || '大于等于'; },
+    onChange: function (v) { state.editNumberOp = normalizeNumberOp(v); }
+  });
+
+  function restoreOpPanel() {
+    var panel = $('editOpPanel');
+    var wrap = $('editOpWrap');
+    if (!panel || !wrap) return;
+    panel.style.position = '';
+    panel.style.left = '';
+    panel.style.top = '';
+    panel.style.width = '';
+    panel.style.right = '';
+    panel.style.zIndex = '';
+    panel.style.margin = '';
+    if (panel.parentNode !== wrap) wrap.appendChild(panel);
+  }
+
+  function placeOpPanel() {
+    var panel = $('editOpPanel');
+    var trigger = $('editOpTrigger');
+    if (!panel || !trigger || !panel.classList.contains('is-open')) return;
+    var rect = trigger.getBoundingClientRect();
+    document.body.appendChild(panel);
+    panel.style.position = 'fixed';
+    panel.style.zIndex = '1300';
+    panel.style.margin = '0';
+    panel.style.right = 'auto';
+    panel.style.left = rect.left + 'px';
+    panel.style.width = rect.width + 'px';
+    var h = panel.offsetHeight;
+    var spaceBelow = window.innerHeight - rect.bottom;
+    var dropup = spaceBelow < h + 8 && rect.top > h + 8;
+    panel.style.top = (dropup ? rect.top - h - 4 : rect.bottom + 4) + 'px';
+  }
+
+  $('editOpTrigger').addEventListener('click', function () {
+    var panel = $('editOpPanel');
+    if (panel && panel.classList.contains('is-open')) placeOpPanel();
+    else restoreOpPanel();
+  });
+  $('editOpPanel').addEventListener('click', function () { setTimeout(restoreOpPanel, 0); });
+  document.addEventListener('click', function () {
+    var panel = $('editOpPanel');
+    if (panel && !panel.classList.contains('is-open') && panel.parentNode === document.body) restoreOpPanel();
+  });
+  var editModalBody = document.querySelector('#editModal .modal__body');
+  if (editModalBody) {
+    editModalBody.addEventListener('scroll', function () {
+      var panel = $('editOpPanel');
+      var trigger = $('editOpTrigger');
+      if (!panel || !panel.classList.contains('is-open')) return;
+      panel.classList.remove('is-open');
+      if (trigger) trigger.classList.remove('is-open');
+      restoreOpPanel();
+    });
+  }
 
   UI.bindSeg('editStatusSeg', function (v) { state.editStatus = v || '启用'; });
   UI.bindSeg('editTypeSeg', function (v) {
@@ -115,6 +185,7 @@
     var type = state.editComponentType;
     $('editMinItem').hidden = type !== '数字输入';
     $('editMaxItem').hidden = type !== '数字输入';
+    $('editOpItem').hidden = type !== '数字输入';
     $('editPlaceholderItem').hidden = type !== '文本输入';
     $('editMaxLenItem').hidden = type !== '文本输入';
     $('editOnValueItem').hidden = type !== '开关';
@@ -165,6 +236,7 @@
       componentType: '数字输入',
       min: null,
       max: null,
+      numberOp: 'gte',
       placeholder: '',
       maxLength: null,
       onValue: '',
@@ -190,6 +262,7 @@
       componentType: c.componentType || '数字输入',
       min: c.min == null ? null : c.min,
       max: c.max == null ? null : c.max,
+      numberOp: c.componentType === '数字输入' ? normalizeNumberOp(c.numberOp) : '',
       placeholder: c.placeholder || '',
       maxLength: c.maxLength == null ? null : c.maxLength,
       onValue: c.onValue || '',
@@ -202,12 +275,29 @@
     return (row.options || []).filter(function (o) { return o.label && o.value; }).length;
   }
 
+  function childOpHtml(row, i) {
+    var op = normalizeNumberOp(row.numberOp);
+    var meta = NUMBER_OP_LABEL[op];
+    var options = ['gte', 'lte', 'eq'].map(function (value) {
+      var active = value === op ? ' is-active' : '';
+      return '<button class="single-option' + active + '" type="button" data-value="' + value + '">' + escapeHtml(NUMBER_OP_LABEL[value]) + '</button>';
+    }).join('');
+    return '<div class="child-op" data-child-op="' + i + '" data-value="' + op + '">' +
+      '<button class="select-trigger" type="button" aria-label="运算符">' +
+        '<span class="select-trigger__text">' + escapeHtml(meta) + '</span>' +
+        '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
+      '</button>' +
+      '<div class="single-panel child-op-panel">' + options + '</div>' +
+    '</div>';
+  }
+
   function renderChildConfig(row, i) {
     var t = row.componentType || '数字输入';
     if (t === '数字输入') {
       return '<div class="child-config">' +
         '<input class="input" data-child-min="' + i + '" value="' + escapeHtml(row.min == null ? '' : String(row.min)) + '" placeholder="最小值" autocomplete="off" />' +
         '<input class="input" data-child-max="' + i + '" value="' + escapeHtml(row.max == null ? '' : String(row.max)) + '" placeholder="最大值" autocomplete="off" />' +
+        childOpHtml(row, i) +
       '</div>';
     }
     if (t === '文本输入') {
@@ -226,6 +316,7 @@
   }
 
   function renderChildren() {
+    closeChildOpPanels();
     var body = $('childBody');
     if (!state.editChildren.length) {
       body.innerHTML = '<tr><td colspan="5" class="array-empty">暂无子字段</td></tr>';
@@ -259,6 +350,13 @@
       if (nameEl) row.name = (nameEl.value || '').trim();
       if (keyEl) row.key = (keyEl.value || '').trim();
       if (typeEl) row.componentType = typeEl.value || '数字输入';
+      if (row.componentType === '数字输入') {
+        var opEl = document.querySelector('[data-child-op="' + i + '"]');
+        var op = opEl ? opEl.getAttribute('data-value') : row.numberOp;
+        row.numberOp = normalizeNumberOp(op);
+      } else {
+        row.numberOp = '';
+      }
       if (minEl) {
         var minRes = parseNumber(minEl.value);
         row.min = minRes.empty || minRes.error ? null : minRes.value;
@@ -330,7 +428,70 @@
     });
   });
 
+  function clearChildOpPanelStyle(panel) {
+    panel.style.position = '';
+    panel.style.left = '';
+    panel.style.top = '';
+    panel.style.width = '';
+    panel.style.right = '';
+    panel.style.zIndex = '';
+    panel.style.margin = '';
+  }
+
+  function restoreChildOpPanel(panel) {
+    if (!panel) return;
+    clearChildOpPanelStyle(panel);
+    var home = panel._opHome;
+    if (home && home.isConnected) home.appendChild(panel);
+    else if (panel.parentNode === document.body) panel.remove();
+  }
+
+  function closeChildOpPanels() {
+    document.querySelectorAll('.child-op-panel').forEach(function (panel) {
+      if (!panel._opHome) return;
+      panel.classList.remove('is-open');
+      restoreChildOpPanel(panel);
+    });
+    document.querySelectorAll('.child-op .select-trigger.is-open').forEach(function (btn) {
+      btn.classList.remove('is-open');
+    });
+  }
+
+  function placeChildOpPanel(trigger) {
+    var box = trigger.closest('.child-op');
+    var panel = box && (box._openPanel && box._openPanel._opHome === box ? box._openPanel : box.querySelector('.child-op-panel'));
+    if (!box || !panel) return;
+    panel._opHome = box;
+    box._openPanel = panel;
+    document.body.appendChild(panel);
+    panel.classList.add('is-open');
+    panel.style.position = 'fixed';
+    panel.style.zIndex = '1300';
+    panel.style.margin = '0';
+    panel.style.right = 'auto';
+    var rect = trigger.getBoundingClientRect();
+    panel.style.left = rect.left + 'px';
+    panel.style.width = rect.width + 'px';
+    var h = panel.offsetHeight;
+    var spaceBelow = window.innerHeight - rect.bottom;
+    var dropup = spaceBelow < h + 8 && rect.top > h + 8;
+    panel.style.top = (dropup ? rect.top - h - 4 : rect.bottom + 4) + 'px';
+  }
+
   $('childBody').addEventListener('click', function (e) {
+    var trig = e.target.closest('.child-op .select-trigger');
+    if (trig) {
+      e.stopPropagation();
+      var box = trig.closest('.child-op');
+      var panel = box._openPanel && box._openPanel._opHome === box ? box._openPanel : box.querySelector('.child-op-panel');
+      var willOpen = !(panel && panel.classList.contains('is-open'));
+      closeChildOpPanels();
+      if (willOpen && panel) {
+        trig.classList.add('is-open');
+        placeChildOpPanel(trig);
+      }
+      return;
+    }
     var del = e.target.closest('[data-child-del]');
     if (del) {
       collectChildren();
@@ -345,6 +506,29 @@
       openChildOptions(Number(opts.getAttribute('data-child-opts')));
     }
   });
+
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('.child-op-panel .single-option');
+    if (opt) {
+      var panel = opt.closest('.child-op-panel');
+      var box = panel && panel._opHome;
+      if (box) {
+        box.setAttribute('data-value', opt.getAttribute('data-value') || 'gte');
+        var text = box.querySelector('.select-trigger__text');
+        if (text) text.textContent = (opt.textContent || '').trim();
+        panel.querySelectorAll('.single-option').forEach(function (item) {
+          item.classList.toggle('is-active', item === opt);
+        });
+      }
+      closeChildOpPanels();
+      return;
+    }
+    if (e.target.closest('.child-op') || e.target.closest('.child-op-panel')) return;
+    closeChildOpPanels();
+  });
+
+  var childTableWrap = document.querySelector('#editChildrenItem .param-table-wrap');
+  if (childTableWrap) childTableWrap.addEventListener('scroll', closeChildOpPanels);
 
   $('childBody').addEventListener('change', function (e) {
     var sel = e.target.closest('[data-child-type]');
@@ -484,6 +668,8 @@
     $('editDesc').value = '';
     $('editMin').value = '';
     $('editMax').value = '';
+    state.editNumberOp = 'gte';
+    if (opSelect && opSelect.syncLabel) opSelect.syncLabel('gte');
     $('editPlaceholder').value = '';
     $('editMaxLen').value = '';
     $('editOnValue').value = '';
@@ -528,6 +714,8 @@
     $('editDesc').value = row.desc || '';
     $('editMin').value = row.min == null ? '' : String(row.min);
     $('editMax').value = row.max == null ? '' : String(row.max);
+    state.editNumberOp = normalizeNumberOp(row.numberOp);
+    if (opSelect && opSelect.syncLabel) opSelect.syncLabel(state.editNumberOp);
     $('editPlaceholder').value = row.placeholder || '';
     $('editMaxLen').value = row.maxLength == null ? '' : String(row.maxLength);
     $('editOnValue').value = row.onValue || '';
@@ -655,6 +843,7 @@
       desc: desc,
       min: type === '数字输入' ? minVal : null,
       max: type === '数字输入' ? maxVal : null,
+      numberOp: type === '数字输入' ? normalizeNumberOp(state.editNumberOp) : '',
       placeholder: type === '文本输入' ? placeholder : '',
       maxLength: type === '文本输入' ? maxLenVal : null,
       onValue: type === '开关' ? onValue : '',

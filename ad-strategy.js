@@ -13,6 +13,25 @@
     Android: 'assets/Android.png',
     iOS: 'assets/iOS.png'
   };
+  var NUMBER_OPS = [
+    { value: 'gte', label: '大于等于', symbol: '≥' },
+    { value: 'lte', label: '小于等于', symbol: '≤' },
+    { value: 'eq', label: '等于', symbol: '=' }
+  ];
+  var DEFAULT_NUMBER_OP = 'gte';
+
+  function fieldNumberOp(field) {
+    var op = field && field.numberOp;
+    return NUMBER_OPS.some(function (o) { return o.value === op; }) ? op : DEFAULT_NUMBER_OP;
+  }
+
+  function numberOpMeta(op) {
+    var i;
+    for (i = 0; i < NUMBER_OPS.length; i++) {
+      if (NUMBER_OPS[i].value === op) return NUMBER_OPS[i];
+    }
+    return NUMBER_OPS[0];
+  }
 
   var COL_PREFS_KEY = 'hwzt_ad_strategy_cols_v4';
   var COLUMN_GROUPS = ['属性', '条件', '数据'];
@@ -412,7 +431,7 @@
     return formatMatchList(row.versions, Store.APP_VERSIONS);
   }
 
-  function formatConditionValue(field, value) {
+  function formatConditionValue(field, value, op, style) {
     if (!field) return value == null || value === '' ? '-' : String(value);
     if (Store.isSwitchField(field)) {
       var on = value === true || value === 'true' || value === '是';
@@ -426,27 +445,36 @@
       if (hit) return hit.label;
     }
     if (value == null || value === '') return '-';
+    if (field.componentType === '数字输入') {
+      var meta = numberOpMeta(NUMBER_OPS.some(function (o) { return o.value === op; }) ? op : fieldNumberOp(field));
+      return (style === 'full' ? meta.label : meta.symbol) + ' ' + value;
+    }
     return String(value);
+  }
+
+  function conditionParts(field, g) {
+    var value = g && g.values && field ? g.values[field.id] : undefined;
+    var op = g && g.numberOps && field ? g.numberOps[field.id] : '';
+    return {
+      text: formatConditionValue(field, value, op),
+      full: formatConditionValue(field, value, op, 'full')
+    };
   }
 
   function conditionCellHtml(row, fieldId, splitIndex) {
     var field = Store.fieldById(fieldId);
     var splits = row.splits || [];
     if (!splits.length) return '-';
-    if (splitIndex != null) {
-      var g = splits[splitIndex];
-      var text = formatConditionValue(field, g && g.values && g.values[fieldId]);
-      return '<span title="' + escapeHtml(text) + '">' + escapeHtml(text) + '</span>';
+    function span(g) {
+      var part = conditionParts(field, g);
+      return '<span title="' + escapeHtml(part.full) + '">' + escapeHtml(part.text) + '</span>';
     }
-    if (splits.length === 1) {
-      var text1 = formatConditionValue(field, splits[0].values && splits[0].values[fieldId]);
-      return '<span title="' + escapeHtml(text1) + '">' + escapeHtml(text1) + '</span>';
-    }
-    var parts = splits.map(function (g) {
-      return formatConditionValue(field, g.values && g.values[fieldId]);
-    });
-    var joined = parts.join(' / ');
-    return '<span title="' + escapeHtml(joined) + '">' + escapeHtml(joined) + '</span>';
+    if (splitIndex != null) return span(splits[splitIndex]);
+    if (splits.length === 1) return span(splits[0]);
+    var parts = splits.map(function (g) { return conditionParts(field, g); });
+    var text = parts.map(function (p) { return p.text; }).join(' / ');
+    var full = parts.map(function (p) { return p.full; }).join(' / ');
+    return '<span title="' + escapeHtml(full) + '">' + escapeHtml(text) + '</span>';
   }
 
   function metricSeed(row, splitIndex, key) {
@@ -745,10 +773,17 @@
   function ensureSplitValues(g) {
     var defaults = defaultValues();
     var next = {};
+    var ops = {};
     Object.keys(defaults).forEach(function (fid) {
       next[fid] = g.values && g.values[fid] != null ? g.values[fid] : defaults[fid];
     });
     g.values = next;
+    currentSceneFields().forEach(function (f) {
+      if (f.componentType !== '数字输入') return;
+      var prev = g.numberOps && g.numberOps[f.id];
+      ops[f.id] = NUMBER_OPS.some(function (o) { return o.value === prev; }) ? prev : fieldNumberOp(f);
+    });
+    g.numberOps = ops;
   }
 
   function resetSplitsForScene() {
@@ -833,6 +868,12 @@
           g.values[fid] = inp.value;
         }
       });
+      document.querySelectorAll('[data-split-op="' + i + '"]').forEach(function (box) {
+        var fid = box.getAttribute('data-field');
+        if (!g.numberOps) g.numberOps = {};
+        var op = box.getAttribute('data-value');
+        g.numberOps[fid] = NUMBER_OPS.some(function (o) { return o.value === op; }) ? op : fieldNumberOp(Store.fieldById(fid));
+      });
       document.querySelectorAll('[data-split-switch="' + i + '"]').forEach(function (btn) {
         var fid = btn.getAttribute('data-field');
         g.values[fid] = btn.classList.contains('is-on');
@@ -869,7 +910,29 @@
       var n = Array.isArray(val) ? val.length : 0;
       return '<button class="link split-array-btn" type="button" data-array-open="' + i + '" data-field="' + escapeHtml(f.id) + '">配置（' + n + '）</button>';
     }
+    if (f.componentType === '数字输入') return numberOpControlHtml(f, g, i, val);
     return '<input class="input" data-split-val="' + i + '" data-field="' + escapeHtml(f.id) + '" value="' + escapeHtml(String(val == null ? '' : val)) + '" placeholder="请输入" />';
+  }
+
+  function numberOpControlHtml(f, g, i, val) {
+    var op = g && g.numberOps && NUMBER_OPS.some(function (o) { return o.value === g.numberOps[f.id]; })
+      ? g.numberOps[f.id]
+      : fieldNumberOp(f);
+    var meta = numberOpMeta(op);
+    var options = NUMBER_OPS.map(function (o) {
+      var active = o.value === op ? ' is-active' : '';
+      return '<button class="single-option' + active + '" type="button" data-value="' + o.value + '">' + escapeHtml(o.label) + '</button>';
+    }).join('');
+    return '<div class="number-op">' +
+      '<div class="split-select split-select--op" data-split-op="' + i + '" data-field="' + escapeHtml(f.id) + '" data-value="' + op + '">' +
+        '<button class="select-trigger" type="button" aria-label="计算方式">' +
+          '<span class="select-trigger__text">' + escapeHtml(meta.label) + '</span>' +
+          '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
+        '</button>' +
+        '<div class="single-panel">' + options + '</div>' +
+      '</div>' +
+      '<input class="input" data-split-val="' + i + '" data-field="' + escapeHtml(f.id) + '" value="' + escapeHtml(String(val == null ? '' : val)) + '" placeholder="请输入" />' +
+    '</div>';
   }
 
   function currentStrategyId() {
@@ -879,6 +942,7 @@
   }
 
   function renderSplits() {
+    closeSplitPanels();
     var el = $('splitList');
     var sumEl = $('splitSum');
     if (!state.editSceneId) {
@@ -929,55 +993,106 @@
       sw.setAttribute('aria-pressed', on ? 'true' : 'false');
       return;
     }
-    var opt = e.target.closest('.split-select .single-option');
-    if (opt) {
-      var box = opt.closest('.split-select');
-      var value = opt.getAttribute('data-value') || '';
-      box.setAttribute('data-value', value);
-      var text = box.querySelector('.select-trigger__text');
-      if (text) {
-        text.textContent = opt.textContent || '';
-        text.classList.remove('muted');
-      }
-      box.querySelectorAll('.single-option').forEach(function (item) {
-        item.classList.toggle('is-active', item === opt);
-      });
-      var panel = box.querySelector('.single-panel');
-      if (panel) panel.classList.remove('is-open');
-      var trigger = box.querySelector('.select-trigger');
-      if (trigger) trigger.classList.remove('is-open');
-      return;
-    }
-    var trig = e.target.closest('.split-select .select-trigger');
-    if (trig) {
-      var selectBox = trig.closest('.split-select');
-      var selectPanel = selectBox.querySelector('.single-panel');
-      var willOpen = selectPanel && !selectPanel.classList.contains('is-open');
-      document.querySelectorAll('.split-select .single-panel.is-open').forEach(function (panel) {
-        panel.classList.remove('is-open');
-      });
-      document.querySelectorAll('.split-select .select-trigger.is-open').forEach(function (btn) {
-        btn.classList.remove('is-open');
-      });
-      if (willOpen) {
-        selectPanel.classList.add('is-open');
-        trig.classList.add('is-open');
-      }
-      return;
-    }
     var arrayBtn = e.target.closest('[data-array-open]');
     if (arrayBtn) openArrayModal(Number(arrayBtn.getAttribute('data-array-open')), arrayBtn.getAttribute('data-field'));
   });
 
-  document.addEventListener('click', function (e) {
-    if (e.target.closest('.split-select')) return;
-    document.querySelectorAll('.split-select .single-panel.is-open').forEach(function (panel) {
-      panel.classList.remove('is-open');
+  function splitPanelOf(box) {
+    if (!box) return null;
+    if (box._openPanel && box._openPanel._splitHome === box) return box._openPanel;
+    return box.querySelector('.single-panel');
+  }
+
+  function clearSplitPanelStyle(panel) {
+    panel.style.position = '';
+    panel.style.left = '';
+    panel.style.top = '';
+    panel.style.bottom = '';
+    panel.style.width = '';
+    panel.style.right = '';
+    panel.style.zIndex = '';
+    panel.style.margin = '';
+  }
+
+  function closeSplitPanels() {
+    document.querySelectorAll('.single-panel').forEach(function (panel) {
+      if (!panel._splitHome) return;
+      panel.classList.remove('is-open', 'is-dropup');
+      clearSplitPanelStyle(panel);
+      if (panel._splitHome.isConnected) panel._splitHome.appendChild(panel);
+      else panel.remove();
     });
     document.querySelectorAll('.split-select .select-trigger.is-open').forEach(function (btn) {
       btn.classList.remove('is-open');
     });
+  }
+
+  function placeSplitPanel(trigger, panel) {
+    var box = trigger.closest('.split-select');
+    panel._splitHome = box;
+    box._openPanel = panel;
+    document.body.appendChild(panel);
+    panel.classList.add('is-open');
+    panel.style.position = 'fixed';
+    panel.style.zIndex = '1300';
+    panel.style.margin = '0';
+    panel.style.right = 'auto';
+    var rect = trigger.getBoundingClientRect();
+    panel.style.width = rect.width + 'px';
+    panel.style.left = rect.left + 'px';
+    var h = panel.offsetHeight;
+    var spaceBelow = window.innerHeight - rect.bottom;
+    var dropup = spaceBelow < h + 8 && rect.top > h + 8;
+    panel.classList.toggle('is-dropup', dropup);
+    panel.style.bottom = 'auto';
+    panel.style.top = (dropup ? rect.top - h - 4 : rect.bottom + 4) + 'px';
+  }
+
+  function toggleSplitPanel(trig) {
+    var box = trig.closest('.split-select');
+    var panel = splitPanelOf(box);
+    var willOpen = !(panel && panel.classList.contains('is-open'));
+    closeSplitPanels();
+    if (willOpen && panel) {
+      trig.classList.add('is-open');
+      placeSplitPanel(trig, panel);
+    }
+  }
+
+  function applySplitOption(box, opt, panel) {
+    var value = opt.getAttribute('data-value') || '';
+    box.setAttribute('data-value', value);
+    var text = box.querySelector('.select-trigger__text');
+    if (text) {
+      text.textContent = (opt.textContent || '').trim();
+      text.classList.remove('muted');
+    }
+    panel.querySelectorAll('.single-option').forEach(function (item) {
+      item.classList.toggle('is-active', item === opt);
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('.single-option');
+    var optPanel = opt && opt.closest('.single-panel');
+    if (opt && optPanel && optPanel._splitHome) {
+      applySplitOption(optPanel._splitHome, opt, optPanel);
+      closeSplitPanels();
+      return;
+    }
+    var trig = e.target.closest('.split-select .select-trigger');
+    if (trig) {
+      toggleSplitPanel(trig);
+      return;
+    }
+    var openPanel = e.target.closest('.single-panel');
+    if (openPanel && openPanel._splitHome) return;
+    closeSplitPanels();
   });
+
+  var editDrawerBody = document.querySelector('#editDrawer .drawer__body');
+  if (editDrawerBody) editDrawerBody.addEventListener('scroll', closeSplitPanels);
+  window.addEventListener('resize', closeSplitPanels);
 
   var arrayEdit = { splitIndex: -1, fieldId: '', rows: [] };
 
@@ -1669,10 +1784,10 @@
         if (!list.length) return '';
         if (splitIndex != null) {
           var sg = list[splitIndex];
-          return formatConditionValue(field, sg && sg.values && sg.values[fid]);
+          return formatConditionValue(field, sg && sg.values && sg.values[fid], sg && sg.numberOps && sg.numberOps[fid], 'full');
         }
         return list.map(function (g) {
-          return formatConditionValue(field, g.values && g.values[fid]);
+          return formatConditionValue(field, g.values && g.values[fid], g.numberOps && g.numberOps[fid], 'full');
         }).join(' / ');
       }
       return '';
