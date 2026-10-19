@@ -101,6 +101,7 @@
       id: 'tools',
       name: '工具',
       children: [
+        { id: 'board-monitor', name: '看板监控' },
         {
           id: 'task-center',
           name: '任务中心',

@@ -1,0 +1,223 @@
+/* 看板监控 */
+
+#filterBoardWrap { width: 280px; }
+
+.bm-dash { color: var(--color-text-4); }
+
+.data-table td .switch { vertical-align: middle; }
+
+#formDrawer .bm-section:not(:last-child) > .form-item:last-child {
+  margin-bottom: 0;
+}
+
+#formDrawer .bm-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: var(--color-border-2);
+  border: 0;
+}
+
+.bm-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#formDrawer .form-item.bm-item-error .form-item__error {
+  display: block;
+}
+
+.bm-select {
+  position: relative;
+  min-width: 0;
+}
+
+.bm-select .select-trigger { width: 100%; }
+
+.bm-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#boardBox,
+#periodBox,
+#dimBox,
+#formNameWrap {
+  width: 640px;
+}
+
+.bm-select--field { width: 168px; flex: 0 0 168px; }
+
+.bm-line__value {
+  width: 464px;
+  flex: 0 0 464px;
+  min-width: 0;
+}
+
+#logicSeg .seg__item {
+  flex: 0 0 168px;
+  width: 168px;
+  min-width: 168px;
+}
+
+#scheduleBox,
+#weekBox,
+#timeBox,
+#pushBox,
+#feishuExtra {
+  width: 168px;
+  flex: 0 0 168px;
+}
+
+#botExtra {
+  width: 464px;
+  flex: 0 0 464px;
+}
+
+#weekBox[hidden],
+.bm-push__extra[hidden] { display: none; }
+
+.bm-lines,
+.bm-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bm-line,
+.bm-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bm-select--field { width: 168px; flex: 0 0 168px; }
+.bm-line__value { flex: 0 0 464px; width: 464px; min-width: 0; }
+.bm-line__value .input,
+.bm-line__value .select-trigger { width: 100%; }
+
+.bm-rule .bm-select--metric,
+.bm-rule .bm-select--op,
+.bm-rule .bm-select--basis,
+.bm-rule .bm-select--vtype {
+  width: 168px;
+  flex: 0 0 168px;
+}
+
+.bm-value {
+  position: relative;
+  width: 168px;
+  flex: 0 0 168px;
+}
+
+.bm-value .input { width: 100%; }
+
+.bm-value--unit .input { padding-right: 28px; }
+
+.bm-value__unit {
+  position: absolute;
+  right: 12px;
+  top: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-3);
+  pointer-events: none;
+}
+
+.bm-icon-btn {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-3);
+  border-radius: var(--border-radius-medium);
+}
+
+.bm-icon-btn:hover {
+  color: var(--color-danger-6);
+  background: var(--color-danger-1);
+}
+
+.bm-icon-btn svg { width: 14px; height: 14px; }
+
+.bm-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  margin-top: 8px;
+  padding: 0;
+  color: var(--color-primary);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.bm-lines:empty + .bm-add { margin-top: 0; }
+
+.bm-add svg { width: 14px; height: 14px; }
+
+.bm-add:disabled {
+  color: var(--color-text-4);
+  cursor: not-allowed;
+}
+
+.bm-push__extra[hidden] { display: none; }
+
+.bm-time-panel {
+  display: none;
+  width: 216px;
+  height: 224px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--border-radius-medium);
+  box-shadow: var(--shadow-2);
+  overflow: hidden;
+}
+
+.bm-time-panel.is-open { display: flex; }
+
+.bm-time-col {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 6px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 205, 212, 0.2) transparent;
+}
+
+.bm-time-col + .bm-time-col { border-left: 1px solid var(--color-border-2); }
+
+.bm-time-col::-webkit-scrollbar { width: 4px; height: 4px; }
+.bm-time-col::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+.bm-time-col::-webkit-scrollbar-track { background: transparent; }
+.bm-time-col::-webkit-scrollbar-thumb {
+  background: rgba(201, 205, 212, 0.18);
+  border-radius: 4px;
+}
+.bm-time-col:hover::-webkit-scrollbar-thumb { background: rgba(201, 205, 212, 0.36); }
+
+.bm-time-opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 36px;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.bm-time-opt:hover { background: var(--color-gray-hover); }
+.bm-time-opt.is-active { color: var(--color-primary); }
+
+.bm-panel-portal.single-panel .single-option {
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
