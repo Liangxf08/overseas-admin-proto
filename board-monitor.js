@@ -1,5 +1,5 @@
 /* 看板监控 · 工具一级页
- * 看板目录对齐中台看板（dashboard.js）现有四条看板，按类型匹配维度 / 筛选项 / 指标。
+ * 只取系统看板，名称平铺。维度 / 筛选项 / 指标按看板类型匹配。
  */
 (function () {
   'use strict';
@@ -59,44 +59,67 @@
     campaign: { label: '推广活动', type: 'text' }
   };
 
-  /* 与看板列表一致：系统 / 共享 / 我的 / 示例文件夹 */
-  var BOARDS = [
-    {
-      id: 'sys_demo',
-      name: '示例看板',
-      folder: '系统看板',
-      type: 'Adjust',
+  /* 只取系统看板，名称平铺，不拼文件夹 */
+  var BOARD_SPEC = {
+    adjust: {
       dimensions: ['按日', '按周', '按月', '平台', '产品', '国家地区', '渠道', '优化师'],
       filters: ['product', 'platform', 'country', 'channel', 'campaign'],
       metrics: ['总收入', '花费', '利润', '当日ROAS', '累计ROAS', 'DAU', 'ARPU', '新用户', '新增单价', '展示', '点击', '安装', 'CTR', 'CVR']
     },
-    {
-      id: 'shared_demo',
-      name: '示例看板',
-      folder: '共享看板',
-      type: '广告聚合',
+    newUser: {
+      dimensions: ['按日', '按周', '按月', '平台', '产品', '国家地区', '渠道'],
+      filters: ['product', 'platform', 'productGroup', 'country', 'channel'],
+      metrics: ['新用户', '花费', '新增单价', 'DAU', '安装', 'CTR', 'CVR', '当日ROAS']
+    },
+    ad: {
       dimensions: ['按日', '按周', '按月', '平台', '产品', '国家地区', '渠道'],
       filters: ['product', 'platform', 'country', 'channel'],
       metrics: ['广告收入', '广告展示', '广告IPU', '广告ARPU', '广告eCPM', '内购收入']
     },
-    {
-      id: 'mine_demo',
-      name: '示例看板',
-      folder: '我的看板',
-      type: '双端 SDK',
-      dimensions: ['按日', '按周', '平台', '产品', '国家地区'],
-      filters: ['product', 'platform', 'productGroup', 'productType', 'country'],
-      metrics: ['DAU', '新用户', '总收入', 'ARPU', '广告收入', '广告展示', '广告eCPM']
+    iaa: {
+      dimensions: ['按日', '按周', '按月', '平台', '产品', '国家地区', '渠道'],
+      filters: ['product', 'platform', 'country', 'channel'],
+      metrics: ['广告收入', '广告展示', '广告IPU', '广告ARPU', '广告eCPM']
     },
-    {
-      id: 'example_demo',
-      name: '示例看板',
-      folder: '示例文件夹',
-      type: 'TikTok 开平',
+    cohort: {
+      dimensions: ['按日', '按周', '平台', '产品', '国家地区', '渠道'],
+      filters: ['product', 'platform', 'country', 'channel'],
+      metrics: ['花费', '新用户', 'D0 总ROAS', 'D1 总ROAS', 'D3 总ROAS', 'D7 总ROAS', 'D14 总ROAS', 'D30 总ROAS', 'D0 总LTV', 'D7 总LTV']
+    },
+    tiktok: {
       dimensions: ['按日', '按周', '产品', '国家地区', '账户'],
-      filters: ['product', 'country', 'channel'],
+      filters: ['product', 'country', 'channel', 'campaign'],
       metrics: ['花费', '展示', '点击', '安装', 'CTR', 'CVR', 'eCPI', '当日ROAS']
+    },
+    tiktokNew: {
+      dimensions: ['按日', '按周', '产品', '国家地区', '账户'],
+      filters: ['product', 'country', 'channel', 'campaign'],
+      metrics: ['新用户', '花费', '新增单价', '安装', 'CTR', 'CVR', '当日ROAS']
     }
+  };
+
+  function boardItem(id, name, spec) {
+    return {
+      id: id,
+      name: name,
+      dimensions: spec.dimensions.slice(),
+      filters: spec.filters.slice(),
+      metrics: spec.metrics.slice()
+    };
+  }
+
+  var BOARDS = [
+    boardItem('adjust_overview', 'Adjust整体概览', BOARD_SPEC.adjust),
+    boardItem('app_new_user', 'APP新用户分析', BOARD_SPEC.newUser),
+    boardItem('ad_agg', '广告聚合看板', BOARD_SPEC.ad),
+    boardItem('iaa_agg', 'IAA聚合看板', BOARD_SPEC.iaa),
+    boardItem('is_cohort', 'IS Cohort看板', BOARD_SPEC.cohort),
+    boardItem('max_cohort', 'MAX Cohort看板', BOARD_SPEC.cohort),
+    boardItem('tt_open', 'TikTok开平看板', BOARD_SPEC.tiktok),
+    boardItem('tt_ads', 'TikTok投放看板', BOARD_SPEC.tiktok),
+    boardItem('tt_convert', 'TikTok转化分析', BOARD_SPEC.tiktok),
+    boardItem('tt_level', 'TikTok关卡分析', BOARD_SPEC.tiktok),
+    boardItem('tt_new_user', 'TikTok新用户分析', BOARD_SPEC.tiktokNew)
   ];
 
   var ARROW = '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>';
@@ -120,8 +143,7 @@
   }
 
   function boardLabel(board) {
-    if (!board) return '';
-    return board.folder + ' / ' + board.name;
+    return board ? board.name : '';
   }
 
   function currentBoard() { return boardById(state.form.boardId); }
@@ -176,7 +198,7 @@
   function seed() {
     return [
       {
-        id: 'bm-1', name: '花费异常预警', status: '启用', boardId: 'sys_demo', period: '近7天',
+        id: 'bm-1', name: '花费异常预警', status: '启用', boardId: 'adjust_overview', period: '近7天',
         dimensions: ['按日', '渠道'],
         filters: [filterRow('channel', ['Facebook', 'Google Ads'])],
         logic: 'any',
@@ -186,7 +208,7 @@
         triggerCount: 12, lastTrigger: '2026-10-18 09:00:12', createdAt: '2026-10-12 10:20:00', creator: '用户A'
       },
       {
-        id: 'bm-2', name: 'DAU 下跌', status: '启用', boardId: 'mine_demo', period: '昨天',
+        id: 'bm-2', name: 'DAU 下跌', status: '启用', boardId: 'app_new_user', period: '昨天',
         dimensions: ['按日', '产品'],
         filters: [filterRow('platform', ['Android'])],
         logic: 'all',
@@ -199,7 +221,7 @@
         triggerCount: 3, lastTrigger: '2026-10-17 10:30:08', createdAt: '2026-10-08 14:12:33', creator: '用户B'
       },
       {
-        id: 'bm-3', name: '广告 eCPM 波动', status: '禁用', boardId: 'shared_demo', period: '近30天',
+        id: 'bm-3', name: '广告 eCPM 波动', status: '禁用', boardId: 'ad_agg', period: '近30天',
         dimensions: ['国家地区'],
         filters: [],
         logic: 'any',
@@ -209,7 +231,7 @@
         triggerCount: 0, lastTrigger: '', createdAt: '2026-10-06 09:40:18', creator: '用户C'
       },
       {
-        id: 'bm-4', name: '安装量异常', status: '启用', boardId: 'example_demo', period: '今天',
+        id: 'bm-4', name: '安装量异常', status: '启用', boardId: 'tt_open', period: '今天',
         dimensions: ['账户'],
         filters: [filterRow('channel', ['TikTok for Business'])],
         logic: 'any',
@@ -219,7 +241,7 @@
         triggerCount: 8, lastTrigger: '2026-10-19 08:00:21', createdAt: '2026-10-02 16:05:44', creator: '用户A'
       },
       {
-        id: 'bm-5', name: '当日 ROAS 过低', status: '启用', boardId: 'sys_demo', period: '本周',
+        id: 'bm-5', name: '当日 ROAS 过低', status: '启用', boardId: 'adjust_overview', period: '本周',
         dimensions: ['平台', '产品'],
         filters: [filterRow('country', ['United States (US)', 'Japan (JP)'])],
         logic: 'all',
@@ -229,7 +251,7 @@
         triggerCount: 2, lastTrigger: '2026-10-13 09:30:02', createdAt: '2026-09-28 11:18:09', creator: '用户D'
       },
       {
-        id: 'bm-6', name: '新增单价偏高', status: '禁用', boardId: 'mine_demo', period: '上周',
+        id: 'bm-6', name: '新增单价偏高', status: '禁用', boardId: 'app_new_user', period: '上周',
         dimensions: ['产品'],
         filters: [filterRow('productGroup', ['奇异果', '苹果组'])],
         logic: 'any',
@@ -239,7 +261,7 @@
         triggerCount: 1, lastTrigger: '2026-10-05 11:00:40', createdAt: '2026-09-20 08:22:51', creator: '用户E'
       },
       {
-        id: 'bm-7', name: '点击率下滑', status: '启用', boardId: 'example_demo', period: '近3天',
+        id: 'bm-7', name: '点击率下滑', status: '启用', boardId: 'tt_convert', period: '近3天',
         dimensions: ['按日', '国家地区'],
         filters: [filterRow('campaign', [], 'US_android_install')],
         logic: 'any',
@@ -249,7 +271,7 @@
         triggerCount: 5, lastTrigger: '2026-10-18 20:00:11', createdAt: '2026-09-16 19:33:27', creator: '用户C'
       },
       {
-        id: 'bm-8', name: '广告收入环比', status: '启用', boardId: 'shared_demo', period: '上月',
+        id: 'bm-8', name: '广告收入环比', status: '启用', boardId: 'iaa_agg', period: '上月',
         dimensions: ['按周', '渠道'],
         filters: [filterRow('platform', ['iOS'])],
         logic: 'any',
