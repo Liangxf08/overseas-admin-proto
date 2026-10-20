@@ -16,12 +16,12 @@
   };
 
   var ALL_ROWS = [
-    { id: '100001', productId: 'ywvt69aoqfdgyti2', url: 'https://playable.example.com/hotpot-match-3d', status: '启用', updatedAt: '2026-09-12 14:20:08' },
-    { id: '100002', productId: 'yw1abauttjsdlfid', url: 'https://playable.example.com/pixel-bounce-jam', status: '启用', updatedAt: '2026-09-10 11:06:41' },
-    { id: '100003', productId: 'ywdazzlejewel001a', url: 'https://playable.example.com/dazzle-jewel', status: '启用', updatedAt: '2026-09-08 16:42:19' },
-    { id: '100004', productId: 'ywbrainsortcard02', url: 'https://playable.example.com/brain-sort-card', status: '禁用', updatedAt: '2026-09-03 09:18:55' },
-    { id: '100005', productId: 'ywtilesort3d0003x', url: 'https://playable.example.com/tile-sort-3d', status: '启用', updatedAt: '2026-08-28 19:03:12' },
-    { id: '100006', productId: 'ywcaptainwave08xx', url: 'https://playable.example.com/captain-wave', status: '禁用', updatedAt: '2026-08-21 10:27:33' }
+    { id: '100001', productId: 'ywvt69aoqfdgyti2', url: 'https://playable.example.com/hotpot-match-3d', clickUrl: 'https://click.example.com/hotpot-match-3d', status: '启用', updatedAt: '2026-09-12 14:20:08' },
+    { id: '100002', productId: 'yw1abauttjsdlfid', url: 'https://playable.example.com/pixel-bounce-jam', clickUrl: 'https://click.example.com/pixel-bounce-jam', status: '启用', updatedAt: '2026-09-10 11:06:41' },
+    { id: '100003', productId: 'ywdazzlejewel001a', url: 'https://playable.example.com/dazzle-jewel', clickUrl: 'https://click.example.com/dazzle-jewel', status: '启用', updatedAt: '2026-09-08 16:42:19' },
+    { id: '100004', productId: 'ywbrainsortcard02', url: 'https://playable.example.com/brain-sort-card', clickUrl: 'https://click.example.com/brain-sort-card', status: '禁用', updatedAt: '2026-09-03 09:18:55' },
+    { id: '100005', productId: 'ywtilesort3d0003x', url: 'https://playable.example.com/tile-sort-3d', clickUrl: 'https://click.example.com/tile-sort-3d', status: '启用', updatedAt: '2026-08-28 19:03:12' },
+    { id: '100006', productId: 'ywcaptainwave08xx', url: 'https://playable.example.com/captain-wave', clickUrl: 'https://click.example.com/captain-wave', status: '禁用', updatedAt: '2026-08-21 10:27:33' }
   ];
 
   var state = {
@@ -171,6 +171,11 @@
     clearId: 'editUrlClear',
     onClear: function () { setItemError('editUrlItem', false); }
   });
+  var editClickUrlClear = UI.bindInputClearable({
+    wrapId: 'editClickUrlWrap',
+    clearId: 'editClickUrlClear',
+    onClear: function () { setItemError('editClickUrlItem', false); }
+  });
 
   $('filterProduct').addEventListener('input', function () {
     state.draft.product = this.value || '';
@@ -194,7 +199,7 @@
   }
 
   function clearEditErrors() {
-    ['editProductItem', 'editUrlItem'].forEach(function (id) {
+    ['editProductItem', 'editUrlItem', 'editClickUrlItem'].forEach(function (id) {
       setItemError(id, false);
     });
   }
@@ -274,6 +279,11 @@
               escapeHtml(row.url) +
             '</a>' +
           '</td>' +
+          '<td title="' + escapeHtml(row.clickUrl) + '">' +
+            '<a class="playable-link" href="' + escapeHtml(row.clickUrl) + '" target="_blank" rel="noopener noreferrer">' +
+              escapeHtml(row.clickUrl) +
+            '</a>' +
+          '</td>' +
           '<td>' + UI.statusTag(row.status) + '</td>' +
           '<td title="' + escapeHtml(row.updatedAt) + '">' + escapeHtml(row.updatedAt) + '</td>' +
           '<td class="col-action"><span class="action-links">' +
@@ -321,10 +331,12 @@
     clearEditErrors();
     $('editModalTitle').textContent = '添加试玩广告';
     $('editUrl').value = '';
+    $('editClickUrl').value = '';
     UI.setSegValue('editStatusSeg', '启用');
     fillProductPanel();
     if (editProductSelect && editProductSelect.syncLabel) editProductSelect.syncLabel('');
     if (editUrlClear) editUrlClear.sync();
+    if (editClickUrlClear) editClickUrlClear.sync();
     UI.openModal('editModal');
   }
 
@@ -336,10 +348,12 @@
     clearEditErrors();
     $('editModalTitle').textContent = '编辑试玩广告';
     $('editUrl').value = row.url || '';
+    $('editClickUrl').value = row.clickUrl || '';
     UI.setSegValue('editStatusSeg', state.editStatus);
     fillProductPanel();
     if (editProductSelect && editProductSelect.syncLabel) editProductSelect.syncLabel(state.editProductId);
     if (editUrlClear) editUrlClear.sync();
+    if (editClickUrlClear) editClickUrlClear.sync();
     UI.openModal('editModal');
   }
 
@@ -351,6 +365,7 @@
     clearEditErrors();
     var productId = state.editProductId || '';
     var url = ($('editUrl').value || '').trim();
+    var clickUrl = ($('editClickUrl').value || '').trim();
     var status = state.editStatus || '启用';
     var hasError = false;
 
@@ -365,6 +380,13 @@
       setItemError('editUrlItem', true, '请输入有效的 http(s) 链接');
       hasError = true;
     }
+    if (!clickUrl) {
+      setItemError('editClickUrlItem', true, '请输入点击链接');
+      hasError = true;
+    } else if (!isValidUrl(clickUrl)) {
+      setItemError('editClickUrlItem', true, '请输入有效的 http(s) 链接');
+      hasError = true;
+    }
     if (hasError) return;
 
     var now = Store.nowText();
@@ -373,6 +395,7 @@
         id: nextId(),
         productId: productId,
         url: url,
+        clickUrl: clickUrl,
         status: status,
         updatedAt: now
       });
@@ -382,6 +405,7 @@
       if (!row) return;
       row.productId = productId;
       row.url = url;
+      row.clickUrl = clickUrl;
       row.status = status;
       row.updatedAt = now;
       UI.showToast('提交成功', 'success');
@@ -487,6 +511,7 @@
         '<td title="' + escapeHtml(row.productText) + '">' + escapeHtml(row.productText || '-') + '</td>' +
         '<td>' + escapeHtml(row.platform || '-') + '</td>' +
         '<td title="' + escapeHtml(row.url) + '">' + escapeHtml(row.url || '-') + '</td>' +
+        '<td title="' + escapeHtml(row.clickUrl) + '">' + escapeHtml(row.clickUrl || '-') + '</td>' +
         '<td>' + escapeHtml(row.status || '-') + '</td>' +
         '<td class="col-error">' + escapeHtml(row.error || '') + '</td>' +
       '</tr>';
@@ -516,6 +541,7 @@
     for (i = 0; i < 20; i++) {
       emptyRows +=
         '<Row>' +
+        '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
         '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
         '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
         '<Cell ss:StyleID="sCell"><Data ss:Type="String"></Data></Cell>' +
@@ -552,16 +578,19 @@
       '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
       '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
       '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
+      '<Column ss:StyleID="sCell" ss:AutoFitWidth="0" ss:Width="' + colW + '"/>' +
       '<Row>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">产品名称</Data></Cell>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">平台</Data></Cell>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">试玩链接</Data></Cell>' +
+      '<Cell ss:StyleID="sCell"><Data ss:Type="String">点击链接</Data></Cell>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">状态</Data></Cell>' +
       '</Row>' +
       '<Row>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">' + xmlEscape(sample.name) + '</Data></Cell>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">' + xmlEscape(sample.platform || 'iOS') + '</Data></Cell>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">https://playable.example.com/sample</Data></Cell>' +
+      '<Cell ss:StyleID="sCell"><Data ss:Type="String">https://click.example.com/sample</Data></Cell>' +
       '<Cell ss:StyleID="sCell"><Data ss:Type="String">启用</Data></Cell>' +
       '</Row>' +
       emptyRows +
@@ -623,13 +652,15 @@
   }
 
   function mapHeaderIndex(headers) {
-    var map = { product: -1, platform: -1, url: -1, status: -1 };
+    var map = { product: -1, platform: -1, url: -1, clickUrl: -1, status: -1 };
     headers.forEach(function (h, i) {
       var key = normalizeHeader(h);
       if (key === '产品名称' || key === '产品' || key === '产品名' || key === 'productname' || key === 'product_name' || key === '产品id' || key === 'productid' || key === 'product_id') {
         map.product = i;
       } else if (key === '平台' || key === 'platform') {
         map.platform = i;
+      } else if (key === '点击链接' || key === 'clickurl' || key === 'click_url' || key === 'clicklink' || key === 'click_link') {
+        map.clickUrl = i;
       } else if (key === '试玩链接' || key === '链接' || key === 'url' || key === 'link' || key === 'playableurl') {
         map.url = i;
       } else if (key === '状态' || key === 'status') {
@@ -679,7 +710,12 @@
     if (!row.url) {
       errors.push('试玩链接不能为空');
     } else if (!isValidUrl(row.url)) {
-      errors.push('请输入有效的 http(s) 链接');
+      errors.push('试玩链接须为有效的 http(s) 链接');
+    }
+    if (!row.clickUrl) {
+      errors.push('点击链接不能为空');
+    } else if (!isValidUrl(row.clickUrl)) {
+      errors.push('点击链接须为有效的 http(s) 链接');
     }
     if (row.statusRaw && row.statusRaw !== '启用' && row.statusRaw !== '禁用') {
       errors.push('状态仅支持：启用、禁用');
@@ -689,8 +725,8 @@
 
   function buildImportRows(headers, dataLines, splitLine) {
     var col = mapHeaderIndex(headers);
-    if (col.product < 0 || col.platform < 0 || col.url < 0) {
-      return { error: '表头不正确，需包含：产品名称、平台、试玩链接' };
+    if (col.product < 0 || col.platform < 0 || col.url < 0 || col.clickUrl < 0) {
+      return { error: '表头不正确，需包含：产品名称、平台、试玩链接、点击链接' };
     }
     var rows = [];
     var i;
@@ -707,6 +743,7 @@
         platformRaw: platformRaw,
         platform: normalizePlatform(platformRaw),
         url: String(cols[col.url] == null ? '' : cols[col.url]).trim(),
+        clickUrl: String(cols[col.clickUrl] == null ? '' : cols[col.clickUrl]).trim(),
         statusRaw: statusRaw,
         status: statusRaw || '启用',
         error: ''
@@ -875,6 +912,7 @@
         id: pad6(seq),
         productId: row.productId,
         url: row.url,
+        clickUrl: row.clickUrl,
         status: row.status || '启用',
         updatedAt: now
       };
@@ -918,6 +956,7 @@
     handleImportFile(file);
   });
   $('editUrl').addEventListener('input', function () { setItemError('editUrlItem', false); });
+  $('editClickUrl').addEventListener('input', function () { setItemError('editClickUrlItem', false); });
 
   $('checkAll').addEventListener('change', function () {
     var checked = !!$('checkAll').checked;

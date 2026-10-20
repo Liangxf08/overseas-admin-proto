@@ -63,6 +63,7 @@
                   <col data-col-width="220" />
                   <col data-col-width="90" />
                   <col data-col-width="280" />
+                  <col data-col-width="280" />
                   <col data-col-width="100" />
                   <col data-col-width="180" />
                   <col data-col-width="140" />
@@ -78,6 +79,7 @@
                     <th>产品</th>
                     <th>平台</th>
                     <th>试玩链接</th>
+                    <th>点击链接</th>
                     <th>状态</th>
                     <th>更新时间</th>
                     <th class="col-action">操作</th>
@@ -124,6 +126,18 @@
               </button>
             </div>
             <div class="form-item__error">请输入试玩链接</div>
+          </div>
+        </div>
+        <div class="form-item" id="editClickUrlItem">
+          <label class="form-item__label is-required">点击链接</label>
+          <div class="form-item__control">
+            <div class="input-clearable" id="editClickUrlWrap">
+              <input class="input" id="editClickUrl" type="text" placeholder="请输入" autocomplete="off" />
+              <button class="select-clear" type="button" id="editClickUrlClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="form-item__error">请输入点击链接</div>
           </div>
         </div>
         <div class="form-item">
@@ -193,17 +207,19 @@
           <div class="import-table-wrap">
             <table class="import-table" id="importTable">
               <colgroup>
-                <col style="width:22%" />
-                <col style="width:12%" />
-                <col style="width:30%" />
+                <col style="width:16%" />
                 <col style="width:10%" />
-                <col style="width:26%" />
+                <col style="width:24%" />
+                <col style="width:24%" />
+                <col style="width:8%" />
+                <col style="width:18%" />
               </colgroup>
               <thead>
                 <tr>
                   <th>产品名称</th>
                   <th>平台</th>
                   <th>试玩链接</th>
+                  <th>点击链接</th>
                   <th>状态</th>
                   <th class="col-error">错误信息</th>
                 </tr>
