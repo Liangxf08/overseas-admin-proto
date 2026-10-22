@@ -590,7 +590,12 @@
           selectedEl.innerHTML = '<div class="multi-panel__empty">暂无已选</div>';
         } else {
           selectedEl.innerHTML = selected.map(function (name) {
-            return '<div class="multi-selected"><span class="multi-selected__name">' + optionContentHtml(name) + '</span><button class="multi-selected__remove" type="button" data-remove="' + escapeHtml(name) + '" aria-label="移除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg></button></div>';
+            var handle = cfg.sortable
+              ? '<span class="multi-selected__handle" title="拖拽调整顺序" aria-hidden="true"><svg viewBox="0 0 12 12"><circle cx="4" cy="2.5" r="1" fill="currentColor"/><circle cx="8" cy="2.5" r="1" fill="currentColor"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="8" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="9.5" r="1" fill="currentColor"/><circle cx="8" cy="9.5" r="1" fill="currentColor"/></svg></span>'
+              : '';
+            var sortCls = cfg.sortable ? ' multi-selected--sort' : '';
+            var drag = cfg.sortable ? ' draggable="true"' : '';
+            return '<div class="multi-selected' + sortCls + '"' + drag + ' data-value="' + escapeHtml(name) + '">' + handle + '<span class="multi-selected__name">' + optionContentHtml(name) + '</span><button class="multi-selected__remove" type="button" data-remove="' + escapeHtml(name) + '" aria-label="移除"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg></button></div>';
           }).join('');
         }
       }
@@ -636,6 +641,54 @@
         var name = btn.getAttribute('data-remove');
         setSelected(getSelected().filter(function (n) { return n !== name; }));
         render();
+      });
+    }
+
+    if (cfg.sortable && selectedEl) {
+      var dragValue = null;
+      selectedEl.addEventListener('dragstart', function (e) {
+        var row = e.target.closest('.multi-selected');
+        if (!row || e.target.closest('[data-remove]')) {
+          e.preventDefault();
+          return;
+        }
+        dragValue = row.getAttribute('data-value');
+        row.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', dragValue || ''); } catch (err) { /* ignore */ }
+      });
+      selectedEl.addEventListener('dragover', function (e) {
+        var row = e.target.closest('.multi-selected');
+        if (!row || !dragValue) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        Array.prototype.forEach.call(selectedEl.querySelectorAll('.multi-selected'), function (el) {
+          el.classList.toggle('is-drag-over', el === row && el.getAttribute('data-value') !== dragValue);
+        });
+      });
+      selectedEl.addEventListener('drop', function (e) {
+        var row = e.target.closest('.multi-selected');
+        if (!row || !dragValue) return;
+        e.preventDefault();
+        var target = row.getAttribute('data-value');
+        var selected = getSelected().slice();
+        var from = selected.indexOf(dragValue);
+        var to = selected.indexOf(target);
+        dragValue = null;
+        if (from < 0 || to < 0 || from === to) {
+          render();
+          return;
+        }
+        var moved = selected.splice(from, 1)[0];
+        selected.splice(to, 0, moved);
+        setSelected(selected);
+        render();
+      });
+      selectedEl.addEventListener('dragend', function () {
+        dragValue = null;
+        Array.prototype.forEach.call(selectedEl.querySelectorAll('.multi-selected'), function (el) {
+          el.classList.remove('is-dragging', 'is-drag-over');
+        });
       });
     }
 

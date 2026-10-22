@@ -262,8 +262,12 @@
     sortKey: null,
     sortDir: 'desc',
     sortInteractive: false,
+    metricFilters: {},
+    metricColors: {},
     colWidths: {},
     viewMode: 'table',
+    pivotOpen: {},
+    pivotDimSig: '',
     chartMetrics: [],
     chartMetricsReady: false,
     chartSeriesOn: {},
@@ -806,7 +810,11 @@
     state.sortKey = null;
     state.sortDir = 'desc';
     state.sortInteractive = false;
+    state.metricFilters = {};
+    state.metricColors = {};
     state.viewMode = 'table';
+    state.pivotOpen = {};
+    state.pivotDimSig = '';
     state.chartMetrics = [];
     state.chartMetricsReady = false;
     state.chartSeriesOn = {};
@@ -1550,6 +1558,27 @@
     });
   }
 
+  function sortRowsWithSpecs(rows, specs) {
+    if (!specs || !specs.length) return rows.slice();
+    return rows.slice().sort(function (a, b) {
+      for (var i = 0; i < specs.length; i++) {
+        var cmp = compareSortValues(a, b, specs[i].key);
+        if (!cmp) continue;
+        return specs[i].dir === 'desc' ? -cmp : cmp;
+      }
+      return 0;
+    });
+  }
+
+  function effectiveTableSort(cols) {
+    var specs = (state.sortSpecs || []).filter(function (s) {
+      return s && s.key && cols.indexOf(s.key) >= 0 && (s.dir === 'asc' || s.dir === 'desc');
+    });
+    if (specs.length) return specs;
+    var key = getDefaultSortKey(cols);
+    return key ? [{ key: key, dir: 'desc' }] : [];
+  }
+
   function thSortHtml(label, key) {
     var spec = null;
     (state.sortSpecs || []).some(function (s) {
@@ -1578,6 +1607,140 @@
       escapeHtml(label) + icons + '</span>';
   }
 
+  var METRIC_FILTER_OPS = [
+    { id: 'gt', label: '大于' },
+    { id: 'gte', label: '大于等于' },
+    { id: 'lt', label: '小于' },
+    { id: 'lte', label: '小于等于' },
+    { id: 'eq', label: '等于' },
+    { id: 'neq', label: '不等于' }
+  ];
+
+  var METRIC_HEAT_COLORS = [
+    { id: 'orange', token: '--color-warning-6', name: '橙色' },
+    { id: 'gold', token: '--color-data-11', name: '金色' },
+    { id: 'red', token: '--color-danger-6', name: '红色' },
+    { id: 'pink', token: '--color-data-15', name: '粉色' },
+    { id: 'purple', token: '--color-data-9', name: '紫色' },
+    { id: 'lime', token: '--color-data-13', name: '黄绿' },
+    { id: 'green', token: '--color-data-7', name: '绿色' },
+    { id: 'cyan', token: '--color-data-17', name: '青色' },
+    { id: 'blue', token: '--color-data-1', name: '蓝色' },
+    { id: 'deep', token: '--color-success-6', name: '深绿' }
+  ];
+
+  var metricPop = { kind: '', key: '' };
+
+  function metricOpLabel(id) {
+    var found = '大于';
+    METRIC_FILTER_OPS.forEach(function (op) {
+      if (op.id === id) found = op.label;
+    });
+    return found;
+  }
+
+  function heatColorById(id) {
+    var found = null;
+    METRIC_HEAT_COLORS.forEach(function (item) {
+      if (item.id === id) found = item;
+    });
+    return found;
+  }
+
+  function metricFilterConds(key) {
+    return (state.metricFilters[key] || []).filter(function (cond) {
+      return cond && cond.op && cond.value !== '' && cond.value != null && isFinite(Number(cond.value));
+    }).slice(0, 1);
+  }
+
+  function matchMetricCond(num, cond) {
+    var n = Number(cond.value);
+    if (!isFinite(num) || !isFinite(n)) return false;
+    if (cond.op === 'gt') return num > n;
+    if (cond.op === 'gte') return num >= n;
+    if (cond.op === 'lt') return num < n;
+    if (cond.op === 'lte') return num <= n;
+    if (cond.op === 'eq') return Math.abs(num - n) < 1e-9;
+    if (cond.op === 'neq') return Math.abs(num - n) >= 1e-9;
+    return true;
+  }
+
+  function metricFilterNumber(key, raw) {
+    var meta = METRIC_META[key];
+    var num = Number(raw);
+    if (meta && meta.type === 'percent') return num / 100;
+    return num;
+  }
+
+  function rowPassesMetricFilters(row, metrics) {
+    for (var i = 0; i < metrics.length; i++) {
+      var key = metrics[i];
+      var conds = metricFilterConds(key);
+      if (!conds.length) continue;
+      var num = metricFilterNumber(key, row[key]);
+      if (!isFinite(num)) return false;
+      for (var j = 0; j < conds.length; j++) {
+        if (!matchMetricCond(num, conds[j])) return false;
+      }
+    }
+    return true;
+  }
+
+  function queryRows(sortKeys, metrics) {
+    var rows = genRows().filter(function (row) {
+      return rowPassesMetricFilters(row, metrics || []);
+    });
+    return applySort(rows, sortKeys);
+  }
+
+  function buildHeatScale(metrics, rows) {
+    var scale = {};
+    (metrics || []).forEach(function (metric) {
+      if (!state.metricColors[metric]) return;
+      var min = Infinity;
+      var max = -Infinity;
+      rows.forEach(function (row) {
+        var n = Number(row[metric]);
+        if (!isFinite(n)) return;
+        if (n < min) min = n;
+        if (n > max) max = n;
+      });
+      if (min !== Infinity) scale[metric] = { min: min, max: max };
+    });
+    return scale;
+  }
+
+  function metricHeatAttr(metric, raw, scale) {
+    var spec = heatColorById(state.metricColors[metric]);
+    if (!spec) return '';
+    var num = Number(raw);
+    if (!isFinite(num)) return '';
+    var range = scale[metric];
+    var t = 1;
+    if (range && range.max > range.min) t = (num - range.min) / (range.max - range.min);
+    if (t < 0) t = 0;
+    if (t > 1) t = 1;
+    var pct = Math.round(18 + t * 62);
+    return ' style="--heat-color:var(' + spec.token + ');--heat-amt:' + pct + '%"';
+  }
+
+  function metricToolsHtml(key) {
+    var filtering = metricFilterConds(key).length > 0;
+    var color = heatColorById(state.metricColors[key]);
+    var dot = color
+      ? '<i class="th-metric__dot" style="--heat-color:var(' + color.token + ')"></i>'
+      : '';
+    return '<div class="th-metric__bar">' +
+      '<button type="button" class="th-metric__btn' + (filtering ? ' is-on' : '') + '" data-metric-filter="' + escapeHtml(key) + '" aria-label="筛选" title="筛选">' +
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.8 2.2h12.4c.3 0 .5.3.3.6L9.6 8.1v4.6c0 .3-.2.5-.5.6l-2.2.9c-.4.1-.7-.1-.7-.5V8.1L1.5 2.8c-.2-.3 0-.6.3-.6z" fill="currentColor"/></svg>' +
+      '</button>' +
+      '<button type="button" class="th-metric__btn' + (color ? ' is-on' : '') + '" data-metric-color="' + escapeHtml(key) + '" aria-label="色彩地图" title="色彩地图">' +
+        '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.2" cy="8" r="1.15" fill="currentColor"/><circle cx="8" cy="8" r="1.15" fill="currentColor"/><circle cx="12.8" cy="8" r="1.15" fill="currentColor"/></svg>' +
+        dot +
+      '</button>' +
+    '</div>';
+  }
+
   function captureAppliedQuery() {
     state.applied = {
       dims: (state.dimSelected || []).slice(),
@@ -1589,7 +1752,13 @@
   }
 
   function renderTable() {
-    captureAppliedQuery();
+    if (!state._skipCapture) captureAppliedQuery();
+    if (state.viewMode === 'pivot') {
+      renderPivotTable();
+      return;
+    }
+    var tableEl = $('dataTable');
+    if (tableEl) tableEl.classList.remove('is-pivot');
     var dims = state.dimSelected.length ? state.dimSelected : ['按日'];
     var metrics = (state.draft && state.draft.metrics) || [];
     var showCompare = isCompareEnabled();
@@ -1600,7 +1769,7 @@
         return s && sortKeys.indexOf(s.key) >= 0;
       });
     }
-    var rows = applySort(genRows(), sortKeys);
+    var rows = queryRows(sortKeys, metrics);
     var total = rows.length;
     var start = (state.page - 1) * state.pageSize;
     var pageRows = rows.slice(start, start + state.pageSize);
@@ -1627,7 +1796,8 @@
       return '<col data-col-key="' + escapeHtml(c.key) + '" style="width:' + widthList[idx] + 'px" />';
     }).join('');
 
-    $('tableHead').innerHTML = '<tr>' + displayCols.map(function (c) {
+    closeMetricPops();
+    var headRow = '<tr>' + displayCols.map(function (c) {
       var cls = [];
       if (c.kind !== 'dim') cls.push('is-num', 'col-num');
       if (c.kind === 'dim') cls.push('is-freeze');
@@ -1635,6 +1805,18 @@
       var style = c.kind === 'dim' ? ' style="left:' + freezeOffsets[c.key] + 'px"' : '';
       return '<th class="' + cls.join(' ') + '"' + style + '>' + thSortHtml(c.label, c.key) + '</th>';
     }).join('') + '</tr>';
+    var toolRow = '<tr class="metric-tool-row">' + displayCols.map(function (c) {
+      var cls = ['metric-tool-cell'];
+      var style = '';
+      var inner = '';
+      if (c.kind === 'dim') {
+        cls.push('is-freeze');
+        style = ' style="left:' + freezeOffsets[c.key] + 'px"';
+      }
+      if (c.kind === 'metric') inner = metricToolsHtml(c.key);
+      return '<td class="' + cls.join(' ') + '"' + style + '>' + inner + '</td>';
+    }).join('') + '</tr>';
+    $('tableHead').innerHTML = headRow + toolRow;
 
     hideCompareTip();
 
@@ -1644,6 +1826,7 @@
       $('tableEmpty').hidden = false;
     } else {
       $('tableEmpty').hidden = true;
+      var heatScale = buildHeatScale(metrics, rows);
       $('tableBody').innerHTML = pageRows.map(function (row) {
         return '<tr>' + displayCols.map(function (c) {
           var cls = [];
@@ -1658,7 +1841,9 @@
           cls.push('is-num');
           if (c.kind === 'metric') {
             text = escapeHtml(formatMetricValue(c.metric, row[c.metric]));
-            return '<td class="' + cls.join(' ') + '">' + text + '</td>';
+            var heat = metricHeatAttr(c.metric, row[c.metric], heatScale);
+            if (heat) cls.push('metric-heat');
+            return '<td class="' + cls.join(' ') + '"' + heat + '>' + text + '</td>';
           }
           /* delta */
           cls.push('col-change');
@@ -1742,7 +1927,7 @@
           var dims2 = state.dimSelected.length ? state.dimSelected : ['按日'];
           var metrics2 = (state.draft && state.draft.metrics) || [];
           var keys = buildDisplayCols(dims2, metrics2, isCompareEnabled()).map(function (c) { return c.key; });
-          return applySort(genRows(), keys).length;
+          return queryRows(keys, metrics2).length;
         },
         onPageChange: function (p) {
           state.page = p;
@@ -1758,6 +1943,292 @@
 
     bindBoardTableColResize(widthList);
     if (state.viewMode === 'chart') renderChart();
+  }
+
+  var PIVOT_CHEVRON = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4.2 2.4L8.2 6 4.2 9.6"/></svg>';
+
+  function pivotDimsFromApplied() {
+    var applied = state.applied;
+    var dims = applied && applied.dims;
+    if (dims && dims.length) return dims.slice();
+    if (state.dimSelected.length) return state.dimSelected.slice();
+    return ['按日'];
+  }
+
+  function buildPivotNodes(rows, dims) {
+    function nest(list, level) {
+      if (level >= dims.length) return [];
+      var dim = dims[level];
+      var order = [];
+      var map = {};
+      list.forEach(function (row) {
+        var key = row[dim] == null ? '' : String(row[dim]);
+        var node = map[key];
+        if (!node) {
+          node = { key: key, dim: dim, level: level, rows: [], children: [] };
+          map[key] = node;
+          order.push(node);
+        }
+        node.rows.push(row);
+      });
+      order.forEach(function (node) {
+        node.children = nest(node.rows, level + 1);
+      });
+      return order;
+    }
+    return nest(rows, 0);
+  }
+
+  function pivotNodeValue(node, metric) {
+    return aggregateMetric(metric, node.rows.map(function (row) { return row[metric]; }));
+  }
+
+  function pivotNodeDelta(node, metric) {
+    var cur = pivotNodeValue(node, metric);
+    var cmp = aggregateMetric(metric, node.rows.map(function (row) { return row['__cmp_' + metric]; }));
+    if (!isFinite(cur) || !isFinite(cmp) || Math.abs(cmp) < 1e-9) return NaN;
+    return ((cur - cmp) / Math.abs(cmp)) * 100;
+  }
+
+  function comparePivotNodes(a, b, spec) {
+    var cmp = 0;
+    if (spec.key === '__pivot') {
+      cmp = String(a.key).localeCompare(String(b.key), 'zh');
+    } else if (String(spec.key).indexOf('__delta_') === 0) {
+      var metric = spec.key.slice(8);
+      var ad = pivotNodeDelta(a, metric);
+      var bd = pivotNodeDelta(b, metric);
+      if (!isFinite(ad) && !isFinite(bd)) cmp = 0;
+      else if (!isFinite(ad)) cmp = 1;
+      else if (!isFinite(bd)) cmp = -1;
+      else cmp = ad - bd;
+    } else {
+      var av = pivotNodeValue(a, spec.key);
+      var bv = pivotNodeValue(b, spec.key);
+      if (!isFinite(av) && !isFinite(bv)) cmp = 0;
+      else if (!isFinite(av)) cmp = 1;
+      else if (!isFinite(bv)) cmp = -1;
+      else cmp = av - bv;
+    }
+    if (!cmp) return 0;
+    return spec.dir === 'desc' ? -cmp : cmp;
+  }
+
+  function sortPivotNodes(nodes, specs) {
+    if (!nodes || !nodes.length) return;
+    nodes.sort(function (a, b) {
+      if (specs.length) {
+        for (var i = 0; i < specs.length; i++) {
+          var cmp = comparePivotNodes(a, b, specs[i]);
+          if (cmp) return cmp;
+        }
+      }
+      return String(a.key).localeCompare(String(b.key), 'zh');
+    });
+    nodes.forEach(function (node) {
+      sortPivotNodes(node.children, specs);
+    });
+  }
+
+  function flattenPivot(nodes, parentPath, out) {
+    nodes.forEach(function (node) {
+      var path = parentPath.concat([node.key]);
+      var id = path.join('\u0001');
+      var hasChildren = !!(node.children && node.children.length);
+      var open = !!(state.pivotOpen && state.pivotOpen[id] === true);
+      out.push({ node: node, id: id, hasChildren: hasChildren, open: open });
+      if (hasChildren && open) flattenPivot(node.children, path, out);
+    });
+    return out;
+  }
+
+  function collectPivotNodes(nodes, out) {
+    nodes.forEach(function (node) {
+      out.push(node);
+      if (node.children && node.children.length) collectPivotNodes(node.children, out);
+    });
+    return out;
+  }
+
+  function pivotTreeHtml(item, tree) {
+    if (!tree) {
+      return '<span class="pivot-tree"><span class="pivot-tree__label">' + escapeHtml(item.node.key) + '</span></span>';
+    }
+    var toggle = item.hasChildren
+      ? '<button class="pivot-tree__toggle' + (item.open ? ' is-open' : '') + '" type="button" data-pivot-toggle="' + encodeURIComponent(item.id) + '" aria-expanded="' + (item.open ? 'true' : 'false') + '" aria-label="' + (item.open ? '收起' : '展开') + '">' + PIVOT_CHEVRON + '</button>'
+      : '<span class="pivot-tree__leaf"></span>';
+    return '<span class="pivot-tree" style="padding-left:' + (item.node.level * 16) + 'px">' + toggle +
+      '<span class="pivot-tree__label">' + escapeHtml(item.node.key) + '</span></span>';
+  }
+
+  function renderPivotTable() {
+    var applied = state.applied || {};
+    var saved = {
+      dims: state.dimSelected,
+      dateStart: state.dateStart,
+      dateEnd: state.dateEnd,
+      filters: state.filterValues
+    };
+    var dims = pivotDimsFromApplied();
+    state.dimSelected = dims.slice();
+    if (applied.dateStart) state.dateStart = new Date(applied.dateStart.getTime());
+    if (applied.dateEnd) state.dateEnd = new Date(applied.dateEnd.getTime());
+    if (applied.filters) state.filterValues = applied.filters;
+    var metrics = (state.draft && state.draft.metrics) || [];
+    var showCompare = isCompareEnabled();
+    var leafRows;
+    try {
+      leafRows = genRows().filter(function (row) {
+        return rowPassesMetricFilters(row, metrics);
+      });
+    } finally {
+      state.dimSelected = saved.dims;
+      state.dateStart = saved.dateStart;
+      state.dateEnd = saved.dateEnd;
+      state.filterValues = saved.filters;
+    }
+
+    var sig = dims.join('\u0001');
+    if (state.pivotDimSig !== sig) {
+      state.pivotDimSig = sig;
+      state.pivotOpen = {};
+    }
+    if (!state.pivotOpen) state.pivotOpen = {};
+
+    var tree = dims.length > 1;
+    var displayCols = buildDisplayCols([], metrics, showCompare);
+    displayCols.unshift({ key: '__pivot', label: dims.join(' / '), kind: 'dim', tree: tree });
+    var flatCols = buildDisplayCols(dims, metrics, showCompare);
+    var orderedLeaves = sortRowsWithSpecs(leafRows, effectiveTableSort(flatCols.map(function (c) { return c.key; })));
+    var nodes = buildPivotNodes(orderedLeaves, dims);
+    var pivotLabelSpecs = (state.sortSpecs || []).filter(function (s) {
+      return s && s.key === '__pivot' && (s.dir === 'asc' || s.dir === 'desc');
+    });
+    if (pivotLabelSpecs.length) sortPivotNodes(nodes, pivotLabelSpecs);
+    var visible = flattenPivot(nodes, [], []);
+    var allNodes = collectPivotNodes(nodes, []);
+    state._displayCols = displayCols;
+
+    var widthList = displayCols.map(function (c) { return getColWidthPx(c); });
+    var freezeOffsets = { __pivot: 0 };
+    var widthSum = widthList.reduce(function (s, w) { return s + w; }, 0);
+    var table = $('dataTable');
+    if (!table) return;
+    table.classList.add('is-pivot');
+    table.style.width = '100%';
+    table.style.minWidth = widthSum + 'px';
+    $('tableColgroup').innerHTML = displayCols.map(function (c, idx) {
+      return '<col data-col-key="' + escapeHtml(c.key) + '" style="width:' + widthList[idx] + 'px" />';
+    }).join('');
+
+    closeMetricPops();
+    hideCompareTip();
+    var dimSortKey = '__pivot';
+    (state.sortSpecs || []).some(function (s) {
+      if (s && dims.indexOf(s.key) >= 0) {
+        dimSortKey = s.key;
+        return true;
+      }
+      return false;
+    });
+    var headRow = '<tr>' + displayCols.map(function (c) {
+      var cls = [];
+      if (c.kind !== 'dim') cls.push('is-num', 'col-num');
+      if (c.kind === 'dim') cls.push('is-freeze');
+      if (c.kind === 'delta') cls.push('col-change');
+      var style = c.kind === 'dim' ? ' style="left:0"' : '';
+      var sortKey = c.key === '__pivot' ? dimSortKey : c.key;
+      return '<th class="' + cls.join(' ') + '"' + style + '>' + thSortHtml(c.label, sortKey) + '</th>';
+    }).join('') + '</tr>';
+    var toolRow = '<tr class="metric-tool-row">' + displayCols.map(function (c) {
+      var cls = ['metric-tool-cell'];
+      var style = '';
+      var inner = '';
+      if (c.kind === 'dim') {
+        cls.push('is-freeze');
+        style = ' style="left:0"';
+      }
+      if (c.kind === 'metric') inner = metricToolsHtml(c.key);
+      return '<td class="' + cls.join(' ') + '"' + style + '>' + inner + '</td>';
+    }).join('') + '</tr>';
+    $('tableHead').innerHTML = headRow + toolRow;
+
+    if (!leafRows.length) {
+      $('tableBody').innerHTML = '';
+      $('tableFoot').innerHTML = '';
+      $('tableEmpty').hidden = false;
+      bindBoardTableColResize(widthList);
+      return;
+    }
+    $('tableEmpty').hidden = true;
+
+    var heatRows = allNodes.map(function (node) {
+      var row = {};
+      metrics.forEach(function (m) { row[m] = pivotNodeValue(node, m); });
+      return row;
+    });
+    var heatScale = buildHeatScale(metrics, heatRows);
+
+    $('tableBody').innerHTML = visible.map(function (item) {
+      return '<tr>' + displayCols.map(function (c) {
+        if (c.kind === 'dim') {
+          return '<td class="is-freeze" style="left:' + freezeOffsets.__pivot + 'px">' + pivotTreeHtml(item, tree) + '</td>';
+        }
+        if (c.kind === 'metric') {
+          var raw = pivotNodeValue(item.node, c.metric);
+          var heat = metricHeatAttr(c.metric, raw, heatScale);
+          var cls = 'is-num' + (heat ? ' metric-heat' : '');
+          return '<td class="' + cls + '"' + heat + '>' + escapeHtml(formatMetricValue(c.metric, raw)) + '</td>';
+        }
+        var delta = pivotNodeDelta(item.node, c.metric);
+        var cur = pivotNodeValue(item.node, c.metric);
+        var cmp = aggregateMetric(c.metric, item.node.rows.map(function (r) { return r['__cmp_' + c.metric]; }));
+        var tipPayload = {
+          metric: c.metric,
+          cmpDay: '',
+          curDay: item.node.key,
+          cmpVal: formatMetricValue(c.metric, cmp),
+          curVal: formatMetricValue(c.metric, cur),
+          delta: formatDeltaPlain(delta),
+          deltaNum: isFinite(delta) ? delta : null
+        };
+        return '<td class="is-num col-change"><span class="' + deltaClassName(delta) + '" data-compare-tip="' + encodeURIComponent(JSON.stringify(tipPayload)) + '">' +
+          escapeHtml(formatDelta(delta)) + '</span></td>';
+      }).join('') + '</tr>';
+    }).join('');
+
+    var totals = {};
+    metrics.forEach(function (m) {
+      var curVals = [];
+      var cmpVals = [];
+      leafRows.forEach(function (r) {
+        curVals.push(r[m]);
+        cmpVals.push(r['__cmp_' + m]);
+      });
+      var raw = aggregateMetric(m, curVals);
+      if (!isFinite(raw)) {
+        totals[m] = '—';
+        totals['__delta_' + m] = '—';
+        return;
+      }
+      totals[m] = formatMetricValue(m, raw);
+      var cmpRaw = aggregateMetric(m, cmpVals);
+      if (showCompare && isFinite(cmpRaw)) {
+        var dlt = Math.abs(cmpRaw) < 1e-9 ? NaN : ((raw - cmpRaw) / Math.abs(cmpRaw)) * 100;
+        totals['__delta_' + m] = formatDelta(dlt);
+        totals['__deltaNum_' + m] = dlt;
+      } else {
+        totals['__delta_' + m] = '—';
+      }
+    });
+    $('tableFoot').innerHTML = '<tr>' + displayCols.map(function (c) {
+      if (c.kind === 'dim') return '<td class="is-freeze" style="left:0">合计</td>';
+      if (c.kind === 'metric') return '<td class="is-num">' + escapeHtml(String(totals[c.key] || '')) + '</td>';
+      var dlt = totals['__deltaNum_' + c.metric];
+      return '<td class="is-num col-change"><span class="' + deltaClassName(dlt) + '">' +
+        escapeHtml(String(totals[c.key] || '—')) + '</span></td>';
+    }).join('') + '</tr>';
+    bindBoardTableColResize(widthList);
   }
 
   function dateGrainsIn(dims) {
@@ -1830,25 +2301,32 @@
   }
 
   function syncChartViewToggle() {
+    var mode = state.viewMode || 'table';
     var chartBtn = $('chartViewBtn');
     var tableBtn = $('tableViewBtn');
+    var pivotBtn = $('pivotViewBtn');
     var tip = $('chartViewTip');
-    var chart = state.viewMode === 'chart';
+    var chart = mode === 'chart';
+    var pivot = mode === 'pivot';
     if (chartBtn) {
       chartBtn.disabled = false;
       chartBtn.classList.toggle('is-active', chart);
       chartBtn.setAttribute('aria-pressed', chart ? 'true' : 'false');
     }
     if (tableBtn) {
-      tableBtn.classList.toggle('is-active', !chart);
-      tableBtn.setAttribute('aria-pressed', chart ? 'false' : 'true');
+      tableBtn.classList.toggle('is-active', mode === 'table');
+      tableBtn.setAttribute('aria-pressed', mode === 'table' ? 'true' : 'false');
+    }
+    if (pivotBtn) {
+      pivotBtn.classList.toggle('is-active', pivot);
+      pivotBtn.setAttribute('aria-pressed', pivot ? 'true' : 'false');
     }
     if (tip) tip.setAttribute('data-tip', '折线图');
     var shell = $('tableShell');
     var pager = $('pagination');
     var box = $('boardChart');
     if (shell) shell.hidden = chart;
-    if (pager) pager.hidden = chart;
+    if (pager) pager.hidden = chart || pivot;
     if (box) box.hidden = !chart;
     if (!chart) hideChartTip();
     if (!chart && window.ColResize && $('dataTable')) {
@@ -1858,11 +2336,36 @@
     }
   }
 
+  function renderFlatFromApplied() {
+    var applied = state.applied || {};
+    var saved = {
+      dims: state.dimSelected,
+      dateStart: state.dateStart,
+      dateEnd: state.dateEnd,
+      filters: state.filterValues
+    };
+    if (applied.dims) state.dimSelected = applied.dims.slice();
+    if (applied.dateStart) state.dateStart = new Date(applied.dateStart.getTime());
+    if (applied.dateEnd) state.dateEnd = new Date(applied.dateEnd.getTime());
+    if (applied.filters) state.filterValues = applied.filters;
+    state._skipCapture = true;
+    renderTable();
+    state._skipCapture = false;
+    state.dimSelected = saved.dims;
+    state.dateStart = saved.dateStart;
+    state.dateEnd = saved.dateEnd;
+    state.filterValues = saved.filters;
+    syncDimLabel();
+  }
+
   function setBoardViewMode(mode) {
     if (state.viewMode === mode) return;
+    var prev = state.viewMode;
     state.viewMode = mode;
     syncChartViewToggle();
     if (mode === 'chart') renderChart();
+    else if (mode === 'pivot') renderPivotTable();
+    else if (prev === 'pivot') renderFlatFromApplied();
   }
 
   function metricDisplayName(key) {
@@ -2381,8 +2884,15 @@
     renderChartLegend(model);
   }
 
+  function colWidthKey(col) {
+    if (col.key === '__pivot') return col.tree ? '__pivot' : '__pivot_flat';
+    return col.key;
+  }
+
   function getColWidthPx(col) {
-    if (state.colWidths[col.key] != null) return state.colWidths[col.key];
+    var storeKey = colWidthKey(col);
+    if (state.colWidths[storeKey] != null) return state.colWidths[storeKey];
+    if (col.key === '__pivot' && col.tree) return 240;
     if (col.kind === 'dim') return DIM_COL_WIDTH;
     return METRIC_COL_WIDTH;
   }
@@ -2398,6 +2908,8 @@
       var w = colEl ? (parseFloat(colEl.style.width) || DIM_COL_WIDTH) : DIM_COL_WIDTH;
       var th = table.querySelectorAll('thead th')[i];
       if (th) th.style.left = left + 'px';
+      var toolRow = table.querySelector('thead tr.metric-tool-row');
+      if (toolRow && toolRow.children[i]) toolRow.children[i].style.left = left + 'px';
       table.querySelectorAll('tbody tr').forEach(function (tr) {
         var td = tr.children[i];
         if (td) td.style.left = left + 'px';
@@ -2406,6 +2918,14 @@
       if (footRow && footRow.children[i]) footRow.children[i].style.left = left + 'px';
       left += w;
     });
+    var headRow = table.querySelector('thead tr');
+    var toolCells = table.querySelectorAll('thead tr.metric-tool-row td');
+    if (headRow && toolCells.length) {
+      var top = headRow.getBoundingClientRect().height;
+      Array.prototype.forEach.call(toolCells, function (cell) {
+        cell.style.top = top + 'px';
+      });
+    }
   }
 
   function bindBoardTableColResize(widthList) {
@@ -2424,7 +2944,7 @@
         onResize: function (index, width) {
           var col = cols[index];
           if (!col) return;
-          state.colWidths[col.key] = width;
+          state.colWidths[colWidthKey(col)] = width;
           syncBoardFreezeOffsets(table);
         }
       });
@@ -3658,6 +4178,9 @@
   $('tableViewBtn').addEventListener('click', function () {
     setBoardViewMode('table');
   });
+  $('pivotViewBtn').addEventListener('click', function () {
+    setBoardViewMode('pivot');
+  });
   $('chartLegendList').addEventListener('click', function (e) {
     var item = e.target.closest('[data-series]');
     if (!item || !state._chartModel) return;
@@ -3726,7 +4249,7 @@
       var showCompare = isCompareEnabled();
       var displayCols = buildDisplayCols(dims, metrics, showCompare);
       var sortKeys = displayCols.map(function (c) { return c.key; });
-      var rows = applySort(genRows(), sortKeys);
+      var rows = queryRows(sortKeys, metrics);
       if (!rows.length) {
         showToast('暂无数据可导出', 'error');
         return;
@@ -3799,7 +4322,226 @@
     }
   });
 
+  function closeOpMenus() {
+    document.querySelectorAll('.metric-filter__op.is-open').forEach(function (el) {
+      el.classList.remove('is-open');
+    });
+  }
+
+  function closeMetricPops() {
+    closeOpMenus();
+    var filterPop = document.getElementById('metricFilterPop');
+    var colorPop = document.getElementById('metricColorPop');
+    if (filterPop) filterPop.hidden = true;
+    if (colorPop) colorPop.hidden = true;
+    metricPop.kind = '';
+    metricPop.key = '';
+  }
+
+  function placeMetricPop(pop, anchor) {
+    pop.hidden = false;
+    var rect = anchor.getBoundingClientRect();
+    var width = pop.offsetWidth;
+    var height = pop.offsetHeight;
+    var left = Math.round(rect.left + (rect.width - width) / 2);
+    var top = Math.round(rect.bottom + 4);
+    var maxLeft = window.innerWidth - width - 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    if (left < 8) left = 8;
+    if (top + height > window.innerHeight - 8) top = Math.max(8, Math.round(rect.top - height - 4));
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+
+  function renderFilterRows(conds) {
+    var list = document.getElementById('metricFilterList');
+    if (!list) return;
+    var cond = (conds && conds[0]) || { op: 'gt', value: '' };
+    var op = cond.op || 'gt';
+    var menu = METRIC_FILTER_OPS.map(function (item) {
+      return '<button type="button" class="metric-filter__op-item' + (item.id === op ? ' is-on' : '') + '" data-op-pick="' + item.id + '">' + item.label + '</button>';
+    }).join('');
+    list.innerHTML = '<div class="metric-filter__row" data-op="' + op + '">' +
+      '<div class="metric-filter__op">' +
+        '<button type="button" class="metric-filter__op-btn" data-op-toggle>' + metricOpLabel(op) + '</button>' +
+        '<div class="metric-filter__op-menu">' + menu + '</div>' +
+      '</div>' +
+      '<div class="metric-filter__num">' +
+        '<input class="input" type="text" inputmode="decimal" autocomplete="off" value="' + escapeHtml(cond.value == null ? '' : String(cond.value)) + '" />' +
+        '<span class="metric-filter__step">' +
+          '<button type="button" data-step="1" aria-label="增加"></button>' +
+          '<button type="button" data-step="-1" aria-label="减少"></button>' +
+        '</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function ensureMetricPops() {
+    if (document.getElementById('metricFilterPop')) return;
+    var filter = document.createElement('div');
+    filter.id = 'metricFilterPop';
+    filter.className = 'metric-pop metric-filter';
+    filter.hidden = true;
+    filter.innerHTML =
+      '<div class="metric-filter__title">显示符合以下条件的行</div>' +
+      '<div class="metric-filter__list" id="metricFilterList"></div>' +
+      '<div class="metric-filter__foot">' +
+        '<button type="button" class="btn btn--text" id="metricFilterReset">重置</button>' +
+        '<button type="button" class="btn btn--primary" id="metricFilterApply">应用</button>' +
+      '</div>';
+    var color = document.createElement('div');
+    color.id = 'metricColorPop';
+    color.className = 'metric-pop metric-color';
+    color.hidden = true;
+    color.innerHTML =
+      '<button type="button" class="metric-color__none" data-heat="">无热图</button>' +
+      '<div class="metric-color__grid">' +
+        METRIC_HEAT_COLORS.map(function (item) {
+          return '<button type="button" class="metric-color__swatch" data-heat="' + item.id + '" aria-label="' + item.name + '" style="--heat-color:var(' + item.token + ')"></button>';
+        }).join('') +
+      '</div>';
+    document.body.appendChild(filter);
+    document.body.appendChild(color);
+    filter.addEventListener('click', onFilterPopClick);
+    color.addEventListener('click', onColorPopClick);
+  }
+
+  function openMetricFilter(key, anchor) {
+    ensureMetricPops();
+    var same = metricPop.kind === 'filter' && metricPop.key === key;
+    closeMetricPops();
+    if (same || !key) return;
+    var saved = state.metricFilters[key];
+    var first = saved && saved[0];
+    renderFilterRows(first ? [{ op: first.op, value: first.value }] : [{ op: 'gt', value: '' }]);
+    metricPop.kind = 'filter';
+    metricPop.key = key;
+    placeMetricPop(document.getElementById('metricFilterPop'), anchor);
+  }
+
+  function openMetricColor(key, anchor) {
+    ensureMetricPops();
+    var same = metricPop.kind === 'color' && metricPop.key === key;
+    closeMetricPops();
+    if (same || !key) return;
+    var current = state.metricColors[key] || '';
+    var pop = document.getElementById('metricColorPop');
+    pop.querySelectorAll('[data-heat]').forEach(function (btn) {
+      btn.classList.toggle('is-on', (btn.getAttribute('data-heat') || '') === current);
+    });
+    metricPop.kind = 'color';
+    metricPop.key = key;
+    placeMetricPop(pop, anchor);
+  }
+
+  function applyMetricFilterFromPop() {
+    var key = metricPop.key;
+    var list = document.getElementById('metricFilterList');
+    if (!key || !list) return;
+    var conds = [];
+    var invalid = false;
+    Array.prototype.forEach.call(list.querySelectorAll('.metric-filter__row'), function (row) {
+      var input = row.querySelector('input');
+      var value = (input.value || '').trim();
+      input.classList.remove('is-error');
+      if (value === '') return;
+      if (!isFinite(Number(value))) {
+        input.classList.add('is-error');
+        invalid = true;
+        return;
+      }
+      conds.push({ op: row.getAttribute('data-op') || 'gt', value: value });
+    });
+    if (invalid) return;
+    if (conds.length) state.metricFilters[key] = conds;
+    else delete state.metricFilters[key];
+    state.page = 1;
+    renderTable();
+  }
+
+  function onFilterPopClick(e) {
+    var toggle = e.target.closest('[data-op-toggle]');
+    if (toggle) {
+      e.preventDefault();
+      var wrap = toggle.closest('.metric-filter__op');
+      var open = wrap.classList.contains('is-open');
+      closeOpMenus();
+      if (!open) wrap.classList.add('is-open');
+      return;
+    }
+    var pick = e.target.closest('[data-op-pick]');
+    if (pick) {
+      e.preventDefault();
+      var row = pick.closest('.metric-filter__row');
+      var op = pick.getAttribute('data-op-pick');
+      row.setAttribute('data-op', op);
+      var labelBtn = row.querySelector('[data-op-toggle]');
+      if (labelBtn) labelBtn.textContent = metricOpLabel(op);
+      row.querySelectorAll('[data-op-pick]').forEach(function (item) {
+        item.classList.toggle('is-on', item.getAttribute('data-op-pick') === op);
+      });
+      closeOpMenus();
+      return;
+    }
+    var stepBtn = e.target.closest('[data-step]');
+    if (stepBtn) {
+      e.preventDefault();
+      var input = stepBtn.closest('.metric-filter__num').querySelector('input');
+      var cur = input.value.trim() === '' ? 0 : Number(input.value);
+      if (!isFinite(cur)) cur = 0;
+      input.value = String(Math.round((cur + Number(stepBtn.getAttribute('data-step'))) * 10000) / 10000);
+      input.classList.remove('is-error');
+      return;
+    }
+    if (e.target.closest('#metricFilterReset')) {
+      e.preventDefault();
+      if (metricPop.key) delete state.metricFilters[metricPop.key];
+      state.page = 1;
+      renderTable();
+      return;
+    }
+    if (e.target.closest('#metricFilterApply')) {
+      e.preventDefault();
+      applyMetricFilterFromPop();
+    }
+  }
+
+  function onColorPopClick(e) {
+    var btn = e.target.closest('[data-heat]');
+    if (!btn || !metricPop.key) return;
+    e.preventDefault();
+    var id = btn.getAttribute('data-heat') || '';
+    if (id) state.metricColors[metricPop.key] = id;
+    else delete state.metricColors[metricPop.key];
+    renderTable();
+  }
+
+  $('tableBody').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-pivot-toggle]');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var id = decodeURIComponent(btn.getAttribute('data-pivot-toggle') || '');
+    if (!state.pivotOpen) state.pivotOpen = {};
+    state.pivotOpen[id] = state.pivotOpen[id] !== true;
+    renderPivotTable();
+  });
+
   $('tableHead').addEventListener('click', function (e) {
+    var filterBtn = e.target.closest('[data-metric-filter]');
+    if (filterBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      openMetricFilter(filterBtn.getAttribute('data-metric-filter'), filterBtn);
+      return;
+    }
+    var colorBtn = e.target.closest('[data-metric-color]');
+    if (colorBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      openMetricColor(colorBtn.getAttribute('data-metric-color'), colorBtn);
+      return;
+    }
     var dirBtn = e.target.closest('[data-sort-dir]');
     if (!dirBtn) return;
     var wrap = dirBtn.closest('[data-sort-key]');
@@ -3814,6 +4556,26 @@
     state.page = 1;
     renderTable();
   });
+
+  document.addEventListener('click', function (e) {
+    if (!metricPop.kind) return;
+    if (e.target.closest('.metric-pop')) {
+      if (!e.target.closest('.metric-filter__op')) closeOpMenus();
+      return;
+    }
+    closeMetricPops();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && metricPop.kind) closeMetricPops();
+  });
+
+  var boardTableWrap = document.querySelector('.board-data .table-wrap');
+  if (boardTableWrap) {
+    boardTableWrap.addEventListener('scroll', function () {
+      if (metricPop.kind) closeMetricPops();
+    });
+  }
 
   $('tableBody').addEventListener('mouseover', function (e) {
     var cell = e.target.closest('[data-compare-tip]');
@@ -3882,6 +4644,7 @@
     selectAllId: 'dimSelectAll',
     clearId: 'dimClearAll',
     prefix: '维度：',
+    sortable: true,
     getOptions: function () { return ALL_DIMENSIONS; },
     getSelected: function () { return state.dimSelected; },
     setSelected: function (arr) {
