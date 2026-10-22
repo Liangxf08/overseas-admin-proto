@@ -1463,49 +1463,80 @@
     return days.length ? days : [startOfDay(new Date())];
   }
 
+  function catalogEntries() {
+    var selected = state.filterValues.product || [];
+    var platform = state.filterValues.platform;
+    return PRODUCT_CATALOG.filter(function (item) {
+      var key = item.product + '@@' + item.platform;
+      if (selected.length && selected.indexOf(key) === -1) return false;
+      if (platform && platform !== '全部' && item.platform !== platform) return false;
+      return true;
+    });
+  }
+
+  function rowBreakdown(dims) {
+    var wantProduct = dims.indexOf('产品') >= 0;
+    var wantPlatform = dims.indexOf('平台') >= 0;
+    if (!wantProduct && !wantPlatform) return [null];
+    var entries = catalogEntries();
+    if (wantProduct) return entries;
+    var seen = {};
+    var platforms = [];
+    entries.forEach(function (item) {
+      if (seen[item.platform]) return;
+      seen[item.platform] = true;
+      platforms.push({ product: '', platform: item.platform });
+    });
+    return platforms;
+  }
+
   function genRows() {
     var dims = state.dimSelected.length ? state.dimSelected : ['按日'];
     var metrics = (state.draft && state.draft.metrics) || [];
     var days = getRangeDays();
     var showCompare = isCompareEnabled();
     var cmpRange = showCompare ? getCompareRangeByType(state.filterValues.compare) : null;
+    var units = rowBreakdown(dims);
     var rows = [];
     days.forEach(function (day, i) {
-      var row = { _i: i, _day: day, __curDay: formatDate(day) };
-      if (cmpRange) {
-        var cmpSpan = Math.max(0, Math.round((cmpRange[1].getTime() - cmpRange[0].getTime()) / 86400000));
-        var cmpOffset = days.length > 1 ? Math.round(i * cmpSpan / (days.length - 1)) : 0;
-        var cmpDay = addDays(cmpRange[0], cmpOffset);
-        row.__cmpDay = formatDate(cmpDay);
-        row._cmpOffset = cmpOffset;
-      }
-      dims.forEach(function (d) {
-        if (d === '按日') row[d] = formatDate(day);
-        else if (d === '按周') row[d] = weekLabelOf(day);
-        else if (d === '按月') row[d] = monthLabelOf(day);
-        else if (d === '按年') row[d] = String(day.getFullYear());
-        else if (d === '平台') row[d] = PLATFORMS[(i % 2) + 1];
-        else if (d === '产品') row[d] = productOptionLabel(PRODUCT_OPTIONS[i % PRODUCT_OPTIONS.length]);
-        else if (d === '国家地区') row[d] = COUNTRIES[i % COUNTRIES.length];
-        else if (d === '优化师') row[d] = OPTIMIZERS[i % OPTIMIZERS.length];
-        else if (d === '账户') row[d] = 'ACC' + (1000 + i);
-        else if (d === '渠道') row[d] = CHANNELS[i % CHANNELS.length];
-        else row[d] = d + (i + 1);
-      });
-      metrics.forEach(function (m, mi) {
-        row[m] = genMetricRaw(m, i, mi);
+      units.forEach(function (item, pi) {
+        var seed = i * Math.max(units.length, 1) + pi;
+        var row = { _i: seed, _day: day, __curDay: formatDate(day) };
         if (cmpRange) {
-          var cmpVal = genMetricRaw(m, 1000 + (row._cmpOffset || 0), mi);
-          row['__cmp_' + m] = cmpVal;
-          row['__delta_' + m] = Math.abs(cmpVal) < 1e-9
-            ? NaN
-            : ((row[m] - cmpVal) / Math.abs(cmpVal)) * 100;
-        } else {
-          row['__cmp_' + m] = null;
-          row['__delta_' + m] = null;
+          var cmpSpan = Math.max(0, Math.round((cmpRange[1].getTime() - cmpRange[0].getTime()) / 86400000));
+          var cmpOffset = days.length > 1 ? Math.round(i * cmpSpan / (days.length - 1)) : 0;
+          var cmpDay = addDays(cmpRange[0], cmpOffset);
+          row.__cmpDay = formatDate(cmpDay);
+          row._cmpOffset = cmpOffset;
         }
+        dims.forEach(function (d) {
+          if (d === '按日') row[d] = formatDate(day);
+          else if (d === '按周') row[d] = weekLabelOf(day);
+          else if (d === '按月') row[d] = monthLabelOf(day);
+          else if (d === '按年') row[d] = String(day.getFullYear());
+          else if (d === '平台') row[d] = item ? item.platform : PLATFORMS[(seed % 2) + 1];
+          else if (d === '产品') row[d] = item ? item.product : productOptionLabel(PRODUCT_OPTIONS[seed % PRODUCT_OPTIONS.length]);
+          else if (d === '国家地区') row[d] = COUNTRIES[seed % COUNTRIES.length];
+          else if (d === '优化师') row[d] = OPTIMIZERS[seed % OPTIMIZERS.length];
+          else if (d === '账户') row[d] = 'ACC' + (1000 + seed);
+          else if (d === '渠道') row[d] = CHANNELS[seed % CHANNELS.length];
+          else row[d] = d + (seed + 1);
+        });
+        metrics.forEach(function (m, mi) {
+          row[m] = genMetricRaw(m, seed, mi);
+          if (cmpRange) {
+            var cmpVal = genMetricRaw(m, 1000 + (row._cmpOffset || 0), mi);
+            row['__cmp_' + m] = cmpVal;
+            row['__delta_' + m] = Math.abs(cmpVal) < 1e-9
+              ? NaN
+              : ((row[m] - cmpVal) / Math.abs(cmpVal)) * 100;
+          } else {
+            row['__cmp_' + m] = null;
+            row['__delta_' + m] = null;
+          }
+        });
+        rows.push(row);
       });
-      rows.push(row);
     });
     return rows;
   }
