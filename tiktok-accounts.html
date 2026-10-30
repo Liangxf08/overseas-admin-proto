@@ -14,11 +14,25 @@
   <div class="app" id="appShell">
     <main class="main" data-main>
         <div class="content-card">
-          <div class="filter-bar">
-            <div class="filter-item">
-              <input class="input" id="accountKeyword" type="text" placeholder="账户名称/ID" autocomplete="off" />
+          <div class="filter-panel">
+            <div class="page-tabs" role="tablist" aria-label="TikTok账户">
+              <button class="page-tabs__item is-active" type="button" role="tab" aria-selected="true" data-tab="account" id="tabAccount">广告账户</button>
+              <button class="page-tabs__item" type="button" role="tab" aria-selected="false" data-tab="auth" id="tabAuth">授权用户</button>
             </div>
-            <div class="filter-item" id="assetTypeWrap">
+          <div class="filter-bar" id="filterBarAccount">
+            <button class="filter-gear" type="button" id="accountFilterSettingBtn" aria-label="筛选设置">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"/></svg>
+            </button>
+            <div class="filter-item" id="accountKeywordWrap" data-filter="account">
+              <label class="select-trigger select-trigger--input" for="accountKeyword">
+                <span class="select-trigger__prefix">广告账户：</span>
+                <input class="select-trigger__field" type="text" id="accountKeyword" placeholder="请输入" autocomplete="off" />
+              </label>
+              <button class="select-clear" type="button" id="accountKeywordClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="filter-item" id="assetTypeWrap" data-filter="assetType">
               <button class="select-trigger" type="button" id="assetTypeTrigger">
                 <span class="select-trigger__text" id="assetTypeLabel">资产类型：<span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
@@ -31,7 +45,35 @@
                 <div class="single-option" data-value="短剧">短剧</div>
               </div>
             </div>
-            <div class="filter-item" id="optimizerWrap">
+            <div class="filter-item" id="productWrap" data-filter="product" hidden>
+              <button class="select-trigger" type="button" id="productTrigger">
+                <span class="select-trigger__text" id="productLabel">产品名称：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" data-product-clear aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="multi-panel" id="productPanel">
+                <div class="multi-panel__left">
+                  <div class="multi-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="productSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="multi-panel__toolbar">
+                    <button class="multi-panel__link" type="button" id="productSelectAll">全选</button>
+                  </div>
+                  <div class="multi-panel__list" id="productList"></div>
+                </div>
+                <div class="multi-panel__right">
+                  <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                    <span id="productCount">已选择 0 项</span>
+                    <button class="multi-panel__link" type="button" id="productClear">清空</button>
+                  </div>
+                  <div class="multi-panel__list" id="productSelected"></div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-item" id="optimizerWrap" data-filter="optimizer">
               <button class="select-trigger" type="button" id="optimizerTrigger">
                 <span class="select-trigger__text" id="optimizerLabel">优化师：<span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
@@ -56,19 +98,60 @@
                 </div>
               </div>
             </div>
-            <div class="filter-item" id="statusWrap">
-              <button class="select-trigger" type="button" id="statusTrigger">
-                <span class="select-trigger__text" id="statusLabel">状态：<span class="muted">请选择</span></span>
+            <div class="filter-item" id="authUserWrap" data-filter="authUser" hidden>
+              <button class="select-trigger" type="button" id="authUserTrigger">
+                <span class="select-trigger__text" id="authUserLabel">授权用户：<span class="muted">请选择</span></span>
                 <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
               </button>
+              <div class="multi-panel" id="authUserPanel">
+                <div class="multi-panel__left">
+                  <div class="multi-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="authUserSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="multi-panel__toolbar">
+                    <button class="multi-panel__link" type="button" id="authUserSelectAll">全选</button>
+                  </div>
+                  <div class="multi-panel__list" id="authUserList"></div>
+                </div>
+                <div class="multi-panel__right">
+                  <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                    <span id="authUserCount">已选择 0 项</span>
+                    <button class="multi-panel__link" type="button" id="authUserClear">清空</button>
+                  </div>
+                  <div class="multi-panel__list" id="authUserSelected"></div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-item" id="authStatusWrap" data-filter="authStatus" hidden>
+              <button class="select-trigger" type="button" id="authStatusTrigger">
+                <span class="select-trigger__text" id="authStatusLabel">授权状态：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="authStatusClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="authStatusPanel">
+                <div class="single-option" data-value="已授权">已授权</div>
+                <div class="single-option" data-value="已失效">已失效</div>
+              </div>
+            </div>
+            <div class="filter-item" id="statusWrap" data-filter="status" hidden>
+              <button class="select-trigger" type="button" id="statusTrigger">
+                <span class="select-trigger__text" id="statusLabel">投放状态：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="statusClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
               <div class="single-panel" id="statusPanel">
-                <div class="single-option is-active" data-value="">全部</div>
                 <div class="single-option" data-value="启用">启用</div>
                 <div class="single-option" data-value="禁用">禁用</div>
               </div>
             </div>
             <div class="filter-actions">
               <button class="btn btn--primary" type="button" id="searchBtn">查询</button>
+              <button class="btn btn--success" type="button" id="addAccountBtn">添加</button>
               <button class="btn btn--success" type="button" id="importBtn">导入</button>
               <div class="batch-wrap" id="batchWrap">
                 <button class="btn btn--default btn--dropdown" type="button" id="batchBtn" disabled>
@@ -78,36 +161,102 @@
                 <div class="batch-menu" id="batchMenu" role="menu">
                   <button class="batch-menu__item" type="button" role="menuitem" data-batch="product">修改产品</button>
                   <button class="batch-menu__item" type="button" role="menuitem" data-batch="optimizer">修改优化师</button>
-                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="status">修改状态</button>
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="auth">修改授权用户</button>
+                  <button class="batch-menu__item" type="button" role="menuitem" data-batch="status">修改投放状态</button>
                 </div>
               </div>
-              <button class="btn btn--default" type="button" id="exportBtn">导出</button>
             </div>
           </div>
 
-          <div class="data-panel">
+          <div class="filter-bar" id="filterBarAuth" hidden>
+            <div class="filter-item" id="authNameWrap">
+              <input class="input input-clearable" id="authNameKeyword" type="text" placeholder="用户名" autocomplete="off" />
+              <button class="select-clear" type="button" id="authNameClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="filter-item" id="authEmailWrap">
+              <input class="input input-clearable" id="authEmailKeyword" type="text" placeholder="邮箱" autocomplete="off" />
+              <button class="select-clear" type="button" id="authEmailClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+            </div>
+            <div class="filter-item" id="authOperatorWrap">
+              <button class="select-trigger" type="button" id="authOperatorTrigger">
+                <span class="select-trigger__text" id="authOperatorLabel">操作人：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <div class="multi-panel" id="authOperatorPanel">
+                <div class="multi-panel__left">
+                  <div class="multi-panel__search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                    <input type="text" id="authOperatorSearch" placeholder="搜索" autocomplete="off" />
+                  </div>
+                  <div class="multi-panel__toolbar">
+                    <button class="multi-panel__link" type="button" id="authOperatorSelectAll">全选</button>
+                  </div>
+                  <div class="multi-panel__list" id="authOperatorList"></div>
+                </div>
+                <div class="multi-panel__right">
+                  <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                    <span id="authOperatorCount">已选择 0 项</span>
+                    <button class="multi-panel__link" type="button" id="authOperatorClear">清空</button>
+                  </div>
+                  <div class="multi-panel__list" id="authOperatorSelected"></div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-item" id="authAutoWrap">
+              <button class="select-trigger" type="button" id="authAutoTrigger">
+                <span class="select-trigger__text" id="authAutoLabel">自动授权：<span class="muted">请选择</span></span>
+                <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+              </button>
+              <button class="select-clear" type="button" id="authAutoClear" aria-label="清除">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+              </button>
+              <div class="single-panel" id="authAutoPanel">
+                <div class="single-option" data-value="开启">开启</div>
+                <div class="single-option" data-value="关闭">关闭</div>
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button class="btn btn--default" type="button" id="authResetBtn">重置</button>
+              <button class="btn btn--primary" type="button" id="authSearchBtn">查询</button>
+            </div>
+          </div>
+          </div>
+
+          <div class="data-panel" id="dataPanelAccount">
           <div class="table-shell">
             <div class="table-wrap">
               <table class="data-table" id="accountTable">
                 <colgroup>
-                  <col class="col-check" />
-                  <col class="col-name" />
-                  <col class="col-id" />
-                  <col class="col-type" />
-                  <col class="col-product" />
-                  <col class="col-optimizer" />
-                  <col class="col-status" />
-                  <col class="col-action" />
+                  <col class="col-check" data-col-width="48" data-col-fixed="true" />
+                  <col data-col-width="200" />
+                  <col data-col-width="200" />
+                  <col data-col-width="100" />
+                  <col data-col-width="200" />
+                  <col data-col-width="100" />
+                  <col data-col-width="200" />
+                  <col data-col-width="100" />
+                  <col data-col-width="100" />
+                  <col data-col-width="168" />
+                  <col data-col-width="168" />
+                  <col class="col-action" data-col-width="100" />
                 </colgroup>
                 <thead>
                   <tr>
                     <th class="col-check"><span class="cell-check"><input type="checkbox" id="checkAll" aria-label="全选" /></span></th>
-                    <th class="col-name">账户名称</th>
-                    <th class="col-id">账户ID</th>
-                    <th class="col-type">资产类型</th>
-                    <th class="col-product">产品名称</th>
-                    <th class="col-optimizer">优化师</th>
-                    <th class="col-status">状态</th>
+                    <th>账户名称</th>
+                    <th>账户ID</th>
+                    <th>资产类型</th>
+                    <th>产品名称</th>
+                    <th>优化师</th>
+                    <th>授权用户</th>
+                    <th>授权状态</th>
+                    <th>投放状态</th>
+                    <th>创建时间</th>
+                    <th>更新时间</th>
                     <th class="col-action">操作</th>
                   </tr>
                 </thead>
@@ -119,17 +268,182 @@
 
           <div class="pagination" id="pagination"></div>
           </div>
+
+          <div class="data-panel" id="dataPanelAuth" hidden>
+            <div class="table-shell">
+              <div class="table-wrap">
+                <table class="data-table" id="authTable">
+                  <colgroup>
+                    <col data-col-width="100" />
+                    <col data-col-width="180" />
+                    <col data-col-width="220" />
+                    <col data-col-width="120" />
+                    <col data-col-width="100" />
+                    <col data-col-width="180" />
+                    <col data-col-width="100" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>自动授权</th>
+                      <th>用户名</th>
+                      <th>邮箱</th>
+                      <th>授权账户数</th>
+                      <th>操作人</th>
+                      <th>更新时间</th>
+                      <th class="col-action">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="authBody"></tbody>
+                </table>
+                <div class="empty-tip" id="authEmptyTip" hidden>暂无数据</div>
+              </div>
+            </div>
+            <div class="pagination" id="authPagination"></div>
+          </div>
         </div>
       </main>
   </div>
 
   <div class="page-msg page-msg--success" id="pageMsg" role="status" aria-live="polite"></div>
 
+  <div class="modal-mask modal-mask--confirm" id="authDeleteModal" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="authDeleteTitle">
+      <button class="confirm-modal__close" type="button" id="authDeleteClose" aria-label="关闭">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+      </button>
+      <div class="confirm-modal__main">
+        <span class="confirm-modal__icon confirm-modal__icon--danger" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20Zm4.955-27.771-4.95 4.95-4.95-4.95a1 1 0 0 0-1.414 0l-1.414 1.414a1 1 0 0 0 0 1.414l4.95 4.95-4.95 4.95a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l4.95-4.95 4.95 4.95a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-4.95-4.95 4.95-4.95a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0Z"/></svg>
+        </span>
+        <div class="confirm-modal__content">
+          <h2 class="confirm-modal__title" id="authDeleteTitle">删除确认</h2>
+          <p class="confirm-modal__body" id="authDeleteBody">此操作不可撤销，确认删除吗？</p>
+        </div>
+      </div>
+      <div class="confirm-modal__footer">
+        <button class="btn btn--default" type="button" id="authDeleteCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="authDeleteOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="authPickModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authPickTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="authPickTitle">修改授权用户</h2>
+        <button class="modal__close" type="button" id="authPickClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="auth-pick-tip" role="note">
+          <svg class="auth-pick-tip__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z"/>
+          </svg>
+          <span id="authPickTipText">系统会使用所选授权账号的 Token，对广告账户进行广告创建、编辑等 API 操作。</span>
+        </div>
+        <div class="auth-pick-table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="authPickTable">
+              <colgroup>
+                <col class="col-check" data-col-width="48" />
+                <col data-col-width="160" />
+                <col data-col-width="200" />
+                <col data-col-width="100" />
+                <col data-col-width="180" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="col-check"></th>
+                  <th>用户名</th>
+                  <th>邮箱</th>
+                  <th>操作人</th>
+                  <th>授权时间</th>
+                </tr>
+              </thead>
+              <tbody id="authPickBody"></tbody>
+            </table>
+            <div class="empty-tip" id="authPickEmpty" hidden>暂无数据</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="authPickCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="authPickSave">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask modal-mask--dropdown" id="oauthPickModal" aria-hidden="true">
+    <div class="modal modal--large" role="dialog" aria-modal="true" aria-labelledby="oauthPickTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="oauthPickTitle">选择授权账户</h2>
+        <button class="modal__close" type="button" id="oauthPickClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body oauth-pick-body">
+        <div class="oauth-pick-filter">
+          <div class="filter-item" id="oauthKwWrap">
+            <input class="input input-clearable" id="oauthKw" type="text" placeholder="账户名称/ID" autocomplete="off" />
+            <button class="select-clear" type="button" id="oauthKwClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+          </div>
+          <div class="filter-item" id="oauthStatusWrap">
+            <button class="select-trigger" type="button" id="oauthStatusTrigger">
+              <span class="select-trigger__text" id="oauthStatusLabel">授权状态：<span class="muted">请选择</span></span>
+              <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+            </button>
+            <button class="select-clear" type="button" id="oauthStatusClear" aria-label="清除">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+            </button>
+            <div class="single-panel" id="oauthStatusPanel">
+              <div class="single-option" data-value="已授权">已授权</div>
+              <div class="single-option" data-value="未授权">未授权</div>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn--primary" type="button" id="oauthSearchBtn">查询</button>
+          </div>
+        </div>
+        <div class="oauth-pick-count">已选：<span id="oauthSelectedCount">0</span></div>
+        <div class="oauth-pick-table-shell">
+          <div class="table-wrap">
+            <table class="data-table" id="oauthPickTable">
+              <colgroup>
+                <col class="col-check" data-col-width="48" />
+                <col data-col-width="200" />
+                <col data-col-width="280" />
+                <col data-col-width="120" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="col-check"><span class="cell-check"><input type="checkbox" id="oauthCheckAll" aria-label="全选" /></span></th>
+                  <th>账户ID</th>
+                  <th>账户名称</th>
+                  <th>授权状态</th>
+                </tr>
+              </thead>
+              <tbody id="oauthPickBody"></tbody>
+            </table>
+            <div class="empty-tip" id="oauthPickEmpty" hidden>暂无数据</div>
+          </div>
+        </div>
+        <div class="pagination" id="oauthPagination"></div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="oauthPickCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="oauthPickSave">提交</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 导入弹窗 -->
   <div class="modal-mask" id="importModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+    <div class="modal modal--large" role="dialog" aria-modal="true" aria-labelledby="importTitle">
       <div class="modal__header">
-        <h2 class="modal__title" id="importTitle">导入</h2>
+        <h2 class="modal__title" id="importTitle">导入更新</h2>
         <button class="modal__close" type="button" id="importClose" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
@@ -171,26 +485,28 @@
     </div>
   </div>
 
-  <!-- 编辑 TikTok 账户 -->
+  <!-- 添加账户 -->
   <div class="modal-mask modal-mask--dropdown" id="editModal" aria-hidden="true">
     <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="editTitle">
       <div class="modal__header">
-        <h2 class="modal__title" id="editTitle">编辑TikTok账户</h2>
+        <h2 class="modal__title" id="editTitle">添加账户</h2>
         <button class="modal__close" type="button" id="editClose" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
       <div class="modal__body">
-        <div class="form-item">
-          <div class="form-item__label">账户名称</div>
+        <div class="form-item" id="editNameItem">
+          <div class="form-item__label is-required">账户名称</div>
           <div class="form-item__control">
-            <input class="input" type="text" id="editAccountName" disabled />
+            <input class="input" type="text" id="editAccountName" placeholder="请输入账户名称" autocomplete="off" />
+            <div class="form-item__error" id="editNameError"></div>
           </div>
         </div>
-        <div class="form-item">
-          <div class="form-item__label">账户ID</div>
+        <div class="form-item" id="editIdItem">
+          <div class="form-item__label is-required">账户ID</div>
           <div class="form-item__control">
-            <input class="input" type="text" id="editAccountId" disabled />
+            <input class="input" type="text" id="editAccountId" placeholder="请输入账户ID" autocomplete="off" />
+            <div class="form-item__error" id="editIdError"></div>
           </div>
         </div>
         <div class="form-item">
@@ -241,9 +557,9 @@
           </div>
         </div>
         <div class="form-item">
-          <div class="form-item__label">状态</div>
+          <div class="form-item__label">投放状态</div>
           <div class="form-item__control">
-            <div class="seg" id="editStatusSeg" role="group" aria-label="状态">
+            <div class="seg" id="editStatusSeg" role="group" aria-label="投放状态">
               <button type="button" class="seg__item is-active" data-value="启用">启用</button>
               <button type="button" class="seg__item" data-value="禁用">禁用</button>
             </div>
@@ -344,16 +660,16 @@
   <div class="modal-mask modal-mask--dropdown" id="batchStatusModal" aria-hidden="true">
     <div class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="batchStatusTitle">
       <div class="modal__header">
-        <h2 class="modal__title" id="batchStatusTitle">修改状态</h2>
+        <h2 class="modal__title" id="batchStatusTitle">修改投放状态</h2>
         <button class="modal__close" type="button" id="batchStatusClose" aria-label="关闭">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
         </button>
       </div>
       <div class="modal__body">
         <div class="form-item">
-          <div class="form-item__label">状态</div>
+          <div class="form-item__label">投放状态</div>
           <div class="form-item__control">
-            <div class="seg" id="batchStatusSeg" role="group" aria-label="状态">
+            <div class="seg" id="batchStatusSeg" role="group" aria-label="投放状态">
               <button type="button" class="seg__item is-active" data-value="启用">启用</button>
               <button type="button" class="seg__item" data-value="禁用">禁用</button>
             </div>
@@ -367,12 +683,30 @@
     </div>
   </div>
 
+  <div class="modal-mask modal-mask--dropdown" id="accountFilterSettingModal" aria-hidden="true">
+    <div class="modal modal--form modal--filter-settings" role="dialog" aria-modal="true" aria-labelledby="accountFilterSettingTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="accountFilterSettingTitle">筛选设置</div>
+        <button class="modal__close" type="button" id="accountFilterSettingClose" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="filter-check-grid" id="accountFilterSettingGrid"></div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" id="accountFilterSettingCancel">取消</button>
+        <button class="btn btn--primary" type="button" id="accountFilterSettingSubmit">确定</button>
+      </div>
+    </div>
+  </div>
+
   <script src="product-common.js"></script>
   <script src="menu.js"></script>
-  <script src="product-sidebar.js"></script>
+  <script src="tool-sidebar.js"></script>
   <script>
     (function () {
-      ProductShell.mount('tiktok-accounts');
+      ToolShell.mount('tiktok-accounts');
 
       const UI = window.ProductUI;
       const escapeHtml = UI.escapeHtml;
@@ -380,6 +714,7 @@
       const copyText = UI.copyText;
       const closePanels = UI.closePanels;
       let optimizerMulti = null;
+      let productMulti = null;
       let batchMenuApi = null;
 
       const GAME_PRODUCTS = [
@@ -416,7 +751,11 @@
         return '用户' + String.fromCharCode(65 + i);
       });
       const ACCOUNT_PREFIXES = ['CWSM_TT_BV', 'TMJ_TT_US', 'WP_TT_EU', 'SM_TT_SEA', 'OM_TT_NA', 'PF_TT_JP'];
+      const TIKTOK_AUTH_URL = 'https://business-api.tiktok.com/portal/auth?app_id=7579142304267517969&state=your_custom_params&redirect_uri=https%3A%2F%2Fbigdata.zuiqiangyingyu.net';
+      const OAUTH_USER_NAME = 'portal_auth_user';
+      const OAUTH_USER_EMAIL = 'portal.auth@yongwangkeji.cn';
       const COPY_ICON = UI.COPY_ICON;
+      const AUTH_EDIT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
 
       let allRows = [];
       let filteredRows = [];
@@ -424,8 +763,30 @@
       let pageSize = 50;
       let selectedIds = new Set();
       let selectedOptimizers = [];
+      let selectedProducts = [];
+      let selectedAuthUsers = [];
       let filterAssetType = '';
+      let filterAuthStatus = '';
       let filterStatus = '';
+      const ACCOUNT_FILTER_DEFS = [
+        { key: 'account', name: '广告账户', def: true },
+        { key: 'assetType', name: '资产类型', def: true },
+        { key: 'product', name: '产品名称' },
+        { key: 'optimizer', name: '优化师', def: true },
+        { key: 'authUser', name: '授权用户' },
+        { key: 'authStatus', name: '授权状态' },
+        { key: 'status', name: '投放状态' }
+      ];
+      let visibleAccountFilters = ACCOUNT_FILTER_DEFS.filter(function (item) { return item.def; }).map(function (item) { return item.key; });
+      let accountFilterSnapshot = null;
+      let assetTypeApi = null;
+      let authStatusApi = null;
+      let statusApi = null;
+      let authUserMulti = null;
+      let accountKeywordApi = null;
+      const FS_ARROW = '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>';
+      const FS_CLEAR = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>';
+      const FS_SEARCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>';
       let importRows = [];
       let editingId = null;
       let editOptimizer = '';
@@ -436,7 +797,32 @@
       let batchAssetType = '小游戏';
       let batchOptimizer = '';
       let batchStatus = '启用';
-      const FORM_MODAL_IDS = ['editModal', 'batchProductModal', 'batchOptimizerModal', 'batchStatusModal'];
+      const FORM_MODAL_IDS = ['editModal', 'batchProductModal', 'batchOptimizerModal', 'batchStatusModal', 'authPickModal', 'oauthPickModal'];
+      let waitingAuthReturn = false;
+      let openedAuthAt = 0;
+      let oauthAllRows = [];
+      let oauthFilteredRows = [];
+      let oauthSelectedIds = new Set();
+      let oauthPage = 1;
+      let oauthPageSize = 20;
+      let oauthFilterStatus = '';
+      let pickingAccountId = null;
+      let pickedAuthUserId = '';
+      let authPickMode = 'single';
+      const AUTH_PICK_TIP_SINGLE = '系统会使用所选授权账号的 Token，对广告账户进行广告创建、编辑等 API 操作。';
+      const AUTH_PICK_TIP_BATCH = '如果广告账户与授权用户之间不存在关联关系，则不会对这些账户变更授权';
+      const AUTH_OPERATORS = Array.from({ length: 6 }, function (_, i) {
+        return '用户' + String.fromCharCode(65 + i);
+      });
+      let currentTab = 'account';
+      let authRows = [];
+      let authFilteredRows = [];
+      let authPage = 1;
+      let authPageSize = 20;
+      let authSelectedOperators = [];
+      let authFilterAuto = '';
+      let authOperatorMulti = null;
+      let pendingAuthDeleteId = null;
 
       function getProductOptions(assetType) {
         return assetType === '短剧' ? DRAMA_PRODUCTS : GAME_PRODUCTS;
@@ -455,38 +841,152 @@
 
       function buildData() {
         const rows = [];
+        const createdBase = new Date('2026-09-01T10:00:00');
         for (let i = 0; i < 58; i++) {
           const isDrama = i % 3 === 0;
           const assetType = isDrama ? '短剧' : '小游戏';
           const products = getProductOptions(assetType);
           const product = products[i % products.length];
           const prefix = ACCOUNT_PREFIXES[i % ACCOUNT_PREFIXES.length];
+          const created = new Date(createdBase.getTime() + i * 3600 * 1000);
+          const updated = new Date(created.getTime() + (i % 9) * 600 * 1000);
           rows.push({
             id: 'acc_' + (i + 1),
-            accountName: prefix + (isDrama ? '_drama_' : '_minigame_') + String(i + 1).padStart(3, '0'),
-            accountId: padId(i * 137 + 8295792517141, 19),
+            accountName: i === 0
+              ? 'BT_TT_BV_minigame_01'
+              : i === 1
+                ? 'NJSS_TT_TD_minigame_01'
+                : prefix + (isDrama ? '_drama_' : '_minigame_') + String(i + 1).padStart(3, '0'),
+            accountId: i === 0
+              ? '7595510834332368897'
+              : i === 1
+                ? '7602217642383049840'
+                : padId(i * 137 + 8295792517141, 19),
             assetType: assetType,
             productName: product,
             optimizer: OPTIMIZERS[i % OPTIMIZERS.length],
-            status: i % 11 === 0 ? '禁用' : '启用'
+            status: i % 11 === 0 ? '禁用' : '启用',
+            createdAt: formatDateTime(created),
+            updatedAt: formatDateTime(updated),
+            authUserId: '',
+            authUsers: [],
+            authStatus: '已失效'
           });
         }
         return rows;
       }
 
-      function applyFilter() {
-        const kw = document.getElementById('accountKeyword').value.trim().toLowerCase();
-        filteredRows = allRows.filter(function (row) {
+      function findAuthUser(id) {
+        return authRows.find(function (u) { return u.id === id; }) || null;
+      }
+
+      function displayAuthUserName(row) {
+        let user = findAuthUser(row.authUserId);
+        if (user) return user.userName;
+        const grants = row.authUsers || [];
+        for (let i = 0; i < grants.length; i++) {
+          user = findAuthUser(grants[i].id);
+          if (user) return user.userName;
+        }
+        return '-';
+      }
+
+      function assignAccountAuth() {
+        const grantUsers = ['Ilxiaofeng', 'BlueVision_wonder', 'Sino_wonder'].map(function (name) {
+          return authRows.find(function (u) { return u.userName === name; });
+        }).filter(Boolean);
+        if (!grantUsers.length) return;
+        allRows.forEach(function (row, i) {
+          const primary = grantUsers[i % grantUsers.length];
+          const created = new Date('2026-03-06T17:23:44');
+          const grants = [{
+            id: primary.id,
+            grantedAt: formatDateTime(new Date(created.getTime() + i * 86400000))
+          }];
+          if (i % 2 === 0) {
+            const second = grantUsers[(i + 1) % grantUsers.length];
+            if (second && second.id !== primary.id) {
+              grants.push({
+                id: second.id,
+                grantedAt: formatDateTime(new Date(created.getTime() + (i + 12) * 86400000))
+              });
+            }
+          }
+          row.authUsers = grants;
+          row.authUserId = primary.id;
+          row.authStatus = i % 5 === 1 ? '已失效' : '已授权';
+        });
+        syncAuthAccountCounts();
+      }
+
+      function syncAuthAccountCounts() {
+        authRows.forEach(function (user) {
+          user.accountCount = allRows.filter(function (row) {
+            return (row.authUsers || []).some(function (item) { return item.id === user.id; });
+          }).length;
+        });
+      }
+
+      function clearAddFormError() {
+        ['editNameItem', 'editIdItem'].forEach(function (id) {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove('is-error');
+        });
+        ['editNameError', 'editIdError'].forEach(function (id) {
+          const el = document.getElementById(id);
+          if (el) el.textContent = '';
+        });
+      }
+
+      function setAddFormError(itemId, errorId, msg) {
+        document.getElementById(itemId).classList.add('is-error');
+        document.getElementById(errorId).textContent = msg;
+      }
+
+      function authUserOptions() {
+        return authRows.map(function (user) { return user.userName; });
+      }
+
+      function filterProductOptions() {
+        if (filterAssetType === '短剧') return DRAMA_PRODUCTS.slice();
+        if (filterAssetType === '小游戏') return GAME_PRODUCTS.slice();
+        return GAME_PRODUCTS.concat(DRAMA_PRODUCTS);
+      }
+
+      function productFilterIcon() {
+        return '<span class="select-option-icon"><img src="' + PRODUCT_PLATFORM_ICON + '" alt="" /></span>';
+      }
+
+      function pruneSelectedProducts() {
+        const allowed = filterProductOptions();
+        selectedProducts = selectedProducts.filter(function (name) { return allowed.indexOf(name) >= 0; });
+        if (productMulti) productMulti.render();
+      }
+
+      function accountFilterVisible(key) {
+        return visibleAccountFilters.indexOf(key) >= 0;
+      }
+
+      function accountRowMatches(row) {
+        if (accountFilterVisible('account')) {
+          const kw = document.getElementById('accountKeyword').value.trim().toLowerCase();
           if (kw) {
             const nameHit = row.accountName.toLowerCase().indexOf(kw) !== -1;
             const idHit = row.accountId.toLowerCase().indexOf(kw) !== -1;
             if (!nameHit && !idHit) return false;
           }
-          if (selectedOptimizers.length && selectedOptimizers.indexOf(row.optimizer) === -1) return false;
-          if (filterAssetType && row.assetType !== filterAssetType) return false;
-          if (filterStatus && row.status !== filterStatus) return false;
-          return true;
-        });
+        }
+        if (accountFilterVisible('optimizer') && selectedOptimizers.length && selectedOptimizers.indexOf(row.optimizer) === -1) return false;
+        if (accountFilterVisible('assetType') && filterAssetType && row.assetType !== filterAssetType) return false;
+        if (accountFilterVisible('product') && selectedProducts.length && selectedProducts.indexOf(row.productName) < 0) return false;
+        if (accountFilterVisible('authUser') && selectedAuthUsers.length && selectedAuthUsers.indexOf(displayAuthUserName(row)) < 0) return false;
+        if (accountFilterVisible('authStatus') && filterAuthStatus && (row.authStatus || '已失效') !== filterAuthStatus) return false;
+        if (accountFilterVisible('status') && filterStatus && row.status !== filterStatus) return false;
+        return true;
+      }
+
+      function applyFilter() {
+        filteredRows = allRows.filter(accountRowMatches);
         page = 1;
         selectedIds.clear();
         closeBatchMenu();
@@ -521,19 +1021,31 @@
         empty.hidden = true;
         body.innerHTML = pageRows.map(function (row) {
           const checked = selectedIds.has(row.id);
+          const authName = displayAuthUserName(row);
+          const authStatus = row.authStatus === '已授权' ? '已授权' : '已失效';
+          const authDot = authStatus === '已授权' ? 'status-dot--done' : 'status-dot--error';
           return '<tr>' +
             '<td class="col-check"><span class="cell-check"><input type="checkbox" data-check="' + escapeHtml(row.id) + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
-            '<td class="col-name" title="' + escapeHtml(row.accountName) + '">' + escapeHtml(row.accountName) + '</td>' +
-            '<td class="col-id">' +
+            '<td title="' + escapeHtml(row.accountName) + '">' + escapeHtml(row.accountName) + '</td>' +
+            '<td>' +
               '<span class="cell-id">' +
                 '<button class="copy-btn" type="button" data-copy="' + escapeHtml(row.accountId) + '" title="复制账户ID">' + COPY_ICON + '</button>' +
                 '<span class="cell-id__text" title="' + escapeHtml(row.accountId) + '">' + escapeHtml(row.accountId) + '</span>' +
               '</span>' +
             '</td>' +
-            '<td class="col-type">' + escapeHtml(row.assetType || '-') + '</td>' +
-            '<td class="col-product" title="' + escapeHtml(row.productName) + '">' + escapeHtml(row.productName) + '</td>' +
-            '<td class="col-optimizer">' + escapeHtml(row.optimizer) + '</td>' +
-            '<td class="col-status">' + UI.statusTag(row.status) + '</td>' +
+            '<td>' + escapeHtml(row.assetType || '-') + '</td>' +
+            '<td title="' + escapeHtml(row.productName) + '">' + escapeHtml(row.productName || '-') + '</td>' +
+            '<td>' + escapeHtml(row.optimizer || '-') + '</td>' +
+            '<td>' +
+              '<span class="auth-user-cell">' +
+                '<span class="auth-user-cell__name" title="' + escapeHtml(authName) + '">' + escapeHtml(authName) + '</span>' +
+                '<button class="auth-user-cell__edit" type="button" data-auth-edit="' + escapeHtml(row.id) + '" aria-label="编辑" title="编辑">' + AUTH_EDIT_ICON + '</button>' +
+              '</span>' +
+            '</td>' +
+            '<td><span class="status-dot ' + authDot + '">' + escapeHtml(authStatus) + '</span></td>' +
+            '<td>' + UI.statusTag(row.status) + '</td>' +
+            '<td>' + escapeHtml(row.createdAt || '-') + '</td>' +
+            '<td>' + escapeHtml(row.updatedAt || '-') + '</td>' +
             '<td class="col-action"><button class="link" type="button" data-edit="' + escapeHtml(row.id) + '">编辑</button></td>' +
             '</tr>';
         }).join('');
@@ -1096,23 +1608,40 @@
       }
 
       function refreshFilteredKeepSelection() {
-        const kw = document.getElementById('accountKeyword').value.trim().toLowerCase();
-        filteredRows = allRows.filter(function (row) {
-          if (kw) {
-            const nameHit = row.accountName.toLowerCase().indexOf(kw) !== -1;
-            const idHit = row.accountId.toLowerCase().indexOf(kw) !== -1;
-            if (!nameHit && !idHit) return false;
-          }
-          if (selectedOptimizers.length && selectedOptimizers.indexOf(row.optimizer) === -1) return false;
-          if (filterAssetType && row.assetType !== filterAssetType) return false;
-          if (filterStatus && row.status !== filterStatus) return false;
-          return true;
-        });
+        filteredRows = allRows.filter(accountRowMatches);
         const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize) || 1);
         if (page > totalPages) page = totalPages;
         renderTable();
         renderPagination();
         syncBatchBtn();
+      }
+
+      function setAccountFormLock(locked) {
+        document.getElementById('editAccountName').disabled = !!locked;
+        document.getElementById('editAccountId').disabled = !!locked;
+      }
+
+      function openAddModal() {
+        editingId = null;
+        editOptimizer = '';
+        editAssetType = '小游戏';
+        editProduct = '';
+        editStatus = '启用';
+        clearAddFormError();
+        document.getElementById('editTitle').textContent = '添加账户';
+        setAccountFormLock(false);
+        document.getElementById('editAccountName').value = '';
+        document.getElementById('editAccountId').value = '';
+        setSegValue('editAssetTypeSeg', editAssetType);
+        setSelectLabel('editOptimizerLabel', '', 'editOptimizerWrap');
+        setSelectLabel('editProductLabel', '', 'editProductWrap', PRODUCT_PLATFORM_ICON);
+        setSegValue('editStatusSeg', editStatus);
+        document.getElementById('editOptimizerSearch').value = '';
+        document.getElementById('editProductSearch').value = '';
+        renderSearchList('editOptimizerList', OPTIMIZERS, '', '');
+        renderSearchList('editProductList', getProductOptions(editAssetType), '', '', PRODUCT_PLATFORM_ICON);
+        closePanels();
+        openFormModal('editModal');
       }
 
       function openEditModal(rowId) {
@@ -1123,6 +1652,9 @@
         editAssetType = row.assetType === '短剧' ? '短剧' : '小游戏';
         editProduct = syncProductForAssetType(editAssetType, row.productName || '');
         editStatus = row.status || '启用';
+        clearAddFormError();
+        document.getElementById('editTitle').textContent = '编辑账户';
+        setAccountFormLock(true);
         document.getElementById('editAccountName').value = row.accountName;
         document.getElementById('editAccountId').value = row.accountId;
         setSegValue('editAssetTypeSeg', editAssetType);
@@ -1137,20 +1669,383 @@
         openFormModal('editModal');
       }
 
-      function saveEditModal() {
-        if (!editingId) return;
-        editAssetType = getSegValue('editAssetTypeSeg') || editAssetType;
-        editStatus = getSegValue('editStatusSeg') || editStatus;
-        const row = allRows.find(function (r) { return r.id === editingId; });
-        if (!row) return;
-        row.optimizer = editOptimizer || '';
-        row.assetType = editAssetType || '小游戏';
-        row.productName = editProduct || '';
-        row.status = editStatus;
+      function saveAccountModal() {
+        clearAddFormError();
+        editAssetType = getSegValue('editAssetTypeSeg') || '小游戏';
+        editStatus = getSegValue('editStatusSeg') || '启用';
+        if (editingId) {
+          const row = allRows.find(function (r) { return r.id === editingId; });
+          if (!row) return;
+          row.optimizer = editOptimizer || '';
+          row.assetType = editAssetType;
+          row.productName = editProduct || '';
+          row.status = editStatus;
+          row.updatedAt = nowDateTime();
+          closeFormModal('editModal');
+          editingId = null;
+          refreshFilteredKeepSelection();
+          showPageMsg('提交成功');
+          return;
+        }
+        const name = document.getElementById('editAccountName').value.trim();
+        const accountId = document.getElementById('editAccountId').value.trim();
+        let hasError = false;
+        if (!name) {
+          setAddFormError('editNameItem', 'editNameError', '请输入账户名称');
+          hasError = true;
+        }
+        if (!accountId) {
+          setAddFormError('editIdItem', 'editIdError', '请输入账户ID');
+          hasError = true;
+        } else if (allRows.some(function (r) { return r.accountId === accountId; })) {
+          setAddFormError('editIdItem', 'editIdError', '账户ID已存在');
+          hasError = true;
+        }
+        if (hasError) return;
+        const now = nowDateTime();
+        allRows.unshift({
+          id: 'acc_' + Date.now(),
+          accountName: name,
+          accountId: accountId,
+          assetType: editAssetType,
+          productName: editProduct || '',
+          optimizer: editOptimizer || '',
+          status: editStatus,
+          createdAt: now,
+          updatedAt: now,
+          authUserId: '',
+          authUsers: [],
+          authStatus: '已失效'
+        });
         closeFormModal('editModal');
-        editingId = null;
+        applyFilter();
+        showPageMsg('添加成功');
+      }
+
+      function setAuthPickTip(text) {
+        document.getElementById('authPickTipText').textContent = text;
+      }
+
+      function renderAuthPickGrants(grants, preselectId) {
+        const body = document.getElementById('authPickBody');
+        const empty = document.getElementById('authPickEmpty');
+        const sorted = grants.slice().sort(function (a, b) {
+          return String(b.grantedAt || '').localeCompare(String(a.grantedAt || ''));
+        });
+        pickedAuthUserId = preselectId || '';
+        if (!sorted.length) {
+          body.innerHTML = '';
+          empty.hidden = false;
+          return;
+        }
+        empty.hidden = true;
+        if (!pickedAuthUserId) pickedAuthUserId = sorted[0].id;
+        body.innerHTML = sorted.map(function (grant) {
+          const user = findAuthUser(grant.id);
+          if (!user) return '';
+          const checked = grant.id === pickedAuthUserId;
+          return '<tr data-pick-row="' + escapeHtml(grant.id) + '">' +
+            '<td class="col-check"><label class="cell-radio"><input type="radio" name="authUserPick" value="' +
+              escapeHtml(grant.id) + '"' + (checked ? ' checked' : '') + ' aria-label="选择授权用户" /></label></td>' +
+            '<td title="' + escapeHtml(user.userName) + '">' + escapeHtml(user.userName) + '</td>' +
+            '<td title="' + escapeHtml(user.email) + '">' + escapeHtml(maskEmail(user.email)) + '</td>' +
+            '<td>' + escapeHtml(user.operator) + '</td>' +
+            '<td>' + escapeHtml(grant.grantedAt || '-') + '</td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      function collectSelectedAuthGrants() {
+        const map = {};
+        allRows.forEach(function (row) {
+          if (!selectedIds.has(row.id)) return;
+          (row.authUsers || []).forEach(function (grant) {
+            const prev = map[grant.id];
+            if (!prev || String(grant.grantedAt || '') > String(prev.grantedAt || '')) {
+              map[grant.id] = { id: grant.id, grantedAt: grant.grantedAt };
+            }
+          });
+        });
+        return Object.keys(map).map(function (id) { return map[id]; });
+      }
+
+      function openAuthPickModal(rowId) {
+        const row = allRows.find(function (r) { return r.id === rowId; });
+        if (!row) return;
+        authPickMode = 'single';
+        pickingAccountId = row.id;
+        setAuthPickTip(AUTH_PICK_TIP_SINGLE);
+        renderAuthPickGrants(row.authUsers || [], row.authUserId || '');
+        closePanels();
+        UI.openModal('authPickModal');
+      }
+
+      function openBatchAuthModal() {
+        authPickMode = 'batch';
+        pickingAccountId = null;
+        setAuthPickTip(AUTH_PICK_TIP_BATCH);
+        renderAuthPickGrants(collectSelectedAuthGrants(), '');
+        closePanels();
+        closeBatchMenu();
+        UI.openModal('authPickModal');
+      }
+
+      function closeAuthPickModal() {
+        pickingAccountId = null;
+        pickedAuthUserId = '';
+        authPickMode = 'single';
+        setAuthPickTip(AUTH_PICK_TIP_SINGLE);
+        UI.closeModal('authPickModal');
+      }
+
+      function saveAuthPickModal() {
+        if (authPickMode === 'batch') {
+          saveBatchAuthPick();
+          return;
+        }
+        if (!pickingAccountId) return;
+        const row = allRows.find(function (r) { return r.id === pickingAccountId; });
+        if (!row) {
+          closeAuthPickModal();
+          return;
+        }
+        if ((row.authUsers || []).length && !pickedAuthUserId) {
+          showPageMsg('请选择授权用户', 'error');
+          return;
+        }
+        row.authUserId = pickedAuthUserId || '';
+        row.authStatus = pickedAuthUserId ? '已授权' : '已失效';
+        row.updatedAt = nowDateTime();
+        closeAuthPickModal();
         refreshFilteredKeepSelection();
         showPageMsg('提交成功');
+      }
+
+      function saveBatchAuthPick() {
+        if (!pickedAuthUserId) {
+          showPageMsg('请选择授权用户', 'error');
+          return;
+        }
+        let changed = 0;
+        allRows.forEach(function (row) {
+          if (!selectedIds.has(row.id)) return;
+          const linked = (row.authUsers || []).some(function (item) { return item.id === pickedAuthUserId; });
+          if (!linked) return;
+          row.authUserId = pickedAuthUserId;
+          row.authStatus = '已授权';
+          row.updatedAt = nowDateTime();
+          changed += 1;
+        });
+        selectedIds.clear();
+        closeAuthPickModal();
+        refreshFilteredKeepSelection();
+        if (changed) showPageMsg('批量修改授权用户成功');
+        else showPageMsg('所选账户均无该授权关联');
+      }
+
+      function existingAccountIdSet() {
+        const set = new Set();
+        allRows.forEach(function (row) { set.add(row.accountId); });
+        return set;
+      }
+
+      function buildOAuthCallbackRows() {
+        const exists = existingAccountIdSet();
+        const featured = [
+          ['7595510834332368897', 'BT_TT_BV_minigame_01'],
+          ['7602217642383049840', 'NJSS_TT_TD_minigame_01'],
+          ['7605595695210479632', 'AIO_TT_TD_minigame_02'],
+          ['7602217649384456193', 'IQ Challenge_TT_TD_minigame_01'],
+          ['7602217721052413969', 'Save The Pets_TT_TD_minigame_01'],
+          ['7602217573983436817', 'AnnoyTok_TT_TD_minigame_01'],
+          ['7602217666354544657', 'AMEP_TT_TD_minigame_01']
+        ];
+        const rows = featured.map(function (item) {
+          return {
+            accountId: item[0],
+            accountName: item[1],
+            authorized: exists.has(item[0])
+          };
+        });
+        const used = new Set(rows.map(function (r) { return r.accountId; }));
+        for (let i = 0; rows.length < 100; i++) {
+          const prefix = ACCOUNT_PREFIXES[i % ACCOUNT_PREFIXES.length];
+          const id = String(7610000000000000000n + BigInt(i * 137 + 29));
+          if (used.has(id)) continue;
+          used.add(id);
+          rows.push({
+            accountId: id,
+            accountName: prefix + '_oauth_' + String(i + 1).padStart(2, '0'),
+            authorized: exists.has(id)
+          });
+        }
+        return rows;
+      }
+
+      function applyOAuthFilter() {
+        const kw = document.getElementById('oauthKw').value.trim().toLowerCase();
+        oauthFilteredRows = oauthAllRows.filter(function (row) {
+          if (kw) {
+            const nameHit = row.accountName.toLowerCase().indexOf(kw) !== -1;
+            const idHit = row.accountId.toLowerCase().indexOf(kw) !== -1;
+            if (!nameHit && !idHit) return false;
+          }
+          if (oauthFilterStatus === '已授权' && !row.authorized) return false;
+          if (oauthFilterStatus === '未授权' && row.authorized) return false;
+          return true;
+        });
+        oauthPage = 1;
+        renderOAuthPickTable();
+        renderOAuthPagination();
+      }
+
+      function syncOAuthSelectedCount() {
+        document.getElementById('oauthSelectedCount').textContent = String(oauthSelectedIds.size);
+      }
+
+      function renderOAuthPickTable() {
+        const body = document.getElementById('oauthPickBody');
+        const empty = document.getElementById('oauthPickEmpty');
+        const start = (oauthPage - 1) * oauthPageSize;
+        const pageRows = oauthFilteredRows.slice(start, start + oauthPageSize);
+        if (!oauthFilteredRows.length) {
+          body.innerHTML = '';
+          empty.hidden = false;
+          document.getElementById('oauthCheckAll').checked = false;
+          document.getElementById('oauthCheckAll').indeterminate = false;
+          syncOAuthSelectedCount();
+          return;
+        }
+        empty.hidden = true;
+        body.innerHTML = pageRows.map(function (row) {
+          const checked = oauthSelectedIds.has(row.accountId);
+          const status = row.authorized ? '已授权' : '未授权';
+          const dot = row.authorized ? 'status-dot--done' : 'status-dot--error';
+          return '<tr>' +
+            '<td class="col-check"><span class="cell-check"><input type="checkbox" data-oauth-check="' + escapeHtml(row.accountId) + '"' + (checked ? ' checked' : '') + ' aria-label="选择" /></span></td>' +
+            '<td title="' + escapeHtml(row.accountId) + '">' + escapeHtml(row.accountId) + '</td>' +
+            '<td title="' + escapeHtml(row.accountName) + '">' + escapeHtml(row.accountName) + '</td>' +
+            '<td><span class="status-dot ' + dot + '">' + escapeHtml(status) + '</span></td>' +
+            '</tr>';
+        }).join('');
+        const pageIds = pageRows.map(function (r) { return r.accountId; });
+        const checkedCount = pageIds.filter(function (id) { return oauthSelectedIds.has(id); }).length;
+        const checkAll = document.getElementById('oauthCheckAll');
+        checkAll.checked = pageIds.length > 0 && checkedCount === pageIds.length;
+        checkAll.indeterminate = checkedCount > 0 && checkedCount < pageIds.length;
+        syncOAuthSelectedCount();
+      }
+
+      function renderOAuthPagination() {
+        UI.renderPagination({
+          containerId: 'oauthPagination',
+          total: oauthFilteredRows.length,
+          page: oauthPage,
+          pageSize: oauthPageSize
+        });
+      }
+
+      function openOAuthPickModal() {
+        oauthAllRows = buildOAuthCallbackRows();
+        oauthSelectedIds = new Set();
+        oauthFilterStatus = '';
+        oauthPage = 1;
+        oauthPageSize = 20;
+        document.getElementById('oauthKw').value = '';
+        document.getElementById('oauthKwWrap').classList.remove('has-value');
+        document.getElementById('oauthStatusLabel').innerHTML = '授权状态：<span class="muted">请选择</span>';
+        document.getElementById('oauthStatusWrap').classList.remove('has-value');
+        document.querySelectorAll('#oauthStatusPanel .single-option').forEach(function (opt) {
+          opt.classList.remove('is-active');
+        });
+        applyOAuthFilter();
+        closePanels();
+        UI.openModal('oauthPickModal');
+      }
+
+      function closeOAuthPickModal() {
+        UI.closeModal('oauthPickModal');
+      }
+
+      function tryShowOAuthPick() {
+        if (!waitingAuthReturn) return;
+        if (document.hidden) return;
+        if (Date.now() - openedAuthAt < 600) return;
+        waitingAuthReturn = false;
+        if (document.getElementById('oauthPickModal').classList.contains('is-open')) return;
+        if (currentTab !== 'account') switchTab('account');
+        openOAuthPickModal();
+      }
+
+      function ensureOAuthUser() {
+        let user = authRows.find(function (u) { return u.userName === OAUTH_USER_NAME; });
+        if (user) return user;
+        user = {
+          id: 'auth_oauth',
+          userName: OAUTH_USER_NAME,
+          email: OAUTH_USER_EMAIL,
+          accountCount: 0,
+          operator: '用户A',
+          autoAuth: false,
+          updatedAt: nowDateTime()
+        };
+        authRows.unshift(user);
+        return user;
+      }
+
+      function linkAccountToOAuthUser(row, user) {
+        const now = nowDateTime();
+        if (!row.authUsers) row.authUsers = [];
+        if (!row.authUsers.some(function (item) { return item.id === user.id; })) {
+          row.authUsers.push({ id: user.id, grantedAt: now });
+        }
+        row.authUserId = user.id;
+        row.authStatus = '已授权';
+        row.updatedAt = now;
+      }
+
+      function saveOAuthPickModal() {
+        if (!oauthSelectedIds.size) {
+          showPageMsg('请选择账户', 'error');
+          return;
+        }
+        const user = ensureOAuthUser();
+        let added = 0;
+        oauthSelectedIds.forEach(function (accountId) {
+          const pick = oauthAllRows.find(function (r) { return r.accountId === accountId; });
+          if (!pick) return;
+          let row = allRows.find(function (r) { return r.accountId === pick.accountId; });
+          if (!row) {
+            row = {
+              id: 'acc_' + Date.now() + '_' + added,
+              accountName: pick.accountName,
+              accountId: pick.accountId,
+              assetType: '小游戏',
+              productName: '',
+              optimizer: '用户A',
+              status: '启用',
+              createdAt: nowDateTime(),
+              updatedAt: nowDateTime(),
+              authUserId: '',
+              authUsers: [],
+              authStatus: '已失效'
+            };
+            allRows.unshift(row);
+            added += 1;
+          }
+          linkAccountToOAuthUser(row, user);
+        });
+        user.updatedAt = nowDateTime();
+        syncAuthAccountCounts();
+        closeOAuthPickModal();
+        applyFilter();
+        authFilteredRows = authRows.slice();
+        if (currentTab === 'auth') {
+          renderAuthTable();
+          renderAuthPagination();
+        }
+        if (added) showPageMsg('已添加 ' + added + ' 个广告账户');
+        else showPageMsg('已关联授权用户');
       }
 
       function openBatchProductModal() {
@@ -1186,7 +2081,10 @@
           return false;
         }
         allRows.forEach(function (row) {
-          if (selectedIds.has(row.id)) mutator(row);
+          if (selectedIds.has(row.id)) {
+            mutator(row);
+            row.updatedAt = nowDateTime();
+          }
         });
         selectedIds.clear();
         closeBatchMenu();
@@ -1255,7 +2153,303 @@
         }
       }
 
+      function syncAccountFilterVisibility() {
+        document.querySelectorAll('#filterBarAccount [data-filter]').forEach(function (el) {
+          el.hidden = !accountFilterVisible(el.getAttribute('data-filter'));
+        });
+      }
+
+      function syncAccountBarFilters() {
+        if (accountKeywordApi) accountKeywordApi.sync();
+        if (assetTypeApi) assetTypeApi.syncLabel(filterAssetType);
+        if (productMulti) productMulti.render();
+        if (optimizerMulti) optimizerMulti.render();
+        if (authUserMulti) authUserMulti.render();
+        if (authStatusApi) authStatusApi.syncLabel(filterAuthStatus);
+        if (statusApi) statusApi.syncLabel(filterStatus);
+      }
+
+      function clearHiddenAccountFilters() {
+        if (!accountFilterVisible('account')) document.getElementById('accountKeyword').value = '';
+        if (!accountFilterVisible('assetType')) filterAssetType = '';
+        if (!accountFilterVisible('product')) selectedProducts = [];
+        if (!accountFilterVisible('optimizer')) selectedOptimizers = [];
+        if (!accountFilterVisible('authUser')) selectedAuthUsers = [];
+        if (!accountFilterVisible('authStatus')) filterAuthStatus = '';
+        if (!accountFilterVisible('status')) filterStatus = '';
+        syncAccountBarFilters();
+      }
+
+      function snapshotAccountFilters() {
+        return {
+          keyword: document.getElementById('accountKeyword').value,
+          assetType: filterAssetType,
+          products: selectedProducts.slice(),
+          optimizers: selectedOptimizers.slice(),
+          authUsers: selectedAuthUsers.slice(),
+          authStatus: filterAuthStatus,
+          status: filterStatus
+        };
+      }
+
+      function restoreAccountFilters(snap) {
+        document.getElementById('accountKeyword').value = snap.keyword;
+        filterAssetType = snap.assetType;
+        selectedProducts = snap.products.slice();
+        selectedOptimizers = snap.optimizers.slice();
+        selectedAuthUsers = snap.authUsers.slice();
+        filterAuthStatus = snap.authStatus;
+        filterStatus = snap.status;
+        syncAccountBarFilters();
+      }
+
+      function fsMultiPanelHtml(key) {
+        return '<div class="multi-panel" id="fsPanel_' + key + '">' +
+          '<div class="multi-panel__left">' +
+            '<div class="multi-panel__search">' + FS_SEARCH + '<input type="text" id="fsSearch_' + key + '" placeholder="搜索" autocomplete="off" /></div>' +
+            '<div class="multi-panel__toolbar"><button class="multi-panel__link" type="button" data-fs-all="' + key + '">全选</button></div>' +
+            '<div class="multi-panel__list" id="fsList_' + key + '"></div>' +
+          '</div>' +
+          '<div class="multi-panel__right">' +
+            '<div class="multi-panel__toolbar multi-panel__toolbar--right"><span id="fsCount_' + key + '">已选择 0 项</span><button class="multi-panel__link" type="button" data-fs-clear="' + key + '">清空</button></div>' +
+            '<div class="multi-panel__list" id="fsSelected_' + key + '"></div>' +
+          '</div></div>';
+      }
+
+      function accountFilterControlHtml(item) {
+        const key = item.key;
+        if (key === 'account') {
+          const value = document.getElementById('accountKeyword').value;
+          return '<div class="filter-setting-control' + (value ? ' has-value' : '') + '" id="fsWrap_account">' +
+            '<label class="select-trigger select-trigger--input" for="fs_account">' +
+              '<span class="select-trigger__prefix">广告账户：</span>' +
+              '<input class="select-trigger__field" type="text" id="fs_account" placeholder="请输入" value="' + escapeHtml(value) + '" autocomplete="off" />' +
+            '</label>' +
+            '<button class="select-clear" type="button" id="fsClear_account" aria-label="清除">' + FS_CLEAR + '</button>' +
+          '</div>';
+        }
+        const singles = key === 'assetType'
+          ? ['小游戏', '短剧']
+          : (key === 'authStatus' ? ['已授权', '已失效'] : (key === 'status' ? ['启用', '禁用'] : null));
+        if (singles) {
+          return '<div class="filter-setting-control" id="fsWrap_' + key + '">' +
+            '<button class="select-trigger" type="button" id="fsTrigger_' + key + '">' +
+              '<span class="select-trigger__text" id="fsLabel_' + key + '">' + escapeHtml(item.name) + '：<span class="muted">请选择</span></span>' +
+              FS_ARROW +
+            '</button>' +
+            '<button class="select-clear" type="button" id="fsClear_' + key + '" aria-label="清除">' + FS_CLEAR + '</button>' +
+            '<div class="single-panel" id="fsPanel_' + key + '">' +
+              singles.map(function (option) {
+                return '<div class="single-option" data-value="' + escapeHtml(option) + '">' + escapeHtml(option) + '</div>';
+              }).join('') +
+            '</div></div>';
+        }
+        return '<div class="filter-setting-control" id="fsWrap_' + key + '">' +
+          '<button class="select-trigger" type="button" id="fsTrigger_' + key + '">' +
+            '<span class="select-trigger__text" id="fsLabel_' + key + '">' + escapeHtml(item.name) + '：<span class="muted">请选择</span></span>' +
+            FS_ARROW +
+          '</button>' +
+          '<button class="select-clear" type="button" data-fs-clear-icon="' + key + '" aria-label="清除">' + FS_CLEAR + '</button>' +
+          fsMultiPanelHtml(key) +
+        '</div>';
+      }
+
+      function bindAccountFilterSettingControls() {
+        let fsProductApi = null;
+        const input = document.getElementById('fs_account');
+        const wrap = document.getElementById('fsWrap_account');
+        const bar = document.getElementById('accountKeyword');
+        function syncKeyword() {
+          wrap.classList.toggle('has-value', !!input.value);
+        }
+        input.addEventListener('input', function () {
+          bar.value = input.value;
+          if (accountKeywordApi) accountKeywordApi.sync();
+          syncKeyword();
+        });
+        input.addEventListener('click', function (e) { e.stopPropagation(); });
+        document.getElementById('fsClear_account').addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          input.value = '';
+          bar.value = '';
+          if (accountKeywordApi) accountKeywordApi.sync();
+          syncKeyword();
+          input.focus();
+        });
+        syncKeyword();
+
+        UI.bindSingleSelect({
+          wrapId: 'fsWrap_assetType',
+          triggerId: 'fsTrigger_assetType',
+          panelId: 'fsPanel_assetType',
+          labelId: 'fsLabel_assetType',
+          clearId: 'fsClear_assetType',
+          prefix: '资产类型：',
+          getValue: function () { return filterAssetType; },
+          onChange: function (value) {
+            filterAssetType = value || '';
+            pruneSelectedProducts();
+            if (assetTypeApi) assetTypeApi.syncLabel(filterAssetType);
+            if (fsProductApi) fsProductApi.render();
+          }
+        });
+        UI.bindSingleSelect({
+          wrapId: 'fsWrap_authStatus',
+          triggerId: 'fsTrigger_authStatus',
+          panelId: 'fsPanel_authStatus',
+          labelId: 'fsLabel_authStatus',
+          clearId: 'fsClear_authStatus',
+          prefix: '授权状态：',
+          getValue: function () { return filterAuthStatus; },
+          onChange: function (value) {
+            filterAuthStatus = value || '';
+            if (authStatusApi) authStatusApi.syncLabel(filterAuthStatus);
+          }
+        });
+        UI.bindSingleSelect({
+          wrapId: 'fsWrap_status',
+          triggerId: 'fsTrigger_status',
+          panelId: 'fsPanel_status',
+          labelId: 'fsLabel_status',
+          clearId: 'fsClear_status',
+          prefix: '投放状态：',
+          getValue: function () { return filterStatus; },
+          onChange: function (value) {
+            filterStatus = value || '';
+            if (statusApi) statusApi.syncLabel(filterStatus);
+          }
+        });
+
+        function bindFsMulti(key, prefix, getOptions, getSelected, setSelected, barApi, extra) {
+          const api = UI.bindMultiSelect(Object.assign({
+            wrapId: 'fsWrap_' + key,
+            triggerId: 'fsTrigger_' + key,
+            panelId: 'fsPanel_' + key,
+            labelId: 'fsLabel_' + key,
+            listId: 'fsList_' + key,
+            selectedId: 'fsSelected_' + key,
+            searchId: 'fsSearch_' + key,
+            countId: 'fsCount_' + key,
+            selectAllId: null,
+            clearId: null,
+            prefix: prefix,
+            getOptions: getOptions,
+            getSelected: getSelected,
+            setSelected: function (arr) {
+              setSelected(arr);
+              if (barApi) barApi.render();
+            }
+          }, extra || {}));
+          const clearIcon = document.querySelector('#accountFilterSettingGrid [data-fs-clear-icon="' + key + '"]');
+          if (clearIcon) {
+            clearIcon.addEventListener('click', function (e) {
+              e.stopPropagation();
+              setSelected([]);
+              if (api) api.render();
+              if (barApi) barApi.render();
+            });
+          }
+          const allBtn = document.querySelector('#accountFilterSettingGrid [data-fs-all="' + key + '"]');
+          if (allBtn) {
+            allBtn.addEventListener('click', function () {
+              setSelected(getOptions().slice());
+              if (api) api.render();
+              if (barApi) barApi.render();
+            });
+          }
+          const clearBtn = document.querySelector('#accountFilterSettingGrid [data-fs-clear="' + key + '"]');
+          if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+              setSelected([]);
+              if (api) api.render();
+              if (barApi) barApi.render();
+            });
+          }
+          return api;
+        }
+
+        fsProductApi = bindFsMulti('product', '产品名称：', filterProductOptions, function () { return selectedProducts; }, function (arr) { selectedProducts = arr; }, productMulti, { getIconHtml: productFilterIcon });
+        bindFsMulti('optimizer', '优化师：', function () { return OPTIMIZERS; }, function () { return selectedOptimizers; }, function (arr) { selectedOptimizers = arr; }, optimizerMulti);
+        bindFsMulti('authUser', '授权用户：', authUserOptions, function () { return selectedAuthUsers; }, function (arr) { selectedAuthUsers = arr; }, authUserMulti);
+      }
+
+      function openAccountFilterSettings() {
+        if (!accountFilterSnapshot) accountFilterSnapshot = snapshotAccountFilters();
+        const grid = document.getElementById('accountFilterSettingGrid');
+        let visibleDraft;
+        if (grid.querySelector('.filter-setting-item > input[type="checkbox"]')) {
+          visibleDraft = [];
+          grid.querySelectorAll('.filter-setting-item > input[type="checkbox"]').forEach(function (input) {
+            if (input.checked) visibleDraft.push(input.value);
+          });
+        } else {
+          visibleDraft = visibleAccountFilters.slice();
+        }
+        const rows = [];
+        for (let i = 0; i < ACCOUNT_FILTER_DEFS.length; i += 3) {
+          rows.push('<div class="filter-setting-row">' + ACCOUNT_FILTER_DEFS.slice(i, i + 3).map(function (item) {
+            const checked = visibleDraft.indexOf(item.key) >= 0;
+            return '<div class="filter-setting-item" data-fs-key="' + item.key + '">' +
+              '<input type="checkbox" value="' + item.key + '"' + (checked ? ' checked' : '') + ' />' +
+              accountFilterControlHtml(item) +
+            '</div>';
+          }).join('') + '</div>');
+        }
+        grid.innerHTML = rows.join('');
+        bindAccountFilterSettingControls();
+        UI.closePanels();
+        UI.openModal('accountFilterSettingModal');
+      }
+
+      function cancelAccountFilterSettings() {
+        const snap = accountFilterSnapshot;
+        accountFilterSnapshot = null;
+        if (snap) restoreAccountFilters(snap);
+        UI.closePanels();
+        UI.closeModal('accountFilterSettingModal');
+      }
+
+      function submitAccountFilterSettings() {
+        const selected = [];
+        document.getElementById('accountFilterSettingGrid').querySelectorAll('.filter-setting-item > input[type="checkbox"]').forEach(function (input) {
+          if (input.checked) selected.push(input.value);
+        });
+        visibleAccountFilters = ACCOUNT_FILTER_DEFS.map(function (item) { return item.key; }).filter(function (key) {
+          return selected.indexOf(key) >= 0;
+        });
+        accountFilterSnapshot = null;
+        syncAccountFilterVisibility();
+        clearHiddenAccountFilters();
+        UI.closePanels();
+        UI.closeModal('accountFilterSettingModal');
+        applyFilter();
+      }
+
       function bindEvents() {
+
+        productMulti = UI.bindMultiSelect({
+          wrapId: 'productWrap',
+          triggerId: 'productTrigger',
+          panelId: 'productPanel',
+          listId: 'productList',
+          selectedId: 'productSelected',
+          countId: 'productCount',
+          labelId: 'productLabel',
+          searchId: 'productSearch',
+          selectAllId: 'productSelectAll',
+          clearId: 'productClear',
+          prefix: '产品名称：',
+          getOptions: filterProductOptions,
+          getSelected: function () { return selectedProducts; },
+          setSelected: function (v) { selectedProducts = v; },
+          getIconHtml: productFilterIcon
+        });
+        document.querySelector('#productWrap [data-product-clear]').addEventListener('click', function (e) {
+          e.stopPropagation();
+          selectedProducts = [];
+          productMulti.render();
+        });
 
         optimizerMulti = UI.bindMultiSelect({
           wrapId: 'optimizerWrap',
@@ -1274,7 +2468,24 @@
           setSelected: function (v) { selectedOptimizers = v; }
         });
 
-        UI.bindSingleSelect({
+        authUserMulti = UI.bindMultiSelect({
+          wrapId: 'authUserWrap',
+          triggerId: 'authUserTrigger',
+          panelId: 'authUserPanel',
+          listId: 'authUserList',
+          selectedId: 'authUserSelected',
+          countId: 'authUserCount',
+          labelId: 'authUserLabel',
+          searchId: 'authUserSearch',
+          selectAllId: 'authUserSelectAll',
+          clearId: 'authUserClear',
+          prefix: '授权用户：',
+          getOptions: authUserOptions,
+          getSelected: function () { return selectedAuthUsers; },
+          setSelected: function (v) { selectedAuthUsers = v; }
+        });
+
+        assetTypeApi = UI.bindSingleSelect({
           wrapId: 'assetTypeWrap',
           triggerId: 'assetTypeTrigger',
           panelId: 'assetTypePanel',
@@ -1282,18 +2493,40 @@
           clearId: 'assetTypeClear',
           prefix: '资产类型：',
           getValue: function () { return filterAssetType; },
-          onChange: function (v) { filterAssetType = v || ''; }
+          onChange: function (v) {
+            filterAssetType = v || '';
+            pruneSelectedProducts();
+          }
         });
 
-        UI.bindSingleSelect({
+        authStatusApi = UI.bindSingleSelect({
+          wrapId: 'authStatusWrap',
+          triggerId: 'authStatusTrigger',
+          panelId: 'authStatusPanel',
+          labelId: 'authStatusLabel',
+          clearId: 'authStatusClear',
+          prefix: '授权状态：',
+          getValue: function () { return filterAuthStatus; },
+          onChange: function (v) { filterAuthStatus = v || ''; }
+        });
+
+        statusApi = UI.bindSingleSelect({
           wrapId: 'statusWrap',
           triggerId: 'statusTrigger',
           panelId: 'statusPanel',
           labelId: 'statusLabel',
-          prefix: '状态：',
+          clearId: 'statusClear',
+          prefix: '投放状态：',
           getValue: function () { return filterStatus; },
           onChange: function (v) { filterStatus = v || ''; }
         });
+
+        accountKeywordApi = UI.bindInputClearable({ wrapId: 'accountKeywordWrap', inputId: 'accountKeyword', clearId: 'accountKeywordClear' });
+        syncAccountFilterVisibility();
+        document.getElementById('accountFilterSettingBtn').addEventListener('click', openAccountFilterSettings);
+        document.getElementById('accountFilterSettingClose').addEventListener('click', cancelAccountFilterSettings);
+        document.getElementById('accountFilterSettingCancel').addEventListener('click', cancelAccountFilterSettings);
+        document.getElementById('accountFilterSettingSubmit').addEventListener('click', submitAccountFilterSettings);
 
         UI.bindPagination({
           containerId: 'pagination',
@@ -1324,6 +2557,7 @@
             }
             if (action === 'product') openBatchProductModal();
             else if (action === 'optimizer') openBatchOptimizerModal();
+            else if (action === 'auth') openBatchAuthModal();
             else if (action === 'status') openBatchStatusModal();
           }
         });
@@ -1333,8 +2567,67 @@
         document.getElementById('accountKeyword').addEventListener('keydown', function (e) {
           if (e.key === 'Enter') applyFilter();
         });
+        document.getElementById('addAccountBtn').addEventListener('click', function () {
+          waitingAuthReturn = true;
+          openedAuthAt = Date.now();
+          window.open(TIKTOK_AUTH_URL, '_blank', 'noopener,noreferrer');
+        });
+        document.addEventListener('visibilitychange', tryShowOAuthPick);
+        window.addEventListener('focus', tryShowOAuthPick);
 
-        document.getElementById('exportBtn').addEventListener('click', exportCsv);
+        UI.bindInputClearable({ wrapId: 'oauthKwWrap', inputId: 'oauthKw', clearId: 'oauthKwClear' });
+        UI.bindSingleSelect({
+          wrapId: 'oauthStatusWrap',
+          triggerId: 'oauthStatusTrigger',
+          panelId: 'oauthStatusPanel',
+          labelId: 'oauthStatusLabel',
+          clearId: 'oauthStatusClear',
+          prefix: '授权状态：',
+          getValue: function () { return oauthFilterStatus; },
+          onChange: function (v) { oauthFilterStatus = v || ''; }
+        });
+        UI.bindPagination({
+          containerId: 'oauthPagination',
+          getTotal: function () { return oauthFilteredRows.length; },
+          getPage: function () { return oauthPage; },
+          getPageSize: function () { return oauthPageSize; },
+          onPageChange: function (p) {
+            oauthPage = p;
+            renderOAuthPickTable();
+            renderOAuthPagination();
+          },
+          onPageSizeChange: function (size) {
+            oauthPageSize = size;
+            oauthPage = 1;
+            renderOAuthPickTable();
+            renderOAuthPagination();
+          }
+        });
+        document.getElementById('oauthSearchBtn').addEventListener('click', applyOAuthFilter);
+        document.getElementById('oauthKw').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') applyOAuthFilter();
+        });
+        document.getElementById('oauthCheckAll').addEventListener('change', function () {
+          const checked = this.checked;
+          const start = (oauthPage - 1) * oauthPageSize;
+          const pageRows = oauthFilteredRows.slice(start, start + oauthPageSize);
+          pageRows.forEach(function (row) {
+            if (checked) oauthSelectedIds.add(row.accountId);
+            else oauthSelectedIds.delete(row.accountId);
+          });
+          renderOAuthPickTable();
+        });
+        document.getElementById('oauthPickBody').addEventListener('change', function (e) {
+          const input = e.target.closest('[data-oauth-check]');
+          if (!input) return;
+          const id = input.getAttribute('data-oauth-check');
+          if (input.checked) oauthSelectedIds.add(id);
+          else oauthSelectedIds.delete(id);
+          renderOAuthPickTable();
+        });
+        document.getElementById('oauthPickClose').addEventListener('click', closeOAuthPickModal);
+        document.getElementById('oauthPickCancel').addEventListener('click', closeOAuthPickModal);
+        document.getElementById('oauthPickSave').addEventListener('click', saveOAuthPickModal);
 
         bindSearchSelect({
           wrapId: 'editOptimizerWrap',
@@ -1405,7 +2698,7 @@
 
         document.getElementById('editClose').addEventListener('click', function () { closeFormModal('editModal'); editingId = null; });
         document.getElementById('editCancel').addEventListener('click', function () { closeFormModal('editModal'); editingId = null; });
-        document.getElementById('editSave').addEventListener('click', saveEditModal);
+        document.getElementById('editSave').addEventListener('click', saveAccountModal);
 
         document.getElementById('batchProductClose').addEventListener('click', function () { closeFormModal('batchProductModal'); });
         document.getElementById('batchProductCancel').addEventListener('click', function () { closeFormModal('batchProductModal'); });
@@ -1460,12 +2753,46 @@
             copyText(copyBtn.getAttribute('data-copy') || '');
             return;
           }
+          const authEdit = e.target.closest('[data-auth-edit]');
+          if (authEdit) {
+            openAuthPickModal(authEdit.getAttribute('data-auth-edit'));
+            return;
+          }
           const edit = e.target.closest('[data-edit]');
           if (edit) openEditModal(edit.getAttribute('data-edit'));
         });
 
+        document.getElementById('authPickBody').addEventListener('change', function (e) {
+          const input = e.target.closest('input[name="authUserPick"]');
+          if (!input) return;
+          pickedAuthUserId = input.value || '';
+        });
+        document.getElementById('authPickBody').addEventListener('click', function (e) {
+          const tr = e.target.closest('[data-pick-row]');
+          if (!tr) return;
+          const id = tr.getAttribute('data-pick-row') || '';
+          pickedAuthUserId = id;
+          const radio = tr.querySelector('input[name="authUserPick"]');
+          if (radio) radio.checked = true;
+        });
+        document.getElementById('authPickClose').addEventListener('click', closeAuthPickModal);
+        document.getElementById('authPickCancel').addEventListener('click', closeAuthPickModal);
+        document.getElementById('authPickSave').addEventListener('click', saveAuthPickModal);
+
         document.addEventListener('keydown', function (e) {
           if (e.key !== 'Escape') return;
+          if (document.getElementById('authDeleteModal').classList.contains('is-open')) {
+            closeAuthDelete();
+            return;
+          }
+          if (document.getElementById('authPickModal').classList.contains('is-open')) {
+            closeAuthPickModal();
+            return;
+          }
+          if (document.getElementById('oauthPickModal').classList.contains('is-open')) {
+            closeOAuthPickModal();
+            return;
+          }
           if (document.getElementById('importModal').classList.contains('is-open')) {
             closeImportModal();
             return;
@@ -1479,12 +2806,288 @@
             }
           }
         });
+
+        bindAuthUserEvents();
       }
 
+      function pad2(n) {
+        return String(n).padStart(2, '0');
+      }
+
+      function formatDateTime(d) {
+        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) +
+          ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+      }
+
+      function nowDateTime() {
+        return formatDateTime(new Date());
+      }
+
+      function maskEmail(email) {
+        const raw = String(email || '');
+        const at = raw.indexOf('@');
+        if (at < 2) return raw;
+        return raw.charAt(0) + '***' + raw.charAt(at - 1) + raw.slice(at);
+      }
+
+      function buildAuthData() {
+        const seeds = [
+          { name: 'Ilxiaofeng', email: 'ilxiaofeng@yongwangkeji.cn', operator: '用户A', autoAuth: true },
+          { name: 'BlueVision_wonder', email: 'xvision@bluefocus.com', operator: '用户B', autoAuth: false },
+          { name: 'Sino_wonder', email: 'xinoi@sinointeractive.com', operator: '用户C', autoAuth: false },
+          { name: 'user7183732511561', email: 'ttcode@yongwangkeji.cn', operator: '用户D', autoAuth: false },
+          { name: 'TecDo_choles.lin', email: 'cholesn@tec-do.com', operator: '用户E', autoAuth: false },
+          { name: 'user5630138616128', email: 'lsyncs@yongwangkeji.cn', operator: '用户F', autoAuth: false },
+          { name: 'tt_media_buyer', email: 'buyer@yongwangkeji.cn', operator: '用户A', autoAuth: true },
+          { name: 'OceanEngine_ops', email: 'ops@bluefocus.com', operator: '用户B', autoAuth: false },
+          { name: 'playable_admin', email: 'admin@sinointeractive.com', operator: '用户C', autoAuth: true },
+          { name: 'user902184773001', email: 'north@yongwangkeji.cn', operator: '用户D', autoAuth: false },
+          { name: 'TecDo_finance.wu', email: 'finance@tec-do.com', operator: '用户E', autoAuth: false },
+          { name: 'wonder_ads_bot', email: 'bot@yongwangkeji.cn', operator: '用户F', autoAuth: true }
+        ];
+        const base = new Date('2026-10-02T10:00:00');
+        return seeds.map(function (item, i) {
+          const t = new Date(base.getTime() + i * 3000);
+          return {
+            id: 'auth_' + (i + 1),
+            userName: item.name,
+            email: item.email,
+            accountCount: 0,
+            operator: item.operator,
+            autoAuth: item.autoAuth,
+            updatedAt: formatDateTime(t)
+          };
+        });
+      }
+
+      function applyAuthFilter() {
+        const nameKw = document.getElementById('authNameKeyword').value.trim().toLowerCase();
+        const emailKw = document.getElementById('authEmailKeyword').value.trim().toLowerCase();
+        authFilteredRows = authRows.filter(function (row) {
+          if (nameKw && row.userName.toLowerCase().indexOf(nameKw) === -1) return false;
+          if (emailKw && row.email.toLowerCase().indexOf(emailKw) === -1) return false;
+          if (authSelectedOperators.length && authSelectedOperators.indexOf(row.operator) === -1) return false;
+          if (authFilterAuto === '开启' && !row.autoAuth) return false;
+          if (authFilterAuto === '关闭' && row.autoAuth) return false;
+          return true;
+        });
+        authPage = 1;
+        renderAuthTable();
+        renderAuthPagination();
+      }
+
+      function resetAuthFilter() {
+        document.getElementById('authNameKeyword').value = '';
+        document.getElementById('authEmailKeyword').value = '';
+        document.getElementById('authNameWrap').classList.remove('has-value');
+        document.getElementById('authEmailWrap').classList.remove('has-value');
+        authSelectedOperators = [];
+        authFilterAuto = '';
+        if (authOperatorMulti) authOperatorMulti.render();
+        const autoLabel = document.getElementById('authAutoLabel');
+        autoLabel.innerHTML = '自动授权：<span class="muted">请选择</span>';
+        document.getElementById('authAutoWrap').classList.remove('has-value');
+        document.querySelectorAll('#authAutoPanel .single-option').forEach(function (opt) {
+          opt.classList.toggle('is-active', (opt.getAttribute('data-value') || '') === '');
+        });
+        applyAuthFilter();
+      }
+
+      function renderAuthTable() {
+        const body = document.getElementById('authBody');
+        const empty = document.getElementById('authEmptyTip');
+        const start = (authPage - 1) * authPageSize;
+        const pageRows = authFilteredRows.slice(start, start + authPageSize);
+        if (!authFilteredRows.length) {
+          body.innerHTML = '';
+          empty.hidden = false;
+          return;
+        }
+        empty.hidden = true;
+        body.innerHTML = pageRows.map(function (row) {
+          const canDelete = row.accountCount <= 0;
+          const delAttr = canDelete
+            ? ' data-auth-del="' + escapeHtml(row.id) + '"'
+            : ' disabled title="存在授权账户，无法删除"';
+          return '<tr>' +
+            '<td><button class="switch' + (row.autoAuth ? ' is-on' : '') + '" type="button" data-auth-switch="' +
+              escapeHtml(row.id) + '" role="switch" aria-checked="' + (row.autoAuth ? 'true' : 'false') + '" aria-label="自动授权"></button></td>' +
+            '<td title="' + escapeHtml(row.userName) + '">' + escapeHtml(row.userName) + '</td>' +
+            '<td title="' + escapeHtml(row.email) + '">' + escapeHtml(maskEmail(row.email)) + '</td>' +
+            '<td>' + escapeHtml(String(row.accountCount)) + '</td>' +
+            '<td>' + escapeHtml(row.operator) + '</td>' +
+            '<td>' + escapeHtml(row.updatedAt) + '</td>' +
+            '<td class="col-action"><button class="link" type="button"' + delAttr + '>删除</button></td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      function renderAuthPagination() {
+        UI.renderPagination({
+          containerId: 'authPagination',
+          total: authFilteredRows.length,
+          page: authPage,
+          pageSize: authPageSize
+        });
+      }
+
+      function switchTab(tab) {
+        currentTab = tab === 'auth' ? 'auth' : 'account';
+        document.querySelectorAll('.page-tabs__item').forEach(function (btn) {
+          const on = btn.getAttribute('data-tab') === currentTab;
+          btn.classList.toggle('is-active', on);
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        document.getElementById('filterBarAccount').hidden = currentTab !== 'account';
+        document.getElementById('filterBarAuth').hidden = currentTab !== 'auth';
+        document.getElementById('dataPanelAccount').hidden = currentTab !== 'account';
+        document.getElementById('dataPanelAuth').hidden = currentTab !== 'auth';
+        closePanels();
+        closeBatchMenu();
+        if (currentTab === 'auth') {
+          renderAuthTable();
+          renderAuthPagination();
+          if (window.ColResize) ColResize.refresh(document.getElementById('authTable'));
+        } else {
+          renderTable();
+          renderPagination();
+          if (window.ColResize) ColResize.refresh(document.getElementById('accountTable'));
+        }
+      }
+
+      function toggleAuthSwitch(id) {
+        const row = authRows.find(function (r) { return r.id === id; });
+        if (!row) return;
+        row.autoAuth = !row.autoAuth;
+        row.updatedAt = nowDateTime();
+        renderAuthTable();
+        showPageMsg(row.autoAuth ? '已开启自动授权' : '已关闭自动授权');
+      }
+
+      function openAuthDelete(id) {
+        const row = authRows.find(function (r) { return r.id === id; });
+        if (!row || row.accountCount > 0) return;
+        pendingAuthDeleteId = id;
+        UI.openModal('authDeleteModal');
+      }
+
+      function closeAuthDelete() {
+        pendingAuthDeleteId = null;
+        UI.closeModal('authDeleteModal');
+      }
+
+      function confirmAuthDelete() {
+        if (!pendingAuthDeleteId) return;
+        const id = pendingAuthDeleteId;
+        const row = authRows.find(function (r) { return r.id === id; });
+        if (!row || row.accountCount > 0) {
+          closeAuthDelete();
+          return;
+        }
+        authRows = authRows.filter(function (r) { return r.id !== id; });
+        allRows.forEach(function (row) {
+          row.authUsers = (row.authUsers || []).filter(function (item) { return item.id !== id; });
+          if (row.authUserId === id) {
+            row.authUserId = row.authUsers.length ? row.authUsers[0].id : '';
+            if (!row.authUserId) row.authStatus = '已失效';
+            row.updatedAt = nowDateTime();
+          }
+        });
+        syncAuthAccountCounts();
+        closeAuthDelete();
+        applyAuthFilter();
+        showPageMsg('删除成功');
+      }
+
+      function bindAuthUserEvents() {
+        document.querySelectorAll('.page-tabs__item').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            switchTab(btn.getAttribute('data-tab'));
+          });
+        });
+
+        UI.bindInputClearable({ wrapId: 'authNameWrap', inputId: 'authNameKeyword', clearId: 'authNameClear' });
+        UI.bindInputClearable({ wrapId: 'authEmailWrap', inputId: 'authEmailKeyword', clearId: 'authEmailClear' });
+
+        authOperatorMulti = UI.bindMultiSelect({
+          wrapId: 'authOperatorWrap',
+          triggerId: 'authOperatorTrigger',
+          panelId: 'authOperatorPanel',
+          listId: 'authOperatorList',
+          selectedId: 'authOperatorSelected',
+          countId: 'authOperatorCount',
+          labelId: 'authOperatorLabel',
+          searchId: 'authOperatorSearch',
+          selectAllId: 'authOperatorSelectAll',
+          clearId: 'authOperatorClear',
+          prefix: '操作人：',
+          getOptions: function () { return AUTH_OPERATORS; },
+          getSelected: function () { return authSelectedOperators; },
+          setSelected: function (v) { authSelectedOperators = v; }
+        });
+
+        UI.bindSingleSelect({
+          wrapId: 'authAutoWrap',
+          triggerId: 'authAutoTrigger',
+          panelId: 'authAutoPanel',
+          labelId: 'authAutoLabel',
+          clearId: 'authAutoClear',
+          prefix: '自动授权：',
+          getValue: function () { return authFilterAuto; },
+          onChange: function (v) { authFilterAuto = v || ''; }
+        });
+
+        UI.bindPagination({
+          containerId: 'authPagination',
+          getTotal: function () { return authFilteredRows.length; },
+          getPage: function () { return authPage; },
+          getPageSize: function () { return authPageSize; },
+          onPageChange: function (p) {
+            authPage = p;
+            renderAuthTable();
+            renderAuthPagination();
+          },
+          onPageSizeChange: function (size) {
+            authPageSize = size;
+            authPage = 1;
+            renderAuthTable();
+            renderAuthPagination();
+          }
+        });
+
+        document.getElementById('authSearchBtn').addEventListener('click', applyAuthFilter);
+        document.getElementById('authResetBtn').addEventListener('click', resetAuthFilter);
+        document.getElementById('authNameKeyword').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') applyAuthFilter();
+        });
+        document.getElementById('authEmailKeyword').addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') applyAuthFilter();
+        });
+
+        document.getElementById('authBody').addEventListener('click', function (e) {
+          const sw = e.target.closest('[data-auth-switch]');
+          if (sw) {
+            toggleAuthSwitch(sw.getAttribute('data-auth-switch'));
+            return;
+          }
+          const del = e.target.closest('[data-auth-del]');
+          if (del && !del.disabled) openAuthDelete(del.getAttribute('data-auth-del'));
+        });
+
+        document.getElementById('authDeleteClose').addEventListener('click', closeAuthDelete);
+        document.getElementById('authDeleteCancel').addEventListener('click', closeAuthDelete);
+        document.getElementById('authDeleteOk').addEventListener('click', confirmAuthDelete);
+      }
+
+      authRows = buildAuthData();
       allRows = buildData();
+      assignAccountAuth();
       filteredRows = allRows.slice();
+      authFilteredRows = authRows.slice();
       renderTable();
       renderPagination();
+      renderAuthTable();
+      renderAuthPagination();
       bindEvents();
     })();
   </script>

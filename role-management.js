@@ -101,14 +101,17 @@
       id: 'tools',
       name: '工具',
       children: [
-        { id: 'board-monitor', name: '看板监控' },
         {
           id: 'task-center',
           name: '任务中心',
           children: [
             { id: 'task-export', name: '下载任务' }
           ]
-        }
+        },
+        { id: 'board-monitor', name: '看板监控' },
+        { id: 'tiktok-accounts', name: 'Tiktok账户' },
+        { id: 'tiktok-promote', name: 'TikTok推广' },
+        { id: 'tiktok-hosting', name: 'TikTok托管' }
       ]
     },
     {
