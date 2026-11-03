@@ -181,7 +181,7 @@
   function seed() {
     var rows = [
       {
-        id: 'th-1', runCount: 18, name: '系列日预算托管', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-1', code: '1009', runCount: 18, name: '系列日预算托管', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户A', lastRun: '2026-10-27 09:00:12', createdAt: '2026-10-20 10:20:00',
         logs: [
           logItem('2026-10-22 11:06:18', '用户A', '修改状态：禁用 → 启用'),
@@ -190,7 +190,7 @@
         ]
       },
       {
-        id: 'th-2', runCount: 6, name: '低消耗系列暂停', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-2', code: '1008', runCount: 6, name: '低消耗系列暂停', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户B', lastRun: '2026-10-27 18:30:08', createdAt: '2026-10-18 14:12:33',
         logs: [
           logItem('2026-10-19 09:12:44', '用户B', '修改状态：禁用 → 启用'),
@@ -198,7 +198,7 @@
         ]
       },
       {
-        id: 'th-3', runCount: 24, name: '系列预算上调', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-3', code: '1007', runCount: 24, name: '系列预算上调', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户A', lastRun: '2026-10-28 08:00:21', createdAt: '2026-10-16 09:40:18',
         logs: [logItem('2026-10-16 09:40:18', '用户A', '创建托管')],
         config: {
@@ -215,7 +215,7 @@
         }
       },
       {
-        id: 'th-4', runCount: 0, name: '空耗系列关停', status: '禁用', channel: CHANNEL, target: '推广系列',
+        id: 'th-4', code: '1006', runCount: 0, name: '空耗系列关停', status: '禁用', channel: CHANNEL, target: '推广系列',
         creator: '用户C', lastRun: '', createdAt: '2026-10-12 16:05:44',
         logs: [
           logItem('2026-10-15 10:18:09', '用户C', '修改状态：启用 → 禁用'),
@@ -236,17 +236,17 @@
         }
       },
       {
-        id: 'th-5', runCount: 11, name: '达标系列加预算', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-5', code: '1005', runCount: 11, name: '达标系列加预算', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户D', lastRun: '2026-10-27 20:15:36', createdAt: '2026-10-09 11:18:09',
         logs: [logItem('2026-10-09 11:18:09', '用户D', '创建托管')]
       },
       {
-        id: 'th-6', runCount: 9, name: '学习期保护', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-6', code: '1004', runCount: 9, name: '学习期保护', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户B', lastRun: '2026-10-26 11:00:40', createdAt: '2026-10-06 08:22:51',
         logs: [logItem('2026-10-06 08:22:51', '用户B', '创建托管')]
       },
       {
-        id: 'th-7', runCount: 3, name: '新系列冷启动', status: '禁用', channel: CHANNEL, target: '推广系列',
+        id: 'th-7', code: '1003', runCount: 3, name: '新系列冷启动', status: '禁用', channel: CHANNEL, target: '推广系列',
         creator: '用户E', lastRun: '2026-10-10 09:30:02', createdAt: '2026-09-28 19:33:27',
         logs: [
           logItem('2026-10-11 13:22:16', '用户E', '修改状态：启用 → 禁用'),
@@ -254,7 +254,7 @@
         ]
       },
       {
-        id: 'th-8', runCount: 15, name: '高ROAS系列放量', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-8', code: '1002', runCount: 15, name: '高ROAS系列放量', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户A', lastRun: '2026-10-28 09:15:11', createdAt: '2026-09-22 13:47:02',
         logs: [logItem('2026-09-22 13:47:02', '用户A', '创建托管')],
         config: {
@@ -269,12 +269,12 @@
         }
       },
       {
-        id: 'th-9', runCount: 7, name: '素材疲劳降价', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-9', code: '1001', runCount: 7, name: '素材疲劳降价', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户F', lastRun: '2026-10-25 21:08:44', createdAt: '2026-09-16 10:05:18',
         logs: [logItem('2026-09-16 10:05:18', '用户F', '创建托管')]
       },
       {
-        id: 'th-10', runCount: 4, name: '周末预算收缩', status: '启用', channel: CHANNEL, target: '推广系列',
+        id: 'th-10', code: '1000', runCount: 4, name: '周末预算收缩', status: '启用', channel: CHANNEL, target: '推广系列',
         creator: '用户C', lastRun: '2026-10-26 00:05:00', createdAt: '2026-09-08 15:28:41',
         logs: [logItem('2026-09-08 15:28:41', '用户C', '创建托管')],
         config: {
@@ -341,6 +341,15 @@
     return null;
   }
 
+  function nextCode() {
+    var max = 999;
+    state.rows.forEach(function (row) {
+      var n = Number(row.code);
+      if (n > max) max = n;
+    });
+    return String(max + 1);
+  }
+
   function nameTaken(name, excludeId) {
     var key = (name || '').trim();
     return state.rows.some(function (row) {
@@ -403,6 +412,7 @@
         return '<tr>' +
           '<td><button class="switch' + (on ? ' is-on' : '') + '" type="button" data-status="' +
             escapeHtml(row.id) + '" role="switch" aria-checked="' + (on ? 'true' : 'false') + '" aria-label="状态"></button></td>' +
+          '<td>' + escapeHtml(row.code) + '</td>' +
           '<td title="' + escapeHtml(row.name) + '">' + escapeHtml(row.name) + '</td>' +
           '<td>推广系列</td>' +
           '<td title="' + escapeHtml(frequencyText(row)) + '">' + escapeHtml(frequencyText(row)) + '</td>' +
@@ -544,6 +554,7 @@
     }
     var created = {
       id: UI.uid('th'),
+      code: nextCode(),
       name: name,
       status: '启用',
       channel: CHANNEL,
