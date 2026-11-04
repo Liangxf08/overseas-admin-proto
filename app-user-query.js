@@ -537,7 +537,7 @@
   function cellHtml(col, row) {
     if (col.key === 'sandbox') {
       var on = !!row.sandbox;
-      return '<button class="switch switch--small' + (on ? ' is-on' : '') + '" type="button" data-sandbox-toggle="' +
+      return '<button class="switch' + (on ? ' is-on' : '') + '" type="button" data-sandbox-toggle="' +
         escapeHtml(row.uuid) + '" aria-label="沙箱" aria-checked="' + (on ? 'true' : 'false') + '" role="switch"></button>';
     }
     var raw = row[col.key];

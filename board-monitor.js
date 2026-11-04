@@ -1233,7 +1233,7 @@
         var last = row.lastTrigger ? escapeHtml(row.lastTrigger) : '<span class="bm-dash">-</span>';
         var on = row.status === '启用';
         return '<tr>' +
-          '<td><button class="switch switch--small' + (on ? ' is-on' : '') + '" type="button" data-status="' +
+          '<td><button class="switch' + (on ? ' is-on' : '') + '" type="button" data-status="' +
             escapeHtml(row.id) + '" role="switch" aria-checked="' + (on ? 'true' : 'false') + '" aria-label="状态"></button></td>' +
           '<td title="' + escapeHtml(row.name) + '">' + escapeHtml(row.name) + '</td>' +
           '<td title="' + escapeHtml(boardText) + '">' + escapeHtml(boardText) + '</td>' +

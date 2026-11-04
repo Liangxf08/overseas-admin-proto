@@ -33,30 +33,44 @@
     return NUMBER_OPS[0];
   }
 
-  var COL_PREFS_KEY = 'hwzt_ad_strategy_cols_v4';
-  var COLUMN_GROUPS = ['属性', '条件', '数据'];
-  var FORCE_FROZEN_KEYS = ['scene', 'versions', 'countries', 'userType', 'abSwitch'];
+  var COL_PREFS_KEY = 'hwzt_ad_strategy_cols_v8';
+  var COLUMN_GROUPS = ['基础信息', '用户定向', '条件配置', '转化数据'];
+  var FORCE_FROZEN_KEYS = ['scene'];
+  var DEFAULT_CONDITION_IDS = ['f_start', 'f_gap_n', 'f_wait_ad', 'f_daily', 'f_gap_sec', 'f_times'];
+  var DROPPED_CONDITION_IDS = { f_day: 1, f_total_days: 1, f_streak: 1 };
+  var AUDIENCE_OP_META = {
+    gt: { label: '大于', symbol: '>' },
+    gte: { label: '大于等于', symbol: '≥' },
+    lt: { label: '小于', symbol: '<' },
+    lte: { label: '小于等于', symbol: '≤' },
+    eq: { label: '等于', symbol: '=' }
+  };
   var BASE_COLUMNS = [
-    { key: 'scene', name: '广告场景', width: 160, group: '属性' },
-    { key: 'versions', name: 'APP版本', width: 100, group: '属性' },
-    { key: 'countries', name: '国家地区', width: 100, group: '属性' },
-    { key: 'userType', name: '用户类型', width: 100, group: '属性' },
-    { key: 'abSwitch', name: '分流开关', width: 100, group: '属性' },
-    { key: 'id', name: '策略ID', width: 100, group: '属性' },
-    { key: 'splitRatio', name: '分流比例', width: 100, group: '属性' },
-    { key: 'adSwitch', name: '广告开关', width: 100, group: '属性' }
+    { key: 'scene', name: '广告场景', width: 160, group: '基础信息' },
+    { key: 'versions', name: 'APP版本', width: 100, group: '用户定向' },
+    { key: 'countries', name: '国家地区', width: 100, group: '用户定向' },
+    { key: 'installDays', name: '安装天数', width: 100, group: '用户定向', audience: 'installDays' },
+    { key: 'totalActive', name: '累计活跃天数', width: 120, group: '用户定向', audience: 'totalActive', optional: true },
+    { key: 'streakActive', name: '连续活跃天数', width: 120, group: '用户定向', audience: 'streakActive', optional: true },
+    { key: 'payAmount', name: '累计付费金额', width: 120, group: '用户定向', audience: 'payAmount', optional: true },
+    { key: 'yesterdayOnline', name: '昨日在线时长', width: 120, group: '用户定向', audience: 'yesterdayOnline', optional: true },
+    { key: 'levelFailStreak', name: '关卡连续失败', width: 120, group: '用户定向', audience: 'levelFailStreak', optional: true },
+    { key: 'abSwitch', name: '分流开关', width: 100, group: '条件配置' },
+    { key: 'id', name: '策略ID', width: 100, group: '条件配置' },
+    { key: 'splitRatio', name: '分流比例', width: 100, group: '条件配置' },
+    { key: 'adSwitch', name: '广告开关', width: 100, group: '条件配置' }
   ];
   var DATA_COLUMNS = [
-    { key: 'dau', name: '触达用户', width: 100, group: '数据', format: 'int' },
-    { key: 'ad_show_request', name: '展示请求', width: 100, group: '数据', format: 'int' },
-    { key: 'ad_show_success', name: '展示成功', width: 100, group: '数据', format: 'int' },
-    { key: 'ad_show_rate', name: '展示率', width: 100, group: '数据', format: 'percent' },
-    { key: 'ad_show_click', name: '点击数', width: 100, group: '数据', format: 'int' },
-    { key: 'ad_click_rate', name: '点击率', width: 100, group: '数据', format: 'percent' },
-    { key: 'ad_revenue', name: '预估收益', width: 112, group: '数据', format: 'num2' },
-    { key: 'ad_ecpm', name: 'eCPM', width: 100, group: '数据', format: 'num4' },
-    { key: 'ad_arpdau', name: 'ARPDAU', width: 100, group: '数据', format: 'num4' },
-    { key: 'ad_ipeu', name: 'IPEU', width: 100, group: '数据', format: 'num2' }
+    { key: 'dau', name: '触达用户', width: 100, group: '转化数据', format: 'int' },
+    { key: 'ad_show_request', name: '展示请求', width: 100, group: '转化数据', format: 'int' },
+    { key: 'ad_show_success', name: '展示成功', width: 100, group: '转化数据', format: 'int' },
+    { key: 'ad_show_rate', name: '展示率', width: 100, group: '转化数据', format: 'percent' },
+    { key: 'ad_show_click', name: '点击数', width: 100, group: '转化数据', format: 'int' },
+    { key: 'ad_click_rate', name: '点击率', width: 100, group: '转化数据', format: 'percent' },
+    { key: 'ad_revenue', name: '预估收益', width: 112, group: '转化数据', format: 'num2' },
+    { key: 'ad_ecpm', name: 'eCPM', width: 100, group: '转化数据', format: 'num4' },
+    { key: 'ad_arpdau', name: 'ARPDAU', width: 100, group: '转化数据', format: 'num4' },
+    { key: 'ad_ipeu', name: 'IPEU', width: 100, group: '转化数据', format: 'num2' }
   ];
   var DEFAULT_FROZEN_COUNT = FORCE_FROZEN_KEYS.length;
 
@@ -76,7 +90,7 @@
     editId: null,
     editProductId: '',
     editSceneId: '',
-    editUserType: '全用户',
+    editAudience: null,
     editCountries: [],
     editVersions: [],
     editAbOn: false,
@@ -234,18 +248,11 @@
     return ALL_ROWS.find(function (r) { return r.id === id; });
   }
 
-  function normalizeUserType(v) {
-    if (v === '全部' || !v) return '全用户';
-    return v;
-  }
-
   function targetingText(row) {
     var parts = [];
     if (row.countries && row.countries.length) parts.push(row.countries.join('、'));
-    var ut = normalizeUserType(row.userType);
-    if (ut && ut !== '全用户') parts.push(ut);
     if (row.versions && row.versions.length) parts.push('版本 ' + row.versions.join('/'));
-    return parts.length ? parts.join(' · ') : '全用户';
+    return parts.length ? parts.join(' · ') : '全部用户';
   }
 
   function splitText(row) {
@@ -279,13 +286,13 @@
     var cols = [];
     sceneIds.forEach(function (sid) {
       Store.sceneFieldModels(Store.sceneById(sid)).forEach(function (field) {
-        if (seen[field.id]) return;
+        if (seen[field.id] || DROPPED_CONDITION_IDS[field.id]) return;
         seen[field.id] = true;
         cols.push({
           key: fieldColKey(field.id),
           name: field.name,
           width: 140,
-          group: '条件',
+          group: '条件配置',
           fieldId: field.id,
           defaultSelected: Store.strategyFieldDefaultSelected(field.id)
         });
@@ -298,9 +305,11 @@
   }
 
   function defaultVisibleKeys() {
-    var keys = BASE_COLUMNS.map(function (c) { return c.key; });
-    currentConditionCols().forEach(function (c) {
-      if (c.defaultSelected) keys.push(c.key);
+    var keys = BASE_COLUMNS.filter(function (c) { return !c.optional; }).map(function (c) { return c.key; });
+    var present = {};
+    currentConditionCols().forEach(function (c) { present[c.fieldId] = c.key; });
+    DEFAULT_CONDITION_IDS.forEach(function (id) {
+      if (present[id]) keys.push(present[id]);
     });
     return keys;
   }
@@ -404,7 +413,12 @@
   var TARGET_MERGE_COL_KEYS = {
     countries: true,
     versions: true,
-    userType: true,
+    installDays: true,
+    totalActive: true,
+    streakActive: true,
+    payAmount: true,
+    yesterdayOnline: true,
+    levelFailStreak: true,
     abSwitch: true
   };
 
@@ -429,6 +443,18 @@
 
   function formatVersionsText(row) {
     return formatMatchList(row.versions, Store.APP_VERSIONS);
+  }
+
+  function formatAudienceMetric(row, key, style) {
+    var audience = Store.normalizeAudience(row && row.audience);
+    var item = audience[key] || {};
+    if (item.value === '' || !isFinite(Number(item.value))) return '-';
+    var meta = AUDIENCE_OP_META[item.op] || AUDIENCE_OP_META.gte;
+    return (style === 'full' ? meta.label : meta.symbol) + ' ' + item.value;
+  }
+
+  function formatInstallDays(row, style) {
+    return formatAudienceMetric(row, 'installDays', style);
   }
 
   function formatConditionValue(field, value, op, style) {
@@ -530,8 +556,9 @@
       var vers = formatVersionsText(row);
       return '<span class="cell-ellipsis" title="' + escapeHtml(vers) + '">' + escapeHtml(vers) + '</span>';
     }
-    if (col.key === 'userType') {
-      return escapeHtml(normalizeUserType(row.userType));
+    if (col.audience) {
+      var audFull = formatAudienceMetric(row, col.audience, 'full');
+      return '<span title="' + escapeHtml(audFull) + '">' + escapeHtml(formatAudienceMetric(row, col.audience)) + '</span>';
     }
     if (col.key === 'abSwitch') {
       return onOffTag(isAbRow(row));
@@ -554,7 +581,7 @@
     if (col.key === 'adSwitch') {
       return onOffTag(scene && scene.adSwitch === true);
     }
-    if (col.group === '数据') {
+    if (col.group === '转化数据') {
       var metric = formatMetric(col, row, splitIndex);
       return '<span class="cell-num" title="' + escapeHtml(metric) + '">' + escapeHtml(metric) + '</span>';
     }
@@ -567,7 +594,7 @@
     var frozen = idx < freezeCount;
     var cls = [];
     if (frozen) cls.push('is-freeze');
-    if (col.group === '数据') cls.push('col-num');
+    if (col.group === '转化数据') cls.push('col-num');
     var style = frozen ? 'left:' + freezeOffsets[col.key] + 'px' : '';
     var html = '<td';
     if (cls.length) html += ' class="' + cls.join(' ') + '"';
@@ -719,8 +746,6 @@
     state.editCountries = [];
     if (countryMulti && countryMulti.render) countryMulti.render();
   });
-
-  UI.bindSeg('editUserTypeSeg', function (v) { state.editUserType = v || '全用户'; });
   UI.bindFormHelp();
 
   function setItemError(id, on, msg) {
@@ -734,15 +759,17 @@
   }
 
   function clearEditErrors() {
-    ['editProductItem', 'editSceneItem', 'editSplitItem'].forEach(function (id) {
-      setItemError(id, false);
-    });
+    var ids = ['editProductItem', 'editSceneItem', 'editSplitItem'];
+    AUDIENCE_FIELDS.forEach(function (f) { ids.push('editAud-' + f.key); });
+    ids.forEach(function (id) { setItemError(id, false); });
     var splitErr = $('editSplitError');
     if (splitErr) splitErr.style.display = 'none';
   }
 
   function currentSceneFields() {
-    return Store.sceneFieldModels(Store.sceneById(state.editSceneId));
+    return Store.sceneFieldModels(Store.sceneById(state.editSceneId)).filter(function (field) {
+      return !DROPPED_CONDITION_IDS[field.id];
+    });
   }
 
   function defaultValues() {
@@ -941,6 +968,67 @@
     return state.previewPolicyId;
   }
 
+  var AUDIENCE_FIELDS = [
+    { key: 'installDays', unit: '天' },
+    { key: 'totalActive', unit: '天' },
+    { key: 'streakActive', unit: '天' },
+    { key: 'payAmount', unit: '元' },
+    { key: 'yesterdayOnline', unit: '分钟' },
+    { key: 'levelFailStreak', unit: '次' }
+  ];
+  var AUDIENCE_OPS = [
+    { value: 'gt', label: '大于' },
+    { value: 'gte', label: '大于等于' },
+    { value: 'lt', label: '小于' },
+    { value: 'lte', label: '小于等于' },
+    { value: 'eq', label: '等于' }
+  ];
+
+  function audienceOpMeta(op) {
+    var i;
+    for (i = 0; i < AUDIENCE_OPS.length; i++) {
+      if (AUDIENCE_OPS[i].value === op) return AUDIENCE_OPS[i];
+    }
+    return AUDIENCE_OPS[1];
+  }
+
+  function paintAudience() {
+    closeSplitPanels();
+    state.editAudience = Store.normalizeAudience(state.editAudience);
+    AUDIENCE_FIELDS.forEach(function (f) {
+      var host = $('audience-' + f.key);
+      if (!host) return;
+      var item = state.editAudience[f.key];
+      var meta = audienceOpMeta(item.op);
+      var options = AUDIENCE_OPS.map(function (o) {
+        var active = o.value === item.op ? ' is-active' : '';
+        return '<button class="single-option' + active + '" type="button" data-value="' + o.value + '">' + escapeHtml(o.label) + '</button>';
+      }).join('');
+      host.innerHTML =
+        '<div class="split-select split-select--op" data-audience-op="' + f.key + '" data-value="' + item.op + '">' +
+          '<button class="select-trigger" type="button" aria-label="运算符">' +
+            '<span class="select-trigger__text">' + escapeHtml(meta.label) + '</span>' +
+            '<svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>' +
+          '</button>' +
+          '<div class="single-panel">' + options + '</div>' +
+        '</div>' +
+        '<input class="input" data-audience-val="' + f.key + '" value="' + escapeHtml(item.value) + '" placeholder="请输入" />' +
+        '<span class="audience-num__unit">' + escapeHtml(f.unit) + '</span>';
+    });
+  }
+
+  function collectAudienceFromDom() {
+    state.editAudience = Store.normalizeAudience(state.editAudience);
+    AUDIENCE_FIELDS.forEach(function (f) {
+      var box = document.querySelector('[data-audience-op="' + f.key + '"]');
+      var input = document.querySelector('[data-audience-val="' + f.key + '"]');
+      var op = box ? box.getAttribute('data-value') : '';
+      state.editAudience[f.key].op = AUDIENCE_OPS.some(function (o) { return o.value === op; }) ? op : 'gte';
+      state.editAudience[f.key].value = input ? input.value : '';
+    });
+    state.editAudience = Store.normalizeAudience(state.editAudience);
+  }
+
   function renderSplits() {
     closeSplitPanels();
     var el = $('splitList');
@@ -976,12 +1064,22 @@
     updateSplitSum();
   }
 
-  $('splitList').addEventListener('input', function (e) {
+  $('editBody').addEventListener('input', function (e) {
     var pct = e.target.getAttribute('data-split-pct');
     if (pct != null) {
       var i = Number(pct);
       if (state.editSplits[i]) state.editSplits[i].percent = parseInt(e.target.value, 10) || 0;
       updateSplitSum();
+    }
+    var aud = e.target.getAttribute('data-audience-val');
+    if (aud) {
+      if (!state.editAudience) state.editAudience = Store.normalizeAudience(null);
+      state.editAudience[aud].value = e.target.value;
+      var item = $('editAud-' + aud);
+      if (item && item.classList.contains('is-error')) {
+        var text = String(e.target.value || '').trim();
+        if (text === '' || isFinite(Number(text))) setItemError('editAud-' + aud, false);
+      }
     }
   });
 
@@ -1067,6 +1165,11 @@
       text.textContent = (opt.textContent || '').trim();
       text.classList.remove('muted');
     }
+    var audKey = box.getAttribute('data-audience-op');
+    if (audKey) {
+      if (!state.editAudience) state.editAudience = Store.normalizeAudience(null);
+      if (state.editAudience[audKey]) state.editAudience[audKey].op = value;
+    }
     panel.querySelectorAll('.single-option').forEach(function (item) {
       item.classList.toggle('is-active', item === opt);
     });
@@ -1090,8 +1193,8 @@
     closeSplitPanels();
   });
 
-  var editDrawerBody = document.querySelector('#editDrawer .drawer__body');
-  if (editDrawerBody) editDrawerBody.addEventListener('scroll', closeSplitPanels);
+  var editBody = $('editBody');
+  if (editBody) editBody.addEventListener('scroll', closeSplitPanels);
   window.addEventListener('resize', closeSplitPanels);
 
   var arrayEdit = { splitIndex: -1, fieldId: '', rows: [] };
@@ -1256,7 +1359,7 @@
         var frozen = idx < freezeCount;
         var cls = [];
         if (frozen) cls.push('is-freeze');
-        if (col.group === '数据') cls.push('col-num');
+        if (col.group === '转化数据') cls.push('col-num');
         var style = frozen ? ' style="left:' + freezeOffsets[col.key] + 'px"' : '';
         return '<th class="' + cls.join(' ') + '"' + style + '>' + escapeHtml(col.name) + '</th>';
       }).join('') + '<th class="col-action">操作</th></tr>';
@@ -1376,7 +1479,7 @@
     clearEditErrors();
     state.editProductId = row.productId || '';
     state.editSceneId = row.sceneId || '';
-    state.editUserType = normalizeUserType(row.userType);
+    state.editAudience = Store.normalizeAudience(row.audience);
     state.editCountries = (row.countries || []).slice();
     state.editVersions = (row.versions || []).slice();
     state.editSplits = Store.clone(row.splits || []);
@@ -1394,7 +1497,7 @@
     if (editSceneSelect && editSceneSelect.syncLabel) editSceneSelect.syncLabel(state.editSceneId);
     if (versionMulti && versionMulti.render) versionMulti.render();
     if (countryMulti && countryMulti.render) countryMulti.render();
-    UI.setSegValue('editUserTypeSeg', state.editUserType);
+    paintAudience();
     setContextReadonly(state.editMode === 'edit' && !isCopy);
     syncAbSwitch();
     renderSplits();
@@ -1434,25 +1537,34 @@
     state.editMode = 'add';
     state.editId = null;
     state.previewPolicyId = String(nextPolicyId());
-    $('editDrawerTitle').textContent = '添加策略';
+    $('editTitle').textContent = '添加策略';
     fillForm({
       name: '', productId: f.productId, sceneId: f.sceneId || '', priority: 10, status: '启用',
-      countries: [], userType: '全用户', versions: [], splits: []
+      countries: [], versions: [], splits: []
     }, false);
-    UI.openDrawer('editDrawer');
+    showEditView();
   }
 
   function openEdit(row, isCopy) {
     state.editMode = isCopy ? 'add' : 'edit';
     state.editId = isCopy ? null : row.id;
     state.previewPolicyId = isCopy ? String(nextPolicyId()) : '';
-    $('editDrawerTitle').textContent = isCopy ? '添加策略' : '编辑策略';
+    $('editTitle').textContent = isCopy ? '复制策略' : '编辑策略';
     fillForm(row, isCopy);
-    UI.openDrawer('editDrawer');
+    showEditView();
+  }
+
+  function showEditView() {
+    closeSplitPanels();
+    $('listView').hidden = true;
+    $('editView').hidden = false;
+    if ($('editBody')) $('editBody').scrollTop = 0;
   }
 
   function closeEdit() {
-    UI.closeDrawer('editDrawer');
+    closeSplitPanels();
+    $('editView').hidden = true;
+    $('listView').hidden = false;
   }
 
   function submitEdit() {
@@ -1460,13 +1572,21 @@
     clearEditErrors();
     var ok = true;
     if (!state.editProductId) {
-      setItemError('editProductItem', true, '请选择产品');
+      setItemError('editProductItem', true, '请选择产品名称');
       ok = false;
     }
     if (!state.editSceneId) {
-      setItemError('editSceneItem', true, '请选择场景');
+      setItemError('editSceneItem', true, '请选择广告场景');
       ok = false;
     }
+    collectAudienceFromDom();
+    AUDIENCE_FIELDS.forEach(function (f) {
+      var value = state.editAudience[f.key].value;
+      if (value !== '' && !isFinite(Number(value))) {
+        setItemError('editAud-' + f.key, true, '请输入数值');
+        ok = false;
+      }
+    });
     if (!state.editSplits.length) {
       setItemError('editSplitItem', true, '请至少配置一个分流组');
       var se = $('editSplitError');
@@ -1489,7 +1609,11 @@
         ok = false;
       }
     }
-    if (!ok) return;
+    if (!ok) {
+      var first = document.querySelector('#editView .form-item.is-error, #editSplitItem.is-error');
+      if (first && first.scrollIntoView) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
 
     var duplicate = ALL_ROWS.some(function (r) {
       if (state.editMode === 'edit' && r.id === state.editId) return false;
@@ -1497,7 +1621,7 @@
         targetingSame(r, {
           versions: state.editVersions,
           countries: state.editCountries,
-          userType: state.editUserType
+          audience: state.editAudience
         });
     });
     if (duplicate) {
@@ -1507,13 +1631,13 @@
 
     var existing = state.editMode === 'edit' ? findRow(state.editId) : null;
     var payload = {
-      name: existing ? existing.name : (Store.sceneName(state.editSceneId) + ' · ' + (state.editUserType || '全用户')),
+      name: existing ? existing.name : Store.sceneName(state.editSceneId),
       productId: state.editMode === 'edit' && existing ? existing.productId : state.editProductId,
       sceneId: state.editMode === 'edit' && existing ? existing.sceneId : state.editSceneId,
       countries: state.editCountries.slice(),
       countryMatch: 'include',
       channels: [],
-      userType: state.editUserType || '全用户',
+      audience: Store.normalizeAudience(state.editAudience),
       versions: state.editVersions.slice(),
       versionMatch: 'include',
       priority: existing && existing.priority != null ? existing.priority : 10,
@@ -1544,11 +1668,9 @@
   }
 
   function targetingSame(row, draft) {
-    var rowUser = row.userType === '全部' || !row.userType ? '全用户' : row.userType;
-    var draftUser = draft.userType === '全部' || !draft.userType ? '全用户' : draft.userType;
     return sortedJoin(row.versions) === sortedJoin(draft.versions) &&
       sortedJoin(row.countries) === sortedJoin(draft.countries) &&
-      rowUser === draftUser;
+      Store.audienceSignature(row.audience) === Store.audienceSignature(draft.audience);
   }
 
   function openDelete(row) {
@@ -1595,6 +1717,8 @@
     renderTable();
   });
   $('addBtn').addEventListener('click', openAdd);
+  $('editBack').addEventListener('click', closeEdit);
+  $('editCancel').addEventListener('click', closeEdit);
   $('editSubmit').addEventListener('click', submitEdit);
   $('deleteOk').addEventListener('click', confirmDelete);
 
@@ -1707,8 +1831,9 @@
   function toggleMetricKey(key, checked) {
     if (isFrozenKey(key)) return;
     var idx = state.metricDraft.indexOf(key);
-    if (checked && idx < 0) state.metricDraft.push(key);
-    else if (!checked && idx >= 0) {
+    if (checked && idx < 0) {
+      state.metricDraft.push(key);
+    } else if (!checked && idx >= 0) {
       state.metricDraft.splice(idx, 1);
       if (idx < state.metricFrozenCount) {
         state.metricFrozenCount = Math.max(minFrozenCount(state.metricDraft), state.metricFrozenCount - 1);
@@ -1764,7 +1889,7 @@
       if (col.key === 'scene') return Store.sceneName(row.sceneId);
       if (col.key === 'countries') return formatCountriesText(row);
       if (col.key === 'versions') return formatVersionsText(row);
-      if (col.key === 'userType') return normalizeUserType(row.userType);
+      if (col.audience) return formatAudienceMetric(row, col.audience, 'full');
       if (col.key === 'abSwitch') return isAbRow(row) ? '开' : '关';
       if (col.key === 'id') return splitStrategyId(row, splitIndex);
       if (col.key === 'splitRatio') {
@@ -1776,7 +1901,7 @@
         return splits.map(function (x) { return (x.percent == null ? 0 : x.percent) + '%'; }).join(' / ');
       }
       if (col.key === 'adSwitch') return scene && scene.adSwitch === true ? '开' : '关';
-      if (col.group === '数据') return formatMetric(col, row, splitIndex);
+      if (col.group === '转化数据') return formatMetric(col, row, splitIndex);
       var fid = parseFieldColKey(col.key);
       if (fid) {
         var field = Store.fieldById(fid);
@@ -1884,19 +2009,43 @@
       if (from < 0) return;
       var line = e.target.closest('[data-freeze-line]');
       var item = e.target.closest('[data-metric]');
-      var to;
+      var minFrozen = minFrozenCount(state.metricDraft);
+
       if (line) {
-        to = state.metricFrozenCount;
+        state.metricDraft.splice(from, 1);
+        var insertAt = from < state.metricFrozenCount
+          ? Math.max(0, state.metricFrozenCount - 1)
+          : state.metricFrozenCount;
+        insertAt = Math.max(0, Math.min(insertAt, state.metricDraft.length));
+        state.metricDraft.splice(insertAt, 0, fromKey);
+        state.metricFrozenCount = insertAt + 1;
       } else if (item) {
-        to = Number(item.getAttribute('data-index'));
+        var target = item.getAttribute('data-metric');
+        if (target === fromKey) return;
+        var to = Number(item.getAttribute('data-index'));
+        if (!(to >= 0)) return;
+        var wasFrozen = from < state.metricFrozenCount;
+        var toFrozen = to < state.metricFrozenCount || isFrozenKey(target);
+        state.metricDraft.splice(from, 1);
+        if (to > from) to -= 1;
+        to = Math.max(0, Math.min(to, state.metricDraft.length));
+        state.metricDraft.splice(to, 0, fromKey);
+        if (toFrozen && !wasFrozen) {
+          state.metricFrozenCount = Math.max(state.metricFrozenCount + 1, state.metricDraft.indexOf(fromKey) + 1);
+        } else if (wasFrozen && !toFrozen) {
+          state.metricFrozenCount = Math.max(minFrozen, state.metricFrozenCount - 1);
+        }
       } else return;
-      if (to === from) return;
-      state.metricDraft.splice(from, 1);
-      if (to > from) to -= 1;
-      state.metricDraft.splice(to, 0, fromKey);
-      /* adjust freeze: if dropped above freeze line, ensure freeze covers it? keep freezeAt as line position */
-      if (line) state.metricFrozenCount = Math.max(minFrozenCount(state.metricDraft), to);
-      state.metricFrozenCount = Math.max(minFrozenCount(state.metricDraft), Math.min(state.metricFrozenCount, state.metricDraft.length));
+
+      var forced = [];
+      var rest = [];
+      state.metricDraft.forEach(function (key) {
+        if (isFrozenKey(key)) forced.push(key);
+        else rest.push(key);
+      });
+      var userFrozen = rest.splice(0, Math.max(0, state.metricFrozenCount - forced.length));
+      state.metricDraft = forced.concat(userFrozen, rest);
+      state.metricFrozenCount = Math.max(minFrozen, Math.min(forced.length + userFrozen.length, state.metricDraft.length));
       renderMetricModal();
     });
     list.addEventListener('dragend', function () {
@@ -1912,9 +2061,6 @@
   });
   document.querySelectorAll('[data-close="metricModal"]').forEach(function (btn) {
     btn.addEventListener('click', function () { UI.closeModal('metricModal'); });
-  });
-  document.querySelectorAll('[data-close="editDrawer"]').forEach(function (btn) {
-    btn.addEventListener('click', closeEdit);
   });
   document.querySelectorAll('[data-close="deleteModal"]').forEach(function (btn) {
     btn.addEventListener('click', function () { UI.closeModal('deleteModal'); });

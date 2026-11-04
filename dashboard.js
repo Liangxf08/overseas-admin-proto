@@ -15,7 +15,7 @@
 
   var BOARD_TYPES = ['Adjust', '双端 SDK', 'APP 新用户', '广告聚合', 'IS Cohort', 'MAX Cohort', 'SDK 初始化', 'TikTok 开平'];
 
-  var DATE_GRAINS = ['按日', '按周', '按月', '按年'];
+  var DATE_GRAINS = ['按日', '按周', '按月', '按年', '分时'];
   var ALL_DIMENSIONS = DATE_GRAINS.concat(['平台', '产品', '国家地区', '渠道', '优化师', '账户']);
 
   var ALL_FILTERS = [
@@ -223,6 +223,7 @@
   var DEMO_FILTERS = ['date', 'compare', 'product', 'channel'];
   var DEMO_DIMENSIONS = ['按日'];
   var DIM_COL_WIDTH = 120;
+  var HOUR_DIM_WIDTH = 180;
   var METRIC_COL_WIDTH = 112;
 
   var state = {
@@ -452,6 +453,10 @@
 
   function formatDateTime(d) {
     return formatDate(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+
+  function hourLabelOf(day, hour) {
+    return formatDate(day) + ' ' + pad(hour) + ':00';
   }
 
   function startOfDay(d) {
@@ -1498,15 +1503,18 @@
     var cmpRange = showCompare ? getCompareRangeByType(state.filterValues.compare) : null;
     var units = rowBreakdown(dims);
     var rows = [];
+    var hourly = dims.indexOf('分时') >= 0;
+    var slots = hourly ? 24 : 1;
     days.forEach(function (day, i) {
-      units.forEach(function (item, pi) {
-        var seed = i * Math.max(units.length, 1) + pi;
-        var row = { _i: seed, _day: day, __curDay: formatDate(day) };
+      for (var hour = 0; hour < slots; hour++) {
+        units.forEach(function (item, pi) {
+        var seed = (i * slots + hour) * Math.max(units.length, 1) + pi;
+        var row = { _i: seed, _day: day, __curDay: hourly ? hourLabelOf(day, hour) : formatDate(day) };
         if (cmpRange) {
           var cmpSpan = Math.max(0, Math.round((cmpRange[1].getTime() - cmpRange[0].getTime()) / 86400000));
           var cmpOffset = days.length > 1 ? Math.round(i * cmpSpan / (days.length - 1)) : 0;
           var cmpDay = addDays(cmpRange[0], cmpOffset);
-          row.__cmpDay = formatDate(cmpDay);
+          row.__cmpDay = hourly ? hourLabelOf(cmpDay, hour) : formatDate(cmpDay);
           row._cmpOffset = cmpOffset;
         }
         dims.forEach(function (d) {
@@ -1514,6 +1522,7 @@
           else if (d === '按周') row[d] = weekLabelOf(day);
           else if (d === '按月') row[d] = monthLabelOf(day);
           else if (d === '按年') row[d] = String(day.getFullYear());
+          else if (d === '分时') row[d] = hourLabelOf(day, hour);
           else if (d === '平台') row[d] = item ? item.platform : PLATFORMS[(seed % 2) + 1];
           else if (d === '产品') row[d] = item ? item.product : productOptionLabel(PRODUCT_OPTIONS[seed % PRODUCT_OPTIONS.length]);
           else if (d === '国家地区') row[d] = COUNTRIES[seed % COUNTRIES.length];
@@ -1536,7 +1545,8 @@
           }
         });
         rows.push(row);
-      });
+        });
+      }
     });
     return rows;
   }
@@ -1552,7 +1562,7 @@
       if (!isFinite(bd)) return -1;
       return ad - bd;
     }
-    if (key === '按日' || key === '按周' || key === '按月' || key === '按年' || (/^\d{4}-\d{2}-\d{2}$/.test(String(av)) && /^\d{4}-\d{2}-\d{2}$/.test(String(bv)))) {
+    if (key === '按日' || key === '按周' || key === '按月' || key === '按年' || key === '分时' || (/^\d{4}-\d{2}-\d{2}$/.test(String(av)) && /^\d{4}-\d{2}-\d{2}$/.test(String(bv)))) {
       return String(av).localeCompare(String(bv));
     }
     if (METRIC_META[key] || typeof av === 'number' || typeof bv === 'number') {
@@ -2295,9 +2305,9 @@
   function chartDimHintText() {
     var dims = appliedChartDims();
     var grains = dateGrainsIn(dims);
-    if (grains.length > 1) return '折线图只能选择一个日期维度（按日、按周、按月、按年）';
+    if (grains.length > 1) return '折线图只能选择一个日期维度（按日、按周、按月、按年、分时）';
     if (dims.length > 2) return '图表最多支持两个维度';
-    if (dims.length === 2 && !grains.length) return '两个维度时，其中一个必须为按日、按周、按月或按年';
+    if (dims.length === 2 && !grains.length) return '两个维度时，其中一个必须为按日、按周、按月、按年或分时';
     return '图表最多支持两个维度';
   }
 
@@ -2437,6 +2447,21 @@
           dayIndexes: [index]
         };
       });
+    }
+    if (grain === '分时') {
+      var hours = [];
+      days.forEach(function (day, index) {
+        for (var hour = 0; hour < 24; hour++) {
+          var title = hourLabelOf(day, hour);
+          hours.push({
+            label: title.slice(5),
+            title: title,
+            dayIndexes: [index],
+            hour: hour
+          });
+        }
+      });
+      return hours;
     }
     var groups = [];
     var seen = {};
@@ -2618,8 +2643,10 @@
           color: s.color,
           hiddenLegend: !!s.hiddenLegend,
           values: buckets.map(function (bucket) {
+            var pointCount = bucket.hour == null ? days.length : days.length * 24;
             var daily = bucket.dayIndexes.map(function (dayIndex) {
-              return genChartPoint(metric, dayIndex, s.index, days.length);
+              var pointIndex = bucket.hour == null ? dayIndex : dayIndex * 24 + bucket.hour;
+              return genChartPoint(metric, pointIndex, s.index, pointCount);
             });
             return aggregateMetric(metric, daily);
           })
@@ -2924,6 +2951,7 @@
     var storeKey = colWidthKey(col);
     if (state.colWidths[storeKey] != null) return state.colWidths[storeKey];
     if (col.key === '__pivot' && col.tree) return 240;
+    if (col.key === '分时' || (col.key === '__pivot' && col.label === '分时')) return HOUR_DIM_WIDTH;
     if (col.kind === 'dim') return DIM_COL_WIDTH;
     return METRIC_COL_WIDTH;
   }

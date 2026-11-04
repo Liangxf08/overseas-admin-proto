@@ -303,6 +303,7 @@
         channels: [],
         userType: opt.userType || '全用户',
         versions: (opt.versions || []).slice(),
+        audience: opt.audience || null,
         priority: opt.priority != null ? opt.priority : 10,
         status: opt.status || '启用',
         updater: opt.updater || '用户A',
@@ -360,6 +361,7 @@
 
         var countries = [];
         var versions = [];
+        var audience = null;
         var userType = '全用户';
         var name = shortName + ' · ' + scene.name;
         var priority = 10 + si * 5;
@@ -370,6 +372,7 @@
           if (isHotpot) {
             name = 'Hotpot 胜利插屏-美日实验';
             countries = ['US', 'JP'];
+            audience = { installDays: { op: 'gte', value: '3' } };
             abRatio = [50, 50];
           } else if (app.productId === 'ywcaptainwave08xx') {
             name = '船长胜利插屏-拉美';
@@ -387,6 +390,7 @@
           sceneId: sid,
           countries: countries,
           versions: versions,
+          audience: audience,
           userType: userType,
           priority: priority,
           status: status,
@@ -765,16 +769,13 @@
     ['f_apl_win', false],
     ['f_apl_churn', false],
     ['f_net', false],
-    ['f_wait_ad', true],
-    ['f_daily', true],
-    ['f_day', true],
-    ['f_launch', false],
-    ['f_streak', false],
-    ['f_total_days', true],
-    ['f_times', true],
-    ['f_gap_sec', true],
     ['f_start', true],
     ['f_gap_n', true],
+    ['f_wait_ad', true],
+    ['f_daily', true],
+    ['f_gap_sec', true],
+    ['f_times', true],
+    ['f_launch', false],
     ['f_admob', false],
     ['f_banner_short', false],
     ['f_pos', false],
@@ -847,11 +848,35 @@
     return changed;
   }
 
+  var AUDIENCE_KEYS = ['installDays', 'totalActive', 'streakActive', 'payAmount', 'yesterdayOnline', 'levelFailStreak'];
+  var AUDIENCE_OP = { gt: 1, gte: 1, lt: 1, lte: 1, eq: 1 };
+
+  function normalizeAudience(raw) {
+    var src = raw || {};
+    var out = {};
+    AUDIENCE_KEYS.forEach(function (key) {
+      var item = src[key] || {};
+      var op = AUDIENCE_OP[item.op] ? item.op : 'gte';
+      var value = item.value == null ? '' : String(item.value).trim();
+      if (value !== '' && isFinite(Number(value))) value = String(Number(value));
+      out[key] = { op: op, value: value };
+    });
+    return out;
+  }
+
+  function audienceSignature(raw) {
+    var audience = normalizeAudience(raw);
+    return AUDIENCE_KEYS.map(function (key) {
+      var item = audience[key];
+      if (item.value === '' || !isFinite(Number(item.value))) return '';
+      return item.op + ':' + item.value;
+    }).join(',');
+  }
+
   function targetingSignature(row) {
     var versions = (row.versions || []).slice().sort().join('\n');
     var countries = (row.countries || []).slice().sort().join('\n');
-    var user = row.userType === '全部' || !row.userType ? '全用户' : row.userType;
-    return [row.productId || '', row.sceneId || '', versions, countries, user].join('|');
+    return [row.productId || '', row.sceneId || '', versions, countries, audienceSignature(row.audience)].join('|');
   }
 
   function policyOrderId(row) {
@@ -959,6 +984,8 @@
     nowText: nowText,
     formatDateTime: formatDateTime,
     clone: clone,
+    normalizeAudience: normalizeAudience,
+    audienceSignature: audienceSignature,
     persist: persist,
     byUpdatedDesc: byUpdatedDesc,
     fieldById: fieldById,
