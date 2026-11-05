@@ -304,7 +304,7 @@
         userType: opt.userType || '全用户',
         versions: (opt.versions || []).slice(),
         audience: opt.audience || null,
-        priority: opt.priority != null ? opt.priority : 10,
+        priority: opt.priority === '' ? null : (opt.priority != null ? opt.priority : 1),
         status: opt.status || '启用',
         updater: opt.updater || '用户A',
         updatedAt: opt.updatedAt || daysAgo(3, 10, 0),
@@ -337,7 +337,7 @@
             countries: [],
             versions: [],
             userType: '全用户',
-            priority: 10,
+            priority: 1,
             ab: true,
             updater: USERS[ai % USERS.length],
             updatedAt: daysAgo(2, 10, 20),
@@ -350,7 +350,7 @@
             countries: [],
             versions: ['1.2.2'],
             userType: '全用户',
-            priority: 20,
+            priority: 2,
             ab: true,
             updater: USERS[ai % USERS.length],
             updatedAt: daysAgo(2, 11, 8),
@@ -364,7 +364,7 @@
         var audience = null;
         var userType = '全用户';
         var name = shortName + ' · ' + scene.name;
-        var priority = 10 + si * 5;
+        var priority = 1;
         var status = '启用';
         var abRatio;
 
@@ -379,7 +379,6 @@
             countries = ['BR', 'MX'];
             userType = '老用户';
             versions = ['1.4.0', '1.5.2'];
-            priority = 12;
             status = '禁用';
           }
         }
@@ -655,6 +654,16 @@
         });
         data._matchIncludeOnlyV1 = true;
       }
+      if (!data._prioritySmallV1) {
+        data.policies = seedPolicies();
+        data._prioritySmallV1 = true;
+        data._scenesNormalized = true;
+      }
+      if (!data._prioritySingleV1) {
+        data.policies = seedPolicies();
+        data._prioritySingleV1 = true;
+        data._scenesNormalized = true;
+      }
       if (!data._dedupeTargetingV1) {
         if (dedupeIdenticalTargeting(data.policies)) data._scenesNormalized = true;
         data._dedupeTargetingV1 = true;
@@ -755,7 +764,7 @@
     return db.scenes.filter(function (s) { return linked[s.id]; });
   }
 
-  /* 策略列表条件列默认顺序与默认选中（图二）。未列入的新字段排在条件组末尾，默认不选中。 */
+  /* 策略列表条件列目录与默认选中，顺序同指标表。未列入的字段不进自定义列。 */
   var STRATEGY_CONDITION_ORDER = [
     ['f_sdk_log', false],
     ['f_load_track', false],
@@ -765,26 +774,26 @@
     ['f_adjust', false],
     ['f_fb_fire', false],
     ['f_fb_evt', false],
-    ['f_ver_tip', false],
     ['f_apl_win', false],
     ['f_apl_churn', false],
     ['f_net', false],
-    ['f_start', true],
-    ['f_gap_n', true],
     ['f_wait_ad', true],
     ['f_daily', true],
-    ['f_gap_sec', true],
-    ['f_times', true],
+    ['f_day', false],
     ['f_launch', false],
-    ['f_admob', false],
+    ['f_times', true],
+    ['f_gap_sec', true],
+    ['f_start', true],
+    ['f_gap_n', true],
     ['f_banner_short', false],
     ['f_pos', false],
     ['f_pad_se', false],
     ['f_pad_tb', false],
     ['f_wait', false],
     ['f_report', false],
-    ['f_test', false],
-    ['f_iap', false]
+    ['f_iap', false],
+    ['f_wonder_backfill', false],
+    ['f_wonder_click', false]
   ];
   var STRATEGY_CONDITION_INDEX = {};
   var STRATEGY_CONDITION_SELECTED = {};

@@ -208,6 +208,8 @@
 
 .cfg-card__form { padding: 24px 24px 8px; }
 
+#editSplitItem .cfg-card__form { padding: 24px; }
+
 .cfg-card__form .form-item { margin-bottom: var(--modal-form-item-gap, 20px); }
 
 .cfg-card__form .form-item__control { max-width: 480px; }
@@ -242,12 +244,91 @@
   color: var(--color-text-3);
 }
 
-.cfg-note {
-  margin: 0 0 16px;
-  font-size: 14px;
-  line-height: 22px;
-  color: var(--color-text-3);
+.priority-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+.priority-field .input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.priority-field .form-help {
+  flex-shrink: 0;
+}
+
+#editAudienceItem .form-item__control {
+  max-width: none;
+  flex: 0 1 auto;
+}
+
+.aud-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2, 8px);
+}
+
+.aud-line {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2, 8px);
+}
+
+.aud-line > .split-select {
+  width: 168px;
+  flex: 0 0 168px;
+}
+
+.aud-value {
+  width: 464px;
+  flex: 0 0 464px;
+  min-width: 0;
+}
+
+.aud-value .scene-field-select,
+.aud-value .scene-field-select .select-trigger,
+.aud-value .audience-num {
+  width: 100%;
+}
+
+.aud-remove {
+  width: var(--size-8, 32px);
+  height: var(--size-8, 32px);
+  flex: 0 0 var(--size-8, 32px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-3);
+  border-radius: var(--border-radius-medium);
+}
+
+.aud-remove:hover {
+  color: var(--color-danger-6);
+  background: var(--color-danger-1);
+}
+
+.aud-remove svg { width: 14px; height: 14px; }
+
+.aud-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--size-8, 32px);
+  margin-top: var(--size-2, 8px);
+  padding: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-body);
+  line-height: 22px;
+}
+
+.aud-add svg { width: 14px; height: 14px; }
+
+#audienceRows:empty + .aud-add { margin-top: 0; }
+
+#audienceWidgetPark[hidden] { display: none !important; }
 
 .audience-summary {
   padding: 8px 12px;
@@ -884,8 +965,8 @@
 
 .form-item__hint {
   margin-top: 8px;
-  font-size: 12px;
-  line-height: 20px;
+  font-size: var(--font-size-body);
+  line-height: 22px;
   color: var(--color-text-3, #86909C);
 }
 
@@ -1196,17 +1277,6 @@
 
 .split-add:hover { opacity: 0.85; }
 .split-add svg { width: 14px; height: 14px; }
-
-.split-sum {
-  margin-top: 8px;
-  font-size: 12px;
-  line-height: 20px;
-  color: var(--color-text-3, #86909C);
-}
-
-.split-sum.is-error {
-  color: var(--color-danger-6, #F53F3F);
-}
 
 #dataTable td .select-option-icon {
   vertical-align: middle;

@@ -149,96 +149,84 @@
           <section class="cfg-card">
             <h2 class="cfg-card__title">用户定向</h2>
             <div class="cfg-card__form">
-              <p class="cfg-note">不填表示不限制</p>
-              <div class="form-item" id="editVersionItem">
-                <label class="form-item__label">APP版本</label>
+              <div class="form-item" id="editPriorityItem">
+                <label class="form-item__label is-required">定向排序</label>
                 <div class="form-item__control">
-                    <div class="scene-field-select" id="editVersionWrap">
-                      <button class="select-trigger" type="button" id="editVersionTrigger">
-                        <span class="select-trigger__text" id="editVersionLabel"><span class="muted">请选择</span></span>
-                        <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-                      </button>
-                      <button class="select-clear" type="button" id="editVersionClear" aria-label="清除">
-                        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-                      </button>
-                      <div class="multi-panel" id="editVersionPanel">
-                        <div class="multi-panel__left">
-                          <div class="multi-panel__search">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                            <input id="editVersionSearch" type="text" placeholder="搜索" autocomplete="off" />
-                          </div>
-                          <div class="multi-panel__toolbar">
-                            <button class="multi-panel__link" type="button" id="editVersionSelectAll">全选</button>
-                          </div>
-                          <div class="multi-panel__list" id="editVersionList"></div>
-                        </div>
-                        <div class="multi-panel__right">
-                          <div class="multi-panel__toolbar multi-panel__toolbar--right">
-                            <span id="editVersionCount">已选择 0 项</span>
-                            <button class="multi-panel__link" type="button" id="editVersionPanelClear">清空</button>
-                          </div>
-                          <div class="multi-panel__list" id="editVersionSelected"></div>
-                        </div>
-                      </div>
-                    </div>
+                  <div class="priority-field">
+                    <input class="input" id="editPriority" type="text" inputmode="decimal" placeholder="请输入" autocomplete="off" />
+                    <span class="form-help" data-tip="当请求同时命中多个用户定向，返回最高优先级（1为最高）的定向策略" aria-label="说明" tabindex="0">?</span>
+                  </div>
+                  <div class="form-item__error">请输入数值</div>
                 </div>
               </div>
-              <div class="form-item" id="editCountryItem">
-                <label class="form-item__label">国家地区</label>
+              <div class="form-item" id="editAudienceItem">
+                <label class="form-item__label">定向条件</label>
                 <div class="form-item__control">
-                    <div class="scene-field-select" id="editCountryWrap">
-                      <button class="select-trigger" type="button" id="editCountryTrigger">
-                        <span class="select-trigger__text" id="editCountryLabel"><span class="muted">请选择</span></span>
-                        <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
-                      </button>
-                      <button class="select-clear" type="button" id="editCountryClear" aria-label="清除">
-                        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
-                      </button>
-                      <div class="multi-panel" id="editCountryPanel">
-                        <div class="multi-panel__left">
-                          <div class="multi-panel__search">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-                            <input id="editCountrySearch" type="text" placeholder="搜索" autocomplete="off" />
-                          </div>
-                          <div class="multi-panel__toolbar">
-                            <button class="multi-panel__link" type="button" id="editCountrySelectAll">全选</button>
-                          </div>
-                          <div class="multi-panel__list" id="editCountryList"></div>
-                        </div>
-                        <div class="multi-panel__right">
-                          <div class="multi-panel__toolbar multi-panel__toolbar--right">
-                            <span id="editCountryCount">已选择 0 项</span>
-                            <button class="multi-panel__link" type="button" id="editCountryPanelClear">清空</button>
-                          </div>
-                          <div class="multi-panel__list" id="editCountrySelected"></div>
-                        </div>
-                      </div>
-                    </div>
+                  <div class="aud-stack" id="audienceRows"></div>
+                  <button class="aud-add" type="button" id="addAudienceBtn">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 1.5v9M1.5 6h9"/></svg>
+                    添加定向条件
+                  </button>
+                  <div class="form-item__error">请输入数值</div>
                 </div>
               </div>
-              <div class="form-item" id="editAud-installDays">
-                <label class="form-item__label">安装天数</label>
-                <div class="form-item__control"><div class="audience-num" id="audience-installDays"></div><div class="form-item__error">请输入数值</div></div>
-              </div>
-              <div class="form-item" id="editAud-totalActive">
-                <label class="form-item__label">累计活跃天数</label>
-                <div class="form-item__control"><div class="audience-num" id="audience-totalActive"></div><div class="form-item__error">请输入数值</div></div>
-              </div>
-              <div class="form-item" id="editAud-streakActive">
-                <label class="form-item__label">连续活跃天数</label>
-                <div class="form-item__control"><div class="audience-num" id="audience-streakActive"></div><div class="form-item__error">请输入数值</div></div>
-              </div>
-              <div class="form-item" id="editAud-payAmount">
-                <label class="form-item__label">累计付费金额</label>
-                <div class="form-item__control"><div class="audience-num" id="audience-payAmount"></div><div class="form-item__error">请输入数值</div></div>
-              </div>
-              <div class="form-item" id="editAud-yesterdayOnline">
-                <label class="form-item__label">昨日在线时长</label>
-                <div class="form-item__control"><div class="audience-num" id="audience-yesterdayOnline"></div><div class="form-item__error">请输入数值</div></div>
-              </div>
-              <div class="form-item" id="editAud-levelFailStreak">
-                <label class="form-item__label">关卡连续失败</label>
-                <div class="form-item__control"><div class="audience-num" id="audience-levelFailStreak"></div><div class="form-item__error">请输入数值</div></div>
+              <div id="audienceWidgetPark" hidden>
+                <div class="scene-field-select" id="editVersionWrap">
+                  <button class="select-trigger" type="button" id="editVersionTrigger">
+                    <span class="select-trigger__text" id="editVersionLabel"><span class="muted">请选择</span></span>
+                    <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <button class="select-clear" type="button" id="editVersionClear" aria-label="清除">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                  </button>
+                  <div class="multi-panel" id="editVersionPanel">
+                    <div class="multi-panel__left">
+                      <div class="multi-panel__search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                        <input id="editVersionSearch" type="text" placeholder="搜索" autocomplete="off" />
+                      </div>
+                      <div class="multi-panel__toolbar">
+                        <button class="multi-panel__link" type="button" id="editVersionSelectAll">全选</button>
+                      </div>
+                      <div class="multi-panel__list" id="editVersionList"></div>
+                    </div>
+                    <div class="multi-panel__right">
+                      <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                        <span id="editVersionCount">已选择 0 项</span>
+                        <button class="multi-panel__link" type="button" id="editVersionPanelClear">清空</button>
+                      </div>
+                      <div class="multi-panel__list" id="editVersionSelected"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="scene-field-select" id="editCountryWrap">
+                  <button class="select-trigger" type="button" id="editCountryTrigger">
+                    <span class="select-trigger__text" id="editCountryLabel"><span class="muted">请选择</span></span>
+                    <svg class="select-trigger__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                  </button>
+                  <button class="select-clear" type="button" id="editCountryClear" aria-label="清除">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l6 6M9 3L3 9"/></svg>
+                  </button>
+                  <div class="multi-panel" id="editCountryPanel">
+                    <div class="multi-panel__left">
+                      <div class="multi-panel__search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+                        <input id="editCountrySearch" type="text" placeholder="搜索" autocomplete="off" />
+                      </div>
+                      <div class="multi-panel__toolbar">
+                        <button class="multi-panel__link" type="button" id="editCountrySelectAll">全选</button>
+                      </div>
+                      <div class="multi-panel__list" id="editCountryList"></div>
+                    </div>
+                    <div class="multi-panel__right">
+                      <div class="multi-panel__toolbar multi-panel__toolbar--right">
+                        <span id="editCountryCount">已选择 0 项</span>
+                        <button class="multi-panel__link" type="button" id="editCountryPanelClear">清空</button>
+                      </div>
+                      <div class="multi-panel__list" id="editCountrySelected"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -253,7 +241,6 @@
             </h2>
             <div class="cfg-card__form">
               <div class="form-item__error form-item__error--static" id="editSplitError">请配置分流组</div>
-              <div class="split-sum" id="splitSum" hidden>流量合计需为 100%，当前 0%</div>
               <div class="split-list" id="splitList"></div>
             </div>
           </section>
