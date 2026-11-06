@@ -862,7 +862,7 @@
     } else {
       if (state.editSplits.length) {
         state.editSplits = [state.editSplits[0]];
-        state.editSplits[0].name = state.editSplits[0].name || '默认组';
+        state.editSplits[0].name = '默认组';
         state.editSplits[0].percent = 100;
       } else {
         state.editSplits = [emptySplit('默认组', 100)];
@@ -1674,6 +1674,10 @@
     if (!state.editSplits.length) resetSplitsForScene();
     else {
       state.editSplits = state.editSplits.slice(0, state.editAbOn ? 2 : 1);
+      if (!state.editAbOn && state.editSplits[0]) {
+        state.editSplits[0].name = '默认组';
+        state.editSplits[0].percent = 100;
+      }
       state.editSplits.forEach(ensureSplitValues);
     }
     if (isCopy) state.editSplits.forEach(function (g) { delete g.strategyId; });
@@ -1755,6 +1759,15 @@
     $('listView').hidden = false;
   }
 
+  function priorityTaken(n) {
+    return ALL_ROWS.some(function (r) {
+      if (state.editMode === 'edit' && r.id === state.editId) return false;
+      if (r.productId !== state.editProductId || r.sceneId !== state.editSceneId) return false;
+      var other = Number(r.priority);
+      return isFinite(other) && other === n;
+    });
+  }
+
   function submitEdit() {
     collectSplitsFromDom();
     clearEditErrors();
@@ -1775,6 +1788,9 @@
       ok = false;
     } else if (!isFinite(Number(priorityText))) {
       setItemError('editPriorityItem', true, '请输入数值');
+      ok = false;
+    } else if (priorityTaken(Number(priorityText))) {
+      setItemError('editPriorityItem', true, '该场景下定向排序已存在');
       ok = false;
     }
     if (markAudienceErrors()) ok = false;
