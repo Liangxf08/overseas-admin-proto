@@ -97,6 +97,22 @@
   display: none !important;
 }
 
+#editDrawer .drawer {
+  width: var(--modal-width-xlarge, 1200px);
+}
+
+#editDrawer .drawer__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--color-bg-layout, #F2F3F5);
+}
+
+#arrayModal.is-open {
+  z-index: 1100;
+}
+
 #listView[hidden],
 .cfg-page[hidden],
 .cfg-card__id[hidden],

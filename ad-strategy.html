@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="design-tokens.css" />
   <link rel="stylesheet" href="product-common.css" />
   <link rel="stylesheet" href="col-resize.css" />
-  <link rel="stylesheet" href="ad-strategy.css?v=20261106q" />
+  <link rel="stylesheet" href="ad-strategy.css?v=20261106d" />
 </head>
 <body>
   <div class="app" id="appShell">
@@ -100,18 +100,18 @@
         </div>
       </div>
 
-      <div class="cfg-page" id="editView" hidden>
-        <div class="cfg-page__head">
-          <button class="cfg-page__back" type="button" id="editBack" aria-label="返回">
-            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7.5 2.5L3.5 6l4 3.5"/></svg>
-          </button>
-          <h1 class="cfg-page__title" id="editTitle">添加策略</h1>
-          <div class="cfg-page__actions">
-            <button class="btn btn--default" type="button" id="editCancel">取消</button>
-            <button class="btn btn--primary" type="button" id="editSubmit">提交</button>
+    </main>
+  </div>
+
+      <div class="drawer-mask" id="editDrawer" aria-hidden="true">
+        <aside class="drawer edit-drawer" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+          <div class="drawer__header">
+            <h2 class="drawer__title" id="editTitle">添加策略</h2>
+            <button class="drawer__close" type="button" id="editClose" aria-label="关闭">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+            </button>
           </div>
-        </div>
-        <div class="cfg-page__body" id="editBody">
+          <div class="drawer__body" id="editBody">
           <section class="cfg-card">
             <h2 class="cfg-card__title">基本信息</h2>
             <div class="cfg-card__form">
@@ -244,10 +244,13 @@
               <div class="split-list" id="splitList"></div>
             </div>
           </section>
-        </div>
+          </div>
+          <div class="drawer__footer">
+            <button class="btn btn--default" type="button" id="editCancel">取消</button>
+            <button class="btn btn--primary" type="button" id="editSubmit">提交</button>
+          </div>
+        </aside>
       </div>
-    </main>
-  </div>
 
   <div class="modal-mask" id="arrayModal" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="arrayModalTitle">
@@ -352,6 +355,6 @@
   <script src="col-resize.js"></script>
   <script src="ad-strategy-data.js?v=20261106"></script>
   <script>ProductShell.mount('ad-strategy');</script>
-  <script src="ad-strategy.js?v=20261106q"></script>
+  <script src="ad-strategy.js?v=20261106d"></script>
 </body>
 </html>

@@ -1761,15 +1761,13 @@
 
   function showEditView() {
     closeSplitPanels();
-    $('listView').hidden = true;
-    $('editView').hidden = false;
+    UI.openDrawer('editDrawer');
     if ($('editBody')) $('editBody').scrollTop = 0;
   }
 
   function closeEdit() {
     closeSplitPanels();
-    $('editView').hidden = true;
-    $('listView').hidden = false;
+    UI.closeDrawer('editDrawer');
   }
 
   function priorityTaken(n) {
@@ -1828,7 +1826,7 @@
       }
     }
     if (!ok) {
-      var first = document.querySelector('#editView .form-item.is-error, #editSplitItem.is-error');
+      var first = document.querySelector('#editDrawer .form-item.is-error, #editSplitItem.is-error');
       if (first && first.scrollIntoView) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
       return;
     }
@@ -1935,7 +1933,7 @@
     renderTable();
   });
   $('addBtn').addEventListener('click', openAdd);
-  $('editBack').addEventListener('click', closeEdit);
+  $('editClose').addEventListener('click', closeEdit);
   $('editCancel').addEventListener('click', closeEdit);
   $('editSubmit').addEventListener('click', submitEdit);
   $('deleteOk').addEventListener('click', confirmDelete);
