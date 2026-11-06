@@ -569,10 +569,7 @@
       var sn = Store.sceneName(row.sceneId);
       return '<span title="' + escapeHtml(sn) + '">' + escapeHtml(sn) + '</span>';
     }
-    if (col.key === 'priority') {
-      var rank = row.priority === '' || row.priority == null || !isFinite(Number(row.priority)) ? '-' : String(row.priority);
-      return '<span title="' + escapeHtml(rank) + '">' + escapeHtml(rank) + '</span>';
-    }
+    if (col.key === 'priority') return priorityCellHtml(row);
     if (col.key === 'countries') {
       var countries = formatCountriesText(row);
       return '<span class="cell-ellipsis" title="' + escapeHtml(countries) + '">' + escapeHtml(countries) + '</span>';
@@ -615,10 +612,24 @@
     return '-';
   }
 
-  function tdAttrs(col, idx, freezeCount, freezeOffsets, rowspan) {
+  var PRIORITY_EDIT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+  var priorityEditId = null;
+  var priorityEditBtn = null;
+
+  function priorityCellHtml(row) {
+    var rank = row.priority === '' || row.priority == null || !isFinite(Number(row.priority)) ? '-' : String(row.priority);
+    return '<div class="priority-cell__inner">' +
+      '<span class="priority-cell__text" title="' + escapeHtml(rank) + '">' + escapeHtml(rank) + '</span>' +
+      '<button class="priority-cell__edit" type="button" data-quick="priority" aria-label="编辑" title="编辑">' +
+        PRIORITY_EDIT_SVG +
+      '</button></div>';
+  }
+
+  function tdAttrs(col, idx, freezeCount, freezeOffsets, rowspan, extraClass) {
     var frozen = idx < freezeCount;
     var cls = [];
     if (frozen) cls.push('is-freeze');
+    if (extraClass) cls.push(extraClass);
     if (col.group === '转化数据') cls.push('col-num');
     var style = frozen ? 'left:' + freezeOffsets[col.key] + 'px' : '';
     var html = '<td';
@@ -1518,6 +1529,7 @@
   });
 
   function renderTable() {
+    if (priorityEditId) closePriorityEdit();
     if (!state.applied) applyFilters();
     syncColumnsForScene();
     var map = columnMap();
@@ -1616,7 +1628,7 @@
           }
           if (TARGET_MERGE_COL_KEYS[col.key]) {
             if (!vr.isPolicyFirst) return '';
-            return tdAttrs(col, idx, freezeCount, freezeOffsets, vr.policySpan) + cellHtml(col, row) + '</td>';
+            return tdAttrs(col, idx, freezeCount, freezeOffsets, vr.policySpan, col.key === 'priority' ? 'priority-cell' : '') + cellHtml(col, row) + '</td>';
           }
           return tdAttrs(col, idx, freezeCount, freezeOffsets, 1) + cellHtml(col, row, vr.splitIndex) + '</td>';
         }).join('');
@@ -1928,7 +1940,132 @@
   $('editSubmit').addEventListener('click', submitEdit);
   $('deleteOk').addEventListener('click', confirmDelete);
 
+  function priorityConflict(row, n) {
+    return ALL_ROWS.some(function (r) {
+      if (r.id === row.id) return false;
+      if (r.productId !== row.productId || r.sceneId !== row.sceneId) return false;
+      var other = Number(r.priority);
+      return isFinite(other) && other === n;
+    });
+  }
+
+  function priorityEditMessage(text, row) {
+    var value = String(text || '').trim();
+    if (value === '') return '请输入';
+    if (!isFinite(Number(value))) return '请输入数值';
+    if (priorityConflict(row, Number(value))) return '该场景下定向排序已存在';
+    return '';
+  }
+
+  function setPriorityEditError(msg) {
+    var pop = $('priorityEditPop');
+    var input = $('priorityEditInput');
+    var err = $('priorityEditError');
+    if (!pop || !input || !err) return;
+    if (msg) {
+      pop.classList.add('is-error');
+      input.classList.add('is-error');
+      err.textContent = msg;
+    } else {
+      pop.classList.remove('is-error');
+      input.classList.remove('is-error');
+      err.textContent = '';
+    }
+  }
+
+  function placePriorityPop(btn) {
+    var pop = $('priorityEditPop');
+    if (!pop || !btn) return;
+    var rect = btn.getBoundingClientRect();
+    var popW = pop.offsetWidth || 240;
+    var popH = pop.offsetHeight || 120;
+    var left = rect.left;
+    var top = rect.bottom + 4;
+    if (left + popW > window.innerWidth - 16) left = window.innerWidth - 16 - popW;
+    if (left < 16) left = 16;
+    if (top + popH > window.innerHeight - 16) top = Math.max(16, rect.top - 4 - popH);
+    pop.style.left = Math.round(left) + 'px';
+    pop.style.top = Math.round(top) + 'px';
+  }
+
+  function closePriorityEdit() {
+    var pop = $('priorityEditPop');
+    if (pop) {
+      pop.classList.remove('is-open');
+      pop.setAttribute('aria-hidden', 'true');
+    }
+    setPriorityEditError('');
+    if (priorityEditBtn) {
+      var cell = priorityEditBtn.closest('td.priority-cell');
+      if (cell) cell.classList.remove('is-editing');
+    }
+    priorityEditId = null;
+    priorityEditBtn = null;
+  }
+
+  function openPriorityEdit(row, btn) {
+    var pop = $('priorityEditPop');
+    var input = $('priorityEditInput');
+    if (!pop || !input || !row || !btn) return;
+    if (priorityEditBtn && priorityEditBtn !== btn) {
+      var prev = priorityEditBtn.closest('td.priority-cell');
+      if (prev) prev.classList.remove('is-editing');
+    }
+    priorityEditId = row.id;
+    priorityEditBtn = btn;
+    var cell = btn.closest('td.priority-cell');
+    if (cell) cell.classList.add('is-editing');
+    input.value = row.priority === '' || row.priority == null || !isFinite(Number(row.priority)) ? '' : String(row.priority);
+    setPriorityEditError('');
+    pop.classList.add('is-open');
+    pop.setAttribute('aria-hidden', 'false');
+    placePriorityPop(btn);
+    setTimeout(function () {
+      input.focus();
+      input.select();
+    }, 0);
+  }
+
+  function commitPriorityEdit() {
+    var pop = $('priorityEditPop');
+    var input = $('priorityEditInput');
+    var row = priorityEditId ? findRow(priorityEditId) : null;
+    if (!pop || !pop.classList.contains('is-open') || !input || !row) {
+      closePriorityEdit();
+      return;
+    }
+    var text = input.value.trim();
+    var msg = priorityEditMessage(text, row);
+    if (msg) {
+      setPriorityEditError(msg);
+      if (priorityEditBtn) placePriorityPop(priorityEditBtn);
+      input.focus();
+      return;
+    }
+    var n = Number(text);
+    var current = Number(row.priority);
+    if (isFinite(current) && current === n) {
+      closePriorityEdit();
+      return;
+    }
+    row.priority = n;
+    Store.touch(row);
+    Store.savePolicies(ALL_ROWS);
+    closePriorityEdit();
+    UI.showToast('修改成功', 'success');
+    renderTable();
+  }
+
   $('tableBody').addEventListener('click', function (e) {
+    var quick = e.target.closest('[data-quick="priority"]');
+    if (quick) {
+      e.preventDefault();
+      e.stopPropagation();
+      var qTr = quick.closest('tr[data-id]');
+      var qRow = qTr ? findRow(qTr.getAttribute('data-id')) : null;
+      if (qRow) openPriorityEdit(qRow, quick);
+      return;
+    }
     var btn = e.target.closest('[data-action]');
     if (!btn) return;
     var tr = btn.closest('tr[data-id]');
@@ -1939,6 +2076,62 @@
     if (action === 'edit') openEdit(row, false);
     else if (action === 'copy') openEdit(row, true);
     else if (action === 'delete') openDelete(row);
+  });
+
+  if ($('priorityEditOk')) {
+    $('priorityEditOk').addEventListener('click', function (e) {
+      e.stopPropagation();
+      commitPriorityEdit();
+    });
+  }
+  if ($('priorityEditCancel')) {
+    $('priorityEditCancel').addEventListener('click', function (e) {
+      e.stopPropagation();
+      closePriorityEdit();
+    });
+  }
+  if ($('priorityEditInput')) {
+    $('priorityEditInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        commitPriorityEdit();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closePriorityEdit();
+      }
+    });
+    $('priorityEditInput').addEventListener('input', function () {
+      var pop = $('priorityEditPop');
+      var row = priorityEditId ? findRow(priorityEditId) : null;
+      if (!pop || !pop.classList.contains('is-error') || !row) return;
+      setPriorityEditError(priorityEditMessage($('priorityEditInput').value, row));
+      if (priorityEditBtn) placePriorityPop(priorityEditBtn);
+    });
+  }
+  if ($('priorityEditPop')) {
+    $('priorityEditPop').addEventListener('click', function (e) { e.stopPropagation(); });
+    $('priorityEditPop').addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      closePriorityEdit();
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var pop = $('priorityEditPop');
+    if (!pop || !pop.classList.contains('is-open')) return;
+    if (e.target.closest('#priorityEditPop') || e.target.closest('[data-quick="priority"]')) return;
+    closePriorityEdit();
+  });
+  document.addEventListener('scroll', function () {
+    if (!priorityEditBtn) return;
+    if (!priorityEditBtn.isConnected) {
+      closePriorityEdit();
+      return;
+    }
+    placePriorityPop(priorityEditBtn);
+  }, true);
+  window.addEventListener('resize', function () {
+    if (priorityEditBtn && priorityEditBtn.isConnected) placePriorityPop(priorityEditBtn);
   });
 
   /* —— 自定义列 —— */
