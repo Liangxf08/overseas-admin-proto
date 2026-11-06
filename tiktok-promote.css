@@ -51,6 +51,14 @@
   padding: 8px 16px;
 }
 
+.page-tabs .data-updated {
+  margin-left: auto;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--color-text-3, #86909C);
+  white-space: nowrap;
+}
+
 .data-panel .table-toolbar .toolbar-icon-btn {
   width: 32px;
   height: 32px;
@@ -120,6 +128,21 @@
 .data-table td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+#campaignTable tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  height: 44px;
+  background: var(--color-fill-1, #F7F8FA);
+  font-weight: 600;
+}
+
+#campaignTable tfoot td.is-freeze {
+  z-index: 4;
+  bottom: 0;
+  background: var(--color-fill-1, #F7F8FA);
 }
 
 .data-table th.num .th-sort {

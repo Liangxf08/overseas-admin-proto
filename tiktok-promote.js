@@ -302,15 +302,102 @@
     return value.toFixed(digits);
   }
 
+  function formatByKind(n, kind) {
+    if (kind === 'money') return formatNumber(n, 2);
+    if (kind === 'int') return formatNumber(n, 0);
+    if (kind === 'dec') return formatNumber(n, 2);
+    if (kind === 'rate') return formatNumber(n * 100, 2) + '%';
+    if (kind === 'sec') return formatNumber(n, 2);
+    return '';
+  }
+
   function displayValue(row, col, scale) {
     if (col.kind === 'text' || col.kind === 'switch') return row[col.key] || '';
-    var n = metricNumber(row, col.key, scale);
-    if (col.kind === 'money') return formatNumber(n, 2);
-    if (col.kind === 'int') return formatNumber(n, 0);
-    if (col.kind === 'dec') return formatNumber(n, 2);
-    if (col.kind === 'rate') return formatNumber(n * 100, 2) + '%';
-    if (col.kind === 'sec') return formatNumber(n, 2);
-    return '';
+    return formatByKind(metricNumber(row, col.key, scale), col.kind);
+  }
+
+  function isNumericMetric(col) {
+    return !!(col && col.group !== '属性指标' && col.kind !== 'text' && col.kind !== 'switch');
+  }
+
+  function isRatioMetric(key) {
+    if (key === 'total_roas' || key === 'ctr' || key === 'cpc' || key === 'cpm' || key === 'reach_cpm' || key === 'frequency' || key === 'cost_per_conversion' || key === 'conversion_rate' || key === 'active_cost' || key === 'unique_open_cost' || key === 'open_rate' || key === 'open_cost' || key === 'unique_ad_cost' || key === 'ad_rate' || key === 'ad_cost' || key === 'ad_value_per' || key === 'ad_roas' || key === 'unique_pay_cost' || key === 'pay_rate' || key === 'pay_cost' || key === 'pay_value_per' || key === 'pay_roas') return true;
+    return key.indexOf('ad_roas_d') === 0 || key.indexOf('pay_roas_d') === 0;
+  }
+
+  function firstNumericKey() {
+    var key = '';
+    columns.some(function (colKey) {
+      if (!isNumericMetric(COLUMN_MAP[colKey])) return false;
+      key = colKey;
+      return true;
+    });
+    return key;
+  }
+
+  function effectiveSortSpecs() {
+    var visible = {};
+    columns.forEach(function (key) { visible[key] = true; });
+    var specs = (sortState.specs || []).filter(function (spec) {
+      return spec && visible[spec.key] && (spec.dir === 'asc' || spec.dir === 'desc');
+    });
+    if (specs.length) return specs;
+    var key = firstNumericKey();
+    return key ? [{ key: key, dir: 'desc' }] : [];
+  }
+
+  function summedMetrics(list, scale) {
+    var sums = {};
+    COLUMNS.forEach(function (col) {
+      if (!isNumericMetric(col) || isRatioMetric(col.key)) return;
+      var total = 0;
+      list.forEach(function (row) { total += metricNumber(row, col.key, scale); });
+      sums[col.key] = total;
+    });
+    return sums;
+  }
+
+  function summaryNumber(sums, key) {
+    if (!isRatioMetric(key)) return sums[key] || 0;
+    var spend = sums.spend || 0;
+    var impressions = sums.impressions || 0;
+    var clicks = sums.clicks || 0;
+    var reach = sums.reach || 0;
+    var conversion = sums.conversion || 0;
+    var active = sums.active || 0;
+    var uniqueOpen = sums.unique_open || 0;
+    var totalOpen = sums.total_open || 0;
+    var uniqueAd = sums.unique_ad || 0;
+    var adTotal = sums.ad_total || 0;
+    var adValue = sums.ad_value || 0;
+    var uniquePay = sums.unique_pay || 0;
+    var payCount = sums.pay_count || 0;
+    var payValue = sums.pay_value || 0;
+    if (key === 'total_roas') return ratio(sums.total_revenue || 0, spend);
+    if (key === 'ctr') return ratio(clicks, impressions);
+    if (key === 'cpc') return clicks ? spend / clicks : 0;
+    if (key === 'cpm') return impressions ? spend / impressions * 1000 : 0;
+    if (key === 'reach_cpm') return reach ? spend / reach * 1000 : 0;
+    if (key === 'frequency') return ratio(impressions, reach);
+    if (key === 'cost_per_conversion') return conversion ? spend / conversion : 0;
+    if (key === 'conversion_rate') return ratio(conversion, clicks);
+    if (key === 'active_cost') return active ? spend / active : 0;
+    if (key === 'unique_open_cost') return uniqueOpen ? spend / uniqueOpen : 0;
+    if (key === 'open_rate') return ratio(uniqueOpen, clicks);
+    if (key === 'open_cost') return totalOpen ? spend / totalOpen : 0;
+    if (key === 'unique_ad_cost') return uniqueAd ? spend / uniqueAd : 0;
+    if (key === 'ad_rate') return ratio(uniqueAd, uniqueOpen);
+    if (key === 'ad_cost') return adTotal ? spend / adTotal : 0;
+    if (key === 'ad_value_per') return adTotal ? adValue / adTotal : 0;
+    if (key === 'ad_roas') return ratio(adValue, spend);
+    if (key.indexOf('ad_roas_d') === 0) return ratio(sums[key.replace('ad_roas_', 'ad_revenue_')] || 0, spend);
+    if (key === 'unique_pay_cost') return uniquePay ? spend / uniquePay : 0;
+    if (key === 'pay_rate') return ratio(uniquePay, clicks);
+    if (key === 'pay_cost') return payCount ? spend / payCount : 0;
+    if (key === 'pay_value_per') return payCount ? payValue / payCount : 0;
+    if (key === 'pay_roas') return ratio(payValue, spend);
+    if (key.indexOf('pay_roas_d') === 0) return ratio(sums[key.replace('pay_roas_', 'pay_value_')] || 0, spend);
+    return 0;
   }
 
   function sortValue(row, key, scale) {
@@ -338,7 +425,7 @@
       if (visibleFilters.indexOf('optimizer_name') >= 0 && applied.optimizer_name.length && applied.optimizer_name.indexOf(row.optimizer_name) < 0) return false;
       return true;
     });
-    return UI.sortRowsBySpecs(list, sortState.specs, function (a, b, key) {
+    return UI.sortRowsBySpecs(list, effectiveSortSpecs(), function (a, b, key) {
       var av = sortValue(a, key, scale);
       var bv = sortValue(b, key, scale);
       if (typeof av === 'number' || typeof bv === 'number') return av - bv;
@@ -368,7 +455,7 @@
     if (!table) return;
     var cols = table.querySelectorAll('colgroup col');
     var ths = table.querySelectorAll('thead th');
-    var bodyRows = table.querySelectorAll('tbody tr');
+    var bodyRows = table.querySelectorAll('tbody tr, tfoot tr');
     var left = 0;
     var count = Math.min(frozenCount, cols.length);
     Array.prototype.forEach.call(cols, function (col, index) {
@@ -422,6 +509,29 @@
         return '<td' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + '>' + escapeHtml(displayValue(row, col, scale)) + '</td>';
       }).join('') + '</tr>';
     }).join('');
+
+    var foot = $('tableFoot');
+    if (!list.length) {
+      foot.innerHTML = '';
+    } else {
+      var sums = summedMetrics(list, scale);
+      var labelPlaced = false;
+      foot.innerHTML = '<tr>' + cols.map(function (col, index) {
+        var cls = [];
+        var text = '';
+        if (index < frozenCount) cls.push('is-freeze');
+        if (!isNumericMetric(col)) {
+          if (!labelPlaced) {
+            text = '合计';
+            labelPlaced = true;
+          }
+        } else {
+          cls.push('num');
+          text = formatByKind(summaryNumber(sums, col.key), col.kind);
+        }
+        return '<td' + (cls.length ? ' class="' + cls.join(' ') + '"' : '') + '>' + escapeHtml(text) + '</td>';
+      }).join('') + '</tr>';
+    }
 
     $('emptyTip').hidden = list.length > 0;
     $('campaignTable').hidden = list.length === 0;
@@ -1053,7 +1163,7 @@
   });
 
   sortApi = UI.bindThSort({
-    root: 'campaignTable',
+    root: '#campaignTable',
     getState: function () { return sortState; },
     setState: function (next) { sortState = next; },
     onChange: function () {
@@ -1079,7 +1189,14 @@
   $('resetBtn').addEventListener('click', resetFilters);
   $('filterSettingBtn').addEventListener('click', openFilterSettings);
   $('filterSettingSubmit').addEventListener('click', submitFilterSettings);
+  function stampUpdated() {
+    var now = new Date();
+    function pad2(n) { return n < 10 ? '0' + n : String(n); }
+    $('dataUpdated').textContent = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate()) + ' ' + pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
+  }
+
   $('refreshBtn').addEventListener('click', function () {
+    stampUpdated();
     renderTable();
     UI.showToast('已刷新');
   });
@@ -1256,5 +1373,6 @@
   });
 
   syncOptionalVisibility();
+  stampUpdated();
   applyQuery();
 })();
