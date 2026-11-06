@@ -33,34 +33,34 @@
     return NUMBER_OPS[0];
   }
 
-  var COL_PREFS_KEY = 'hwzt_ad_strategy_cols_v8';
+  var COL_PREFS_KEY = 'hwzt_ad_strategy_cols_v9';
   var COLUMN_GROUPS = ['基础信息', '用户定向', '条件配置', '转化数据'];
   var FORCE_FROZEN_KEYS = ['scene', 'priority'];
   var CONDITION_COLUMNS = [
-    { id: 'f_sdk_log', name: 'SDK日志上报' },
+    { id: 'f_sdk_log', name: 'SDK日志开关' },
     { id: 'f_load_track', name: '广告加载事件上报' },
     { id: 'f_ad_track', name: '广告展示行为上报' },
     { id: 'f_sdk_type', name: '启动聚合类型' },
-    { id: 'f_inter_ctl', name: '插屏全局间隔（秒）' },
+    { id: 'f_inter_ctl', name: '插屏全局间隔 (秒)' },
     { id: 'f_adjust', name: 'Adjust买量事件' },
     { id: 'f_fb_fire', name: 'Firebase买量事件' },
     { id: 'f_fb_evt', name: 'FB关卡买量事件' },
     { id: 'f_apl_win', name: 'APL新用户窗口期' },
     { id: 'f_apl_churn', name: 'APL老用户切流比例' },
     { id: 'f_net', name: '弱网状态弹窗' },
-    { id: 'f_wait_ad', name: '广告等待时长（秒）', defaultSelected: true },
-    { id: 'f_daily', name: '每日展示上限（次）', defaultSelected: true },
+    { id: 'f_wait_ad', name: '广告等待时长 (秒)', defaultSelected: true },
+    { id: 'f_daily', name: '每日展示上限 (次)', defaultSelected: true },
     { id: 'f_day', name: '安装N天起展示' },
     { id: 'f_launch', name: '当日启动次数' },
-    { id: 'f_times', name: '广告展示间隔（次）', defaultSelected: true },
-    { id: 'f_gap_sec', name: '广告展示间隔（秒）', defaultSelected: true },
-    { id: 'f_start', name: '广告起始关卡（关）', defaultSelected: true },
-    { id: 'f_gap_n', name: '关卡展示间隔（关）', defaultSelected: true },
+    { id: 'f_times', name: '广告展示间隔 (次)', defaultSelected: true },
+    { id: 'f_gap_sec', name: '广告展示间隔 (秒)', defaultSelected: true },
+    { id: 'f_start', name: '广告起始关卡', defaultSelected: true },
+    { id: 'f_gap_n', name: '关卡展示间隔 (关)', defaultSelected: true },
     { id: 'f_banner_short', name: '短屏手机展示BN' },
     { id: 'f_pos', name: '广告显示位置' },
-    { id: 'f_pad_se', name: '原生左右边距（750px）' },
-    { id: 'f_pad_tb', name: '原生上下间距（1334px）' },
-    { id: 'f_wait', name: '单关停留时长（秒）' },
+    { id: 'f_pad_se', name: '原生左右边距 (750px)' },
+    { id: 'f_pad_tb', name: '原生上下边距 (1334px)' },
+    { id: 'f_wait', name: '单关停留时长 (秒)' },
     { id: 'f_report', name: '中台埋点上报' },
     { id: 'f_iap', name: 'Firebase内购上报比例' },
     { id: 'f_wonder_backfill', name: 'Wonder广告兜底' },
@@ -310,9 +310,10 @@
 
   function currentConditionCols() {
     return CONDITION_COLUMNS.map(function (c) {
+      var field = Store.fieldById(c.id);
       return {
         key: fieldColKey(c.id),
-        name: c.name,
+        name: field && field.name ? field.name : c.name,
         width: 140,
         group: '条件配置',
         fieldId: c.id,
