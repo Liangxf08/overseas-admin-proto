@@ -81,6 +81,10 @@
             <div class="filter-actions">
               <button class="btn btn--default" type="button" id="resetBtn">重置</button>
               <button class="btn btn--primary" type="button" id="queryBtn">查询</button>
+              <button class="btn btn--default review-entry" type="button" id="reviewBtn">
+                审核
+                <span class="review-badge" id="reviewBadge" hidden>0</span>
+              </button>
             </div>
           </div>
 
@@ -180,15 +184,6 @@
             </div>
           </div>
         </div>
-        <div class="form-item">
-          <label class="form-item__label">状态</label>
-          <div class="form-item__control">
-            <div class="seg" id="editStatusSeg" role="group" aria-label="状态">
-              <button type="button" class="seg__item is-active" data-value="启用">启用</button>
-              <button type="button" class="seg__item" data-value="禁用">禁用</button>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="modal__footer">
         <button class="btn btn--default" type="button" data-close="editModal">取消</button>
@@ -215,6 +210,53 @@
       <div class="confirm-modal__footer">
         <button class="btn btn--default" type="button" data-close="impersonateModal">取消</button>
         <button class="btn btn--primary" type="button" id="impersonateOk">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="reviewModal" aria-hidden="true">
+    <div class="modal modal--large" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="reviewModalTitle">禁用审核</div>
+        <button class="modal__close" type="button" data-close="reviewModal" aria-label="关闭">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2L2 10"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p class="review-tip" id="reviewTip">以下账号已被禁用，请完成资产转移后，点击提交同步更新状态。</p>
+        <div class="review-table-shell">
+          <table class="data-table review-table" id="reviewTable">
+            <colgroup>
+              <col class="col-check" />
+              <col style="width: 120px" />
+              <col style="width: 180px" />
+              <col />
+              <col />
+              <col />
+              <col style="width: 168px" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="col-check">
+                  <label class="cell-check">
+                    <input type="checkbox" id="reviewCheckAll" aria-label="全选" />
+                  </label>
+                </th>
+                <th>昵称</th>
+                <th>账号</th>
+                <th>部门</th>
+                <th>角色</th>
+                <th>数据组</th>
+                <th>更新时间</th>
+              </tr>
+            </thead>
+            <tbody id="reviewTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--default" type="button" data-close="reviewModal">取消</button>
+        <button class="btn btn--primary" type="button" id="reviewSubmit">提交</button>
       </div>
     </div>
   </div>

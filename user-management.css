@@ -27,6 +27,61 @@
   font-variant-numeric: tabular-nums;
 }
 
+.review-entry {
+  position: relative;
+}
+
+.review-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--color-danger-6);
+  color: var(--color-white);
+  font-size: var(--font-size-body-1);
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.review-badge[hidden] {
+  display: none;
+}
+
+#reviewModal .modal__body {
+  padding-bottom: 24px;
+}
+
+.review-tip {
+  margin: 0 0 16px;
+  font-size: var(--font-size-body-2);
+  line-height: 22px;
+  color: var(--color-text-2);
+}
+
+.review-tip.is-error {
+  color: var(--color-danger-6);
+}
+
+.review-table-shell {
+  overflow: hidden;
+}
+
+.review-table {
+  width: 100%;
+}
+
+.review-table__empty td {
+  height: 88px;
+  text-align: center;
+  color: var(--color-text-3);
+}
+
 .data-table .col-action {
   width: 168px;
 }

@@ -94,9 +94,13 @@
       var updated = new Date(2026, 7, 10, 9, 30, 4);
       updated.setMinutes(updated.getMinutes() - i * 17);
       updated.setSeconds(updated.getSeconds() - (i % 40));
-      var status = i % 9 === 0 ? '禁用' : '启用';
-      /* 禁用用户不保留部门 / 角色 / 数据组关联 */
-      if (status === '禁用') {
+      var status = '启用';
+      var pendingSync = false;
+      if (i % 8 === 3) {
+        status = '禁用';
+        pendingSync = true;
+      } else if (i % 9 === 0) {
+        status = '禁用';
         depts = [];
         roles = [];
         groups = [];
@@ -108,6 +112,7 @@
         departments: depts,
         roles: roles,
         dataGroups: groups,
+        pendingSync: pendingSync,
         status: status,
         updatedAt: formatDateTime(updated)
       });
@@ -155,6 +160,12 @@
   if (ALL_ROWS[1]) seedEditLogs(ALL_ROWS[1], 5, 2);
   if (ALL_ROWS[2]) seedEditLogs(ALL_ROWS[2], 3, 3);
 
+  ALL_ROWS.forEach(function (row) {
+    if (!row.pendingSync) return;
+    var syncedAt = row.updatedAt;
+    pushEditLog(row.id, '同步离职', '启用', '禁用', '系统', syncedAt);
+  });
+
   var state = {
     draft: {
       nickname: '',
@@ -169,7 +180,7 @@
     editId: null,
     editRoles: [],
     editDataGroups: [],
-    editStatus: '启用',
+    reviewSelected: {},
     impersonateId: null,
     logUserId: null,
     logPage: 1,
@@ -276,32 +287,27 @@
     setSelected: function (arr) { state.editDataGroups = arr; }
   });
 
-  UI.bindSeg('editStatusSeg', function (v) {
-    state.editStatus = v || '启用';
-    if (state.editStatus === '禁用') {
-      state.editRoles = [];
-      state.editDataGroups = [];
-      if ($('editDept')) $('editDept').value = '';
-      if (editRoleSelect && editRoleSelect.render) editRoleSelect.render();
-      if (editDataGroupSelect && editDataGroupSelect.render) editDataGroupSelect.render();
-    } else {
-      var row = findRow(state.editId);
-      if (row && row.status !== '禁用') {
-        if ($('editDept')) $('editDept').value = (row.departments || []).join(', ');
-        state.editRoles = (row.roles || []).slice();
-        state.editDataGroups = (row.dataGroups || []).slice();
-        if (editRoleSelect && editRoleSelect.render) editRoleSelect.render();
-        if (editDataGroupSelect && editDataGroupSelect.render) editDataGroupSelect.render();
-      }
-    }
-  });
-
   $('filterNickname').addEventListener('input', function () {
     state.draft.nickname = this.value || '';
   });
 
+  function pendingRows() {
+    return ALL_ROWS.filter(function (row) { return row.pendingSync; });
+  }
+
+  function renderReviewBadge() {
+    var badge = $('reviewBadge');
+    var btn = $('reviewBtn');
+    if (!badge || !btn) return;
+    var count = pendingRows().length;
+    badge.hidden = count === 0;
+    badge.textContent = String(count);
+    btn.setAttribute('aria-label', count ? ('审核，' + count + ' 个账号待同步') : '审核');
+  }
+
   function renderTable() {
     if (!state.applied) applyFilters();
+    renderReviewBadge();
     var rows = getFilteredRows();
     var total = rows.length;
     var totalPages = Math.max(1, Math.ceil(total / state.pageSize) || 1);
@@ -371,23 +377,19 @@
     state.editId = row.id;
     state.editRoles = (row.roles || []).slice();
     state.editDataGroups = (row.dataGroups || []).slice();
-    state.editStatus = row.status || '启用';
     $('editAccount').value = row.account;
     $('editNickname').value = row.nickname;
     $('editDept').value = (row.departments || []).join(', ');
     if (editRoleSelect && editRoleSelect.render) editRoleSelect.render();
     if (editDataGroupSelect && editDataGroupSelect.render) editDataGroupSelect.render();
-    UI.setSegValue('editStatusSeg', state.editStatus);
     UI.openModal('editModal');
   }
 
   function submitEdit() {
     var row = findRow(state.editId);
     if (!row) return;
-    var nextStatus = state.editStatus || '启用';
-    var nextRoles = nextStatus === '禁用' ? [] : (state.editRoles || []).slice();
-    var nextGroups = nextStatus === '禁用' ? [] : (state.editDataGroups || []).slice();
-    var nextDepts = nextStatus === '禁用' ? [] : (row.departments || []).slice();
+    var nextRoles = (state.editRoles || []).slice();
+    var nextGroups = (state.editDataGroups || []).slice();
     var operator = '用户A';
     var now = formatDateTime(new Date());
     var changed = false;
@@ -400,15 +402,6 @@
     if (!sameList(row.dataGroups, nextGroups)) {
       pushEditLog(row.id, '修改数据组', displayList(row.dataGroups), displayList(nextGroups), operator, now);
       row.dataGroups = nextGroups;
-      changed = true;
-    }
-    if (!sameList(row.departments, nextDepts)) {
-      row.departments = nextDepts;
-      changed = true;
-    }
-    if (row.status !== nextStatus) {
-      pushEditLog(row.id, '修改状态', row.status, nextStatus, operator, now);
-      row.status = nextStatus;
       changed = true;
     }
 
@@ -521,6 +514,78 @@
     state.logUserId = null;
   }
 
+  function setReviewError(on) {
+    var tip = $('reviewTip');
+    if (tip) tip.classList.toggle('is-error', !!on);
+  }
+
+  function syncReviewCheckAll(rows) {
+    var box = $('reviewCheckAll');
+    if (!box) return;
+    var list = rows || pendingRows();
+    var picked = list.filter(function (row) { return state.reviewSelected[row.id]; }).length;
+    box.disabled = !list.length;
+    box.checked = list.length > 0 && picked === list.length;
+    box.indeterminate = picked > 0 && picked < list.length;
+  }
+
+  function renderReviewTable() {
+    var rows = pendingRows();
+    var body = $('reviewTableBody');
+    if (!rows.length) {
+      body.innerHTML = '<tr class="review-table__empty"><td colspan="7">暂无待同步账号</td></tr>';
+    } else {
+      body.innerHTML = rows.map(function (row) {
+        var checked = state.reviewSelected[row.id] ? ' checked' : '';
+        return '<tr data-id="' + escapeHtml(row.id) + '">' +
+          '<td class="col-check"><label class="cell-check"><input type="checkbox" data-review-check' + checked + ' aria-label="选择' + escapeHtml(row.nickname) + '" /></label></td>' +
+          '<td><span class="user-cell"><span class="user-cell__avatar" aria-hidden="true"></span><span class="user-cell__name">' + escapeHtml(row.nickname) + '</span></span></td>' +
+          '<td class="col-account">' + escapeHtml(row.account) + '</td>' +
+          '<td title="' + escapeHtml(joinList(row.departments)) + '">' + escapeHtml(joinList(row.departments)) + '</td>' +
+          '<td title="' + escapeHtml(joinList(row.roles)) + '">' + escapeHtml(joinList(row.roles)) + '</td>' +
+          '<td title="' + escapeHtml(joinList(row.dataGroups)) + '">' + escapeHtml(joinList(row.dataGroups)) + '</td>' +
+          '<td>' + escapeHtml(row.updatedAt) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+    syncReviewCheckAll(rows);
+  }
+
+  function openReview() {
+    state.reviewSelected = {};
+    setReviewError(false);
+    renderReviewTable();
+    UI.openModal('reviewModal');
+  }
+
+  function closeReview() {
+    UI.closeModal('reviewModal');
+    state.reviewSelected = {};
+    setReviewError(false);
+  }
+
+  function submitReview() {
+    var ids = Object.keys(state.reviewSelected).filter(function (id) { return state.reviewSelected[id]; });
+    if (!ids.length) {
+      setReviewError(true);
+      return;
+    }
+    var now = formatDateTime(new Date());
+    ids.forEach(function (id) {
+      var row = findRow(id);
+      if (!row || !row.pendingSync) return;
+      pushEditLog(row.id, '同步状态', '未交接', '已交接', '用户A', now);
+      row.departments = [];
+      row.roles = [];
+      row.dataGroups = [];
+      row.pendingSync = false;
+      row.updatedAt = now;
+    });
+    closeReview();
+    UI.showToast('已同步', 'success');
+    renderTable();
+  }
+
   $('queryBtn').addEventListener('click', function () {
     applyFilters();
     renderTable();
@@ -572,6 +637,28 @@
   $('impersonateOk').addEventListener('click', confirmImpersonate);
 
   $('logDrawerClose').addEventListener('click', closeLogDrawer);
+  $('reviewBtn').addEventListener('click', openReview);
+  document.querySelectorAll('[data-close="reviewModal"]').forEach(function (btn) {
+    btn.addEventListener('click', closeReview);
+  });
+  $('reviewSubmit').addEventListener('click', submitReview);
+  $('reviewCheckAll').addEventListener('change', function () {
+    var on = this.checked;
+    pendingRows().forEach(function (row) {
+      state.reviewSelected[row.id] = on;
+    });
+    if (on) setReviewError(false);
+    renderReviewTable();
+  });
+  $('reviewTableBody').addEventListener('change', function (e) {
+    var box = e.target.closest('[data-review-check]');
+    if (!box) return;
+    var tr = box.closest('tr[data-id]');
+    if (!tr) return;
+    state.reviewSelected[tr.getAttribute('data-id')] = box.checked;
+    if (box.checked) setReviewError(false);
+    syncReviewCheckAll();
+  });
 
   if (UI.bindSidebar) UI.bindSidebar();
 
