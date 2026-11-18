@@ -590,7 +590,7 @@
     if (!state.dateStart || !state.dateEnd) {
       text = null;
     } else {
-      text = '日期：' + formatDate(state.dateStart) + ' - ' + formatDate(state.dateEnd);
+      text = '日期：' + formatDate(state.dateStart) + ' ~ ' + formatDate(state.dateEnd);
     }
     ['dateRangeLabel', 'fsDateLabel'].forEach(function (id) {
       var el = $(id);

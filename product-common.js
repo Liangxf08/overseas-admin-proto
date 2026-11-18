@@ -991,10 +991,10 @@
         return;
       }
       if (!rangeEnd) {
-        label.textContent = prefix + formatDateYMD(rangeStart) + ' - ...';
+        label.textContent = prefix + formatDateYMD(rangeStart) + ' ~ ...';
         return;
       }
-      label.textContent = prefix + formatDateYMD(rangeStart) + ' - ' + formatDateYMD(rangeEnd);
+      label.textContent = prefix + formatDateYMD(rangeStart) + ' ~ ' + formatDateYMD(rangeEnd);
     }
 
     function syncShortcutActive() {
