@@ -5,10 +5,6 @@
   display: none !important;
 }
 
-.page-tabs__item {
-  color: var(--color-text-1, #1D2129);
-}
-
 .col-check {
   width: 48px;
   min-width: 48px;
